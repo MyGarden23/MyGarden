@@ -14,3 +14,6 @@ The app uses the camera sensor as a core feature: users take photos of their pla
 
 ### Offline Mode
 In offline mode, the user still has full access to their garden, including plant profiles, and care schedules. Notifications continue to alert the user of upcoming or overdue care tasks, ensuring the plant care experience remains functional and reliable even without network access.
+
+### Figma
+Link: https://www.figma.com/design/3iAjAd0sxYwH84R5g7eaNu/MyGarden?node-id=0-1&p=f&t=4tn0hrWLaffFtwsb-0
