@@ -163,6 +163,8 @@ dependencies {
     testImplementation(libs.robolectric)
 }
 
+
+
 tasks.withType<Test> {
     // Configure Jacoco for each tests
     configure<JacocoTaskExtension> {
@@ -181,12 +183,8 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     }
 
     val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*",
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*",
+        "**/Manifest*.*", "**/*Test*.*", "android/**/*.*"
     )
 
     val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
@@ -198,17 +196,26 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     sourceDirectories.setFrom(files(mainSrc, mainKtSrc))
     classDirectories.setFrom(files(debugTree))
 
-    // Collect execution data from both unit tests and instrumented tests
-    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
-        include("jacoco/testDebugUnitTest.exec")
-        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-        include("outputs/code_coverage/debugAndroidTest/connected/**/coverage.ec")
-    })
-
-    // Ensure tests run before this task
-    dependsOn("testDebugUnitTest")
-    // Only depend on connectedCheck if it exists (i.e., if there are instrumented tests)
-    tasks.findByName("connectedDebugAndroidTest")?.let {
-        dependsOn(it)
+    // Collect exec data from unit + (optional) connected tests
+    val execFiles = fileTree(project.layout.buildDirectory.get()) {
+        include(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
+            "outputs/code_coverage/debugAndroidTest/connected/**/coverage.ec"
+        )
     }
+    executionData.setFrom(execFiles)
+
+    // If there's no data, skip the task (don't fail the build)
+    onlyIf {
+        val hasData = execFiles.files.any { it.exists() && it.length() > 0 }
+        if (!hasData) {
+            logger.lifecycle("No execution data found — skipping jacocoTestReport.")
+        }
+        hasData
+    }
+
+    // Ensure unit tests ran
+    dependsOn("testDebugUnitTest")
+    // do NOT depend on connected tests here; CI runs them separately
 }
