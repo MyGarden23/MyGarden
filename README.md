@@ -1,2 +1,16 @@
 # MyGarden
-swent team 23
+
+### Pitch
+Many people enjoy having plants but forget care routines, leading to unhealthy or dead plants. MyGarden solves this by offering simple reminders, schedules, and photo insights using the phone’s camera to track plant health. The app is designed for every person who wants a low-effort way to keep his room plants alive and healthy.
+
+### Split App Model
+The app use a managed authentication service for account creation and login, a document database to store plant data and care schedules, a file storage service for users to keep their plants, and a notification service to send reminders and updates.
+
+### Multi-User Support
+Multi-user support is enabled through authentication, giving each user a unique account tied to their personal data. Authenticated users can create and manage their own “garden” with plants and care schedules. Moreover they can add friends to view each other’s gardens and earn points for consistent care and plant growth to maybe appear on the leaderboard.
+
+### Sensor Use
+The app uses the camera sensor as a core feature: users take photos of their plants to log growth, document health, and detect issues over time. The photos may be stored to keep track of the history of the plant. The sensor is not just for raw capture but directly drives the app’s main value, helping users track and improve plant care.
+
+### Offline Mode
+In offline mode, the user still has full access to their garden, including plant profiles, and care schedules. Notifications continue to alert the user of upcoming or overdue care tasks, ensuring the plant care experience remains functional and reliable even without network access.
