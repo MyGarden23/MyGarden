@@ -2,10 +2,6 @@ name: CI - Test Runner
 
 # Run the workflow when commits are pushed on main or when a PR is modified
 on:
-  permissions:
-    contents: read
-    pull-requests: write
-    checks: write
   push:
     branches:
       - main
