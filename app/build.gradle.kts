@@ -5,6 +5,9 @@ plugins {
     alias(libs.plugins.sonar)
     id("jacoco")
 }
+jacoco {
+    toolVersion = "0.8.11"
+}
 
 android {
     namespace = "com.android.sample"
@@ -39,7 +42,7 @@ android {
     }
 
     testCoverage {
-        jacocoVersion = "0.8.8"
+        jacocoVersion = "0.8.11"
     }
 
     buildFeatures {
@@ -72,6 +75,7 @@ android {
         }
     }
 
+
     // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
     // The next lines transfers the src/test/* from shared to the testDebug one
     //
@@ -94,15 +98,24 @@ android {
 sonar {
     properties {
         property("sonar.projectKey", "MyGarden23_MyGarden")
-        property("sonar.projectName", "M")
+        property("sonar.projectName", "MyGarden")
         property("sonar.organization", "mygarden23")
         property("sonar.host.url", "https://sonarcloud.io")
-        // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
-        property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
-        // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
+
+        // Silence: "Default to 'debug'"
+        property("sonar.androidVariant", "debug")
+
+        // ---- report paths = STRINGS ----
+        property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugUnitTest")
         property("sonar.androidLint.reportPaths", "${project.layout.buildDirectory.get()}/reports/lint-results-debug.xml")
-        // Paths to JaCoCo XML coverage report files.
         property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+
+        // ---- dirs = MUTABLE LISTS (not String) ----
+        property("sonar.sources", mutableListOf("src/main/java"))
+        property("sonar.tests", mutableListOf("src/test/java", "src/androidTest/java"))
+
+        // Optional exclusions (string)
+        property("sonar.exclusions", "**/R.class,**/R$*.class,**/BuildConfig.*,**/Manifest*.*,android/**/*.*,**/ui/theme/**")
     }
 }
 
@@ -159,7 +172,8 @@ tasks.withType<Test> {
 }
 
 tasks.register("jacocoTestReport", JacocoReport::class) {
-    mustRunAfter("testDebugUnitTest", "connectedDebugAndroidTest")
+    group = "reporting"
+    description = "Generate Jacoco coverage reports."
 
     reports {
         xml.required = true
@@ -180,10 +194,21 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     }
 
     val mainSrc = "${project.layout.projectDirectory}/src/main/java"
-    sourceDirectories.setFrom(files(mainSrc))
+    val mainKtSrc = "${project.layout.projectDirectory}/src/main/kotlin"
+    sourceDirectories.setFrom(files(mainSrc, mainKtSrc))
     classDirectories.setFrom(files(debugTree))
+
+    // Collect execution data from both unit tests and instrumented tests
     executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
+        include("jacoco/testDebugUnitTest.exec")
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-        include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
+        include("outputs/code_coverage/debugAndroidTest/connected/**/coverage.ec")
     })
+
+    // Ensure tests run before this task
+    dependsOn("testDebugUnitTest")
+    // Only depend on connectedCheck if it exists (i.e., if there are instrumented tests)
+    tasks.findByName("connectedDebugAndroidTest")?.let {
+        dependsOn(it)
+    }
 }
