@@ -21,7 +21,7 @@ import java.sql.Timestamp
  */
 data class Plant(
     val name: String,
-    val image: Image, // Can use a URL or a ByteArray for storage (to be discussed)
+    val image: Image?, // Can use a URL or a ByteArray for storage (to be discussed)
     val latinName: String,
     val description: String,
     val healthStatus: PlantHealthStatus,
