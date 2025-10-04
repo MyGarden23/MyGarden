@@ -165,8 +165,6 @@ dependencies {
     testImplementation(libs.robolectric)
 
     // ----------         Firebase      ------------
-    // Import the Firebase BoM
-    implementation(platform(libs.firebase.bom))
     // Add the dependency for the Firebase Authentication library
     implementation(libs.firebase.auth)
     implementation(libs.firebase.auth.ktx)
