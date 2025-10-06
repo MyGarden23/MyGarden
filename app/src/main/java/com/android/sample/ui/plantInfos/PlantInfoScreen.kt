@@ -49,9 +49,164 @@ fun PlantInfosScreen(
   // Observe UI state from ViewModel
   val uiState by plantInfoViewModel.uiState.collectAsState()
 
+  // Remember scroll states for each tab separately
+  // This ensures scroll position is maintained when switching between tabs
+  val descriptionScrollState = rememberScrollState()
+  val healthScrollState = rememberScrollState()
+
   // Initialize UI state when plant changes
   LaunchedEffect(plant) { plantInfoViewModel.initializeUIState(plant) }
 
+  Scaffold(
+      containerColor = Color(0xFFF5F0E8), // Beige background for entire scaffold
+      bottomBar = {
+        // Bottom bar with "Save Plant" button
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            contentAlignment = Alignment.Center) {
+              Button(
+                  onClick = {
+                    // TODO Maybe later add a field to put in the last watered time
+                    plantInfoViewModel.savePlant(plant)
+                  },
+                  modifier = Modifier.fillMaxWidth().height(56.dp),
+                  shape = RoundedCornerShape(28.dp),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = Color(0xFF7FA869) // Green color
+                          )) {
+                    Text(text = "Save Plant", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                  }
+            }
+      }) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+          // --- Plant Image Header ---
+          Box(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .height(280.dp)
+                      .background(Color(0xFF8BC34A)) // Placeholder green background
+              ) {
+                // Placeholder for plant image
+                Text(
+                    text = "Plant Image",
+                    color = Color.Gray,
+                    fontSize = 16.sp,
+                    modifier = Modifier.align(Alignment.Center))
+
+                // Back button overlaid on top-left corner of image
+                IconButton(
+                    onClick = onBackPressed,
+                    modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
+                      Icon(
+                          imageVector = Icons.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          tint = Color.Black)
+                    }
+              }
+
+          // --- Name and Latin Name Section ---
+          Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+            // Common name (e.g., "Rose")
+            Text(
+                text = uiState.name,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black)
+            // Scientific name (e.g., "Rosa rubiginosa")
+            Text(text = uiState.latinName, fontSize = 16.sp, color = Color.Gray)
+          }
+
+          // --- Tab Row for Description/Health ---
+          TabRow(
+              selectedTabIndex =
+                  if (uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION) 0 else 1,
+              modifier = Modifier.fillMaxWidth(),
+              containerColor = Color(0xFFF5F0E8), // Beige background
+              contentColor = Color.Black) {
+                // Description Tab
+                Tab(
+                    selected = uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION,
+                    onClick = { plantInfoViewModel.setTab(SelectedPlantInfoTab.DESCRIPTION) },
+                    text = {
+                      Text(
+                          text = "Description",
+                          fontWeight =
+                              if (uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION)
+                                  FontWeight.Bold
+                              else FontWeight.Normal,
+                          fontSize = 16.sp)
+                    })
+                // Health Tab
+                Tab(
+                    selected = uiState.selectedTab == SelectedPlantInfoTab.HEALTH_STATUS,
+                    onClick = { plantInfoViewModel.setTab(SelectedPlantInfoTab.HEALTH_STATUS) },
+                    text = {
+                      Text(
+                          text = "Health",
+                          fontWeight =
+                              if (uiState.selectedTab == SelectedPlantInfoTab.HEALTH_STATUS)
+                                  FontWeight.Bold
+                              else FontWeight.Normal,
+                          fontSize = 16.sp)
+                    })
+              }
+
+          // --- Scrollable Content for Active Tab ---
+          Box(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .weight(1f) // Takes remaining space between tabs and bottom button
+                      .background(Color(0xFFF5F0E8)) // Beige background
+              ) {
+                Column(
+                    modifier =
+                        Modifier.fillMaxSize()
+                            // Use different scroll state for each tab to preserve scroll position
+                            .verticalScroll(
+                                if (uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION)
+                                    descriptionScrollState
+                                else healthScrollState)
+                            .padding(20.dp)) {
+                      when (uiState.selectedTab) {
+                        // --- Description Tab Content ---
+                        SelectedPlantInfoTab.DESCRIPTION -> {
+                          Text(
+                              text = uiState.description,
+                              fontSize = 14.sp,
+                              color = Color.Black,
+                              lineHeight = 20.sp)
+                        }
+
+                        // --- Health Tab Content ---
+                        SelectedPlantInfoTab.HEALTH_STATUS -> {
+                          // Health status description
+                          Text(
+                              text = uiState.healthStatusDescription,
+                              fontSize = 14.sp,
+                              color = Color.Black,
+                              lineHeight = 20.sp)
+                          Spacer(modifier = Modifier.height(16.dp))
+
+                          // Current health status with emoji
+                          Text(
+                              text = "Status: ${uiState.healthStatus.description}",
+                              fontSize = 16.sp,
+                              fontWeight = FontWeight.Medium,
+                              color = Color.Black)
+                          Spacer(modifier = Modifier.height(8.dp))
+
+                          // Watering frequency information
+                          Text(
+                              text = "Watering Frequency: Every ${uiState.wateringFrequency} days",
+                              fontSize = 14.sp,
+                              color = Color.Black)
+                        }
+                      }
+                    }
+              }
+        }
+      }
 }
 
 @Preview
