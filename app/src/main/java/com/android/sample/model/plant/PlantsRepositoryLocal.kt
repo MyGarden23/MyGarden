@@ -26,4 +26,20 @@ class PlantsRepositoryLocal: PlantsRepository {
 
 
     }
+
+    override suspend fun getAllOwnedPlants(): List<OwnedPlant> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getOwnedPlant(id: String): OwnedPlant {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteFromGarden(id: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun editOwnedPlant(id: String, lastWatered: Timestamp) {
+        TODO("Not yet implemented")
+    }
 }
