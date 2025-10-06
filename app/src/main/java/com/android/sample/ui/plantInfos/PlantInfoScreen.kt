@@ -7,7 +7,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -119,39 +118,7 @@ fun PlantInfosScreen(
           }
 
           // --- Tab Row for Description/Health ---
-          TabRow(
-              selectedTabIndex =
-                  if (uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION) 0 else 1,
-              modifier = Modifier.fillMaxWidth(),
-              containerColor = Color(0xFFF5F0E8), // Beige background
-              contentColor = Color.Black) {
-                // Description Tab
-                Tab(
-                    selected = uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION,
-                    onClick = { plantInfoViewModel.setTab(SelectedPlantInfoTab.DESCRIPTION) },
-                    text = {
-                      Text(
-                          text = "Description",
-                          fontWeight =
-                              if (uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION)
-                                  FontWeight.Bold
-                              else FontWeight.Normal,
-                          fontSize = 16.sp)
-                    })
-                // Health Tab
-                Tab(
-                    selected = uiState.selectedTab == SelectedPlantInfoTab.HEALTH_STATUS,
-                    onClick = { plantInfoViewModel.setTab(SelectedPlantInfoTab.HEALTH_STATUS) },
-                    text = {
-                      Text(
-                          text = "Health",
-                          fontWeight =
-                              if (uiState.selectedTab == SelectedPlantInfoTab.HEALTH_STATUS)
-                                  FontWeight.Bold
-                              else FontWeight.Normal,
-                          fontSize = 16.sp)
-                    })
-              }
+          ModulableTabRow(uiState, plantInfoViewModel)
 
           // --- Scrollable Content for Active Tab ---
           Box(
@@ -206,6 +173,28 @@ fun PlantInfosScreen(
                       }
                     }
               }
+        }
+      }
+}
+
+@Composable
+fun ModulableTabRow(uiState: PlantInfoUIState, plantInfoViewModel: PlantInfoViewModel) {
+  TabRow(
+      selectedTabIndex = uiState.selectedTab.ordinal,
+      modifier = Modifier.fillMaxWidth(),
+      containerColor = Color(0xFFF5F0E8), // Beige background
+      contentColor = Color.Black) {
+        for (tab in SelectedPlantInfoTab.values()) {
+          Tab(
+              selected = uiState.selectedTab == tab,
+              onClick = { plantInfoViewModel.setTab(tab) },
+              text = {
+                Text(
+                    text = tab.text,
+                    fontWeight =
+                        if (uiState.selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
+                    fontSize = 16.sp)
+              })
         }
       }
 }

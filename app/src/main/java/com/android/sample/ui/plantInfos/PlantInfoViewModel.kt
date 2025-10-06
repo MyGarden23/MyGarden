@@ -14,9 +14,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /** Enum representing which tab is currently selected in the plant info screen. */
-enum class SelectedPlantInfoTab {
-  DESCRIPTION,
-  HEALTH_STATUS,
+enum class SelectedPlantInfoTab(val text: String) {
+  DESCRIPTION("Description"),
+  HEALTH_STATUS("Health"),
 }
 
 /** UI state for the plant info screen. Contains all the plant information to be displayed. */
