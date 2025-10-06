@@ -2,7 +2,6 @@ package com.android.sample.ui.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -17,9 +16,7 @@ class MyGardenThemeInstrumentedTest {
     lateinit var scheme: ColorScheme
 
     composeRule.setContent {
-      MyGardenTheme(darkTheme = false, dynamicColor = false) {
-        scheme = MaterialTheme.colorScheme
-      }
+      MyGardenTheme(darkTheme = false, dynamicColor = false) { scheme = MaterialTheme.colorScheme }
     }
     composeRule.waitForIdle()
 
@@ -72,9 +69,7 @@ class MyGardenThemeInstrumentedTest {
     lateinit var scheme: ColorScheme
 
     composeRule.setContent {
-      MyGardenTheme(darkTheme = true, dynamicColor = false) {
-        scheme = MaterialTheme.colorScheme
-      }
+      MyGardenTheme(darkTheme = true, dynamicColor = false) { scheme = MaterialTheme.colorScheme }
     }
     composeRule.waitForIdle()
 
