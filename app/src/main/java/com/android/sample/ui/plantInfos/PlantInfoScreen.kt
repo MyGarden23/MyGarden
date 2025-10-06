@@ -46,6 +46,26 @@ fun PlantInfosScreen(
     plantInfoViewModel: PlantInfoViewModel = viewModel(),
     onBackPressed: () -> Unit
 ) {
-    // Observe UI state from ViewModel
-    val uiState by plantInfoViewModel.uiState.collectAsState()
+  // Observe UI state from ViewModel
+  val uiState by plantInfoViewModel.uiState.collectAsState()
+
+  // Initialize UI state when plant changes
+  LaunchedEffect(plant) { plantInfoViewModel.initializeUIState(plant) }
+
+}
+
+@Preview
+@Composable
+fun PlantDetailScreenPreview() {
+  val plant =
+      Plant(
+          name = "test name",
+          image = null, // Can use a URL or a ByteArray for storage (to be discussed)
+          latinName = "latin name",
+          description = "Description of the plant",
+          healthStatus = PlantHealthStatus.HEALTHY,
+          healthStatusDescription = "The plant is healthy",
+          wateringFrequency = 0, // in days
+      )
+  PlantInfosScreen(plant) {}
 }
