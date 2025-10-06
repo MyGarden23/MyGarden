@@ -1,5 +1,6 @@
 package com.android.sample.ui.authentication
 
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
