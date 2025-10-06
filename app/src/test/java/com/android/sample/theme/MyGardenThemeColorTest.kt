@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.sample.ui.theme.MyGardenTheme
 import com.android.sample.ui.theme.md_theme_dark_background
 import com.android.sample.ui.theme.md_theme_dark_error
@@ -68,8 +67,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class MyGardenThemeColorTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

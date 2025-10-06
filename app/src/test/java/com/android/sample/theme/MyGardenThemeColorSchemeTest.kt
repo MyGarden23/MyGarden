@@ -12,7 +12,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.sample.ui.theme.MyGardenTheme
 import com.android.sample.ui.theme.md_theme_dark_primary
 import com.android.sample.ui.theme.md_theme_light_primary
@@ -21,9 +20,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric.buildActivity
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class MyGardenThemeColorSchemeTest {
 
   @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
