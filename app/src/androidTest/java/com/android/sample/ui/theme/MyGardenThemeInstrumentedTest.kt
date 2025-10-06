@@ -1,5 +1,6 @@
 package com.android.sample.ui.theme
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -13,38 +14,111 @@ class MyGardenThemeInstrumentedTest {
 
   @Test
   fun myGardenTheme_light_uses_expected_colors() {
-    var primary: Color? = null
-    var onPrimary: Color? = null
-    var background: Color? = null
+    lateinit var scheme: ColorScheme
 
     composeRule.setContent {
       MyGardenTheme(darkTheme = false, dynamicColor = false) {
-        primary = MaterialTheme.colorScheme.primary
-        onPrimary = MaterialTheme.colorScheme.onPrimary
-        background = MaterialTheme.colorScheme.background
+        scheme = MaterialTheme.colorScheme
       }
     }
     composeRule.waitForIdle()
 
-    assertEquals(md_theme_light_primary, primary)
-    assertEquals(md_theme_light_onPrimary, onPrimary)
-    assertEquals(md_theme_light_background, background)
+    with(scheme) {
+      // Primary
+      assertEquals(md_theme_light_primary, primary)
+      assertEquals(md_theme_light_onPrimary, onPrimary)
+      assertEquals(md_theme_light_primaryContainer, primaryContainer)
+      assertEquals(md_theme_light_onPrimaryContainer, onPrimaryContainer)
+
+      // Secondary
+      assertEquals(md_theme_light_secondary, secondary)
+      assertEquals(md_theme_light_onSecondary, onSecondary)
+      assertEquals(md_theme_light_secondaryContainer, secondaryContainer)
+      assertEquals(md_theme_light_onSecondaryContainer, onSecondaryContainer)
+
+      // Tertiary
+      assertEquals(md_theme_light_tertiary, tertiary)
+      assertEquals(md_theme_light_onTertiary, onTertiary)
+      assertEquals(md_theme_light_tertiaryContainer, tertiaryContainer)
+      assertEquals(md_theme_light_onTertiaryContainer, onTertiaryContainer)
+
+      // Error
+      assertEquals(md_theme_light_error, error)
+      assertEquals(md_theme_light_onError, onError)
+      assertEquals(md_theme_light_errorContainer, errorContainer)
+      assertEquals(md_theme_light_onErrorContainer, onErrorContainer)
+
+      // Neutrals / Surfaces / Background
+      assertEquals(md_theme_light_outline, outline)
+      assertEquals(md_theme_light_background, background)
+      assertEquals(md_theme_light_onBackground, onBackground)
+      assertEquals(md_theme_light_surface, surface)
+      assertEquals(md_theme_light_onSurface, onSurface)
+      assertEquals(md_theme_light_surfaceVariant, surfaceVariant)
+      assertEquals(md_theme_light_onSurfaceVariant, onSurfaceVariant)
+
+      // Inverse & misc
+      assertEquals(md_theme_light_inverseSurface, inverseSurface)
+      assertEquals(md_theme_light_inverseOnSurface, inverseOnSurface)
+      assertEquals(md_theme_light_inversePrimary, inversePrimary)
+      assertEquals(md_theme_light_surfaceTint, surfaceTint)
+      assertEquals(md_theme_light_outlineVariant, outlineVariant)
+      assertEquals(md_theme_light_scrim, scrim)
+    }
   }
 
   @Test
   fun myGardenTheme_dark_uses_expected_colors() {
-    var primary: Color? = null
-    var container: Color? = null
+    lateinit var scheme: ColorScheme
 
     composeRule.setContent {
       MyGardenTheme(darkTheme = true, dynamicColor = false) {
-        primary = MaterialTheme.colorScheme.primary
-        container = MaterialTheme.colorScheme.primaryContainer
+        scheme = MaterialTheme.colorScheme
       }
     }
     composeRule.waitForIdle()
 
-    assertEquals(md_theme_dark_primary, primary)
-    assertEquals(md_theme_dark_primaryContainer, container)
+    with(scheme) {
+      // Primary
+      assertEquals(md_theme_dark_primary, primary)
+      assertEquals(md_theme_dark_onPrimary, onPrimary)
+      assertEquals(md_theme_dark_primaryContainer, primaryContainer)
+      assertEquals(md_theme_dark_onPrimaryContainer, onPrimaryContainer)
+
+      // Secondary
+      assertEquals(md_theme_dark_secondary, secondary)
+      assertEquals(md_theme_dark_onSecondary, onSecondary)
+      assertEquals(md_theme_dark_secondaryContainer, secondaryContainer)
+      assertEquals(md_theme_dark_onSecondaryContainer, onSecondaryContainer)
+
+      // Tertiary
+      assertEquals(md_theme_dark_tertiary, tertiary)
+      assertEquals(md_theme_dark_onTertiary, onTertiary)
+      assertEquals(md_theme_dark_tertiaryContainer, tertiaryContainer)
+      assertEquals(md_theme_dark_onTertiaryContainer, onTertiaryContainer)
+
+      // Error
+      assertEquals(md_theme_dark_error, error)
+      assertEquals(md_theme_dark_onError, onError)
+      assertEquals(md_theme_dark_errorContainer, errorContainer)
+      assertEquals(md_theme_dark_onErrorContainer, onErrorContainer)
+
+      // Neutrals / Surfaces / Background
+      assertEquals(md_theme_dark_outline, outline)
+      assertEquals(md_theme_dark_background, background)
+      assertEquals(md_theme_dark_onBackground, onBackground)
+      assertEquals(md_theme_dark_surface, surface)
+      assertEquals(md_theme_dark_onSurface, onSurface)
+      assertEquals(md_theme_dark_surfaceVariant, surfaceVariant)
+      assertEquals(md_theme_dark_onSurfaceVariant, onSurfaceVariant)
+
+      // Inverse & misc
+      assertEquals(md_theme_dark_inverseSurface, inverseSurface)
+      assertEquals(md_theme_dark_inverseOnSurface, inverseOnSurface)
+      assertEquals(md_theme_dark_inversePrimary, inversePrimary)
+      assertEquals(md_theme_dark_surfaceTint, surfaceTint)
+      assertEquals(md_theme_dark_outlineVariant, outlineVariant)
+      assertEquals(md_theme_dark_scrim, scrim)
+    }
   }
 }
