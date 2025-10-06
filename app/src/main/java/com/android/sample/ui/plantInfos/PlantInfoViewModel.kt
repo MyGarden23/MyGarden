@@ -2,6 +2,7 @@ package com.android.sample.ui.plantInfos
 
 import android.media.Image
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.android.sample.model.plant.Plant
 import com.android.sample.model.plant.PlantHealthStatus
 import com.android.sample.model.plant.PlantsRepository
@@ -10,6 +11,8 @@ import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
 /** Enum representing which tab is currently selected in the plant info screen. */
 enum class SelectedPlantInfoTab {
   DESCRIPTION,
@@ -52,5 +55,20 @@ class PlantInfoViewModel(
         )
   }
 
+  /**
+   * Save the plant to the user's garden.
+   *
+   * TODO: Update to allow user to specify last watered time.
+   */
+  fun savePlant(plant: Plant) {
+    viewModelScope.launch {
+      plantsRepository.saveToGarden(
+          plant, plantsRepository.getNewId(), Timestamp(3000000000000L)) // TODO Change lastwatered
+    }
+  }
 
+  /** Update the selected tab (Description or Health). */
+  fun setTab(tab: SelectedPlantInfoTab) {
+    _uiState.value = _uiState.value.copy(selectedTab = tab)
+  }
 }
