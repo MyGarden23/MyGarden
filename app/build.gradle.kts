@@ -115,7 +115,7 @@ sonar {
         property("sonar.tests", mutableListOf("src/test/java", "src/androidTest/java"))
 
         // Optional exclusions (string)
-        property("sonar.exclusions", "**/R.class,**/R$*.class,**/BuildConfig.*,**/Manifest*.*,android/**/*.*,**/ui/theme/**")
+        property("sonar.exclusions", "**/R.class,**/R$*.class,**/BuildConfig.*,**/Manifest*.*,android/**/*.*")
     }
 }
 
