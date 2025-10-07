@@ -1,4 +1,4 @@
-package com.android.sample.ui.plantInfos
+package com.android.sample.ui.plantinfos
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

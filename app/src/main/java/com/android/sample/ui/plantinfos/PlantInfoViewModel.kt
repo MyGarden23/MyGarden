@@ -1,4 +1,4 @@
-package com.android.sample.ui.plantInfos
+package com.android.sample.ui.plantinfos
 
 import android.media.Image
 import androidx.lifecycle.ViewModel
