@@ -1,4 +1,4 @@
-package com.android.sample.theme
+package theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -62,13 +62,10 @@ import com.android.sample.ui.theme.md_theme_light_surfaceTint
 import com.android.sample.ui.theme.md_theme_light_surfaceVariant
 import com.android.sample.ui.theme.md_theme_light_tertiary
 import com.android.sample.ui.theme.md_theme_light_tertiaryContainer
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class MyGardenThemeColorTest {
 
   @get:Rule val composeRule = createComposeRule()
@@ -84,45 +81,45 @@ class MyGardenThemeColorTest {
 
     with(scheme) {
       // Primary
-      assertEquals(md_theme_light_primary, primary)
-      assertEquals(md_theme_light_onPrimary, onPrimary)
-      assertEquals(md_theme_light_primaryContainer, primaryContainer)
-      assertEquals(md_theme_light_onPrimaryContainer, onPrimaryContainer)
+      Assert.assertEquals(md_theme_light_primary, primary)
+      Assert.assertEquals(md_theme_light_onPrimary, onPrimary)
+      Assert.assertEquals(md_theme_light_primaryContainer, primaryContainer)
+      Assert.assertEquals(md_theme_light_onPrimaryContainer, onPrimaryContainer)
 
       // Secondary
-      assertEquals(md_theme_light_secondary, secondary)
-      assertEquals(md_theme_light_onSecondary, onSecondary)
-      assertEquals(md_theme_light_secondaryContainer, secondaryContainer)
-      assertEquals(md_theme_light_onSecondaryContainer, onSecondaryContainer)
+      Assert.assertEquals(md_theme_light_secondary, secondary)
+      Assert.assertEquals(md_theme_light_onSecondary, onSecondary)
+      Assert.assertEquals(md_theme_light_secondaryContainer, secondaryContainer)
+      Assert.assertEquals(md_theme_light_onSecondaryContainer, onSecondaryContainer)
 
       // Tertiary
-      assertEquals(md_theme_light_tertiary, tertiary)
-      assertEquals(md_theme_light_onTertiary, onTertiary)
-      assertEquals(md_theme_light_tertiaryContainer, tertiaryContainer)
-      assertEquals(md_theme_light_onTertiaryContainer, onTertiaryContainer)
+      Assert.assertEquals(md_theme_light_tertiary, tertiary)
+      Assert.assertEquals(md_theme_light_onTertiary, onTertiary)
+      Assert.assertEquals(md_theme_light_tertiaryContainer, tertiaryContainer)
+      Assert.assertEquals(md_theme_light_onTertiaryContainer, onTertiaryContainer)
 
       // Error
-      assertEquals(md_theme_light_error, error)
-      assertEquals(md_theme_light_onError, onError)
-      assertEquals(md_theme_light_errorContainer, errorContainer)
-      assertEquals(md_theme_light_onErrorContainer, onErrorContainer)
+      Assert.assertEquals(md_theme_light_error, error)
+      Assert.assertEquals(md_theme_light_onError, onError)
+      Assert.assertEquals(md_theme_light_errorContainer, errorContainer)
+      Assert.assertEquals(md_theme_light_onErrorContainer, onErrorContainer)
 
       // Neutrals / Surfaces / Background
-      assertEquals(md_theme_light_outline, outline)
-      assertEquals(md_theme_light_background, background)
-      assertEquals(md_theme_light_onBackground, onBackground)
-      assertEquals(md_theme_light_surface, surface)
-      assertEquals(md_theme_light_onSurface, onSurface)
-      assertEquals(md_theme_light_surfaceVariant, surfaceVariant)
-      assertEquals(md_theme_light_onSurfaceVariant, onSurfaceVariant)
+      Assert.assertEquals(md_theme_light_outline, outline)
+      Assert.assertEquals(md_theme_light_background, background)
+      Assert.assertEquals(md_theme_light_onBackground, onBackground)
+      Assert.assertEquals(md_theme_light_surface, surface)
+      Assert.assertEquals(md_theme_light_onSurface, onSurface)
+      Assert.assertEquals(md_theme_light_surfaceVariant, surfaceVariant)
+      Assert.assertEquals(md_theme_light_onSurfaceVariant, onSurfaceVariant)
 
       // Inverse & misc
-      assertEquals(md_theme_light_inverseSurface, inverseSurface)
-      assertEquals(md_theme_light_inverseOnSurface, inverseOnSurface)
-      assertEquals(md_theme_light_inversePrimary, inversePrimary)
-      assertEquals(md_theme_light_surfaceTint, surfaceTint)
-      assertEquals(md_theme_light_outlineVariant, outlineVariant)
-      assertEquals(md_theme_light_scrim, scrim)
+      Assert.assertEquals(md_theme_light_inverseSurface, inverseSurface)
+      Assert.assertEquals(md_theme_light_inverseOnSurface, inverseOnSurface)
+      Assert.assertEquals(md_theme_light_inversePrimary, inversePrimary)
+      Assert.assertEquals(md_theme_light_surfaceTint, surfaceTint)
+      Assert.assertEquals(md_theme_light_outlineVariant, outlineVariant)
+      Assert.assertEquals(md_theme_light_scrim, scrim)
     }
   }
 
@@ -137,45 +134,45 @@ class MyGardenThemeColorTest {
 
     with(scheme) {
       // Primary
-      assertEquals(md_theme_dark_primary, primary)
-      assertEquals(md_theme_dark_onPrimary, onPrimary)
-      assertEquals(md_theme_dark_primaryContainer, primaryContainer)
-      assertEquals(md_theme_dark_onPrimaryContainer, onPrimaryContainer)
+      Assert.assertEquals(md_theme_dark_primary, primary)
+      Assert.assertEquals(md_theme_dark_onPrimary, onPrimary)
+      Assert.assertEquals(md_theme_dark_primaryContainer, primaryContainer)
+      Assert.assertEquals(md_theme_dark_onPrimaryContainer, onPrimaryContainer)
 
       // Secondary
-      assertEquals(md_theme_dark_secondary, secondary)
-      assertEquals(md_theme_dark_onSecondary, onSecondary)
-      assertEquals(md_theme_dark_secondaryContainer, secondaryContainer)
-      assertEquals(md_theme_dark_onSecondaryContainer, onSecondaryContainer)
+      Assert.assertEquals(md_theme_dark_secondary, secondary)
+      Assert.assertEquals(md_theme_dark_onSecondary, onSecondary)
+      Assert.assertEquals(md_theme_dark_secondaryContainer, secondaryContainer)
+      Assert.assertEquals(md_theme_dark_onSecondaryContainer, onSecondaryContainer)
 
       // Tertiary
-      assertEquals(md_theme_dark_tertiary, tertiary)
-      assertEquals(md_theme_dark_onTertiary, onTertiary)
-      assertEquals(md_theme_dark_tertiaryContainer, tertiaryContainer)
-      assertEquals(md_theme_dark_onTertiaryContainer, onTertiaryContainer)
+      Assert.assertEquals(md_theme_dark_tertiary, tertiary)
+      Assert.assertEquals(md_theme_dark_onTertiary, onTertiary)
+      Assert.assertEquals(md_theme_dark_tertiaryContainer, tertiaryContainer)
+      Assert.assertEquals(md_theme_dark_onTertiaryContainer, onTertiaryContainer)
 
       // Error
-      assertEquals(md_theme_dark_error, error)
-      assertEquals(md_theme_dark_onError, onError)
-      assertEquals(md_theme_dark_errorContainer, errorContainer)
-      assertEquals(md_theme_dark_onErrorContainer, onErrorContainer)
+      Assert.assertEquals(md_theme_dark_error, error)
+      Assert.assertEquals(md_theme_dark_onError, onError)
+      Assert.assertEquals(md_theme_dark_errorContainer, errorContainer)
+      Assert.assertEquals(md_theme_dark_onErrorContainer, onErrorContainer)
 
       // Neutrals / Surfaces / Background
-      assertEquals(md_theme_dark_outline, outline)
-      assertEquals(md_theme_dark_background, background)
-      assertEquals(md_theme_dark_onBackground, onBackground)
-      assertEquals(md_theme_dark_surface, surface)
-      assertEquals(md_theme_dark_onSurface, onSurface)
-      assertEquals(md_theme_dark_surfaceVariant, surfaceVariant)
-      assertEquals(md_theme_dark_onSurfaceVariant, onSurfaceVariant)
+      Assert.assertEquals(md_theme_dark_outline, outline)
+      Assert.assertEquals(md_theme_dark_background, background)
+      Assert.assertEquals(md_theme_dark_onBackground, onBackground)
+      Assert.assertEquals(md_theme_dark_surface, surface)
+      Assert.assertEquals(md_theme_dark_onSurface, onSurface)
+      Assert.assertEquals(md_theme_dark_surfaceVariant, surfaceVariant)
+      Assert.assertEquals(md_theme_dark_onSurfaceVariant, onSurfaceVariant)
 
       // Inverse & misc
-      assertEquals(md_theme_dark_inverseSurface, inverseSurface)
-      assertEquals(md_theme_dark_inverseOnSurface, inverseOnSurface)
-      assertEquals(md_theme_dark_inversePrimary, inversePrimary)
-      assertEquals(md_theme_dark_surfaceTint, surfaceTint)
-      assertEquals(md_theme_dark_outlineVariant, outlineVariant)
-      assertEquals(md_theme_dark_scrim, scrim)
+      Assert.assertEquals(md_theme_dark_inverseSurface, inverseSurface)
+      Assert.assertEquals(md_theme_dark_inverseOnSurface, inverseOnSurface)
+      Assert.assertEquals(md_theme_dark_inversePrimary, inversePrimary)
+      Assert.assertEquals(md_theme_dark_surfaceTint, surfaceTint)
+      Assert.assertEquals(md_theme_dark_outlineVariant, outlineVariant)
+      Assert.assertEquals(md_theme_dark_scrim, scrim)
     }
   }
 }
