@@ -42,8 +42,10 @@ class SignInScreenTest {
 
     composeTestRule.setContent { SignInScreen(onSignInClick = { wasClicked = true }) }
     composeTestRule.waitUntil {
-      composeTestRule.onAllNodesWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
-        .fetchSemanticsNodes().isNotEmpty()
+      composeTestRule
+          .onAllNodesWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
     }
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
 
