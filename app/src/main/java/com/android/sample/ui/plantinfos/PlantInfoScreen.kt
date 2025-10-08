@@ -136,10 +136,11 @@ fun PlantInfosScreen(
               modifier =
                   Modifier.fillMaxWidth()
                       .padding(horizontal = 20.dp, vertical = 16.dp)
-                      .testTag(PlantInfoScreenTestTags.PLANT_NAME)) {
+                      ) {
                 // Common name (e.g., "Rose")
                 Text(
                     text = uiState.name,
+                    modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_NAME),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black)
