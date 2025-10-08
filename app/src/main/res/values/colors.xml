@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Light -->
-    <color name="primary_light">#3A873A</color>
+    <color name="primary_light">#367444</color>
     <color name="primary_variant_light">#66BB6A</color>
     <color name="on_primary_light">#FFFFFFFF</color>
 
@@ -10,7 +10,7 @@
     <color name="on_secondary_light">#FF000000</color>
 
     <!-- Dark -->
-    <color name="primary_dark">#81C784</color>
+    <color name="primary_dark">#47AC74</color>
     <color name="primary_variant_dark">#388E3C</color>
     <color name="on_primary_dark">#003300</color>
 
