@@ -132,25 +132,21 @@ fun PlantInfosScreen(
               }
 
           // --- Name and Latin Name Section ---
-          Column(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(horizontal = 20.dp, vertical = 16.dp)
-                      ) {
-                // Common name (e.g., "Rose")
-                Text(
-                    text = uiState.name,
-                    modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_NAME),
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black)
-                // Scientific name (e.g., "Rosa rubiginosa")
-                Text(
-                    text = uiState.latinName,
-                    fontSize = 16.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME))
-              }
+          Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+            // Common name (e.g., "Rose")
+            Text(
+                text = uiState.name,
+                modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_NAME),
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black)
+            // Scientific name (e.g., "Rosa rubiginosa")
+            Text(
+                text = uiState.latinName,
+                fontSize = 16.sp,
+                color = Color.Gray,
+                modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME))
+          }
 
           // --- Tab Row for Description/Health ---
           ModulableTabRow(
