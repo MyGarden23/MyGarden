@@ -1,5 +1,6 @@
 package com.android.sample.ui.authentication
 
+import android.content.Context
 import android.view.Surface
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -23,27 +24,36 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
 import com.android.sample.R
 import com.android.sample.ui.theme.SampleAppTheme
 
 @Composable
-fun SignInScreen(onSignInClick: () -> Unit = {}) {
+fun SignInScreen(
+    uiState: AuthUIState = AuthUIState(),
+    credentialManager: androidx.credentials.CredentialManager =
+        CredentialManager.create(LocalContext.current),
+    onSignInClick: () -> Unit = {}
+) {
   val isDarkTheme = isSystemInDarkTheme()
 
   var buttonColor = Color(0xffe0e0e0)
   var textColor = Color(0xff424242)
   var logoRes = R.drawable.app_logo_light
 
-  if (false) {
+  if (isDarkTheme) {
     logoRes = R.drawable.app_logo_dark
     buttonColor = Color(0xFF424242)
     textColor = Color(0xFFBDBDBD)
@@ -77,6 +87,12 @@ fun SignInScreen(onSignInClick: () -> Unit = {}) {
 
           Spacer(modifier = Modifier.height(150.dp))
 
+          if (uiState.errorMsg != null) {
+            Text(
+                text = uiState.errorMsg,
+                color = Color.Red,
+                modifier = Modifier.padding(bottom = 16.dp).testTag("error_message"))
+          }
           OutlinedButton(
               onClick = { onSignInClick() },
               modifier =
@@ -101,6 +117,17 @@ fun SignInScreen(onSignInClick: () -> Unit = {}) {
               }
         }
       }
+}
+
+@Composable
+fun SignInRoute(
+    context: Context,
+    credentialManager: CredentialManager,
+    viewModel: SignInViewModel = SignInViewModel()
+) {
+  val uiState by viewModel.uiState.collectAsState()
+
+  SignInScreen(uiState = uiState, onSignInClick = { viewModel.signIn(context, credentialManager) })
 }
 
 @Preview
