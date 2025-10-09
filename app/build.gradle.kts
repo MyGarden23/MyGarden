@@ -8,7 +8,17 @@ plugins {
     id("jacoco")
 }
 jacoco {
-    toolVersion = "0.8.11"
+    toolVersion = "0.8.12"
+}
+
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.group == "org.jacoco") {
+                useVersion("0.8.12")
+            }
+        }
+    }
 }
 
 android {
@@ -44,7 +54,7 @@ android {
     }
 
     testCoverage {
-        jacocoVersion = "0.8.11"
+        jacocoVersion = "0.8.12"
     }
 
     buildFeatures {
@@ -209,12 +219,15 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     sourceDirectories.setFrom(files(mainSrc, mainKtSrc))
     classDirectories.setFrom(files(debugTree))
 
-    // Collect exec data from unit + (optional) connected tests
+    // Collect exec data from unit + connected tests
     val execFiles = fileTree(project.layout.buildDirectory.get()) {
         include(
+            // Unit tests
             "jacoco/testDebugUnitTest.exec",
             "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
-            "outputs/code_coverage/debugAndroidTest/connected/**/coverage.ec"
+            // Connected/instrumentation tests
+            "outputs/code_coverage/debugAndroidTest/connected/**/*.ec",
+            "outputs/code_coverage/debugAndroidTest/**/*.ec"
         )
     }
     executionData.setFrom(execFiles)
@@ -228,7 +241,12 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         hasData
     }
 
-    // Ensure unit tests ran
+    // Ensure both unit tests and connected tests ran
     dependsOn("testDebugUnitTest")
-    // do NOT depend on connected tests here; CI runs them separately
+
+    // Also try to depend on connected tests if they were run
+    // This will not fail if connectedCheck wasn't executed
+    tasks.findByName("createDebugCoverageReport")?.let { task ->
+        dependsOn(task)
+    }
 }
