@@ -49,12 +49,6 @@ class PlantInfoScreenTests {
   }
 
   @Test
-  fun descriptionTextIsDisplayedByDefault() {
-    setContent(plant)
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
-  }
-
-  @Test
   fun descriptionTabIsSelectedByDefault() {
     setContent(plant)
     // Verify description is shown and health info is not

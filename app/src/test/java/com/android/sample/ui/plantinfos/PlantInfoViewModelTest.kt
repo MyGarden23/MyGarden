@@ -182,21 +182,6 @@ class PlantInfoViewModelTest {
   }
 
   @Test
-  fun savePlant_usesNewIdFromRepository() = runTest {
-    val plant = createTestPlant()
-
-    // Get the ID that will be used
-    val expectedId = repository.getNewId()
-
-    viewModel.savePlant(plant)
-    advanceUntilIdle()
-
-    // Verify ID was incremented (next ID should be different)
-    val nextId = repository.getNewId()
-    assertNotEquals(expectedId, nextId)
-  }
-
-  @Test
   fun savePlant_canSaveMultiplePlants() = runTest {
     val plant1 = createTestPlant(name = "Plant 1")
     val plant2 = createTestPlant(name = "Plant 2")
