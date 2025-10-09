@@ -1,7 +1,5 @@
 package com.android.sample.ui.authentication
 
-import android.content.Context
-import android.view.Surface
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,10 +19,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,42 +30,51 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import com.android.sample.R
-import com.android.sample.ui.theme.SampleAppTheme
 
+/** Semantic for testing */
+val LogoResNameKey = SemanticsPropertyKey<String>("LogoResName")
+var SemanticsPropertyReceiver.logoRes by LogoResNameKey
+
+/**
+ * Composable function that displays the Sign-In screen for the application.
+ *
+ * This screen shows the app logo and provides a button to sign in with Google. The logo adapts
+ * automatically to the system theme (dark or light mode).
+ *
+ * @param uiState Current UI state of the authentication flow. Used to display error messages.
+ * @param credentialManager Optional [CredentialManager] instance for managing credentials.
+ * @param onSignInClick Lambda triggered when the "Sign in with Google" button is clicked.
+ * @param isDarkTheme Boolean flag indicating whether the system is in dark theme.
+ */
+@Preview
 @Composable
 fun SignInScreen(
     uiState: AuthUIState = AuthUIState(),
     credentialManager: androidx.credentials.CredentialManager =
         CredentialManager.create(LocalContext.current),
-    onSignInClick: () -> Unit = {}
+    onSignInClick: () -> Unit = {},
+    isDarkTheme: Boolean = isSystemInDarkTheme()
 ) {
-  val isDarkTheme = isSystemInDarkTheme()
-
-  var buttonColor = Color(0xffe0e0e0)
-  var textColor = Color(0xff424242)
-  var logoRes = R.drawable.app_logo_light
-
-  if (isDarkTheme) {
-    logoRes = R.drawable.app_logo_dark
-    buttonColor = Color(0xFF424242)
-    textColor = Color(0xFFBDBDBD)
-  }
+  val logoRes =
+      if (isDarkTheme) {
+        R.drawable.app_logo_dark
+      } else {
+        R.drawable.app_logo_light
+      }
+  // For testing
+  val resName = LocalContext.current.resources.getResourceEntryName(logoRes)
   Box(
       modifier =
           Modifier.fillMaxSize()
               .background(MaterialTheme.colorScheme.background)
               .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_BACKGROUND)) {
-        //        Image(
-        //            painter = painterResource(id = R.drawable.signinscreen_background_image),
-        //            contentDescription = null,
-        //            modifier = Modifier.matchParentSize(),
-        //            contentScale = ContentScale.Crop
-        //        )
-
         Column(
             modifier = Modifier.fillMaxSize().padding(top = 120.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -81,12 +86,12 @@ fun SignInScreen(
               modifier =
                   Modifier.size(350.dp)
                       .clip(RoundedCornerShape(16.dp))
-                      // .border(BorderStroke(2.dp, Color.Gray), RoundedCornerShape(16.dp))
-                      // .shadow(8.dp, RoundedCornerShape(16.dp))
-                      .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO))
+                      .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
+                      .semantics { this.logoRes = resName })
 
           Spacer(modifier = Modifier.height(150.dp))
 
+          // To display an error message in case of error
           if (uiState.errorMsg != null) {
             Text(
                 text = uiState.errorMsg,
@@ -101,7 +106,9 @@ fun SignInScreen(
                       .border(BorderStroke(2.dp, Color.Gray), RoundedCornerShape(50))
                       .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON),
               shape = RoundedCornerShape(50),
-              colors = ButtonDefaults.outlinedButtonColors(containerColor = buttonColor)) {
+              colors =
+                  ButtonDefaults.outlinedButtonColors(
+                      containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                 Icon(
                     painter = painterResource(R.drawable.google_logo),
                     contentDescription = "google Icon",
@@ -112,26 +119,8 @@ fun SignInScreen(
 
                 Text(
                     text = "Sign in with Google",
-                    color = textColor,
-                )
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
               }
         }
       }
-}
-
-@Composable
-fun SignInRoute(
-    context: Context,
-    credentialManager: CredentialManager,
-    viewModel: SignInViewModel = SignInViewModel()
-) {
-  val uiState by viewModel.uiState.collectAsState()
-
-  SignInScreen(uiState = uiState, onSignInClick = { viewModel.signIn(context, credentialManager) })
-}
-
-@Preview
-@Composable
-fun SignInScreenPreview() {
-  SampleAppTheme { Surface(modifier = Modifier.fillMaxSize()) { SignInScreen() } }
 }

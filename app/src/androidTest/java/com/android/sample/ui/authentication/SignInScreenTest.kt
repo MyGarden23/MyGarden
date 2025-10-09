@@ -1,5 +1,6 @@
 package com.android.sample.ui.authentication
 
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -33,6 +34,26 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen() }
 
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_BACKGROUND).isDisplayed()
+  }
+
+  @Test
+  fun shows_dark_logo_in_dark_mode() {
+    // Set the dark mode
+    composeTestRule.setContent { SignInScreen(isDarkTheme = true) }
+
+    composeTestRule
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
+        .assert(SemanticsMatcher.expectValue(LogoResNameKey, "app_logo_dark"))
+  }
+
+  @Test
+  fun shows_light_logo_in_light_mode() {
+    // Set the light mode
+    composeTestRule.setContent { SignInScreen(isDarkTheme = false) }
+
+    composeTestRule
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
+        .assert(SemanticsMatcher.expectValue(LogoResNameKey, "app_logo_light"))
   }
 
   //  @Test
