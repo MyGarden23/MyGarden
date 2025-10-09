@@ -3,66 +3,44 @@ package com.android.sample.ui.navigation
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.android.sample.R
 
 val cameraIconId = R.drawable.photo_camera_icon
 val profileIconId = R.drawable.plant_profile_icon
 
-sealed class Page(
-    val name: String,
-    val destination: Screen,
-    val iconId: Int,
-    val testTag: String
-) {
-    object Camera: Page(
-        "CameraPage",
-        Screen.Camera,
-        cameraIconId,
-        NavigationTestTags.CAMERA_BUTTON
-    )
-    object Profile: Page(
-        "ProfilePage",
-        Screen.Profile,
-        profileIconId,
-        NavigationTestTags.PROFILE_BUTTON
-    )
+sealed class Page(val name: String, val destination: Screen, val iconId: Int, val testTag: String) {
+  object Camera : Page("CameraPage", Screen.Camera, cameraIconId, NavigationTestTags.CAMERA_BUTTON)
+
+  object Profile :
+      Page("ProfilePage", Screen.Profile, profileIconId, NavigationTestTags.PROFILE_BUTTON)
 }
 
-
 @Composable
-fun BottomBar(
-    selectedPage: Page,
-    onSelect: (Page) -> Unit
-) {
-    val pages = listOf(Page.Camera, Page.Profile)
-    NavigationBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .testTag(NavigationTestTags.BOTTOM_BAR),
-        containerColor = MaterialTheme.colorScheme.background,
-        content = {
-            pages.forEach { page ->
-                NavigationBarItem(
-                    modifier = Modifier.testTag(page.testTag),
-                    selected = (page == selectedPage),
-                    onClick = {onSelect(page)},
-                    icon = { Icon(
-                        painter = painterResource(page.iconId),
-                        contentDescription = page.name,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )}
-                )
-            }
+fun BottomBar(selectedPage: Page, onSelect: (Page) -> Unit) {
+  val pages = listOf(Page.Camera, Page.Profile)
+  NavigationBar(
+      modifier = Modifier.fillMaxWidth().height(100.dp).testTag(NavigationTestTags.BOTTOM_BAR),
+      containerColor = MaterialTheme.colorScheme.background,
+      content = {
+        pages.forEach { page ->
+          NavigationBarItem(
+              modifier = Modifier.testTag(page.testTag),
+              selected = (page == selectedPage),
+              onClick = { onSelect(page) },
+              icon = {
+                Icon(
+                    painter = painterResource(page.iconId),
+                    contentDescription = page.name,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer)
+              })
         }
-    )
+      })
 }
