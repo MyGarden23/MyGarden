@@ -34,3 +34,4 @@ google-services.json
 *.hprof
 
 *.DS_Store
+sonar-props.txt
