@@ -3,6 +3,7 @@ package com.android.sample.ui.camera
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -14,10 +15,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * UI state contains the orientation of the camera (initially back camera).
- */
+/** UI state contains the orientation of the camera (initially back camera). */
 data class CameraUIState(var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA)
+
+/** Error tag used to indicate errors coming from taking picture */
+private const val CAMERA_ERROR_TAG = "CameraPicture"
 
 /**
  * ViewModel responsible for managing camera state and actions. It should be used with a
@@ -43,28 +45,46 @@ open class CameraViewModel : ViewModel() {
     controller.takePicture(
         ContextCompat.getMainExecutor(context),
         object : ImageCapture.OnImageCapturedCallback() {
+          // If the picture succeed, pass the resulting Bitmap to the given lambda
           override fun onCaptureSuccess(image: ImageProxy) {
             super.onCaptureSuccess(image)
-            onPictureTaken(image.toBitmap())
+            try {
+              onPictureTaken(image.toBitmap())
+              image.close()
+            } catch (e: IllegalArgumentException) {
+              toastPictureFail(context)
+              Log.e(CAMERA_ERROR_TAG, "ImageProxy could not be converted to a Bitmap", e)
+            }
           }
 
           override fun onError(exception: ImageCaptureException) {
+            // If the picture fails, log the exception and keep the stack trace
             super.onError(exception)
-            Log.e("CameraPicture", "Picture could not been taken")
+            toastPictureFail(context)
+            Log.e(CAMERA_ERROR_TAG, "Picture could not been taken", exception)
           }
         })
   }
 
   /**
-   * Switches the orientation of the camera (Front or Back) by changing the value of the UI
-   * state that contains the camera selector.
+   * Display a Toast saying "Failed to take picture." on a fail to take a picture.
+   *
+   * @param context the context of the application used to display the Toast
+   */
+  private fun toastPictureFail(context: Context) {
+    Toast.makeText(context, "Failed to take picture.", Toast.LENGTH_SHORT).show()
+  }
+
+  /**
+   * Switches the orientation of the camera (Front or Back) by changing the value of the UI state
+   * that contains the camera selector.
    */
   fun switchOrientation() {
     _uiState.value.cameraSelector =
-      if (_uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
-        CameraSelector.DEFAULT_FRONT_CAMERA
-      } else {
-        CameraSelector.DEFAULT_BACK_CAMERA
-      }
+        if (_uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+          CameraSelector.DEFAULT_FRONT_CAMERA
+        } else {
+          CameraSelector.DEFAULT_BACK_CAMERA
+        }
   }
 }

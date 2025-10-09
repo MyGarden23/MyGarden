@@ -51,11 +51,11 @@ class CameraScreenAndroidTest {
   @Test
   fun switchCameraButtonWorks() {
     composeTestRule.setContent { CameraScreen(cameraViewModel = viewModel) }
-      assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA)
+    assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA)
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).performClick()
-      assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA)
+    assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA)
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).performClick()
-      assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA)
+    assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA)
   }
 
   @Test

@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.CameraController
@@ -47,6 +46,12 @@ object CameraScreenTestTags {
 }
 
 /**
+ * Represents the color that the buttons of the camera screen take. It must not change depending on
+ * the light or dark theme.
+ */
+private val BUTTONS_COLOR = Color.White
+
+/**
  * Screen that allows the user to take a picture of a plant or load one from the gallery. The
  * picture can then be processed to a LLM api to extract the wanted information: description,
  * watering, health status, etc.
@@ -56,6 +61,8 @@ object CameraScreenTestTags {
  * @param modifier the optional modifier of the composable
  * @param cameraViewModel the optional View Model of the camera screen
  * @param onPictureTaken the optional lambda called whenever the user takes a picture
+ *
+ * TODO: Implement the picture taking and gallery access logic
  */
 @Composable
 fun CameraScreen(
@@ -63,20 +70,14 @@ fun CameraScreen(
     cameraViewModel: CameraViewModel = viewModel(),
     onPictureTaken: (Bitmap) -> Unit = {}
 ) {
-    val uiState = cameraViewModel.uiState.collectAsState()
+  val uiState = cameraViewModel.uiState.collectAsState()
   val context = LocalContext.current
   // Request Camera permission when composing the Camera Screen
   val cameraPermissionLauncher =
       rememberLauncherForActivityResult(
-          contract = ActivityResultContracts.RequestPermission(),
-          onResult = { res ->
-            if (res) {
-              Log.d("CameraPermission", "Camera permission acquired.")
-            } else {
-              Log.d("CameraPermission", "Camera permission denied.")
-            }
-          })
+          contract = ActivityResultContracts.RequestPermission(), onResult = { /* Do nothing */})
   // Currently suppose that the user will accept camera access
+  // TODO: Implement the workflow for handling the user declining camera access and gallery access
   LaunchedEffect(Unit) {
     if (!hasCameraPermission(context)) {
       cameraPermissionLauncher.launch(CAMERAX_PERMISSION)
@@ -89,15 +90,15 @@ fun CameraScreen(
   }
 
   Scaffold(
-      bottomBar = { /* Add the navigation bottom bar when ready */},
+      bottomBar = { /* TODO: Add the navigation bottom bar when ready */},
       content = { paddingValues ->
         Box(modifier = modifier.fillMaxSize().padding(paddingValues)) {
           CameraPreview(controller = controller, modifier = modifier.fillMaxSize())
           // Button for switching between back camera and front camera
           IconButton(
               onClick = {
-                  cameraViewModel.switchOrientation()
-                  controller.cameraSelector = uiState.value.cameraSelector
+                cameraViewModel.switchOrientation()
+                controller.cameraSelector = uiState.value.cameraSelector
               },
               modifier =
                   modifier.padding(20.dp, 20.dp).testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
@@ -105,8 +106,8 @@ fun CameraScreen(
                     Icons.Default.FlipCameraAndroid,
                     contentDescription = "Flip Camera Icon",
                     modifier = modifier.size(30.dp),
-                    tint = Color.White) // TODO: Replace with Theme color
-          }
+                    tint = BUTTONS_COLOR)
+              }
           // Button for taking picture
           IconButton(
               modifier =
@@ -120,8 +121,7 @@ fun CameraScreen(
                     painter = painterResource(R.drawable.ic_photo_button_mygarden),
                     contentDescription = "Take picture Icon",
                     modifier = modifier.size(70.dp),
-                    tint = Color.White // TODO: Replace with Theme color
-                    )
+                    tint = BUTTONS_COLOR)
               }
           // Button for accessing the gallery
           IconButton(
@@ -132,13 +132,13 @@ fun CameraScreen(
                       .padding(bottom = 60.dp)
                       .size(70.dp)
                       .testTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON),
-              onClick = { /* Handle gallery access logic*/}) {
+              onClick = { /* TODO: Handle gallery access logic */}) {
                 Icon(
                     Icons.Default.Photo,
                     contentDescription = "Open Gallery Icon",
                     modifier = modifier.size(40.dp),
-                    tint = Color.White) // TODO: Replace with Theme color
-          }
+                    tint = BUTTONS_COLOR)
+              }
         }
       })
 }
