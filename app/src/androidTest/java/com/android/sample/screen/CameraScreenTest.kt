@@ -1,12 +1,12 @@
 package com.android.sample.screen
 
+import androidx.camera.core.CameraSelector
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
-import com.android.sample.ui.camera.CameraOrientation
 import com.android.sample.ui.camera.CameraScreen
 import com.android.sample.ui.camera.CameraScreenTestTags
 import com.android.sample.ui.camera.CameraViewModel
@@ -51,11 +51,11 @@ class CameraScreenAndroidTest {
   @Test
   fun switchCameraButtonWorks() {
     composeTestRule.setContent { CameraScreen(cameraViewModel = viewModel) }
-    assert(viewModel.getOrientation() == CameraOrientation.BACK)
+      assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA)
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).performClick()
-    assert(viewModel.getOrientation() == CameraOrientation.FRONT)
+      assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA)
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).performClick()
-    assert(viewModel.getOrientation() == CameraOrientation.BACK)
+      assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA)
   }
 
   @Test

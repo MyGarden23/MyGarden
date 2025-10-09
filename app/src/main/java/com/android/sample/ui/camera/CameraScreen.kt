@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.CameraSelector
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
@@ -24,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +63,7 @@ fun CameraScreen(
     cameraViewModel: CameraViewModel = viewModel(),
     onPictureTaken: (Bitmap) -> Unit = {}
 ) {
+    val uiState = cameraViewModel.uiState.collectAsState()
   val context = LocalContext.current
   // Request Camera permission when composing the Camera Screen
   val cameraPermissionLauncher =
@@ -87,8 +88,6 @@ fun CameraScreen(
     LifecycleCameraController(context).apply { setEnabledUseCases(CameraController.IMAGE_CAPTURE) }
   }
 
-  cameraViewModel.setOrientation(CameraOrientation.BACK)
-
   Scaffold(
       bottomBar = { /* Add the navigation bottom bar when ready */},
       content = { paddingValues ->
@@ -97,17 +96,8 @@ fun CameraScreen(
           // Button for switching between back camera and front camera
           IconButton(
               onClick = {
-                controller.cameraSelector =
-                    if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
-                      CameraSelector.DEFAULT_FRONT_CAMERA
-                    } else {
-                      CameraSelector.DEFAULT_BACK_CAMERA
-                    }
-                if (controller.cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA) {
-                  cameraViewModel.setOrientation(CameraOrientation.FRONT)
-                } else {
-                  cameraViewModel.setOrientation(CameraOrientation.BACK)
-                }
+                  cameraViewModel.switchOrientation()
+                  controller.cameraSelector = uiState.value.cameraSelector
               },
               modifier =
                   modifier.padding(20.dp, 20.dp).testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
