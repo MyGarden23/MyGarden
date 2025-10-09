@@ -13,9 +13,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.android.sample.R
 
-val cameraIconId = R.drawable.photo_camera_icon
-val profileIconId = R.drawable.plant_profile_icon
+private val cameraIconId = R.drawable.photo_camera_icon
+private val profileIconId = R.drawable.plant_profile_icon
 
+/**
+ * Representing a button of the bottom bar
+ *
+ * @param name the name of the page
+ * @param destination the screen it refers to
+ * @param iconId the id of the icon
+ * @param testTag the test tag of the page
+ */
 sealed class Page(val name: String, val destination: Screen, val iconId: Int, val testTag: String) {
   object Camera : Page("CameraPage", Screen.Camera, cameraIconId, NavigationTestTags.CAMERA_BUTTON)
 
@@ -23,11 +31,15 @@ sealed class Page(val name: String, val destination: Screen, val iconId: Int, va
       Page("ProfilePage", Screen.Profile, profileIconId, NavigationTestTags.PROFILE_BUTTON)
 }
 
+/**
+ * Composable of the bottom bar of the app making it possible to switch between the
+ * main screens of the app
+ */
 @Composable
-fun BottomBar(selectedPage: Page, onSelect: (Page) -> Unit) {
+fun BottomBar(selectedPage: Page, onSelect: (Page) -> Unit, modifier: Modifier = Modifier) {
   val pages = listOf(Page.Camera, Page.Profile)
   NavigationBar(
-      modifier = Modifier.fillMaxWidth().height(100.dp).testTag(NavigationTestTags.BOTTOM_BAR),
+      modifier = modifier.fillMaxWidth().height(100.dp).testTag(NavigationTestTags.BOTTOM_BAR),
       containerColor = MaterialTheme.colorScheme.background,
       content = {
         pages.forEach { page ->
