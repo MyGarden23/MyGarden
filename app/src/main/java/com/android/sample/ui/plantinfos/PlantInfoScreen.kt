@@ -14,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,9 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.sample.model.plant.Plant
 import com.android.sample.model.plant.PlantHealthStatus
-
-// TODO change each "Color(0xFFF5F0E8)" with the theme color
-// TODO change each "Color(0xFF7FA869)"  with the theme color
+import com.android.sample.ui.theme.MyGardenTheme
 
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
@@ -78,7 +75,7 @@ fun PlantInfosScreen(
 
   Scaffold(
       modifier = Modifier.testTag(PlantInfoScreenTestTags.SCREEN),
-      containerColor = Color(0xFFF5F0E8), // Beige background for entire scaffold
+      containerColor = MaterialTheme.colorScheme.background,
       bottomBar = {
         // Bottom bar with "Save Plant" button
         Box(
@@ -96,8 +93,7 @@ fun PlantInfosScreen(
                   shape = RoundedCornerShape(28.dp),
                   colors =
                       ButtonDefaults.buttonColors(
-                          containerColor = Color(0xFF7FA869) // Green color
-                          )) {
+                          containerColor = MaterialTheme.colorScheme.primaryContainer)) {
                     Text(text = "Save Plant", fontSize = 18.sp, fontWeight = FontWeight.Medium)
                   }
             }
@@ -108,12 +104,12 @@ fun PlantInfosScreen(
               modifier =
                   Modifier.fillMaxWidth()
                       .height(280.dp)
-                      .background(Color(0xFF8BC34A)) // Placeholder green background
+                      .background(MaterialTheme.colorScheme.primary)
                       .testTag(PlantInfoScreenTestTags.PLANT_IMAGE)) {
                 // Placeholder for plant image
                 Text(
                     text = "Plant Image",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 16.sp,
                     modifier = Modifier.align(Alignment.Center))
 
@@ -127,7 +123,7 @@ fun PlantInfosScreen(
                       Icon(
                           imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                           contentDescription = "Back",
-                          tint = Color.Black)
+                          tint = MaterialTheme.colorScheme.onPrimary)
                     }
               }
 
@@ -139,12 +135,12 @@ fun PlantInfosScreen(
                 modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_NAME),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black)
+                color = MaterialTheme.colorScheme.onBackground)
             // Scientific name (e.g., "Rosa rubiginosa")
             Text(
                 text = uiState.latinName,
                 fontSize = 16.sp,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME))
           }
 
@@ -159,7 +155,7 @@ fun PlantInfosScreen(
               modifier =
                   Modifier.fillMaxWidth()
                       .weight(1f) // Takes remaining space between tabs and bottom button
-                      .background(Color(0xFFF5F0E8)) // Beige background
+                      .background(MaterialTheme.colorScheme.background)
                       .testTag(PlantInfoScreenTestTags.CONTENT_CONTAINER)) {
                 Column(
                     modifier =
@@ -176,7 +172,7 @@ fun PlantInfosScreen(
                           Text(
                               text = uiState.description,
                               fontSize = 14.sp,
-                              color = Color.Black,
+                              color = MaterialTheme.colorScheme.onBackground,
                               lineHeight = 20.sp,
                               modifier = Modifier.testTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT))
                         }
@@ -187,7 +183,7 @@ fun PlantInfosScreen(
                           Text(
                               text = uiState.healthStatusDescription,
                               fontSize = 14.sp,
-                              color = Color.Black,
+                              color = MaterialTheme.colorScheme.onBackground,
                               lineHeight = 20.sp,
                               modifier =
                                   Modifier.testTag(
@@ -199,7 +195,7 @@ fun PlantInfosScreen(
                               text = "Status: ${uiState.healthStatus.description}",
                               fontSize = 16.sp,
                               fontWeight = FontWeight.Medium,
-                              color = Color.Black,
+                              color = MaterialTheme.colorScheme.onBackground,
                               modifier = Modifier.testTag(PlantInfoScreenTestTags.HEALTH_STATUS))
                           Spacer(modifier = Modifier.height(8.dp))
 
@@ -207,7 +203,7 @@ fun PlantInfosScreen(
                           Text(
                               text = "Watering Frequency: Every ${uiState.wateringFrequency} days",
                               fontSize = 14.sp,
-                              color = Color.Black,
+                              color = MaterialTheme.colorScheme.onBackground,
                               modifier =
                                   Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
                         }
@@ -227,8 +223,8 @@ fun ModulableTabRow(
   TabRow(
       selectedTabIndex = uiState.selectedTab.ordinal,
       modifier = modifier,
-      containerColor = Color(0xFFF5F0E8), // Beige background
-      contentColor = Color.Black) {
+      containerColor = MaterialTheme.colorScheme.background,
+      contentColor = MaterialTheme.colorScheme.onBackground) {
         for (tab in SelectedPlantInfoTab.values()) {
           val tabModifier =
               when (tab) {
@@ -267,5 +263,5 @@ fun PlantDetailScreenPreview() {
           healthStatusDescription = "The plant is healthy",
           wateringFrequency = 0, // in days
       )
-  PlantInfosScreen(plant) {}
+  MyGardenTheme { PlantInfosScreen(plant) {} }
 }
