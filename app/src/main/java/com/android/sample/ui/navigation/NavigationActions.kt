@@ -7,7 +7,8 @@ import androidx.navigation.NavHostController
  *
  * @param route the route of the screen
  * @param name the name of the screen
- * @param isTopLevel whether the screen is a core screen that can be accessible from the bottom bar or not
+ * @param isTopLevel whether the screen is a core screen that can be accessible from the bottom bar
+ *   or not
  */
 sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean = false) {
   object Camera : Screen(route = "camera", name = "Camera", isTopLevel = true)

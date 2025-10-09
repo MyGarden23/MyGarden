@@ -32,8 +32,8 @@ sealed class Page(val name: String, val destination: Screen, val iconId: Int, va
 }
 
 /**
- * Composable of the bottom bar of the app making it possible to switch between the
- * main screens of the app
+ * Composable of the bottom bar of the app making it possible to switch between the main screens of
+ * the app
  */
 @Composable
 fun BottomBar(selectedPage: Page, onSelect: (Page) -> Unit, modifier: Modifier = Modifier) {
