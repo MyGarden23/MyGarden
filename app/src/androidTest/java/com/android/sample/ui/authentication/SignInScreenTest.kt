@@ -2,7 +2,7 @@ package com.android.sample.ui.authentication
 
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,21 +19,25 @@ class SignInScreenTest {
   fun signInButton_isDisplay() {
     composeTestRule.setContent { SignInScreen() }
 
-    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).isDisplayed()
+    composeTestRule
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+        .assertIsDisplayed()
   }
 
   @Test
   fun appLogo_isDisplay() {
     composeTestRule.setContent { SignInScreen() }
 
-    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO).isDisplayed()
+    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO).assertIsDisplayed()
   }
 
   @Test
   fun background_isDisplay() {
     composeTestRule.setContent { SignInScreen() }
 
-    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_BACKGROUND).isDisplayed()
+    composeTestRule
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_BACKGROUND)
+        .assertIsDisplayed()
   }
 
   @Test
