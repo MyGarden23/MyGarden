@@ -2,6 +2,7 @@ package com.android.sample.screen
 
 import androidx.camera.core.CameraSelector
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -10,6 +11,7 @@ import androidx.test.rule.GrantPermissionRule
 import com.android.sample.ui.camera.CameraScreen
 import com.android.sample.ui.camera.CameraScreenTestTags
 import com.android.sample.ui.camera.CameraViewModel
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -29,11 +31,12 @@ class CameraScreenAndroidTest {
   @Before
   fun setup() {
     viewModel = CameraViewModel()
+    composeTestRule.setContent { CameraScreen(cameraViewModel = viewModel) }
+    composeTestRule.waitForIdle()
   }
 
   @Test
   fun cameraScreenButtonsTestTagsAreDisplayed() {
-    composeTestRule.setContent { CameraScreen(cameraViewModel = viewModel) }
     composeTestRule
         .onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)
         .assertExists()
@@ -49,18 +52,23 @@ class CameraScreenAndroidTest {
   }
 
   @Test
+  fun cameraScreenButtonsTestTagsAreEnabled() {
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).assertIsEnabled()
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).assertIsEnabled()
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON).assertIsEnabled()
+  }
+
+  @Test
   fun switchCameraButtonWorks() {
-    composeTestRule.setContent { CameraScreen(cameraViewModel = viewModel) }
-    assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA)
+    assertEquals(viewModel.uiState.value.cameraSelector, CameraSelector.DEFAULT_BACK_CAMERA)
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).performClick()
-    assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA)
+    assertEquals(viewModel.uiState.value.cameraSelector, CameraSelector.DEFAULT_FRONT_CAMERA)
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).performClick()
-    assert(viewModel.uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA)
+    assertEquals(viewModel.uiState.value.cameraSelector, CameraSelector.DEFAULT_BACK_CAMERA)
   }
 
   @Test
   fun cameraPreviewIsVisible() {
-    composeTestRule.setContent { CameraScreen(cameraViewModel = viewModel) }
     // Check that the camera preview is active
     composeTestRule
         .onNodeWithTag(CameraScreenTestTags.PREVIEW_VIEW)

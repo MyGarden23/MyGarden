@@ -25,7 +25,7 @@ private const val CAMERA_ERROR_TAG = "CameraPicture"
  * ViewModel responsible for managing camera state and actions. It should be used with a
  * corresponding CameraScreen.
  */
-open class CameraViewModel : ViewModel() {
+class CameraViewModel : ViewModel() {
   private val _uiState = MutableStateFlow(CameraUIState())
   val uiState: StateFlow<CameraUIState> = _uiState.asStateFlow()
 
