@@ -1,10 +1,10 @@
-package com.android.sample.theme
+package com.android.mygarden.theme
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import com.android.sample.ui.theme.MyGardenTheme
+import com.android.mygarden.ui.theme.MyGardenTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
