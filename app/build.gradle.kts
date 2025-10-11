@@ -12,11 +12,11 @@ jacoco {
 }
 
 android {
-    namespace = "com.android.sample"
+    namespace = "com.android.mygarden"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.android.sample"
+        applicationId = "com.android.mygarden"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
