@@ -45,14 +45,14 @@ interface PlantsRepository {
   suspend fun saveToGarden(plant: Plant, id: String, lastWatered: Timestamp): OwnedPlant
 
   /**
-   * Retrieves all plants currently in the user's virtual garden.
+   * Retrieves all ownedplants currently in the user's virtual garden.
    *
    * @return A list of all OwnedPlant objects in the garden
    */
   suspend fun getAllOwnedPlants(): List<OwnedPlant>
 
   /**
-   * Retrieves a specific plant from the user's garden by its unique identifier.
+   * Retrieves a specific owned plant from the user's garden by its unique identifier.
    *
    * @param id The unique identifier of the plant to retrieve
    * @return The OwnedPlant object with the specified id
@@ -60,17 +60,17 @@ interface PlantsRepository {
   suspend fun getOwnedPlant(id: String): OwnedPlant
 
   /**
-   * Removes a plant from the user's virtual garden.
+   * Removes a owned plant from the user's virtual garden.
    *
-   * @param id The unique identifier of the plant to remove
+   * @param id The unique identifier of the owned plant to remove
    */
   suspend fun deleteFromGarden(id: String)
 
   /**
-   * Updates the last watering timestamp for a plant in the garden.
+   * Updates an existing owned plant in the user's virtual garden.
    *
    * @param id The unique identifier of the plant to update
-   * @param lastWatered The new timestamp for the last watering event
+   * @param newOwnedPlant The new ownedPlant
    */
-  suspend fun editOwnedPlant(id: String, lastWatered: Timestamp)
+  suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant)
 }

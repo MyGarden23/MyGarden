@@ -24,18 +24,30 @@ class PlantsRepositoryLocal : PlantsRepository {
   }
 
   override suspend fun getAllOwnedPlants(): List<OwnedPlant> {
-    TODO("Not yet implemented")
+    return ownedPlants
   }
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
-    TODO("Not yet implemented")
+    return ownedPlants.find { it.id == id }
+      ?: throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
   }
 
   override suspend fun deleteFromGarden(id: String) {
-    TODO("Not yet implemented")
+    val index = ownedPlants.indexOfFirst { it.id == id }
+    if (index != -1) {
+      ownedPlants.removeAt(index)
+    } else {
+      throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
+    }
   }
 
-  override suspend fun editOwnedPlant(id: String, lastWatered: Timestamp) {
-    TODO("Not yet implemented")
+  override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
+    val index = ownedPlants.indexOfFirst { it.id == id }
+    if (index != -1) {
+      ownedPlants[index] = newOwnedPlant
+    } else {
+      throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
+    }
+
   }
 }
