@@ -42,6 +42,10 @@ class PlantsRepositoryLocal : PlantsRepository {
   }
 
   override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
+    if (id != newOwnedPlant.id) {
+      throw IllegalArgumentException(
+          "PlantsRepositoryLocal: ID mismatch - parameter id '$id' does not match newOwnedPlant.id '${newOwnedPlant.id}'")
+    }
     val index = ownedPlants.indexOfFirst { it.id == id }
     if (index != -1) {
       ownedPlants[index] = newOwnedPlant
