@@ -212,6 +212,67 @@ class PlantsRepositoryLocalTest {
   }
 
   @Test
+  fun deleteFromGarden_throwsExceptionWhenIdNotFound() = runTest {
+    try {
+      repository.deleteFromGarden("non-existent-id")
+      fail("Expected IllegalArgumentException to be thrown")
+    } catch (exception: IllegalArgumentException) {
+      assertTrue(
+          exception.message?.contains("OwnedPlant with id non-existent-id not found") == true)
+    }
+  }
+
+  @Test
+  fun getOwnedPlant_returnsCorrectPlant() = runTest {
+    val plant1 = createTestPlant(name = "Rose", latinName = "Rosa")
+    val plant2 = createTestPlant(name = "Tulip", latinName = "Tulipa")
+    val timestamp = Timestamp(123456789L)
+
+    repository.saveToGarden(plant1, "rose-1", timestamp)
+    repository.saveToGarden(plant2, "tulip-1", timestamp)
+
+    val retrievedPlant = repository.getOwnedPlant("rose-1")
+
+    assertEquals("rose-1", retrievedPlant.id)
+    assertEquals(plant1, retrievedPlant.plant)
+    assertEquals(timestamp, retrievedPlant.lastWatered)
+    assertEquals("Rose", retrievedPlant.plant.name)
+    assertEquals("Rosa", retrievedPlant.plant.latinName)
+  }
+
+  @Test
+  fun getOwnedPlant_throwsExceptionWhenIdNotFound() = runTest {
+    try {
+      repository.getOwnedPlant("non-existent-id")
+      fail("Expected IllegalArgumentException to be thrown")
+    } catch (exception: IllegalArgumentException) {
+      assertTrue(
+          exception.message?.contains("OwnedPlant with id non-existent-id not found") == true)
+    }
+  }
+
+  @Test
+  fun getOwnedPlant_returnsCorrectPlantAfterEdit() = runTest {
+    val originalPlant = createTestPlant(name = "Original Rose", latinName = "Rosa Original")
+    val originalTimestamp = Timestamp(123456789L)
+
+    repository.saveToGarden(originalPlant, "rose-1", originalTimestamp)
+
+    val updatedPlant = createTestPlant(name = "Updated Rose", latinName = "Rosa Updated")
+    val newTimestamp = Timestamp(987654321L)
+    val newOwnedPlant = OwnedPlant("rose-1", updatedPlant, newTimestamp)
+
+    repository.editOwnedPlant("rose-1", newOwnedPlant)
+
+    val retrievedPlant = repository.getOwnedPlant("rose-1")
+
+    assertEquals("rose-1", retrievedPlant.id)
+    assertEquals("Updated Rose", retrievedPlant.plant.name)
+    assertEquals("Rosa Updated", retrievedPlant.plant.latinName)
+    assertEquals(newTimestamp, retrievedPlant.lastWatered)
+  }
+
+  @Test
   fun editOwnedPlant_updatesExistingPlant() = runTest {
     val originalPlant = createTestPlant(name = "Rose", latinName = "Rosa")
     val originalTimestamp = Timestamp(123456789L)
@@ -304,5 +365,26 @@ class PlantsRepositoryLocalTest {
     assertEquals("Cactus", retrievedPlant.plant.name)
     assertEquals("Cactaceae", retrievedPlant.plant.latinName)
     assertEquals(PlantHealthStatus.NEEDS_WATER, retrievedPlant.plant.healthStatus)
+  }
+
+  @Test
+  fun editOwnedPlant_throwsExceptionWhenIdMismatch() = runTest {
+    val originalPlant = createTestPlant(name = "Rose")
+    val timestamp = Timestamp(System.currentTimeMillis())
+
+    repository.saveToGarden(originalPlant, "rose-1", timestamp)
+
+    val updatedPlant = createTestPlant(name = "Updated Rose")
+    // Create OwnedPlant with different ID than the parameter
+    val newOwnedPlant = OwnedPlant("different-id", updatedPlant, timestamp)
+
+    try {
+      repository.editOwnedPlant("rose-1", newOwnedPlant)
+      fail("Expected IllegalArgumentException to be thrown")
+    } catch (exception: IllegalArgumentException) {
+      assertTrue(exception.message?.contains("ID mismatch") == true)
+      assertTrue(exception.message?.contains("rose-1") == true)
+      assertTrue(exception.message?.contains("different-id") == true)
+    }
   }
 }
