@@ -1,11 +1,11 @@
 package com.android.mygarden.model.plant
 
 import java.sql.Timestamp
+import kotlin.collections.get
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import kotlin.collections.get
 
 class PlantsRepositoryLocalTest {
 
@@ -149,165 +149,160 @@ class PlantsRepositoryLocalTest {
     assertEquals(10, ownedPlant.plant.wateringFrequency)
     assertEquals(Timestamp(123456789L), ownedPlant.lastWatered)
   }
-    @Test
-    fun getAllOwnedPlants_returnsEmptyListWhenNoPlants() = runTest {
-        val ownedPlants = repository.getAllOwnedPlants()
 
-        assertTrue(ownedPlants.isEmpty())
+  @Test
+  fun getAllOwnedPlants_returnsEmptyListWhenNoPlants() = runTest {
+    val ownedPlants = repository.getAllOwnedPlants()
+
+    assertTrue(ownedPlants.isEmpty())
+  }
+
+  @Test
+  fun getAllOwnedPlants_returnsCorrectPlantsAfterSaving() = runTest {
+    val plant1 = createTestPlant(name = "Rose", latinName = "Rosa")
+    val plant2 = createTestPlant(name = "Tulip", latinName = "Tulipa")
+    val timestamp = Timestamp(System.currentTimeMillis())
+
+    repository.saveToGarden(plant1, "rose-1", timestamp)
+    repository.saveToGarden(plant2, "tulip-1", timestamp)
+
+    val ownedPlants = repository.getAllOwnedPlants()
+
+    assertEquals(2, ownedPlants.size)
+    assertEquals("rose-1", ownedPlants[0].id)
+    assertEquals("tulip-1", ownedPlants[1].id)
+    assertEquals(plant1, ownedPlants[0].plant)
+    assertEquals(plant2, ownedPlants[1].plant)
+  }
+
+  @Test
+  fun getAllOwnedPlants_returnsCorrectOrderOfInsertion() = runTest {
+    val plant1 = createTestPlant(name = "First")
+    val plant2 = createTestPlant(name = "Second")
+    val plant3 = createTestPlant(name = "Third")
+    val timestamp = Timestamp(System.currentTimeMillis())
+
+    repository.saveToGarden(plant1, "id-1", timestamp)
+    repository.saveToGarden(plant2, "id-2", timestamp)
+    repository.saveToGarden(plant3, "id-3", timestamp)
+
+    val ownedPlants = repository.getAllOwnedPlants()
+
+    assertEquals(3, ownedPlants.size)
+    assertEquals("First", ownedPlants[0].plant.name)
+    assertEquals("Second", ownedPlants[1].plant.name)
+    assertEquals("Third", ownedPlants[2].plant.name)
+  }
+
+  @Test
+  fun getAllOwnedPlants_updatesAfterDeletion() = runTest {
+    val plant1 = createTestPlant(name = "Rose")
+    val plant2 = createTestPlant(name = "Tulip")
+    val timestamp = Timestamp(System.currentTimeMillis())
+
+    repository.saveToGarden(plant1, "rose-1", timestamp)
+    repository.saveToGarden(plant2, "tulip-1", timestamp)
+    repository.deleteFromGarden("rose-1")
+
+    val ownedPlants = repository.getAllOwnedPlants()
+
+    assertEquals(1, ownedPlants.size)
+    assertEquals("tulip-1", ownedPlants[0].id)
+    assertEquals("Tulip", ownedPlants[0].plant.name)
+  }
+
+  @Test
+  fun editOwnedPlant_updatesExistingPlant() = runTest {
+    val originalPlant = createTestPlant(name = "Rose", latinName = "Rosa")
+    val originalTimestamp = Timestamp(123456789L)
+    val newTimestamp = Timestamp(987654321L)
+
+    repository.saveToGarden(originalPlant, "rose-1", originalTimestamp)
+
+    val updatedPlant = createTestPlant(name = "Updated Rose", latinName = "Rosa Updated")
+    val newOwnedPlant = OwnedPlant("rose-1", updatedPlant, newTimestamp)
+
+    repository.editOwnedPlant("rose-1", newOwnedPlant)
+
+    val retrievedPlant = repository.getOwnedPlant("rose-1")
+    assertEquals("Updated Rose", retrievedPlant.plant.name)
+    assertEquals("Rosa Updated", retrievedPlant.plant.latinName)
+    assertEquals(newTimestamp, retrievedPlant.lastWatered)
+  }
+
+  @Test
+  fun editOwnedPlant_throwsExceptionWhenIdNotFound() = runTest {
+    val plant = createTestPlant()
+    val ownedPlant = OwnedPlant("non-existent", plant, Timestamp(System.currentTimeMillis()))
+
+    try {
+      repository.editOwnedPlant("non-existent", ownedPlant)
+      fail("Expected IllegalArgumentException to be thrown")
+    } catch (exception: IllegalArgumentException) {
+      assertTrue(exception.message?.contains("OwnedPlant with id non-existent not found") == true)
     }
+  }
 
-    @Test
-    fun getAllOwnedPlants_returnsCorrectPlantsAfterSaving() = runTest {
-        val plant1 = createTestPlant(name = "Rose", latinName = "Rosa")
-        val plant2 = createTestPlant(name = "Tulip", latinName = "Tulipa")
-        val timestamp = Timestamp(System.currentTimeMillis())
+  @Test
+  fun editOwnedPlant_doesNotAffectOtherPlants() = runTest {
+    val plant1 = createTestPlant(name = "Rose")
+    val plant2 = createTestPlant(name = "Tulip")
+    val timestamp = Timestamp(System.currentTimeMillis())
 
-        repository.saveToGarden(plant1, "rose-1", timestamp)
-        repository.saveToGarden(plant2, "tulip-1", timestamp)
+    repository.saveToGarden(plant1, "rose-1", timestamp)
+    repository.saveToGarden(plant2, "tulip-1", timestamp)
 
-        val ownedPlants = repository.getAllOwnedPlants()
+    val updatedPlant = createTestPlant(name = "Updated Rose")
+    val newOwnedPlant = OwnedPlant("rose-1", updatedPlant, Timestamp(999999999L))
 
-        assertEquals(2, ownedPlants.size)
-        assertEquals("rose-1", ownedPlants[0].id)
-        assertEquals("tulip-1", ownedPlants[1].id)
-        assertEquals(plant1, ownedPlants[0].plant)
-        assertEquals(plant2, ownedPlants[1].plant)
-    }
+    repository.editOwnedPlant("rose-1", newOwnedPlant)
 
-    @Test
-    fun getAllOwnedPlants_returnsCorrectOrderOfInsertion() = runTest {
-        val plant1 = createTestPlant(name = "First")
-        val plant2 = createTestPlant(name = "Second")
-        val plant3 = createTestPlant(name = "Third")
-        val timestamp = Timestamp(System.currentTimeMillis())
+    // Verify rose was updated
+    val updatedRose = repository.getOwnedPlant("rose-1")
+    assertEquals("Updated Rose", updatedRose.plant.name)
+    assertEquals(Timestamp(999999999L), updatedRose.lastWatered)
 
-        repository.saveToGarden(plant1, "id-1", timestamp)
-        repository.saveToGarden(plant2, "id-2", timestamp)
-        repository.saveToGarden(plant3, "id-3", timestamp)
+    // Verify tulip was not affected
+    val unchangedTulip = repository.getOwnedPlant("tulip-1")
+    assertEquals("Tulip", unchangedTulip.plant.name)
+    assertEquals(timestamp, unchangedTulip.lastWatered)
+  }
 
-        val ownedPlants = repository.getAllOwnedPlants()
+  @Test
+  fun editOwnedPlant_canUpdateOnlyLastWatered() = runTest {
+    val originalPlant = createTestPlant(name = "Cactus", latinName = "Cactaceae")
+    val originalTimestamp = Timestamp(123456789L)
+    val newTimestamp = Timestamp(987654321L)
 
-        assertEquals(3, ownedPlants.size)
-        assertEquals("First", ownedPlants[0].plant.name)
-        assertEquals("Second", ownedPlants[1].plant.name)
-        assertEquals("Third", ownedPlants[2].plant.name)
-    }
+    repository.saveToGarden(originalPlant, "cactus-1", originalTimestamp)
 
-    @Test
-    fun getAllOwnedPlants_updatesAfterDeletion() = runTest {
-        val plant1 = createTestPlant(name = "Rose")
-        val plant2 = createTestPlant(name = "Tulip")
-        val timestamp = Timestamp(System.currentTimeMillis())
+    // Update only the lastWatered timestamp, keep same plant data
+    val updatedOwnedPlant = OwnedPlant("cactus-1", originalPlant, newTimestamp)
+    repository.editOwnedPlant("cactus-1", updatedOwnedPlant)
 
-        repository.saveToGarden(plant1, "rose-1", timestamp)
-        repository.saveToGarden(plant2, "tulip-1", timestamp)
-        repository.deleteFromGarden("rose-1")
+    val retrievedPlant = repository.getOwnedPlant("cactus-1")
+    assertEquals("Cactus", retrievedPlant.plant.name)
+    assertEquals("Cactaceae", retrievedPlant.plant.latinName)
+    assertEquals(newTimestamp, retrievedPlant.lastWatered)
+  }
 
-        val ownedPlants = repository.getAllOwnedPlants()
+  @Test
+  fun editOwnedPlant_canUpdateCompletelyDifferentPlant() = runTest {
+    val originalPlant =
+        createTestPlant(name = "Rose", latinName = "Rosa", healthStatus = PlantHealthStatus.HEALTHY)
+    val completelDifferentPlant =
+        createTestPlant(
+            name = "Cactus", latinName = "Cactaceae", healthStatus = PlantHealthStatus.NEEDS_WATER)
+    val timestamp = Timestamp(System.currentTimeMillis())
 
-        assertEquals(1, ownedPlants.size)
-        assertEquals("tulip-1", ownedPlants[0].id)
-        assertEquals("Tulip", ownedPlants[0].plant.name)
-    }
+    repository.saveToGarden(originalPlant, "plant-1", timestamp)
 
-    @Test
-    fun editOwnedPlant_updatesExistingPlant() = runTest {
-        val originalPlant = createTestPlant(name = "Rose", latinName = "Rosa")
-        val originalTimestamp = Timestamp(123456789L)
-        val newTimestamp = Timestamp(987654321L)
+    val newOwnedPlant = OwnedPlant("plant-1", completelDifferentPlant, timestamp)
+    repository.editOwnedPlant("plant-1", newOwnedPlant)
 
-        repository.saveToGarden(originalPlant, "rose-1", originalTimestamp)
-
-        val updatedPlant = createTestPlant(name = "Updated Rose", latinName = "Rosa Updated")
-        val newOwnedPlant = OwnedPlant("rose-1", updatedPlant, newTimestamp)
-
-        repository.editOwnedPlant("rose-1", newOwnedPlant)
-
-        val retrievedPlant = repository.getOwnedPlant("rose-1")
-        assertEquals("Updated Rose", retrievedPlant.plant.name)
-        assertEquals("Rosa Updated", retrievedPlant.plant.latinName)
-        assertEquals(newTimestamp, retrievedPlant.lastWatered)
-    }
-
-    @Test
-    fun editOwnedPlant_throwsExceptionWhenIdNotFound() = runTest {
-        val plant = createTestPlant()
-        val ownedPlant = OwnedPlant("non-existent", plant, Timestamp(System.currentTimeMillis()))
-
-        try {
-            repository.editOwnedPlant("non-existent", ownedPlant)
-            fail("Expected IllegalArgumentException to be thrown")
-        } catch (exception: IllegalArgumentException) {
-            assertTrue(exception.message?.contains("OwnedPlant with id non-existent not found") == true)
-        }
-    }
-
-    @Test
-    fun editOwnedPlant_doesNotAffectOtherPlants() = runTest {
-        val plant1 = createTestPlant(name = "Rose")
-        val plant2 = createTestPlant(name = "Tulip")
-        val timestamp = Timestamp(System.currentTimeMillis())
-
-        repository.saveToGarden(plant1, "rose-1", timestamp)
-        repository.saveToGarden(plant2, "tulip-1", timestamp)
-
-        val updatedPlant = createTestPlant(name = "Updated Rose")
-        val newOwnedPlant = OwnedPlant("rose-1", updatedPlant, Timestamp(999999999L))
-
-        repository.editOwnedPlant("rose-1", newOwnedPlant)
-
-        // Verify rose was updated
-        val updatedRose = repository.getOwnedPlant("rose-1")
-        assertEquals("Updated Rose", updatedRose.plant.name)
-        assertEquals(Timestamp(999999999L), updatedRose.lastWatered)
-
-        // Verify tulip was not affected
-        val unchangedTulip = repository.getOwnedPlant("tulip-1")
-        assertEquals("Tulip", unchangedTulip.plant.name)
-        assertEquals(timestamp, unchangedTulip.lastWatered)
-    }
-
-    @Test
-    fun editOwnedPlant_canUpdateOnlyLastWatered() = runTest {
-        val originalPlant = createTestPlant(name = "Cactus", latinName = "Cactaceae")
-        val originalTimestamp = Timestamp(123456789L)
-        val newTimestamp = Timestamp(987654321L)
-
-        repository.saveToGarden(originalPlant, "cactus-1", originalTimestamp)
-
-        // Update only the lastWatered timestamp, keep same plant data
-        val updatedOwnedPlant = OwnedPlant("cactus-1", originalPlant, newTimestamp)
-        repository.editOwnedPlant("cactus-1", updatedOwnedPlant)
-
-        val retrievedPlant = repository.getOwnedPlant("cactus-1")
-        assertEquals("Cactus", retrievedPlant.plant.name)
-        assertEquals("Cactaceae", retrievedPlant.plant.latinName)
-        assertEquals(newTimestamp, retrievedPlant.lastWatered)
-    }
-
-    @Test
-    fun editOwnedPlant_canUpdateCompletelyDifferentPlant() = runTest {
-        val originalPlant = createTestPlant(
-            name = "Rose",
-            latinName = "Rosa",
-            healthStatus = PlantHealthStatus.HEALTHY
-        )
-        val completelDifferentPlant = createTestPlant(
-            name = "Cactus",
-            latinName = "Cactaceae",
-            healthStatus = PlantHealthStatus.NEEDS_WATER
-        )
-        val timestamp = Timestamp(System.currentTimeMillis())
-
-        repository.saveToGarden(originalPlant, "plant-1", timestamp)
-
-        val newOwnedPlant = OwnedPlant("plant-1", completelDifferentPlant, timestamp)
-        repository.editOwnedPlant("plant-1", newOwnedPlant)
-
-        val retrievedPlant = repository.getOwnedPlant("plant-1")
-        assertEquals("Cactus", retrievedPlant.plant.name)
-        assertEquals("Cactaceae", retrievedPlant.plant.latinName)
-        assertEquals(PlantHealthStatus.NEEDS_WATER, retrievedPlant.plant.healthStatus)
-    }
+    val retrievedPlant = repository.getOwnedPlant("plant-1")
+    assertEquals("Cactus", retrievedPlant.plant.name)
+    assertEquals("Cactaceae", retrievedPlant.plant.latinName)
+    assertEquals(PlantHealthStatus.NEEDS_WATER, retrievedPlant.plant.healthStatus)
+  }
 }
-

@@ -29,7 +29,7 @@ class PlantsRepositoryLocal : PlantsRepository {
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
     return ownedPlants.find { it.id == id }
-      ?: throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
+        ?: throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
   }
 
   override suspend fun deleteFromGarden(id: String) {
@@ -48,6 +48,5 @@ class PlantsRepositoryLocal : PlantsRepository {
     } else {
       throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
     }
-
   }
 }
