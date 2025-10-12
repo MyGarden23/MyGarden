@@ -1,7 +1,6 @@
 package com.android.mygarden.ui.editPlant
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -17,14 +16,16 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.mygarden.ui.theme.MyGardenTheme
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.android.mygarden.R
+
 
 /**
  * Test tags to mirror your existing pattern.
@@ -40,10 +41,7 @@ object EditPlantScreenTestTags {
     const val PLANT_DELETE = "plantDelete"
 }
 
-/**
- * Route-level Composable, mirroring EditToDoScreen’s structure.
- * Assumes EditPlantViewModel exposes: uiState, loadPlant(), setters, editPlant(), deletePlant(), clearErrorMsg()
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPlantScreen(
@@ -120,8 +118,11 @@ fun EditPlantScreen(
 
             // Plant image
             if (plantUIState.image != null) {
-                Image(
-                    bitmap = plantUIState.image!!,
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(plantUIState.image)
+                        .error(R.drawable.error_image_download)
+                        .build(),
                     contentDescription = "Plant image",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -237,7 +238,7 @@ fun EditPlantScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // Save (enabled only if lastWatered present and basic fields not empty)
+            // Save
             val isSaveEnabled = plantUIState.description.isNotBlank()
                     && plantUIState.lastWatered != null
 
@@ -250,7 +251,7 @@ fun EditPlantScreen(
                         onSaved()
                     }
                 },
-                enabled = true,
+                enabled = isSaveEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
@@ -259,7 +260,7 @@ fun EditPlantScreen(
                 Text("Save")
             }
 
-            // Delete (accented with error color icon/text)
+            // Delete
             TextButton(
                 onClick = {
                     editPlantViewModel.deletePlant(ownedPlantId)
@@ -277,9 +278,3 @@ fun EditPlantScreen(
     }
 }
 
-
-@Preview
-@Composable
-fun Sr(){
-    MyGardenTheme { EditPlantScreen("d") }
-}
