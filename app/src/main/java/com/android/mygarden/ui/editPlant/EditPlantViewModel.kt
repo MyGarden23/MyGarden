@@ -1,7 +1,6 @@
 package com.android.mygarden.ui.editPlant
 
 import android.util.Log
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.plant.OwnedPlant
@@ -20,7 +19,7 @@ data class EditPlantUIState(
     val description: String = "",
     val errorMsg: String? = null,
     val lastWatered: Timestamp? = null,
-    val image: ImageBitmap? = null
+    val image: String? = null
 )
 
 
