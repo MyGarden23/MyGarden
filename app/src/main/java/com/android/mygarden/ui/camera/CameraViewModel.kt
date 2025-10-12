@@ -11,6 +11,8 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.view.LifecycleCameraController
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
+import java.io.File
+import java.io.FileOutputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,9 +51,18 @@ class CameraViewModel : ViewModel() {
           override fun onCaptureSuccess(image: ImageProxy) {
             super.onCaptureSuccess(image)
             try {
-              onPictureTaken(image.toBitmap())
+              val bitmap = image.toBitmap()
               image.close()
-            } catch (e: IllegalArgumentException) {
+
+              // Save the image locally
+              val file = saveBitmapToFile(context, bitmap, "plant_${System.currentTimeMillis()}")
+
+              /*TODO : Check if still useful to do that*/
+              onPictureTaken(bitmap)
+
+              /*TODO : Check if we keep that*/
+              Log.d("CameraViewModel", "Image saved at: ${file.absolutePath}")
+            } catch (e: Exception) {
               toastPictureFail(context)
               Log.e(CAMERA_ERROR_TAG, "ImageProxy could not be converted to a Bitmap", e)
             }
@@ -86,5 +97,11 @@ class CameraViewModel : ViewModel() {
         } else {
           CameraSelector.DEFAULT_BACK_CAMERA
         }
+  }
+
+  private fun saveBitmapToFile(context: Context, bitmap: Bitmap, fileName: String): File {
+    val file = File(context.filesDir, "$fileName.jpg")
+    FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out) }
+    return file
   }
 }
