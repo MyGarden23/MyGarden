@@ -68,10 +68,10 @@ fun NewProfileScreen(
 
   // Logique de filtrage
   val filteredCountries =
-      if (countryTextFieldValue.isEmpty()) {
+      if (uiState.country.isBlank()) {
         Countries.ALL
       } else {
-        Countries.ALL.filter { it.contains(countryTextFieldValue, ignoreCase = true) }
+        Countries.ALL.filter { it.contains(uiState.country, ignoreCase = true) }
       }
 
   Scaffold(
@@ -198,10 +198,9 @@ fun NewProfileScreen(
                     // Country (searchable dropdown)
                     Box(modifier = Modifier.fillMaxWidth()) {
                       OutlinedTextField(
-                          value = countryTextFieldValue,
+                          value = uiState.country,
                           onValueChange = { newText ->
-                            countryTextFieldValue = newText
-                            newProfileViewModel.setCountry(countryTextFieldValue)
+                            newProfileViewModel.setCountry(newText)
                             // Ouvrir le dropdown quand on tape du texte
                             if (newText.isNotEmpty()) {
                               isCountryExpanded = true
@@ -248,7 +247,6 @@ fun NewProfileScreen(
                                           Modifier.fillMaxWidth()
                                               .clickable {
                                                 newProfileViewModel.setCountry(country)
-                                                countryTextFieldValue = country
                                                 isCountryExpanded = false
                                               }
                                               .padding(horizontal = 16.dp, vertical = 12.dp))
@@ -287,8 +285,6 @@ fun NewProfileScreen(
         }
       }
 }
-
-// validate fields : first name, last name, country
 
 @Preview
 @Composable
