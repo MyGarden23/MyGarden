@@ -1,6 +1,5 @@
-package com.android.mygarden
+package com.android.mygarden.ui.navigation
 
-import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.credentials.CredentialManager
 import androidx.navigation.NavHostController
@@ -10,28 +9,29 @@ import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
-import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     startDestination: String,
-    onSignedIn: () -> Unit,
-    onOpenPlant: (Bitmap) -> Unit,
-    onBack: () -> Unit,
     credentialManagerProvider: () -> CredentialManager = {
       CredentialManager.create(navController.context)
     }
 ) {
   NavHost(navController = navController, startDestination = startDestination) {
+    val navigationActions = NavigationActions(navController)
     // Auth
     composable(Screen.Auth.route) {
-      SignInScreen(credentialManager = credentialManagerProvider(), onSignedIn = onSignedIn)
+      SignInScreen(
+          credentialManager = credentialManagerProvider(),
+          onSignedIn = { navigationActions.navTo(Screen.Camera) })
     }
 
     // Top-level Camera
-    composable(Screen.Camera.route) { CameraScreen(onPictureTaken = onOpenPlant) }
+    composable(Screen.Camera.route) {
+      CameraScreen(onPictureTaken = { navigationActions.navTo(Screen.PlantView) })
+    }
 
     // Optional top-level Profile
     composable(Screen.Profile.route) {
@@ -50,7 +50,7 @@ fun AppNavHost(
                   healthStatus = PlantHealthStatus.HEALTHY,
                   healthStatusDescription = PlantHealthStatus.HEALTHY.description,
                   wateringFrequency = 2),
-          onBackPressed = onBack)
+          onBackPressed = { navigationActions.navBack() })
     }
   }
 }

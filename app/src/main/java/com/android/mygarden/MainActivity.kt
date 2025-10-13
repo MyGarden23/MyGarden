@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.BottomBar
 import com.android.mygarden.ui.navigation.NavigationActions
 import com.android.mygarden.ui.navigation.Page
@@ -58,9 +59,7 @@ fun MyGardenApp() {
           AppNavHost(
               navController = navController,
               startDestination = startDestination,
-              onSignedIn = { actions.navToTopLevel(Screen.Camera) },
-              onOpenPlant = { actions.navTo(Screen.PlantView) },
-              onBack = actions::navBack)
+          )
         }
       }
 }
