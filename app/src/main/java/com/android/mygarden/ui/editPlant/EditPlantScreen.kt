@@ -36,6 +36,7 @@ object EditPlantScreenTestTags {
   const val ERROR_MESSAGE = "errorMessage"
   const val PLANT_SAVE = "plantSave"
   const val PLANT_DELETE = "plantDelete"
+    const val DATE_PICKER_BUTTON = "datePicker"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -199,7 +200,8 @@ fun EditPlantScreen(
                           onClick = {
                             touchedLastWatered = true
                             showDatePicker = true
-                          }) {
+                          },
+                          modifier = Modifier.testTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON)) {
                             Icon(Icons.Filled.CalendarMonth, contentDescription = "Pick date")
                           }
                     },
