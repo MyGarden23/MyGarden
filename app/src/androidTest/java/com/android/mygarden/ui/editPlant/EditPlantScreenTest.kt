@@ -136,6 +136,8 @@ class EditPlantScreenTest {
     // Focus into description -> mark as touched
     composeRule.onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION).performClick()
 
+    composeRule.waitForIdle()
+
     // Now an error helper text should appear
     composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE).assertCountEquals(1)
   }
@@ -150,6 +152,8 @@ class EditPlantScreenTest {
 
     // User presses the calendar button (marks date as 'touched')
     composeRule.onNodeWithContentDescription("Pick date").performClick()
+
+    composeRule.waitForIdle()
 
     // Now an error should be visible for the date field
     composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE).assertCountEquals(1)
