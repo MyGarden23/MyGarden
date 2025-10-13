@@ -56,23 +56,6 @@ import com.android.mygarden.model.Countries
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.ui.theme.MyGardenTheme
 
-/** Test tags for NewProfileScreen components to enable UI testing */
-object NewProfileScreenTestTags {
-  const val SCREEN = "new_profile_screen"
-  const val TITLE = "profile_title"
-  const val AVATAR = "profile_avatar"
-  const val FIRST_NAME_FIELD = "first_name_field"
-  const val LAST_NAME_FIELD = "last_name_field"
-  const val EXPERIENCE_FIELD = "experience_field"
-  const val EXPERIENCE_DROPDOWN = "experience_dropdown"
-  const val FAVORITE_PLANT_FIELD = "favorite_plant_field"
-  const val COUNTRY_FIELD = "country_field"
-  const val COUNTRY_DROPDOWN = "country_dropdown"
-  const val COUNTRY_DROPDOWN_ICON = "country_dropdown_icon"
-  const val COUNTRY_SEARCH_RESULTS = "country_search_results"
-  const val REGISTER_BUTTON = "register_button"
-}
-
 /**
  * Screen for creating a new user profile in the MyGarden app.
  *
@@ -226,14 +209,18 @@ fun NewProfileScreen(
                               expanded = isExperienceExpanded,
                               onDismissRequest = { isExperienceExpanded = false },
                               modifier =
-                                  Modifier.testTag(NewProfileScreenTestTags.EXPERIENCE_DROPDOWN)) {
+                                  Modifier.testTag(
+                                      NewProfileScreenTestTags.EXPERIENCE_DROPDOWN_MENU)) {
                                 GardeningSkill.values().forEach { skill ->
                                   DropdownMenuItem(
                                       text = { Text(skill.name) },
                                       onClick = {
                                         newProfileViewModel.setGardeningSkill(skill)
                                         isExperienceExpanded = false
-                                      })
+                                      },
+                                      modifier =
+                                          Modifier.testTag(
+                                              NewProfileScreenTestTags.getExperienceItemTag(skill)))
                                 }
                               }
                         }
@@ -290,12 +277,16 @@ fun NewProfileScreen(
                               LazyColumn(
                                   modifier =
                                       Modifier.testTag(
-                                          NewProfileScreenTestTags.COUNTRY_SEARCH_RESULTS)) {
+                                          NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)) {
                                     // Display number of countries found
                                     item {
                                       Text(
                                           text = "${filteredCountries.size} countries found",
-                                          modifier = Modifier.padding(16.dp),
+                                          modifier =
+                                              Modifier.padding(16.dp)
+                                                  .testTag(
+                                                      NewProfileScreenTestTags
+                                                          .COUNTRY_RESULTS_COUNT),
                                           fontSize = 12.sp,
                                           fontStyle = FontStyle.Italic,
                                           color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -311,7 +302,10 @@ fun NewProfileScreen(
                                                     newProfileViewModel.setCountry(country)
                                                     isCountryExpanded = false
                                                   }
-                                                  .padding(horizontal = 16.dp, vertical = 12.dp),
+                                                  .padding(horizontal = 16.dp, vertical = 12.dp)
+                                                  .testTag(
+                                                      NewProfileScreenTestTags.getCountryItemTag(
+                                                          country)),
                                           color = MaterialTheme.colorScheme.onSurface)
                                     }
 
@@ -322,7 +316,11 @@ fun NewProfileScreen(
                                         Text(
                                             text =
                                                 "... and ${filteredCountries.size - 15} more countries",
-                                            modifier = Modifier.padding(16.dp),
+                                            modifier =
+                                                Modifier.padding(16.dp)
+                                                    .testTag(
+                                                        NewProfileScreenTestTags
+                                                            .COUNTRY_MORE_RESULTS),
                                             fontSize = 12.sp,
                                             fontStyle = FontStyle.Italic,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -334,7 +332,11 @@ fun NewProfileScreen(
                                       item {
                                         Text(
                                             text = "No countries found",
-                                            modifier = Modifier.padding(16.dp),
+                                            modifier =
+                                                Modifier.padding(16.dp)
+                                                    .testTag(
+                                                        NewProfileScreenTestTags
+                                                            .COUNTRY_NO_RESULTS),
                                             fontSize = 14.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                                       }
