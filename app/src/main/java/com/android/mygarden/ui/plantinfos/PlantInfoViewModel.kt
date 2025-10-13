@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.plantinfos
 
-import android.media.Image
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.plant.Plant
@@ -22,7 +21,7 @@ enum class SelectedPlantInfoTab(val text: String) {
 /** UI state for the plant info screen. Contains all the plant information to be displayed. */
 data class PlantInfoUIState(
     val name: String = "",
-    val image: Image? = null,
+    val image: String? = null,
     val latinName: String = "",
     val description: String = "",
     val healthStatus: PlantHealthStatus = PlantHealthStatus.UNKNOWN,
