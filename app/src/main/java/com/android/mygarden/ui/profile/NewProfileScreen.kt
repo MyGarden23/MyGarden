@@ -28,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -85,24 +86,33 @@ fun NewProfileScreen(
               }
             },
             modifier =
-                Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 24.dp, vertical = 8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8BC34A)),
-            shape = RoundedCornerShape(25.dp)) {
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            shape = RoundedCornerShape(25.dp)
+        ) {
               Text(
                   text = "Register Profile",
-                  color = Color.White,
+                  color = MaterialTheme.colorScheme.onPrimary,
                   fontSize = 16.sp,
                   fontWeight = FontWeight.Medium)
             }
       }) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.SpaceBetween // Distribution équitable
             ) {
               // Section supérieure - Titre + Avatar
               Row(modifier = Modifier.weight(0.2f)) {
                 Column(
-                    modifier = Modifier.weight(0.3f).fillMaxHeight(), // 30% de l'écran
+                    modifier = Modifier
+                        .weight(0.3f)
+                        .fillMaxHeight(), // 30% de l'écran
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceEvenly) {
                       // Titre
@@ -110,21 +120,23 @@ fun NewProfileScreen(
                           text = "New Profile",
                           fontSize = 20.sp,
                           fontWeight = FontWeight.Medium,
-                          color = Color.Gray)
+                          color = MaterialTheme.colorScheme.onSurfaceVariant
+                      )
 
                       // Avatar
                       Box(
                           modifier =
-                              Modifier.fillMaxWidth(0.25f) // 25% de la largeur de l'écran
+                              Modifier
+                                  .fillMaxWidth(0.25f) // 25% de la largeur de l'écran
                                   .aspectRatio(1f) // Garde un ratio carré
                                   .clip(CircleShape)
-                                  .background(Color.Gray),
+                                  .background(MaterialTheme.colorScheme.surfaceVariant),
                           contentAlignment = Alignment.Center) {
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = "Profile Avatar",
                                 modifier = Modifier.fillMaxSize(0.5f), // 50% de la taille du cercle
-                                tint = Color.White)
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant)
                           }
                     }
               }
@@ -210,7 +222,9 @@ fun NewProfileScreen(
                           },
                           label = { Text("Country *") },
                           placeholder = { Text("Search for your country") },
-                          modifier = Modifier.fillMaxWidth().focusRequester(countryFocusRequester),
+                          modifier = Modifier
+                              .fillMaxWidth()
+                              .focusRequester(countryFocusRequester),
                           isError = uiState.countryIsError(),
                           singleLine = true,
                           trailingIcon = {
@@ -227,7 +241,11 @@ fun NewProfileScreen(
                         Card(
                             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                             modifier =
-                                Modifier.fillMaxWidth().height(250.dp).offset(y = (-266).dp)) {
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(250.dp)
+                                    .offset(y = (-266).dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                               LazyColumn {
                                 // Afficher le nombre de pays trouvés
                                 item {
@@ -236,7 +254,8 @@ fun NewProfileScreen(
                                       modifier = Modifier.padding(16.dp),
                                       fontSize = 12.sp,
                                       fontStyle = FontStyle.Italic,
-                                      color = Color.Gray)
+                                      color = MaterialTheme.colorScheme.onSurfaceVariant
+                                  )
                                 }
 
                                 // Afficher les pays (jusqu'à 15)
@@ -244,12 +263,14 @@ fun NewProfileScreen(
                                   Text(
                                       text = country,
                                       modifier =
-                                          Modifier.fillMaxWidth()
+                                          Modifier
+                                              .fillMaxWidth()
                                               .clickable {
-                                                newProfileViewModel.setCountry(country)
-                                                isCountryExpanded = false
+                                                  newProfileViewModel.setCountry(country)
+                                                  isCountryExpanded = false
                                               }
-                                              .padding(horizontal = 16.dp, vertical = 12.dp))
+                                              .padding(horizontal = 16.dp, vertical = 12.dp),
+                                      color = MaterialTheme.colorScheme.onSurface)
                                 }
 
                                 // Si il y a plus de 15 résultats, afficher un indicateur
@@ -260,7 +281,7 @@ fun NewProfileScreen(
                                         modifier = Modifier.padding(16.dp),
                                         fontSize = 12.sp,
                                         fontStyle = FontStyle.Italic,
-                                        color = Color.Gray)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                                   }
                                 }
 
@@ -271,7 +292,8 @@ fun NewProfileScreen(
                                         text = "Aucun pays trouvé",
                                         modifier = Modifier.padding(16.dp),
                                         fontSize = 14.sp,
-                                        color = Color.Gray)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                   }
                                 }
                               }
