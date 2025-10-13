@@ -27,6 +27,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -43,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,6 +54,24 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.model.Countries
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.ui.theme.MyGardenTheme
+
+/** Test tags for NewProfileScreen components to enable UI testing */
+object NewProfileScreenTestTags {
+  const val SCREEN = "new_profile_screen"
+  const val TITLE = "profile_title"
+  const val AVATAR = "profile_avatar"
+  const val FIRST_NAME_FIELD = "first_name_field"
+  const val LAST_NAME_FIELD = "last_name_field"
+  const val EXPERIENCE_FIELD = "experience_field"
+  const val EXPERIENCE_DROPDOWN = "experience_dropdown"
+  const val FAVORITE_PLANT_FIELD = "favorite_plant_field"
+  const val COUNTRY_FIELD = "country_field"
+  const val COUNTRY_DROPDOWN = "country_dropdown"
+  const val COUNTRY_DROPDOWN_ICON = "country_dropdown_icon"
+  const val COUNTRY_SEARCH_RESULTS = "country_search_results"
+  const val REGISTER_BUTTON = "register_button"
+}
 
 /**
  * Screen for creating a new user profile in the MyGarden app.
@@ -68,6 +89,7 @@ import com.android.mygarden.model.profile.GardeningSkill
  * @param onRegisterPressed Callback function invoked when the registration is successful
  */
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun NewProfileScreen(
     newProfileViewModel: NewProfileViewModel = viewModel(),
     onRegisterPressed: () -> Unit
@@ -91,6 +113,7 @@ fun NewProfileScreen(
       }
 
   Scaffold(
+      modifier = Modifier.testTag(NewProfileScreenTestTags.SCREEN),
       bottomBar = {
         // Fixed bottom button for profile registration
         Button(
@@ -101,7 +124,10 @@ fun NewProfileScreen(
               }
             },
             modifier =
-                Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 24.dp, vertical = 8.dp),
+                Modifier.fillMaxWidth()
+                    .height(56.dp)
+                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                    .testTag(NewProfileScreenTestTags.REGISTER_BUTTON),
             colors =
                 ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(25.dp)) {
@@ -128,7 +154,8 @@ fun NewProfileScreen(
                           text = "New Profile",
                           fontSize = 20.sp,
                           fontWeight = FontWeight.Medium,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant)
+                          color = MaterialTheme.colorScheme.onSurfaceVariant,
+                          modifier = Modifier.testTag(NewProfileScreenTestTags.TITLE))
 
                       // User avatar placeholder with person icon
                       Box(
@@ -136,7 +163,8 @@ fun NewProfileScreen(
                               Modifier.fillMaxWidth(0.25f) // 25% of screen width
                                   .aspectRatio(1f) // Maintain square aspect ratio
                                   .clip(CircleShape)
-                                  .background(MaterialTheme.colorScheme.surfaceVariant),
+                                  .background(MaterialTheme.colorScheme.surfaceVariant)
+                                  .testTag(NewProfileScreenTestTags.AVATAR),
                           contentAlignment = Alignment.Center) {
                             Icon(
                                 Icons.Default.Person,
@@ -157,7 +185,9 @@ fun NewProfileScreen(
                         onValueChange = { newProfileViewModel.setFirstName(it) },
                         label = { Text("First Name *") },
                         placeholder = { Text("Enter your first name") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .testTag(NewProfileScreenTestTags.FIRST_NAME_FIELD),
                         isError = uiState.firstNameIsError(),
                         singleLine = true)
 
@@ -167,43 +197,46 @@ fun NewProfileScreen(
                         onValueChange = { newProfileViewModel.setLastName(it) },
                         label = { Text("Last Name *") },
                         placeholder = { Text("Enter your last name") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .testTag(NewProfileScreenTestTags.LAST_NAME_FIELD),
                         isError = uiState.lastNameIsError(),
                         singleLine = true)
 
                     // Gardening Experience dropdown - Read-only field with dropdown menu
-                    Box {
-                      OutlinedTextField(
-                          value = uiState.gardeningSkill?.name ?: "",
-                          onValueChange = {},
-                          readOnly = true,
-                          label = { Text("Experience with Plants") },
-                          placeholder = { Text("Select your experience level") },
-                          modifier = Modifier.fillMaxWidth(),
-                          trailingIcon = {
-                            Icon(
-                                Icons.Default.ArrowDropDown,
-                                contentDescription = null,
-                                modifier =
-                                    Modifier.clickable {
-                                      isExperienceExpanded = !isExperienceExpanded
-                                    })
-                          })
+                    ExposedDropdownMenuBox(
+                        expanded = isExperienceExpanded,
+                        onExpandedChange = { isExperienceExpanded = it },
+                        modifier = Modifier.testTag(NewProfileScreenTestTags.EXPERIENCE_DROPDOWN)) {
+                          OutlinedTextField(
+                              value = uiState.gardeningSkill?.name ?: "",
+                              onValueChange = {},
+                              readOnly = true,
+                              label = { Text("Experience with Plants") },
+                              placeholder = { Text("Select your experience level") },
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .menuAnchor()
+                                      .testTag(NewProfileScreenTestTags.EXPERIENCE_FIELD),
+                              trailingIcon = {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                              })
 
-                      // Dropdown menu for gardening skill selection
-                      DropdownMenu(
-                          expanded = isExperienceExpanded,
-                          onDismissRequest = { isExperienceExpanded = false }) {
-                            GardeningSkill.values().forEach { skill ->
-                              DropdownMenuItem(
-                                  text = { Text(skill.name) },
-                                  onClick = {
-                                    newProfileViewModel.setGardeningSkill(skill)
-                                    isExperienceExpanded = false
-                                  })
-                            }
-                          }
-                    }
+                          DropdownMenu(
+                              expanded = isExperienceExpanded,
+                              onDismissRequest = { isExperienceExpanded = false },
+                              modifier =
+                                  Modifier.testTag(NewProfileScreenTestTags.EXPERIENCE_DROPDOWN)) {
+                                GardeningSkill.values().forEach { skill ->
+                                  DropdownMenuItem(
+                                      text = { Text(skill.name) },
+                                      onClick = {
+                                        newProfileViewModel.setGardeningSkill(skill)
+                                        isExperienceExpanded = false
+                                      })
+                                }
+                              }
+                        }
 
                     // Favorite Plant field - Optional field
                     OutlinedTextField(
@@ -211,7 +244,9 @@ fun NewProfileScreen(
                         onValueChange = { newProfileViewModel.setFavoritePlant(it) },
                         label = { Text("Favorite Plant") },
                         placeholder = { Text("Enter your favorite plant") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .testTag(NewProfileScreenTestTags.FAVORITE_PLANT_FIELD),
                         singleLine = true)
 
                     // Country selection with search functionality - Required field
@@ -225,7 +260,10 @@ fun NewProfileScreen(
                           },
                           label = { Text("Country *") },
                           placeholder = { Text("Search for your country") },
-                          modifier = Modifier.fillMaxWidth().focusRequester(countryFocusRequester),
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .focusRequester(countryFocusRequester)
+                                  .testTag(NewProfileScreenTestTags.COUNTRY_FIELD),
                           isError = uiState.countryIsError(),
                           singleLine = true,
                           trailingIcon = {
@@ -233,66 +271,75 @@ fun NewProfileScreen(
                                 Icons.Default.ArrowDropDown,
                                 contentDescription = "Country dropdown",
                                 modifier =
-                                    Modifier.clickable { isCountryExpanded = !isCountryExpanded })
+                                    Modifier.clickable { isCountryExpanded = !isCountryExpanded }
+                                        .testTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_ICON))
                           })
 
                       // Searchable dropdown for country selection
                       if (isCountryExpanded) {
                         Card(
                             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                            modifier = Modifier.fillMaxWidth().height(250.dp).offset(y = (-266).dp),
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .height(250.dp)
+                                    .offset(y = (-266).dp)
+                                    .testTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN),
                             colors =
                                 CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.surface)) {
-                              LazyColumn {
-                                // Display number of countries found
-                                item {
-                                  Text(
-                                      text = "${filteredCountries.size} countries found",
-                                      modifier = Modifier.padding(16.dp),
-                                      fontSize = 12.sp,
-                                      fontStyle = FontStyle.Italic,
-                                      color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
+                              LazyColumn(
+                                  modifier =
+                                      Modifier.testTag(
+                                          NewProfileScreenTestTags.COUNTRY_SEARCH_RESULTS)) {
+                                    // Display number of countries found
+                                    item {
+                                      Text(
+                                          text = "${filteredCountries.size} countries found",
+                                          modifier = Modifier.padding(16.dp),
+                                          fontSize = 12.sp,
+                                          fontStyle = FontStyle.Italic,
+                                          color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
 
-                                // Display filtered countries (limited to 15 for performance)
-                                items(filteredCountries.take(15)) { country ->
-                                  Text(
-                                      text = country,
-                                      modifier =
-                                          Modifier.fillMaxWidth()
-                                              .clickable {
-                                                newProfileViewModel.setCountry(country)
-                                                isCountryExpanded = false
-                                              }
-                                              .padding(horizontal = 16.dp, vertical = 12.dp),
-                                      color = MaterialTheme.colorScheme.onSurface)
-                                }
+                                    // Display filtered countries (limited to 15 for performance)
+                                    items(filteredCountries.take(15)) { country ->
+                                      Text(
+                                          text = country,
+                                          modifier =
+                                              Modifier.fillMaxWidth()
+                                                  .clickable {
+                                                    newProfileViewModel.setCountry(country)
+                                                    isCountryExpanded = false
+                                                  }
+                                                  .padding(horizontal = 16.dp, vertical = 12.dp),
+                                          color = MaterialTheme.colorScheme.onSurface)
+                                    }
 
-                                // Show indicator for additional countries if more than 15 results
-                                if (filteredCountries.size > 15) {
-                                  item {
-                                    Text(
-                                        text =
-                                            "... and ${filteredCountries.size - 15} more countries",
-                                        modifier = Modifier.padding(16.dp),
-                                        fontSize = 12.sp,
-                                        fontStyle = FontStyle.Italic,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    // Show indicator for additional countries if more than 15
+                                    // results
+                                    if (filteredCountries.size > 15) {
+                                      item {
+                                        Text(
+                                            text =
+                                                "... and ${filteredCountries.size - 15} more countries",
+                                            modifier = Modifier.padding(16.dp),
+                                            fontSize = 12.sp,
+                                            fontStyle = FontStyle.Italic,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                      }
+                                    }
+
+                                    // Display message when no countries found
+                                    if (filteredCountries.isEmpty()) {
+                                      item {
+                                        Text(
+                                            text = "No countries found",
+                                            modifier = Modifier.padding(16.dp),
+                                            fontSize = 14.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                      }
+                                    }
                                   }
-                                }
-
-                                // Display message when no countries found
-                                if (filteredCountries.isEmpty()) {
-                                  item {
-                                    Text(
-                                        text = "No countries found",
-                                        modifier = Modifier.padding(16.dp),
-                                        fontSize = 14.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                  }
-                                }
-                              }
                             }
                       }
                     }
@@ -311,5 +358,5 @@ fun NewProfileScreen(
 @Preview
 @Composable
 fun NewProfileScreenPreview() {
-  NewProfileScreen(onRegisterPressed = {})
+  MyGardenTheme { NewProfileScreen(onRegisterPressed = {}) }
 }
