@@ -256,7 +256,7 @@ fun PlantDetailScreenPreview() {
   val plant =
       Plant(
           name = "test name",
-          image = null, // Can use a URL or a ByteArray for storage (to be discussed)
+          image = null,
           latinName = "latin name",
           description = "Description of the plant",
           healthStatus = PlantHealthStatus.HEALTHY,
