@@ -9,10 +9,39 @@ import kotlinx.coroutines.flow.asStateFlow
 data class NewProfileUIState(
     val firstName: String = "",
     val LastName: String = "",
-    val gardeningSkill: GardeningSkill = GardeningSkill.NOVICE,
+    val gardeningSkill: GardeningSkill? = null,
     val favoritePlant: String = "",
     val country: String = "",
-)
+    val registerPressed: Boolean = false,
+) {
+  private fun firstNameValid(): Boolean {
+    return firstName.isNotBlank()
+  }
+
+  fun firstNameIsError(): Boolean {
+    return registerPressed && !firstNameValid()
+  }
+
+  private fun lastNameValid(): Boolean {
+    return LastName.isNotBlank()
+  }
+
+  fun lastNameIsError(): Boolean {
+    return registerPressed && !lastNameValid()
+  }
+
+  private fun countryValid(): Boolean {
+    return country.isNotBlank() // changer la logique ici
+  }
+
+  fun countryIsError(): Boolean {
+    return registerPressed && !countryValid()
+  }
+
+  fun canRegister(): Boolean {
+    return firstNameValid() && lastNameValid() && countryValid()
+  }
+}
 
 class NewProfileViewModel() : ViewModel() {
   private val _uiState = MutableStateFlow(NewProfileUIState())
@@ -37,5 +66,9 @@ class NewProfileViewModel() : ViewModel() {
 
   fun setCountry(country: String) {
     _uiState.value = _uiState.value.copy(country = country)
+  }
+
+  fun setRegisterPressed(registerPressed: Boolean) {
+    _uiState.value = _uiState.value.copy(registerPressed = registerPressed)
   }
 }
