@@ -73,7 +73,7 @@ class EditPlantScreenTest {
     saveNode.assertIsNotEnabled()
 
     // Touch the date icon to simulate user intent (shows error if missing)
-    composeRule.onNodeWithContentDescription("Pick date").performClick()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON).performClick()
     // Still disabled because no date set, and description is blank
     saveNode.assertIsNotEnabled()
 
@@ -139,7 +139,7 @@ class EditPlantScreenTest {
     composeRule.waitForIdle()
 
     // Now an error helper text should appear
-    composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE).assertCountEquals(1)
+    composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true).assertCountEquals(1)
   }
 
   @Test
@@ -151,12 +151,14 @@ class EditPlantScreenTest {
     composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE).assertCountEquals(0)
 
     // User presses the calendar button (marks date as 'touched')
-    composeRule.onNodeWithContentDescription("Pick date").performClick()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON).performClick()
+
+    composeRule.waitForIdle()
 
     composeRule.waitForIdle()
 
     // Now an error should be visible for the date field
-    composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE).assertCountEquals(1)
+    composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true).assertCountEquals(1)
   }
 }
 
