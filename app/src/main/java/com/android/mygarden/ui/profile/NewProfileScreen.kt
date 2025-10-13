@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,7 +41,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -116,7 +116,6 @@ fun NewProfileScreen(
     onRegisterPressed: () -> Unit
 ) {
   val uiState by newProfileViewModel.uiState.collectAsState()
-  val focusManager = LocalFocusManager.current
   val countryFocusRequester = remember { FocusRequester() }
 
   var isExperienceExpanded by remember { mutableStateOf(false) }
@@ -314,7 +313,11 @@ fun NewProfileScreen(
                 if (isCountryExpanded) {
                   Card(
                       elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                      modifier = Modifier.fillMaxWidth().height(300.dp)) {
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .height(250.dp)
+                              .offset(y = (-266).dp) // Décale la Card au-dessus du TextField
+                      ) {
                         LazyColumn(modifier = Modifier.fillMaxWidth()) {
                           if (filteredCountries.isEmpty()) {
                             item {
