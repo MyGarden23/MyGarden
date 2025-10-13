@@ -52,18 +52,37 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.model.Countries
 import com.android.mygarden.model.profile.GardeningSkill
 
+/**
+ * Screen for creating a new user profile in the MyGarden app.
+ *
+ * This screen allows users to input their personal information including:
+ * - First and last name (required fields)
+ * - Gardening experience level
+ * - Favorite plant (optional)
+ * - Country selection with search functionality
+ *
+ * The screen uses Material 3 design principles with proper theming and accessibility support. Form
+ * validation is handled through the ViewModel with visual error indicators.
+ *
+ * @param newProfileViewModel ViewModel that manages the profile creation state and validation
+ * @param onRegisterPressed Callback function invoked when the registration is successful
+ */
 @Composable
 fun NewProfileScreen(
     newProfileViewModel: NewProfileViewModel = viewModel(),
     onRegisterPressed: () -> Unit
 ) {
+  // Collect UI state from ViewModel
   val uiState by newProfileViewModel.uiState.collectAsState()
 
+  // Focus requester for country text field (for accessibility)
   val countryFocusRequester = remember { FocusRequester() }
 
+  // Local state for dropdown menus
   var isExperienceExpanded by remember { mutableStateOf(false) }
   var isCountryExpanded by remember { mutableStateOf(false) }
-  // Logique de filtrage
+
+  // Filter countries based on user input for search functionality
   val filteredCountries =
       if (uiState.country.isBlank()) {
         Countries.ALL
@@ -73,7 +92,7 @@ fun NewProfileScreen(
 
   Scaffold(
       bottomBar = {
-        // Register Button en tant que bottom bar
+        // Fixed bottom button for profile registration
         Button(
             onClick = {
               newProfileViewModel.setRegisterPressed(true)
@@ -93,45 +112,46 @@ fun NewProfileScreen(
                   fontWeight = FontWeight.Medium)
             }
       }) { paddingValues ->
+        // Main content layout with three sections using weight distribution
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.SpaceBetween // Distribution équitable
-            ) {
-              // Section supérieure - Titre + Avatar
+            verticalArrangement = Arrangement.SpaceBetween) {
+              // Header section (20% of screen) - Title and Avatar
               Row(modifier = Modifier.weight(0.2f)) {
                 Column(
-                    modifier = Modifier.weight(0.3f).fillMaxHeight(), // 30% de l'écran
+                    modifier = Modifier.weight(0.3f).fillMaxHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceEvenly) {
-                      // Titre
+
+                      // Screen title
                       Text(
                           text = "New Profile",
                           fontSize = 20.sp,
                           fontWeight = FontWeight.Medium,
                           color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-                      // Avatar
+                      // User avatar placeholder with person icon
                       Box(
                           modifier =
-                              Modifier.fillMaxWidth(0.25f) // 25% de la largeur de l'écran
-                                  .aspectRatio(1f) // Garde un ratio carré
+                              Modifier.fillMaxWidth(0.25f) // 25% of screen width
+                                  .aspectRatio(1f) // Maintain square aspect ratio
                                   .clip(CircleShape)
                                   .background(MaterialTheme.colorScheme.surfaceVariant),
                           contentAlignment = Alignment.Center) {
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = "Profile Avatar",
-                                modifier = Modifier.fillMaxSize(0.5f), // 50% de la taille du cercle
+                                modifier = Modifier.fillMaxSize(0.5f), // 50% of circle size
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant)
                           }
                     }
               }
 
-              // Section du milieu - Formulaire
+              // Form section (60% of screen) - Input fields
               Column(
-                  modifier = Modifier.weight(0.6f), // 60% de l'écran
-                  verticalArrangement = Arrangement.SpaceEvenly) {
-                    // First Name
+                  modifier = Modifier.weight(0.6f), verticalArrangement = Arrangement.SpaceEvenly) {
+
+                    // First Name field - Required field with validation
                     OutlinedTextField(
                         value = uiState.firstName,
                         onValueChange = { newProfileViewModel.setFirstName(it) },
@@ -141,7 +161,7 @@ fun NewProfileScreen(
                         isError = uiState.firstNameIsError(),
                         singleLine = true)
 
-                    // Last Name
+                    // Last Name field - Required field with validation
                     OutlinedTextField(
                         value = uiState.LastName,
                         onValueChange = { newProfileViewModel.setLastName(it) },
@@ -151,7 +171,7 @@ fun NewProfileScreen(
                         isError = uiState.lastNameIsError(),
                         singleLine = true)
 
-                    // Experience (dropdown)
+                    // Gardening Experience dropdown - Read-only field with dropdown menu
                     Box {
                       OutlinedTextField(
                           value = uiState.gardeningSkill?.name ?: "",
@@ -170,6 +190,7 @@ fun NewProfileScreen(
                                     })
                           })
 
+                      // Dropdown menu for gardening skill selection
                       DropdownMenu(
                           expanded = isExperienceExpanded,
                           onDismissRequest = { isExperienceExpanded = false }) {
@@ -184,7 +205,7 @@ fun NewProfileScreen(
                           }
                     }
 
-                    // Favorite Plant
+                    // Favorite Plant field - Optional field
                     OutlinedTextField(
                         value = uiState.favoritePlant,
                         onValueChange = { newProfileViewModel.setFavoritePlant(it) },
@@ -193,14 +214,14 @@ fun NewProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true)
 
-                    // Country (searchable dropdown)
+                    // Country selection with search functionality - Required field
                     Box(modifier = Modifier.fillMaxWidth()) {
                       OutlinedTextField(
                           value = uiState.country,
                           onValueChange = { newText ->
                             newProfileViewModel.setCountry(newText)
-                            // Ouvrir le dropdown quand on tape du texte
-                              isCountryExpanded = newText.isNotEmpty()
+                            // Open dropdown when user starts typing
+                            isCountryExpanded = newText.isNotEmpty()
                           },
                           label = { Text("Country *") },
                           placeholder = { Text("Search for your country") },
@@ -210,13 +231,12 @@ fun NewProfileScreen(
                           trailingIcon = {
                             Icon(
                                 Icons.Default.ArrowDropDown,
-                                contentDescription = "Dropdown des pays",
+                                contentDescription = "Country dropdown",
                                 modifier =
                                     Modifier.clickable { isCountryExpanded = !isCountryExpanded })
                           })
 
-                      // Utiliser un if au lieu d'une condition dans expanded pour éviter les
-                      // problèmes de focus
+                      // Searchable dropdown for country selection
                       if (isCountryExpanded) {
                         Card(
                             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -225,17 +245,17 @@ fun NewProfileScreen(
                                 CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.surface)) {
                               LazyColumn {
-                                // Afficher le nombre de pays trouvés
+                                // Display number of countries found
                                 item {
                                   Text(
-                                      text = "${filteredCountries.size} pays trouvés",
+                                      text = "${filteredCountries.size} countries found",
                                       modifier = Modifier.padding(16.dp),
                                       fontSize = 12.sp,
                                       fontStyle = FontStyle.Italic,
                                       color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
 
-                                // Afficher les pays (jusqu'à 15)
+                                // Display filtered countries (limited to 15 for performance)
                                 items(filteredCountries.take(15)) { country ->
                                   Text(
                                       text = country,
@@ -249,11 +269,12 @@ fun NewProfileScreen(
                                       color = MaterialTheme.colorScheme.onSurface)
                                 }
 
-                                // Si il y a plus de 15 résultats, afficher un indicateur
+                                // Show indicator for additional countries if more than 15 results
                                 if (filteredCountries.size > 15) {
                                   item {
                                     Text(
-                                        text = "... et ${filteredCountries.size - 15} autres pays",
+                                        text =
+                                            "... and ${filteredCountries.size - 15} more countries",
                                         modifier = Modifier.padding(16.dp),
                                         fontSize = 12.sp,
                                         fontStyle = FontStyle.Italic,
@@ -261,11 +282,11 @@ fun NewProfileScreen(
                                   }
                                 }
 
-                                // Message si aucun pays trouvé
+                                // Display message when no countries found
                                 if (filteredCountries.isEmpty()) {
                                   item {
                                     Text(
-                                        text = "Aucun pays trouvé",
+                                        text = "No countries found",
                                         modifier = Modifier.padding(16.dp),
                                         fontSize = 14.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -277,12 +298,16 @@ fun NewProfileScreen(
                     }
                   }
 
-              // Section inférieure - Spacer pour pousser le contenu vers le haut
-              Spacer(modifier = Modifier.weight(0.1f)) // 10% restant
-        }
+              // Bottom spacer (10% of screen) - Pushes content up
+              Spacer(modifier = Modifier.weight(0.1f))
+            }
       }
 }
 
+/**
+ * Preview composable for the NewProfileScreen. Used for development and design testing in Android
+ * Studio.
+ */
 @Preview
 @Composable
 fun NewProfileScreenPreview() {
