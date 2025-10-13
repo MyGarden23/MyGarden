@@ -139,7 +139,9 @@ class EditPlantScreenTest {
     composeRule.waitForIdle()
 
     // Now an error helper text should appear
-    composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true).assertCountEquals(1)
+    composeRule
+        .onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
+        .assertCountEquals(1)
   }
 
   @Test
@@ -158,7 +160,9 @@ class EditPlantScreenTest {
     composeRule.waitForIdle()
 
     // Now an error should be visible for the date field
-    composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true).assertCountEquals(1)
+    composeRule
+        .onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
+        .assertCountEquals(1)
   }
 }
 

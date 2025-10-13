@@ -36,7 +36,7 @@ object EditPlantScreenTestTags {
   const val ERROR_MESSAGE = "errorMessage"
   const val PLANT_SAVE = "plantSave"
   const val PLANT_DELETE = "plantDelete"
-    const val DATE_PICKER_BUTTON = "datePicker"
+  const val DATE_PICKER_BUTTON = "datePicker"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
