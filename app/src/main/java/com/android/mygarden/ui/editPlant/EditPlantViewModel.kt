@@ -23,21 +23,21 @@ data class EditPlantUIState(
 
 class EditPlantViewModel(
     private val repository: PlantsRepository = PlantsRepositoryProvider.repository,
-) : ViewModel() {
+) : ViewModel(), EditPlantViewModelInterface {
   private val _uiState = MutableStateFlow(EditPlantUIState())
-  val uiState: StateFlow<EditPlantUIState> = _uiState.asStateFlow()
+  override val uiState: StateFlow<EditPlantUIState> = _uiState.asStateFlow()
 
   private var newOwnedPlant: OwnedPlant? = null
 
-  fun clearErrorMsg() {
+  override fun clearErrorMsg() {
     _uiState.value = _uiState.value.copy(errorMsg = null)
   }
 
-  fun setErrorMsg(e: String) {
+  override fun setErrorMsg(e: String) {
     _uiState.value = _uiState.value.copy(errorMsg = e)
   }
 
-  fun loadPlant(ownedPlantId: String) {
+  override fun loadPlant(ownedPlantId: String) {
     viewModelScope.launch {
       try {
         val owned = repository.getOwnedPlant(ownedPlantId)
@@ -57,15 +57,15 @@ class EditPlantViewModel(
     }
   }
 
-  fun setLastWatered(timestamp: Timestamp) {
+  override fun setLastWatered(timestamp: Timestamp) {
     _uiState.value = _uiState.value.copy(lastWatered = timestamp)
   }
 
-  fun setDescription(newDescription: String) {
+  override fun setDescription(newDescription: String) {
     _uiState.value = _uiState.value.copy(description = newDescription)
   }
 
-  fun deletePlant(ownedPlantId: String) {
+  override fun deletePlant(ownedPlantId: String) {
     viewModelScope.launch {
       try {
 
@@ -77,7 +77,7 @@ class EditPlantViewModel(
     }
   }
 
-  fun editPlant(ownedPlantId: String) {
+  override fun editPlant(ownedPlantId: String) {
     val newPlant = newOwnedPlant
     val waterd = _uiState.value.lastWatered
     val description = _uiState.value.description
@@ -94,6 +94,7 @@ class EditPlantViewModel(
       return
     }
 
+    // Not suppose to occur with the workflow of the app.
     if (waterd == null) {
       Log.e("EditPlantViewModel", "Failed to edit plant. (no last time watered selected).")
       setErrorMsg("Please select the last time watered")

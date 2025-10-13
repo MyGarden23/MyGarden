@@ -42,10 +42,10 @@ object EditPlantScreenTestTags {
 @Composable
 fun EditPlantScreen(
     ownedPlantId: String,
-    editPlantViewModel: EditPlantViewModel = viewModel(),
+    editPlantViewModel: EditPlantViewModelInterface = viewModel(),
     onSaved: () -> Unit = {},
     onDeleted: () -> Unit = {},
-    goBack: () -> Unit = {}, // ← back to camera
+    goBack: () -> Unit = {},
 ) {
   // Load the plant when the id changes
   LaunchedEffect(ownedPlantId) { editPlantViewModel.loadPlant(ownedPlantId) }
