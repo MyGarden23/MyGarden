@@ -80,10 +80,17 @@ class EditPlantViewModel(
   fun editPlant(ownedPlantId: String) {
     val newPlant = newOwnedPlant
     val waterd = _uiState.value.lastWatered
+    val description = _uiState.value.description
 
     if (newPlant == null) {
       Log.e("EditPlantViewModel", "Failed to edit plant (Plant not loaded).")
       setErrorMsg("Plant not loaded yet")
+      return
+    }
+
+    if (description.isBlank()) {
+      Log.e("EditPlantViewModel", "Failed to edit plant. (no description selected).")
+      setErrorMsg("Please put a description")
       return
     }
 
