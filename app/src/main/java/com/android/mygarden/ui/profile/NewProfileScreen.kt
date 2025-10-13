@@ -50,67 +50,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.mygarden.model.Countries
 import com.android.mygarden.model.profile.GardeningSkill
-
-// Liste des pays
-private val countries =
-    listOf(
-        "Afghanistan",
-        "Albania",
-        "Algeria",
-        "Argentina",
-        "Australia",
-        "Austria",
-        "Bangladesh",
-        "Belgium",
-        "Brazil",
-        "Canada",
-        "Chile",
-        "China",
-        "Colombia",
-        "Denmark",
-        "Egypt",
-        "Finland",
-        "France",
-        "Germany",
-        "Greece",
-        "India",
-        "Indonesia",
-        "Iran",
-        "Iraq",
-        "Ireland",
-        "Israel",
-        "Italy",
-        "Japan",
-        "Jordan",
-        "Kazakhstan",
-        "Kenya",
-        "Malaysia",
-        "Mexico",
-        "Morocco",
-        "Netherlands",
-        "New Zealand",
-        "Norway",
-        "Pakistan",
-        "Peru",
-        "Philippines",
-        "Poland",
-        "Portugal",
-        "Romania",
-        "Russia",
-        "Saudi Arabia",
-        "Singapore",
-        "South Africa",
-        "South Korea",
-        "Spain",
-        "Sweden",
-        "Switzerland",
-        "Thailand",
-        "Turkey",
-        "Ukraine",
-        "United Kingdom",
-        "United States",
-        "Vietnam")
 
 @Composable
 fun NewProfileScreen(
@@ -128,9 +69,9 @@ fun NewProfileScreen(
   // Logique de filtrage
   val filteredCountries =
       if (countryTextFieldValue.isEmpty()) {
-        countries
+        Countries.ALL
       } else {
-        countries.filter { it.contains(countryTextFieldValue, ignoreCase = true) }
+        Countries.ALL.filter { it.contains(countryTextFieldValue, ignoreCase = true) }
       }
 
   Scaffold(
