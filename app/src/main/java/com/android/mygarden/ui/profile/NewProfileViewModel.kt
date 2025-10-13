@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 data class NewProfileUIState(
     val firstName: String = "",
-    val LastName: String = "",
+    val lastName: String = "",
     val gardeningSkill: GardeningSkill? = null,
     val favoritePlant: String = "",
     val country: String = "",
@@ -43,7 +43,7 @@ data class NewProfileUIState(
    * @return true if last name is valid, false otherwise
    */
   private fun lastNameValid(): Boolean {
-    return LastName.isNotBlank()
+    return lastName.isNotBlank()
   }
 
   /**
@@ -109,7 +109,7 @@ class NewProfileViewModel() : ViewModel() {
    * @param lastName The new last name value
    */
   fun setLastName(lastName: String) {
-    _uiState.value = _uiState.value.copy(LastName = lastName)
+    _uiState.value = _uiState.value.copy(lastName = lastName)
   }
 
   /**

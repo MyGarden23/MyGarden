@@ -163,7 +163,7 @@ fun NewProfileScreen(
 
                     // Last Name field - Required field with validation
                     OutlinedTextField(
-                        value = uiState.LastName,
+                        value = uiState.lastName,
                         onValueChange = { newProfileViewModel.setLastName(it) },
                         label = { Text("Last Name *") },
                         placeholder = { Text("Enter your last name") },
