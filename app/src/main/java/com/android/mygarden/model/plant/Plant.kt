@@ -18,7 +18,7 @@ import java.sql.Timestamp
  */
 data class Plant(
     val name: String,
-    val image: String,
+    val image: String?,
     val latinName: String,
     val description: String,
     val healthStatus: PlantHealthStatus,

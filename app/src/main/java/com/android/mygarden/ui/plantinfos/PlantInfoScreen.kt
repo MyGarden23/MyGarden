@@ -256,7 +256,7 @@ fun PlantDetailScreenPreview() {
   val plant =
       Plant(
           name = "test name",
-          image = "",
+          image = null,
           latinName = "latin name",
           description = "Description of the plant",
           healthStatus = PlantHealthStatus.HEALTHY,

@@ -21,7 +21,7 @@ enum class SelectedPlantInfoTab(val text: String) {
 /** UI state for the plant info screen. Contains all the plant information to be displayed. */
 data class PlantInfoUIState(
     val name: String = "",
-    val image: String = "",
+    val image: String? = null,
     val latinName: String = "",
     val description: String = "",
     val healthStatus: PlantHealthStatus = PlantHealthStatus.UNKNOWN,
