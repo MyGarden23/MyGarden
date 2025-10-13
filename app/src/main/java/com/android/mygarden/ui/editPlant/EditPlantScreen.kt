@@ -105,13 +105,11 @@ fun EditPlantScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
               // Plant image
-              if (true /*plantUIState.image != null*/) {
+              if (plantUIState.image != null) {
                 AsyncImage(
                     model =
                         ImageRequest.Builder(LocalContext.current)
-                            // .data(plantUIState.image)
-                            .data(
-                                "https://fastly.picsum.photos/id/840/200/300.jpg?hmac=Z8Mc1xk7GaQHQ1hkPTK4cY0dYIxDKGBCHrgyaDqE0u0")
+                            .data(plantUIState.image)
                             .error(R.drawable.error_image_download)
                             .build(),
                     contentDescription = "Plant image",
