@@ -67,7 +67,7 @@ class NewProfileViewModel() : ViewModel() {
 
   fun setCountry(country: String) {
     val capitalizedCountry =
-      country.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        country.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     _uiState.value = _uiState.value.copy(country = capitalizedCountry)
   }
 

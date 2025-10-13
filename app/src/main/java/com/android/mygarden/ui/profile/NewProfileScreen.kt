@@ -37,14 +37,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,8 +63,6 @@ fun NewProfileScreen(
 
   var isExperienceExpanded by remember { mutableStateOf(false) }
   var isCountryExpanded by remember { mutableStateOf(false) }
-  var countryTextFieldValue by rememberSaveable { mutableStateOf("") }
-
   // Logique de filtrage
   val filteredCountries =
       if (uiState.country.isBlank()) {
@@ -86,13 +82,10 @@ fun NewProfileScreen(
               }
             },
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            shape = RoundedCornerShape(25.dp)
-        ) {
+                Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 24.dp, vertical = 8.dp),
+            colors =
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            shape = RoundedCornerShape(25.dp)) {
               Text(
                   text = "Register Profile",
                   color = MaterialTheme.colorScheme.onPrimary,
@@ -101,18 +94,13 @@ fun NewProfileScreen(
             }
       }) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp),
+            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.SpaceBetween // Distribution équitable
             ) {
               // Section supérieure - Titre + Avatar
               Row(modifier = Modifier.weight(0.2f)) {
                 Column(
-                    modifier = Modifier
-                        .weight(0.3f)
-                        .fillMaxHeight(), // 30% de l'écran
+                    modifier = Modifier.weight(0.3f).fillMaxHeight(), // 30% de l'écran
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceEvenly) {
                       // Titre
@@ -120,14 +108,12 @@ fun NewProfileScreen(
                           text = "New Profile",
                           fontSize = 20.sp,
                           fontWeight = FontWeight.Medium,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant
-                      )
+                          color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                       // Avatar
                       Box(
                           modifier =
-                              Modifier
-                                  .fillMaxWidth(0.25f) // 25% de la largeur de l'écran
+                              Modifier.fillMaxWidth(0.25f) // 25% de la largeur de l'écran
                                   .aspectRatio(1f) // Garde un ratio carré
                                   .clip(CircleShape)
                                   .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -214,17 +200,11 @@ fun NewProfileScreen(
                           onValueChange = { newText ->
                             newProfileViewModel.setCountry(newText)
                             // Ouvrir le dropdown quand on tape du texte
-                            if (newText.isNotEmpty()) {
-                              isCountryExpanded = true
-                            } else {
-                              isCountryExpanded = false
-                            }
+                              isCountryExpanded = newText.isNotEmpty()
                           },
                           label = { Text("Country *") },
                           placeholder = { Text("Search for your country") },
-                          modifier = Modifier
-                              .fillMaxWidth()
-                              .focusRequester(countryFocusRequester),
+                          modifier = Modifier.fillMaxWidth().focusRequester(countryFocusRequester),
                           isError = uiState.countryIsError(),
                           singleLine = true,
                           trailingIcon = {
@@ -240,12 +220,10 @@ fun NewProfileScreen(
                       if (isCountryExpanded) {
                         Card(
                             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(250.dp)
-                                    .offset(y = (-266).dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                            modifier = Modifier.fillMaxWidth().height(250.dp).offset(y = (-266).dp),
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface)) {
                               LazyColumn {
                                 // Afficher le nombre de pays trouvés
                                 item {
@@ -254,8 +232,7 @@ fun NewProfileScreen(
                                       modifier = Modifier.padding(16.dp),
                                       fontSize = 12.sp,
                                       fontStyle = FontStyle.Italic,
-                                      color = MaterialTheme.colorScheme.onSurfaceVariant
-                                  )
+                                      color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
 
                                 // Afficher les pays (jusqu'à 15)
@@ -263,11 +240,10 @@ fun NewProfileScreen(
                                   Text(
                                       text = country,
                                       modifier =
-                                          Modifier
-                                              .fillMaxWidth()
+                                          Modifier.fillMaxWidth()
                                               .clickable {
-                                                  newProfileViewModel.setCountry(country)
-                                                  isCountryExpanded = false
+                                                newProfileViewModel.setCountry(country)
+                                                isCountryExpanded = false
                                               }
                                               .padding(horizontal = 16.dp, vertical = 12.dp),
                                       color = MaterialTheme.colorScheme.onSurface)
@@ -292,8 +268,7 @@ fun NewProfileScreen(
                                         text = "Aucun pays trouvé",
                                         modifier = Modifier.padding(16.dp),
                                         fontSize = 14.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                                   }
                                 }
                               }
