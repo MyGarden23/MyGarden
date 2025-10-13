@@ -2,9 +2,13 @@ package com.android.mygarden.ui.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -136,7 +140,10 @@ fun NewProfileScreen(
         Button(
             onClick = onRegisterPressed,
             modifier =
-                Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 24.dp, vertical = 8.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8BC34A)),
             shape = RoundedCornerShape(25.dp)) {
               Text(
@@ -144,241 +151,284 @@ fun NewProfileScreen(
                   color = Color.White,
                   fontSize = 16.sp,
                   fontWeight = FontWeight.Medium)
-            }
+        }
       }) { paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+      Column(
+          modifier = Modifier
+              .fillMaxSize()
+              .padding(paddingValues)
+              .padding(horizontal = 24.dp),
+          verticalArrangement = Arrangement.SpaceBetween // Distribution équitable
+      ) {
+          // Section supérieure - Titre + Avatar
+          Row(modifier = Modifier.weight(0.2f)) {
+          Column(
+              modifier = Modifier.weight(0.3f).fillMaxHeight(), // 30% de l'écran
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.SpaceEvenly
+          ) {
               // Titre
               Text(
                   text = "New Profile",
-                  fontSize = 20.sp,
-                  fontWeight = FontWeight.Medium,
-                  color = Color.Gray,
-                  modifier = Modifier.padding(bottom = 24.dp))
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Gray
+                )
 
-              // Avatar
-              Box(
-                  modifier = Modifier.size(100.dp).clip(CircleShape).background(Color.Gray),
-                  contentAlignment = Alignment.Center) {
+                // Avatar
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(0.25f) // 25% de la largeur de l'écran
+                            .aspectRatio(1f) // Garde un ratio carré
+                            .clip(CircleShape)
+                            .background(Color.Gray),
+                    contentAlignment = Alignment.Center
+                ) {
                     Icon(
                         Icons.Default.Person,
                         contentDescription = "Profile Avatar",
-                        modifier = Modifier.size(50.dp),
-                        tint = Color.White)
-                  }
-
-              Spacer(modifier = Modifier.height(24.dp))
-
-              // First Name
-              OutlinedTextField(
-                  value = uiState.firstName,
-                  onValueChange = { newProfileViewModel.setFirstName(it) },
-                  label = {
-                    Text(
-                        "FIRST NAME",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Gray)
-                  },
-                  placeholder = { Text("Text field data", color = Color.LightGray) },
-                  singleLine = true,
-                  modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                  colors =
-                      OutlinedTextFieldDefaults.colors(
-                          focusedBorderColor = Color.Gray, unfocusedBorderColor = Color.LightGray),
-                  shape = RoundedCornerShape(8.dp))
-
-              // Last Name
-              OutlinedTextField(
-                  value = uiState.LastName,
-                  onValueChange = { newProfileViewModel.setLastName(it) },
-                  label = {
-                    Text(
-                        "LAST NAME",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Gray)
-                  },
-                  placeholder = { Text("Text field data", color = Color.LightGray) },
-                  singleLine = true,
-                  modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                  colors =
-                      OutlinedTextFieldDefaults.colors(
-                          focusedBorderColor = Color.Gray, unfocusedBorderColor = Color.LightGray),
-                  shape = RoundedCornerShape(8.dp))
-
-              // Experience (dropdown)
-              Box {
-                OutlinedTextField(
-                    value = uiState.gardeningSkill.name,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = {
-                      Text(
-                          "EXPERIENCE WITH PLANTS",
-                          fontSize = 12.sp,
-                          fontWeight = FontWeight.Medium,
-                          color = Color.Gray)
-                    },
-                    placeholder = { Text("Text field data", color = Color.LightGray) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    trailingIcon = {
-                      Icon(
-                          Icons.Default.ArrowDropDown,
-                          contentDescription = null,
-                          modifier =
-                              Modifier.clickable { isExperienceExpanded = !isExperienceExpanded })
-                    },
-                    colors =
-                        OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Gray,
-                            unfocusedBorderColor = Color.LightGray),
-                    shape = RoundedCornerShape(8.dp))
-
-                DropdownMenu(
-                    expanded = isExperienceExpanded,
-                    onDismissRequest = { isExperienceExpanded = false }) {
-                      GardeningSkill.values().forEach { skill ->
-                        DropdownMenuItem(
-                            text = { Text(skill.name) },
-                            onClick = {
-                              newProfileViewModel.setGardeningSkill(skill)
-                              isExperienceExpanded = false
-                            })
-                      }
-                    }
-              }
-
-              // Favorite Plant
-              OutlinedTextField(
-                  value = uiState.favoritePlant,
-                  onValueChange = { newProfileViewModel.setFavoritePlant(it) },
-                  label = {
-                    Text(
-                        "FAVORITE PLANT",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Gray)
-                  },
-                  placeholder = { Text("Text field data", color = Color.LightGray) },
-                  singleLine = true,
-                  modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                  colors =
-                      OutlinedTextFieldDefaults.colors(
-                          focusedBorderColor = Color.Gray, unfocusedBorderColor = Color.LightGray),
-                  shape = RoundedCornerShape(8.dp))
-
-              // Country (searchable dropdown)
-              Box {
-                OutlinedTextField(
-                    value = countryTextFieldValue,
-                    onValueChange = { newText ->
-                      countryTextFieldValue = newText
-                      // Ouvrir le dropdown quand on tape du texte, mais sans voler le focus
-                      if (newText.isNotEmpty()) {
-                        isCountryExpanded = true
-                      } else {
-                        isCountryExpanded = false
-                      }
-                    },
-                    label = {
-                      Text(
-                          "PAYS",
-                          fontSize = 12.sp,
-                          fontWeight = FontWeight.Medium,
-                          color = Color.Gray)
-                    },
-                    placeholder = { Text("Rechercher un pays", color = Color.LightGray) },
-                    singleLine = true,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                            .focusRequester(countryFocusRequester),
-                    trailingIcon = {
-                      Icon(
-                          Icons.Default.ArrowDropDown,
-                          contentDescription = null,
-                          modifier = Modifier.clickable { isCountryExpanded = !isCountryExpanded })
-                    },
-                    colors =
-                        OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Gray,
-                            unfocusedBorderColor = Color.LightGray),
-                    shape = RoundedCornerShape(8.dp))
-
-                // Utiliser un if au lieu d'une condition dans expanded pour éviter les problèmes de
-                // focus
-                if (isCountryExpanded) {
-                  Card(
-                      elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                      modifier =
-                          Modifier.fillMaxWidth()
-                              .height(250.dp)
-                              .offset(y = (-266).dp) // Décale la Card au-dessus du TextField
-                      ) {
-                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                          if (filteredCountries.isEmpty()) {
-                            item {
-                              Text(
-                                  text = "Aucun pays trouvé",
-                                  fontSize = 12.sp,
-                                  color = Color.Gray,
-                                  fontStyle = FontStyle.Italic,
-                                  modifier = Modifier.padding(16.dp))
-                            }
-                          } else {
-                            // Afficher un indicateur du nombre de résultats si on filtre
-                            if (countryTextFieldValue.isNotEmpty()) {
-                              item {
-                                Text(
-                                    text = "${filteredCountries.size} pays trouvés",
-                                    fontSize = 12.sp,
-                                    color = Color.Gray,
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier.padding(12.dp))
-                              }
-                            }
-                            items(filteredCountries.take(15)) { country ->
-                              Text(
-                                  text = country,
-                                  modifier =
-                                      Modifier.fillMaxWidth()
-                                          .clickable {
-                                            newProfileViewModel.setCountry(country)
-                                            countryTextFieldValue = country
-                                            isCountryExpanded = false
-                                          }
-                                          .padding(horizontal = 16.dp, vertical = 12.dp),
-                                  fontSize = 14.sp,
-                                  color = Color.Black)
-                            }
-                            // Si il y a plus de 15 résultats, afficher un indicateur
-                            if (filteredCountries.size > 15) {
-                              item {
-                                Text(
-                                    text = "... et ${filteredCountries.size - 15} autres pays",
-                                    fontSize = 12.sp,
-                                    color = Color.Gray,
-                                    fontStyle = FontStyle.Italic,
-                                    modifier = Modifier.padding(12.dp))
-                              }
-                            }
-                          }
-                        }
-                      }
+                            modifier = Modifier.fillMaxSize(0.5f), // 50% de la taille du cercle
+                            tint = Color.White
+                        )
                 }
+            }
               }
 
-              // Utiliser le poids pour distribuer l'espace restant
-              Spacer(modifier = Modifier.weight(1f))
+            // Section du milieu - Formulaire
+            Column(
+                modifier = Modifier.weight(0.6f), // 60% de l'écran
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // First Name
+                OutlinedTextField(
+                    value = uiState.firstName,
+                    onValueChange = { newProfileViewModel.setFirstName(it) },
+                    label = {
+                        Text(
+                            "FIRST NAME *",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color.Gray,
+                            unfocusedBorderColor = Color.LightGray
+                        ),
+                    shape = RoundedCornerShape(8.dp)
+                )
+
+                // Last Name
+                OutlinedTextField(
+                    value = uiState.LastName,
+                    onValueChange = { newProfileViewModel.setLastName(it) },
+                    label = {
+                        Text(
+                            "LAST NAME",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color.Gray,
+                            unfocusedBorderColor = Color.LightGray
+                        ),
+                    shape = RoundedCornerShape(8.dp)
+                )
+
+                // Experience (dropdown)
+                Box {
+                    OutlinedTextField(
+                      value = uiState.gardeningSkill.name,
+                      onValueChange = {},
+                      readOnly = true,
+                      label = {
+                          Text(
+                              "EXPERIENCE WITH PLANTS",
+                              fontSize = 12.sp,
+                              fontWeight = FontWeight.Medium,
+                              color = Color.Gray
+                          )
+                      },
+                      modifier = Modifier.fillMaxWidth(),
+                      trailingIcon = {
+                          Icon(
+                              Icons.Default.ArrowDropDown,
+                              contentDescription = null,
+                              modifier =
+                                  Modifier.clickable {
+                                      isExperienceExpanded = !isExperienceExpanded
+                                  })
+                      },
+                      colors =
+                          OutlinedTextFieldDefaults.colors(
+                              focusedBorderColor = Color.Gray,
+                              unfocusedBorderColor = Color.LightGray
+                          ),
+                      shape = RoundedCornerShape(8.dp)
+                  )
+
+                    DropdownMenu(
+                        expanded = isExperienceExpanded,
+                        onDismissRequest = { isExperienceExpanded = false }) {
+                        GardeningSkill.values().forEach { skill ->
+                            DropdownMenuItem(
+                                text = { Text(skill.name) },
+                                onClick = {
+                                    newProfileViewModel.setGardeningSkill(skill)
+                                    isExperienceExpanded = false
+                                })
+                        }
+                    }
+                }
+
+                // Favorite Plant
+                OutlinedTextField(
+                    value = uiState.favoritePlant,
+                    onValueChange = { newProfileViewModel.setFavoritePlant(it) },
+                    label = {
+                        Text(
+                            "FAVORITE PLANT",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color.Gray,
+                            unfocusedBorderColor = Color.LightGray
+                        ),
+                    shape = RoundedCornerShape(8.dp)
+                )
+
+                // Country (searchable dropdown)
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = countryTextFieldValue,
+                        onValueChange = { newText ->
+                            countryTextFieldValue = newText
+                            // Ouvrir le dropdown quand on tape du texte
+                            if (newText.isNotEmpty()) {
+                                isCountryExpanded = true
+                            } else {
+                                isCountryExpanded = false
+                            }
+                        },
+                        label = {
+                            Text(
+                                "PAYS",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.Gray
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(countryFocusRequester),
+                        singleLine = true,
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Dropdown des pays",
+                                modifier = Modifier.clickable {
+                                    isCountryExpanded = !isCountryExpanded
+                                }
+                            )
+                        },
+                        colors =
+                            OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Gray,
+                                unfocusedBorderColor = Color.LightGray
+                            ),
+                        shape = RoundedCornerShape(8.dp))
+
+                    // Utiliser un if au lieu d'une condition dans expanded pour éviter les problèmes de focus
+                    if (isCountryExpanded) {
+                        Card(
+                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                                .offset(y = (-266).dp)
+                        ) {
+                            LazyColumn {
+                                // Afficher le nombre de pays trouvés
+                                item {
+                                    Text(
+                                        text = "${filteredCountries.size} pays trouvés",
+                                        modifier = Modifier.padding(16.dp),
+                                        fontSize = 12.sp,
+                                        fontStyle = FontStyle.Italic,
+                                        color = Color.Gray
+                                    )
+                                }
+
+                                // Afficher les pays (jusqu'à 15)
+                                items(filteredCountries.take(15)) { country ->
+                                    Text(
+                                        text = country,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                newProfileViewModel.setCountry(country)
+                                                countryTextFieldValue = country
+                                                isCountryExpanded = false
+                                            }
+                                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                                    )
+                                }
+
+                                // Si il y a plus de 15 résultats, afficher un indicateur
+                                if (filteredCountries.size > 15) {
+                                    item {
+                                        Text(
+                                            text = "... et ${filteredCountries.size - 15} autres pays",
+                                            modifier = Modifier.padding(16.dp),
+                                            fontSize = 12.sp,
+                                            fontStyle = FontStyle.Italic,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                }
+
+                                // Message si aucun pays trouvé
+                                if (filteredCountries.isEmpty()) {
+                                    item {
+                                        Text(
+                                            text = "Aucun pays trouvé",
+                                            modifier = Modifier.padding(16.dp),
+                                            fontSize = 14.sp,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-      }
+
+            // Section inférieure - Spacer pour pousser le contenu vers le haut
+            Spacer(modifier = Modifier.weight(0.1f)) // 10% restant
+        }
+  }
 }
 
 @Preview
 @Composable
 fun NewProfileScreenPreview() {
-  MyGardenTheme { NewProfileScreen(onRegisterPressed = {}) }
+    NewProfileScreen(onRegisterPressed = {})
 }
