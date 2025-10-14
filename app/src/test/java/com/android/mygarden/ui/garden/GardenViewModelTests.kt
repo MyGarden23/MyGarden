@@ -35,6 +35,9 @@ class GardenViewModelTests {
           2)
   private val testDispatcher = StandardTestDispatcher()
 
+  /**
+   * Sets up the repository and the view model and the test dispatcher to simulate the app
+   */
   @Before
   fun setUp() = runTest {
     Dispatchers.setMain(testDispatcher)
@@ -42,11 +45,17 @@ class GardenViewModelTests {
     vm = GardenViewModel(plantsRepo = repo)
   }
 
+  /**
+   * Ensures the reset of the dispatcher at each end of test
+   */
   @After
   fun end() {
     Dispatchers.resetMain()
   }
 
+  /**
+   * Tests that the setErrorMessage function updates correctly the vm
+   */
   @Test
   fun setErrorMsgUpdatesCorrectly() {
     val errorMsg = "Error"
@@ -54,6 +63,9 @@ class GardenViewModelTests {
     assertEquals(errorMsg, vm.uiState.value.errorMsg)
   }
 
+  /**
+   * Tests that the clearErrorMessage function updates correctly the vm
+   */
   @Test
   fun clearErrorMsgClearsCorrectly() {
     val errorMsg = "Error"
@@ -63,6 +75,9 @@ class GardenViewModelTests {
     assertNull(vm.uiState.value.errorMsg)
   }
 
+  /**
+   * Tests that the getAllPlants function retrieves correctly the list of owned plants and updated the vm
+   */
   @Test
   fun getAllPlantsWorksCorrectly() = runTest {
     assertEquals(emptyList<OwnedPlant>(), vm.uiState.value.plants)

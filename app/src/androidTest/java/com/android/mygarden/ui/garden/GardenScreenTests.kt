@@ -94,12 +94,18 @@ class GardenScreenTests {
     runTest { repo.getAllOwnedPlants().forEach { p -> repo.deleteFromGarden(p.id) } }
   }
 
+  /**
+   * Ensures that all profile-related components are currently displayed
+   */
   fun ComposeTestRule.userRowIsDisplayed() {
     onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertIsDisplayed()
     onNodeWithTag(GardenScreenTestTags.USERNAME).assertIsDisplayed()
     onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsDisplayed()
   }
 
+  /**
+   * Ensures that all plants currently on the [repo] are displayed on the screen
+   */
   fun ComposeTestRule.allPlantsAreDisplayed() {
     runTest {
       repo.getAllOwnedPlants().forEach { p ->
@@ -108,6 +114,9 @@ class GardenScreenTests {
     }
   }
 
+  /**
+   * Tests that when the list is empty, the empty list message and profile components are displayed
+   */
   @Test
   fun correctDisplayWhenEmptyGarden() {
     setContent()
@@ -117,6 +126,9 @@ class GardenScreenTests {
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsDisplayed()
   }
 
+  /**
+   * Tests that the whole list is displayed (alongside profile components) when the list is not empty
+   */
   @Test
   fun correctDisplayWhenNonEmptyGarden() {
     val plants = listOf(plant1, plant2, plant3, plant4)
@@ -128,6 +140,9 @@ class GardenScreenTests {
     composeTestRule.allPlantsAreDisplayed()
   }
 
+  /**
+   * Tests that all buttons present are clickable
+   */
   @Test
   fun buttonsAreClickable() {
     setContent()
