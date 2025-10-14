@@ -1,4 +1,4 @@
-package com.android.mygarden.model
+package com.android.mygarden.model.profile
 
 /** Comprehensive list of all world countries. Source: ISO 3166-1 alpha-2 country codes */
 object Countries {

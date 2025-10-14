@@ -1,6 +1,6 @@
 package com.android.mygarden.ui.profile
 
-import com.android.mygarden.model.Countries
+import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -52,7 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.mygarden.model.Countries
+import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.ui.theme.MyGardenTheme
 
