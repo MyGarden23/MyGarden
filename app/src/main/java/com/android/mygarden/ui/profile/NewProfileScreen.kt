@@ -103,7 +103,7 @@ fun NewProfileScreen(
             onClick = {
               newProfileViewModel.setRegisterPressed(true)
               if (uiState.canRegister()) {
-                onRegisterPressed
+                onRegisterPressed()
               }
             },
             modifier =
