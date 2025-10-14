@@ -42,7 +42,7 @@ class CameraViewModel : ViewModel() {
   fun takePicture(
       context: Context,
       controller: LifecycleCameraController,
-      onPictureTaken: (Bitmap) -> Unit
+      onPictureTaken: (Bitmap, String) -> Unit
   ) {
     controller.takePicture(
         ContextCompat.getMainExecutor(context),
@@ -51,16 +51,19 @@ class CameraViewModel : ViewModel() {
           override fun onCaptureSuccess(image: ImageProxy) {
             super.onCaptureSuccess(image)
             try {
+              // We convert the image to a Bitmap because it will be useful later for sending it to
+              // an API
               val bitmap = image.toBitmap()
               image.close()
 
               // Save the image locally
               val file = saveBitmapToFile(context, bitmap, "plant_${System.currentTimeMillis()}")
 
-              /*TODO : Check if still useful to do that*/
-              onPictureTaken(bitmap)
+              /* Give the image of the plant in Bitmap (to give to an API eventually)
+               * and the path of the plant to the next screen
+               * */
+              onPictureTaken(bitmap, file.absolutePath)
 
-              /*TODO : Check if we keep that*/
               Log.d("CameraViewModel", "Image saved at: ${file.absolutePath}")
             } catch (e: Exception) {
               toastPictureFail(context)
@@ -99,9 +102,17 @@ class CameraViewModel : ViewModel() {
         }
   }
 
+  /**
+   * Takes the image given in Bitmap type, compress it in JPEG format and store it in
+   * context.filesDir which is a local memory place accessible when you have the context of the app.
+   *
+   * @param context the context of the app
+   * @param bitmap the image in bitmap type
+   * @param fileName the name we want to give to the image that will be stored
+   */
   private fun saveBitmapToFile(context: Context, bitmap: Bitmap, fileName: String): File {
     val file = File(context.filesDir, "$fileName.jpg")
-    FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out) }
+    FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out) }
     return file
   }
 }

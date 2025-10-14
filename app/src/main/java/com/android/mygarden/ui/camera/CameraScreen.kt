@@ -68,7 +68,7 @@ private val BUTTONS_COLOR = Color.White
 fun CameraScreen(
     modifier: Modifier = Modifier,
     cameraViewModel: CameraViewModel = viewModel(),
-    onPictureTaken: (Bitmap) -> Unit = {}
+    onPictureTaken: (Bitmap, String) -> Unit = { b, s -> }
 ) {
   val uiState = cameraViewModel.uiState.collectAsState()
   val context = LocalContext.current
