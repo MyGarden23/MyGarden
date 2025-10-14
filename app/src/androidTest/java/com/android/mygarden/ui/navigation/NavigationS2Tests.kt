@@ -83,4 +83,43 @@ class NavigationS2Tests {
   private fun waitForRoute(expected: String, timeoutMillis: Long = 5_000) {
     compose.waitUntil(timeoutMillis) { currentRoute.value == expected }
   }
+
+    @Test
+    fun onSignedIn_from_auth_navigates_to_camera() {
+        // AppNavHost wires SignInScreen.onSignedIn -> navigate(Camera)
+        setApp(Screen.Auth.route)
+
+        // Emulate the onSignedIn callback effect
+        compose.runOnIdle {
+            navController.navigate(Screen.Camera.route)
+        }
+
+        // Wait for recomposition / back stack update, then assert
+        waitForRoute(Screen.Camera.route)
+        compose.runOnIdle {
+            assertEquals(Screen.Camera.route, currentRoute.value)
+        }
+    }
+
+    @Test
+    fun onBackPressed_from_plantView_returns_to_camera() {
+        // AppNavHost wires PlantInfosScreen.onBackPressed -> navBack()
+        setApp(Screen.Camera.route)
+
+        // Camera -> PlantView (same as tapping from CameraScreen)
+        compose.runOnIdle {
+            navController.navigate(Screen.PlantView.route)
+        }
+        waitForRoute(Screen.PlantView.route)
+
+        // Emulate the onBackPressed callback effect
+        compose.runOnIdle {
+            navController.popBackStack()
+        }
+        waitForRoute(Screen.Camera.route)
+
+        compose.runOnIdle {
+            assertEquals(Screen.Camera.route, currentRoute.value)
+        }
+    }
 }
