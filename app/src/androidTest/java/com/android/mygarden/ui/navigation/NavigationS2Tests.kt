@@ -3,8 +3,8 @@ package com.android.mygarden.ui.navigation
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.navigation.NavHostController
@@ -19,94 +19,68 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class NavigationS2Tests {
 
-    @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
-    // We’ll stash these per-test (initialized inside setContent)
-    private lateinit var navController: NavHostController
-    private lateinit var currentRoute: MutableState<String?>
+  // We’ll stash these per-test (initialized inside setContent)
+  private lateinit var navController: NavHostController
+  private lateinit var currentRoute: MutableState<String?>
 
-    /** Helper to compose AppNavHost once per test with a given start route. */
-    private fun setApp(startRoute: String) {
-        compose.setContent {
-            navController = rememberNavController()
+  /** Helper to compose AppNavHost once per test with a given start route. */
+  private fun setApp(startRoute: String) {
+    compose.setContent {
+      navController = rememberNavController()
 
-            // Observe current route via the back stack
-            val backEntry by navController.currentBackStackEntryAsState()
-            currentRoute = remember { mutableStateOf<String?>(null) }
-            LaunchedEffect(backEntry) {
-                currentRoute.value = backEntry?.destination?.route
-            }
+      // Observe current route via the back stack
+      val backEntry by navController.currentBackStackEntryAsState()
+      currentRoute = remember { mutableStateOf<String?>(null) }
+      LaunchedEffect(backEntry) { currentRoute.value = backEntry?.destination?.route }
 
-            AppNavHost(
-                navController = navController,
-                startDestination = startRoute
-            )
-        }
-        compose.waitForIdle()
+      AppNavHost(navController = navController, startDestination = startRoute)
     }
+    compose.waitForIdle()
+  }
 
-    @Test
-    fun starts_at_Auth_when_requested() {
-        setApp(Screen.Auth.route)
-        compose.runOnIdle {
-            assertEquals(Screen.Auth.route, currentRoute.value)
-        }
-    }
+  @Test
+  fun starts_at_Auth_when_requested() {
+    setApp(Screen.Auth.route)
+    compose.runOnIdle { assertEquals(Screen.Auth.route, currentRoute.value) }
+  }
 
-    @Test
-    fun starts_at_Camera_when_requested() {
-        setApp(Screen.Camera.route)
-        compose.runOnIdle {
-            assertEquals(Screen.Camera.route, currentRoute.value)
-        }
-    }
+  @Test
+  fun starts_at_Camera_when_requested() {
+    setApp(Screen.Camera.route)
+    compose.runOnIdle { assertEquals(Screen.Camera.route, currentRoute.value) }
+  }
 
-    @Test
-    fun camera_navigates_to_plantView() {
-        setApp(Screen.Camera.route)
-        compose.runOnIdle {
-            navController.navigate(Screen.PlantView.route)
-        }
-        compose.runOnIdle {
-            assertEquals(Screen.PlantView.route, currentRoute.value)
-        }
-    }
+  @Test
+  fun camera_navigates_to_plantView() {
+    setApp(Screen.Camera.route)
+    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
+    compose.runOnIdle { assertEquals(Screen.PlantView.route, currentRoute.value) }
+  }
 
-    @Test
-    fun back_from_plantView_returns_to_camera() {
-        setApp(Screen.Camera.route)
+  @Test
+  fun back_from_plantView_returns_to_camera() {
+    setApp(Screen.Camera.route)
 
-        // Camera -> Plant View
-        compose.runOnIdle {
-            navController.navigate(Screen.PlantView.route)
-        }
-        waitForRoute(Screen.PlantView.route)
+    // Camera -> Plant View
+    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
+    waitForRoute(Screen.PlantView.route)
 
-        // popBackStack -> Camera
-        compose.runOnIdle {
-            navController.popBackStack()
-        }
-        waitForRoute(Screen.Camera.route)
-        compose.runOnIdle {
-            assertEquals(Screen.Camera.route, currentRoute.value)
-        }
-    }
+    // popBackStack -> Camera
+    compose.runOnIdle { navController.popBackStack() }
+    waitForRoute(Screen.Camera.route)
+    compose.runOnIdle { assertEquals(Screen.Camera.route, currentRoute.value) }
+  }
 
-    @Test
-    fun can_reach_profile_destination() {
-        setApp(Screen.Camera.route)
-        compose.runOnIdle {
-            navController.navigate(Screen.Profile.route)
-        }
-        compose.runOnIdle {
-            assertEquals(Screen.Profile.route, currentRoute.value)
-        }
-    }
+  @Test
+  fun can_reach_profile_destination() {
+    setApp(Screen.Camera.route)
+    compose.runOnIdle { navController.navigate(Screen.Profile.route) }
+    compose.runOnIdle { assertEquals(Screen.Profile.route, currentRoute.value) }
+  }
 
-    private fun waitForRoute(expected: String, timeoutMillis: Long = 5_000) {
-        compose.waitUntil(timeoutMillis) {
-            currentRoute.value == expected
-        }
-    }
+  private fun waitForRoute(expected: String, timeoutMillis: Long = 5_000) {
+    compose.waitUntil(timeoutMillis) { currentRoute.value == expected }
+  }
 }
-
