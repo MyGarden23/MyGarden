@@ -12,6 +12,7 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.camera.CameraScreenTestTags
@@ -39,6 +40,10 @@ class CameraScreenWithPermissionAndroidTest {
 
   @Before
   fun setup() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(
+      "pm revoke ${context.packageName} android.permission.CAMERA"
+    )
     viewModel = CameraViewModel()
     composeTestRule.setContent { CameraScreen(cameraViewModel = viewModel) }
     composeTestRule.waitForIdle()
