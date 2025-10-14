@@ -64,7 +64,8 @@ class MainActivitySmokeTest {
   private fun waitForRoot() {
     rule.waitUntil(TIMEOUT) {
       try {
-        rule.onRoot().fetchSemanticsNode(); true
+        rule.onRoot().fetchSemanticsNode()
+        true
       } catch (_: Throwable) {
         false
       }
@@ -73,7 +74,10 @@ class MainActivitySmokeTest {
 
   /** Safe probe for a node by tag without failing the test. */
   private fun nodeExistsWithTag(tag: String): Boolean =
-    try {
-      rule.onNodeWithTag(tag).fetchSemanticsNode(); true
-    } catch (_: Throwable) { false }
+      try {
+        rule.onNodeWithTag(tag).fetchSemanticsNode()
+        true
+      } catch (_: Throwable) {
+        false
+      }
 }

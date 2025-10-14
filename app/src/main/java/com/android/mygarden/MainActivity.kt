@@ -41,7 +41,13 @@ fun MyGardenApp() {
   // Small wrapper to simplify navigation calls
   val actions = remember(navController) { NavigationActions(navController) }
   // Determine where to start: if the user is logged in, skip Sign-In
-  val user = remember { FirebaseAuth.getInstance().currentUser }
+  val user = remember {
+    runCatching { FirebaseAuth.getInstance().currentUser }
+        .onFailure {
+          android.util.Log.w("MyGarden", "FirebaseAuth unavailable; defaulting to Auth", it)
+        }
+        .getOrNull()
+  }
   val startDestination = if (user == null) Screen.Auth.route else Screen.Camera.route
   // Observe the current destination so we can update UI accordingly
   val backStackEntry by navController.currentBackStackEntryAsState()
