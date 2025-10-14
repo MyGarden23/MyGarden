@@ -81,7 +81,6 @@ class EditPlantScreenTest {
 
     composeRule.waitForIdle()
 
-
     // Still disabled because no date set, and description is blank
     saveNode.assertIsNotEnabled()
 
@@ -169,7 +168,6 @@ class EditPlantScreenTest {
     composeRule.onNodeWithText("Cancel").performClick()
 
     composeRule.waitForIdle()
-
 
     // Now an error should be visible for the date field
     composeRule
