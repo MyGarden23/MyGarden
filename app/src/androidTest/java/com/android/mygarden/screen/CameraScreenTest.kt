@@ -41,9 +41,9 @@ class CameraScreenWithPermissionAndroidTest {
   @Before
   fun setup() {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(
-      "pm revoke ${context.packageName} android.permission.CAMERA"
-    )
+    InstrumentationRegistry.getInstrumentation()
+        .uiAutomation
+        .executeShellCommand("pm revoke ${context.packageName} android.permission.CAMERA")
     viewModel = CameraViewModel()
     composeTestRule.setContent { CameraScreen(cameraViewModel = viewModel) }
     composeTestRule.waitForIdle()
