@@ -48,13 +48,11 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
-import com.android.mygarden.ui.theme.MyGardenTheme
 
 // Layout proportions
 private const val HEADER_SECTION_WEIGHT = 0.2f
@@ -449,14 +447,4 @@ fun NewProfileScreen(
               Spacer(modifier = Modifier.weight(SPACER_SECTION_WEIGHT))
             }
       }
-}
-
-/**
- * Preview composable for the NewProfileScreen. Used for development and design testing in Android
- * Studio.
- */
-@Preview
-@Composable
-fun NewProfileScreenPreview() {
-  MyGardenTheme { NewProfileScreen(onRegisterPressed = {}) }
 }
