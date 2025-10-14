@@ -19,7 +19,10 @@ fun AppNavHost(
       CredentialManager.create(navController.context)
     }
 ) {
+  // This NavHost is basically the "map" of all screens in the app.
+  // Each composable() below defines one destination (screen) and what to do when navigating there.
   NavHost(navController = navController, startDestination = startDestination) {
+    // handy wrapper so we don’t call navController.navigate() directly everywhere
     val navigationActions = NavigationActions(navController)
     // Auth
     composable(Screen.Auth.route) {
@@ -28,18 +31,20 @@ fun AppNavHost(
           onSignedIn = { navigationActions.navTo(Screen.Camera) })
     }
 
-    // Top-level Camera
+    // Camera
     composable(Screen.Camera.route) {
       CameraScreen(onPictureTaken = { navigationActions.navTo(Screen.PlantView) })
     }
 
-    // Optional top-level Profile
+    // Profile
     composable(Screen.Profile.route) {
       // TODO: ProfileScreen(...)
     }
 
-    // Non top-level Plant View (shows back)
+    // Plant View
     composable(Screen.PlantView.route) {
+      // Shows plant details after a photo is taken
+      // Right now it just uses a mock Plant object for demo purposes
       PlantInfosScreen(
           plant =
               Plant(
