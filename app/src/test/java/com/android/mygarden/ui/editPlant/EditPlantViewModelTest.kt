@@ -14,6 +14,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/** Tests for [EditPlantViewModel]. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditPlantViewModelTest {
 
@@ -23,6 +24,7 @@ class EditPlantViewModelTest {
   private lateinit var owned: OwnedPlant
   private val testDispatcher = StandardTestDispatcher()
 
+  /** Set up the test environment. */
   @Before
   fun setup() = runTest {
     Dispatchers.setMain(testDispatcher)
@@ -44,11 +46,13 @@ class EditPlantViewModelTest {
         repository.saveToGarden(plant = plant, id = plantId, lastWatered = Timestamp(1760375671))
   }
 
+  /** Tear down the test environment. */
   @After
   fun tearDown() {
     Dispatchers.resetMain()
   }
 
+  /** Test clearing and setting error messages. */
   @Test
   fun clearErrorMsg_and_setErrorMsg_update_state() {
     viewModel.setErrorMsg("boom")
@@ -58,6 +62,7 @@ class EditPlantViewModelTest {
     assertNull(viewModel.uiState.value.errorMsg)
   }
 
+  /** Test loading a plant from the repository. */
   @Test
   fun loadPlant_success() = runTest {
     viewModel.loadPlant(plantId)
@@ -72,6 +77,7 @@ class EditPlantViewModelTest {
     assertNull(ui.errorMsg)
   }
 
+  /** Test loading a plant that does not exist in the repository. */
   @Test
   fun loadPlant_failure_sets_error_message() = runTest {
     viewModel.loadPlant("does-not-exist")
@@ -79,6 +85,7 @@ class EditPlantViewModelTest {
     assertEquals("Failed to load plant", viewModel.uiState.value.errorMsg)
   }
 
+  /** Test setting the last watered date. */
   @Test
   fun setLastWatered_updates_state() {
     val ts = Timestamp(1730001234000)
@@ -86,12 +93,14 @@ class EditPlantViewModelTest {
     assertEquals(ts, viewModel.uiState.value.lastWatered)
   }
 
+  /** Test setting the description. */
   @Test
   fun setDescription_updates_state() {
     viewModel.setDescription("New description")
     assertEquals("New description", viewModel.uiState.value.description)
   }
 
+  /** Test deleting a plant from the repository. */
   @Test
   fun deletePlant_success_removes_from_repository() = runTest {
     viewModel.deletePlant(plantId)
@@ -103,6 +112,7 @@ class EditPlantViewModelTest {
     } catch (e: IllegalArgumentException) {}
   }
 
+  /** Test deleting a plant that does not exist in the repository. */
   @Test
   fun deletePlant_failure_sets_error_message() = runTest {
     viewModel.deletePlant("unknown-id")
@@ -110,12 +120,14 @@ class EditPlantViewModelTest {
     assertEquals("Failed to delete plant", viewModel.uiState.value.errorMsg)
   }
 
+  /** Test editing a plant in the repository without loading it first. */
   @Test
   fun editPlant_without_load_sets_error_about_plant_not_loaded() {
     viewModel.editPlant(plantId)
     assertEquals("Plant not loaded yet", viewModel.uiState.value.errorMsg)
   }
 
+  /** Test editing a plant in the repository. */
   @Test
   fun editPlant_success_updates_repository_with_new_description_and_lastWatered() = runTest {
     viewModel.loadPlant(plantId)
@@ -139,6 +151,7 @@ class EditPlantViewModelTest {
     assertEquals(7, updated.plant.wateringFrequency)
   }
 
+  /** Test editing a plant in the repository with a different ID than the one loaded. */
   @Test
   fun editPlant_with_different_id_sets_ID_mismatch_error() {
     viewModel.loadPlant(plantId)
@@ -152,6 +165,7 @@ class EditPlantViewModelTest {
     assertTrue(err!!.contains("Plant not loaded yet"))
   }
 
+  /** Test editing a plant in the repository with a blank description. */
   @Test
   fun editPlant_with_blank_description_sets_error_and_does_not_update_repo() = runTest {
     viewModel.loadPlant(plantId)

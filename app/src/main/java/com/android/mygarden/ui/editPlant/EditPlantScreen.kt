@@ -26,7 +26,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-/** Test tags to mirror your existing pattern. */
+/** Test tags for [EditPlantScreen]. */
 object EditPlantScreenTestTags {
   const val PLANT_IMAGE = "plantImage"
   const val PLANT_NAME = "plantName"
@@ -39,6 +39,19 @@ object EditPlantScreenTestTags {
   const val DATE_PICKER_BUTTON = "datePicker"
 }
 
+/**
+ * Composable screen for editing a plant’s details.
+ *
+ * Displays the plant’s image, read-only names, editable description,
+ * and last watered date (via date picker). Handles validation and
+ * error messages, and provides Save/Delete actions.
+ *
+ * @param ownedPlantId ID of the plant to edit.
+ * @param editPlantViewModel ViewModel managing UI state and actions.
+ * @param onSaved Called after saving the plant.
+ * @param onDeleted Called after deleting the plant.
+ * @param goBack Called when navigating back.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPlantScreen(

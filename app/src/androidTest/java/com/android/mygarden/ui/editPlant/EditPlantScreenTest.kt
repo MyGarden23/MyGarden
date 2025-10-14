@@ -13,12 +13,25 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/** Tests for [EditPlantScreen]. */
 @RunWith(AndroidJUnit4::class)
 class EditPlantScreenTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
-  // --- helpers ---
+  /**
+   * Test helper to set the content of the Compose rule to the [EditPlantScreen].
+   *
+   * This function simplifies test setup by providing default values for the view model, plant ID,
+   * and callback trackers. It allows tests to override specific parameters as needed while keeping
+   * the setup concise.
+   *
+   * @param vm The [FakeEditPlantViewModel] to use for the screen. Defaults to a new instance.
+   * @param ownedPlantId The ID of the plant being edited. Defaults to "owned-123".
+   * @param onSavedCalled A mutable list to track if the `onSaved` callback was invoked.
+   * @param onDeletedCalled A mutable list to track if the `onDeleted` callback was invoked.
+   * @param goBackCalled A mutable list to track if the `goBack` callback was invoked.
+   */
   private fun setContentWith(
       vm: FakeEditPlantViewModel = FakeEditPlantViewModel(),
       ownedPlantId: String = "owned-123",
@@ -36,6 +49,10 @@ class EditPlantScreenTest {
     }
   }
 
+  /**
+   * Verifies that when the [EditPlantScreen] is composed, it triggers the `loadPlant`
+   * function on the ViewModel with the correct `ownedPlantId`.
+   */
   @Test
   fun loadPlant_calledOnComposition_withOwnedPlantId() {
     val vm = FakeEditPlantViewModel()
@@ -44,6 +61,10 @@ class EditPlantScreenTest {
     assertEquals(listOf("abc-xyz"), vm.loadCalls)
   }
 
+  /**
+   * Verifies that the plant's common name and Latin name fields are read-only
+   * and disabled for user input on the edit screen.
+   */
   @Test
   fun nameAndLatin_areReadOnlyDisabled() {
     setContentWith()
@@ -51,12 +72,23 @@ class EditPlantScreenTest {
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsNotEnabled()
   }
 
+  /**
+   * Tests that the placeholder image is displayed when the plant data does not contain an image URL.
+   * It sets up the screen with default data (which has a null image) and asserts that the
+   * image composable, identified by its test tag, is present and visible.
+   */
   @Test
   fun image_placeholderIsShown_whenNoImage() {
     setContentWith()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_IMAGE).assertIsDisplayed()
   }
 
+  /**
+   * Verifies that the 'Save' button is initially disabled and only becomes enabled
+   * after both the description and the last watered date have been provided by the user.
+   * Once enabled, it confirms that clicking 'Save' triggers the ViewModel's `editPlant`
+   * method and the `onSaved` callback.
+   */
   @Test
   fun save_disabledUntilDescriptionAndDateProvided_thenCallsVmAndCallback() {
     val vm =
@@ -104,6 +136,11 @@ class EditPlantScreenTest {
     assertTrue(onSaved.isNotEmpty())
   }
 
+  /**
+   * Tests that clicking the delete button triggers the corresponding
+   * ViewModel method `deletePlant` with the correct plant ID, and
+   * also invokes the `onDeleted` callback.
+   */
   @Test
   fun delete_callsVmAndCallback() {
     val vm = FakeEditPlantViewModel()
@@ -119,6 +156,11 @@ class EditPlantScreenTest {
     assertTrue(onDeleted.isNotEmpty())
   }
 
+
+  /**
+   * Verifies that clicking the back button in the top app bar
+   * invokes the `goBack` callback.
+   */
   @Test
   fun backButton_invokesGoBack() {
     val goBack = mutableListOf<Boolean>()
@@ -128,6 +170,12 @@ class EditPlantScreenTest {
     assertTrue(goBack.isNotEmpty())
   }
 
+  /**
+   * Tests that the validation error for a blank description field only appears after the
+   * user has interacted with (focused on) the input field. It verifies that initially, with a
+   * blank description, no error is shown. After simulating a click on the description input,
+   * it asserts that an error message becomes visible.
+   */
   @Test
   fun description_errorAppears_onlyAfterUserFocus_whenBlank() {
     val vm =
@@ -150,6 +198,11 @@ class EditPlantScreenTest {
         .assertCountEquals(1)
   }
 
+    /**
+     * Verifies that the validation error message for the "last watered" date
+     * is only displayed after the user has interacted with the date picker icon,
+     * not on initial screen load.
+     */
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun lastWatered_errorAppears_onlyAfterUserInteraction_whenMissing() {
