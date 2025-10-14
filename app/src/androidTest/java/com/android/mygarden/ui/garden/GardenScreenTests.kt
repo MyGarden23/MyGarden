@@ -94,18 +94,14 @@ class GardenScreenTests {
     runTest { repo.getAllOwnedPlants().forEach { p -> repo.deleteFromGarden(p.id) } }
   }
 
-  /**
-   * Ensures that all profile-related components are currently displayed
-   */
+  /** Ensures that all profile-related components are currently displayed */
   fun ComposeTestRule.userRowIsDisplayed() {
     onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertIsDisplayed()
     onNodeWithTag(GardenScreenTestTags.USERNAME).assertIsDisplayed()
     onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsDisplayed()
   }
 
-  /**
-   * Ensures that all plants currently on the [repo] are displayed on the screen
-   */
+  /** Ensures that all plants currently on the [repo] are displayed on the screen */
   fun ComposeTestRule.allPlantsAreDisplayed() {
     runTest {
       repo.getAllOwnedPlants().forEach { p ->
@@ -127,7 +123,8 @@ class GardenScreenTests {
   }
 
   /**
-   * Tests that the whole list is displayed (alongside profile components) when the list is not empty
+   * Tests that the whole list is displayed (alongside profile components) when the list is not
+   * empty
    */
   @Test
   fun correctDisplayWhenNonEmptyGarden() {
@@ -140,9 +137,7 @@ class GardenScreenTests {
     composeTestRule.allPlantsAreDisplayed()
   }
 
-  /**
-   * Tests that all buttons present are clickable
-   */
+  /** Tests that all buttons present are clickable */
   @Test
   fun buttonsAreClickable() {
     setContent()
