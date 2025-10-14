@@ -56,6 +56,36 @@ import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.ui.theme.MyGardenTheme
 
+// Layout proportions
+private const val HEADER_SECTION_WEIGHT = 0.2f
+private const val CONTENT_SECTION_WEIGHT = 0.3f
+private const val FORM_SECTION_WEIGHT = 0.6f
+private const val SPACER_SECTION_WEIGHT = 0.1f
+private const val AVATAR_WIDTH_FRACTION = 0.25f
+private const val AVATAR_ICON_SIZE_FRACTION = 0.5f
+
+// Dimensions
+private val BUTTON_HEIGHT = 56.dp
+private val BUTTON_CORNER_RADIUS = 25.dp
+private val DROPDOWN_HEIGHT = 250.dp
+private val DROPDOWN_OFFSET = (-266).dp
+private val CARD_ELEVATION = 6.dp
+
+// Spacing
+private val HORIZONTAL_PADDING = 24.dp
+private val VERTICAL_PADDING = 8.dp
+private val STANDARD_PADDING = 16.dp
+private val ITEM_VERTICAL_PADDING = 12.dp
+
+// Typography
+private val TITLE_FONT_SIZE = 20.sp
+private val BUTTON_FONT_SIZE = 16.sp
+private val CAPTION_FONT_SIZE = 12.sp
+private val BODY_FONT_SIZE = 14.sp
+
+// Countries logic
+private const val MAX_COUNTRIES_DISPLAYED = 15
+
 /**
  * Screen for creating a new user profile in the MyGarden app.
  *
@@ -108,34 +138,37 @@ fun NewProfileScreen(
             },
             modifier =
                 Modifier.fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                    .height(BUTTON_HEIGHT)
+                    .padding(horizontal = HORIZONTAL_PADDING, vertical = VERTICAL_PADDING)
                     .testTag(NewProfileScreenTestTags.REGISTER_BUTTON),
             colors =
                 ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            shape = RoundedCornerShape(25.dp)) {
+            shape = RoundedCornerShape(BUTTON_CORNER_RADIUS)) {
               Text(
                   text = "Register Profile",
                   color = MaterialTheme.colorScheme.onPrimary,
-                  fontSize = 16.sp,
+                  fontSize = BUTTON_FONT_SIZE,
                   fontWeight = FontWeight.Medium)
             }
       }) { paddingValues ->
         // Main content layout with three sections using weight distribution
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = HORIZONTAL_PADDING),
             verticalArrangement = Arrangement.SpaceBetween) {
               // Header section (20% of screen) - Title and Avatar
-              Row(modifier = Modifier.weight(0.2f)) {
+              Row(modifier = Modifier.weight(HEADER_SECTION_WEIGHT)) {
                 Column(
-                    modifier = Modifier.weight(0.3f).fillMaxHeight(),
+                    modifier = Modifier.weight(CONTENT_SECTION_WEIGHT).fillMaxHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceEvenly) {
 
                       // Screen title
                       Text(
                           text = "New Profile",
-                          fontSize = 20.sp,
+                          fontSize = TITLE_FONT_SIZE,
                           fontWeight = FontWeight.Medium,
                           color = MaterialTheme.colorScheme.onSurfaceVariant,
                           modifier = Modifier.testTag(NewProfileScreenTestTags.TITLE))
@@ -143,7 +176,7 @@ fun NewProfileScreen(
                       // User avatar placeholder with person icon
                       Box(
                           modifier =
-                              Modifier.fillMaxWidth(0.25f) // 25% of screen width
+                              Modifier.fillMaxWidth(AVATAR_WIDTH_FRACTION) // 25% of screen width
                                   .aspectRatio(1f) // Maintain square aspect ratio
                                   .clip(CircleShape)
                                   .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -152,7 +185,9 @@ fun NewProfileScreen(
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = "Profile Avatar",
-                                modifier = Modifier.fillMaxSize(0.5f), // 50% of circle size
+                                modifier =
+                                    Modifier.fillMaxSize(
+                                        AVATAR_ICON_SIZE_FRACTION), // 50% of circle size
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant)
                           }
                     }
@@ -160,7 +195,8 @@ fun NewProfileScreen(
 
               // Form section (60% of screen) - Input fields
               Column(
-                  modifier = Modifier.weight(0.6f), verticalArrangement = Arrangement.SpaceEvenly) {
+                  modifier = Modifier.weight(FORM_SECTION_WEIGHT),
+                  verticalArrangement = Arrangement.SpaceEvenly) {
 
                     // First Name field - Required field with validation
                     OutlinedTextField(
@@ -265,11 +301,12 @@ fun NewProfileScreen(
                       // Searchable dropdown for country selection
                       if (isCountryExpanded) {
                         Card(
-                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                            elevation =
+                                CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .height(250.dp)
-                                    .offset(y = (-266).dp)
+                                    .height(DROPDOWN_HEIGHT)
+                                    .offset(y = DROPDOWN_OFFSET)
                                     .testTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN),
                             colors =
                                 CardDefaults.cardColors(
@@ -283,17 +320,18 @@ fun NewProfileScreen(
                                       Text(
                                           text = "${filteredCountries.size} countries found",
                                           modifier =
-                                              Modifier.padding(16.dp)
+                                              Modifier.padding(STANDARD_PADDING)
                                                   .testTag(
                                                       NewProfileScreenTestTags
                                                           .COUNTRY_RESULTS_COUNT),
-                                          fontSize = 12.sp,
+                                          fontSize = CAPTION_FONT_SIZE,
                                           fontStyle = FontStyle.Italic,
                                           color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
 
                                     // Display filtered countries (limited to 15 for performance)
-                                    items(filteredCountries.take(15)) { country ->
+                                    items(filteredCountries.take(MAX_COUNTRIES_DISPLAYED)) { country
+                                      ->
                                       Text(
                                           text = country,
                                           modifier =
@@ -302,7 +340,9 @@ fun NewProfileScreen(
                                                     newProfileViewModel.setCountry(country)
                                                     isCountryExpanded = false
                                                   }
-                                                  .padding(horizontal = 16.dp, vertical = 12.dp)
+                                                  .padding(
+                                                      horizontal = STANDARD_PADDING,
+                                                      vertical = ITEM_VERTICAL_PADDING)
                                                   .testTag(
                                                       NewProfileScreenTestTags.getCountryItemTag(
                                                           country)),
@@ -311,17 +351,17 @@ fun NewProfileScreen(
 
                                     // Show indicator for additional countries if more than 15
                                     // results
-                                    if (filteredCountries.size > 15) {
+                                    if (filteredCountries.size > MAX_COUNTRIES_DISPLAYED) {
                                       item {
                                         Text(
                                             text =
-                                                "... and ${filteredCountries.size - 15} more countries",
+                                                "... and ${filteredCountries.size - MAX_COUNTRIES_DISPLAYED} more countries",
                                             modifier =
-                                                Modifier.padding(16.dp)
+                                                Modifier.padding(STANDARD_PADDING)
                                                     .testTag(
                                                         NewProfileScreenTestTags
                                                             .COUNTRY_MORE_RESULTS),
-                                            fontSize = 12.sp,
+                                            fontSize = CAPTION_FONT_SIZE,
                                             fontStyle = FontStyle.Italic,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                                       }
@@ -333,11 +373,11 @@ fun NewProfileScreen(
                                         Text(
                                             text = "No countries found",
                                             modifier =
-                                                Modifier.padding(16.dp)
+                                                Modifier.padding(STANDARD_PADDING)
                                                     .testTag(
                                                         NewProfileScreenTestTags
                                                             .COUNTRY_NO_RESULTS),
-                                            fontSize = 14.sp,
+                                            fontSize = BODY_FONT_SIZE,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                                       }
                                     }
@@ -348,7 +388,7 @@ fun NewProfileScreen(
                   }
 
               // Bottom spacer (10% of screen) - Pushes content up
-              Spacer(modifier = Modifier.weight(0.1f))
+              Spacer(modifier = Modifier.weight(SPACER_SECTION_WEIGHT))
             }
       }
 }
