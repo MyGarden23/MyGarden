@@ -74,6 +74,9 @@ class EditPlantScreenTest {
 
     // Touch the date icon to simulate user intent (shows error if missing)
     composeRule.onNodeWithTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON).performClick()
+
+    composeRule.runOnIdle {}
+
     // Still disabled because no date set, and description is blank
     saveNode.assertIsNotEnabled()
 
@@ -107,6 +110,8 @@ class EditPlantScreenTest {
     setContentWith(vm = vm, onDeletedCalled = onDeleted)
 
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+
+    composeRule.runOnIdle {}
     composeRule.waitForIdle()
 
     assertEquals(listOf("owned-123"), vm.deleteCalls)
@@ -155,7 +160,7 @@ class EditPlantScreenTest {
     // User presses the calendar button (marks date as 'touched')
     composeRule.onNodeWithTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON).performClick()
 
-    composeRule.waitForIdle()
+    composeRule.runOnIdle {}
 
     composeRule.waitForIdle()
 
