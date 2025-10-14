@@ -77,10 +77,6 @@ class EditPlantScreenTest {
 
     composeRule.waitForIdle()
 
-    composeRule.onNodeWithText("Cancel").performClick()
-
-    composeRule.waitForIdle()
-
     // Still disabled because no date set, and description is blank
     saveNode.assertIsNotEnabled()
 
@@ -163,10 +159,6 @@ class EditPlantScreenTest {
 
     // User presses the calendar button (marks date as 'touched')
     composeRule.onNodeWithTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON).performClick()
-    composeRule.waitForIdle()
-
-    composeRule.onNodeWithText("Cancel").performClick()
-
     composeRule.waitForIdle()
 
     // Now an error should be visible for the date field
