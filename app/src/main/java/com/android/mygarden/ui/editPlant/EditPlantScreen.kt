@@ -17,7 +17,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
@@ -55,7 +54,7 @@ object EditPlantScreenTestTags {
 @Composable
 fun EditPlantScreen(
     ownedPlantId: String,
-    editPlantViewModel: EditPlantViewModelInterface = viewModel(),
+    editPlantViewModel: EditPlantViewModelInterface = EditPlantViewModel(),
     onSaved: () -> Unit = {},
     onDeleted: () -> Unit = {},
     goBack: () -> Unit = {},
