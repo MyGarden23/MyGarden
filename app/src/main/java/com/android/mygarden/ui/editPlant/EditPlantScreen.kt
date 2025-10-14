@@ -42,9 +42,8 @@ object EditPlantScreenTestTags {
 /**
  * Composable screen for editing a plant’s details.
  *
- * Displays the plant’s image, read-only names, editable description,
- * and last watered date (via date picker). Handles validation and
- * error messages, and provides Save/Delete actions.
+ * Displays the plant’s image, read-only names, editable description, and last watered date (via
+ * date picker). Handles validation and error messages, and provides Save/Delete actions.
  *
  * @param ownedPlantId ID of the plant to edit.
  * @param editPlantViewModel ViewModel managing UI state and actions.

@@ -50,8 +50,8 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Verifies that when the [EditPlantScreen] is composed, it triggers the `loadPlant`
-   * function on the ViewModel with the correct `ownedPlantId`.
+   * Verifies that when the [EditPlantScreen] is composed, it triggers the `loadPlant` function on
+   * the ViewModel with the correct `ownedPlantId`.
    */
   @Test
   fun loadPlant_calledOnComposition_withOwnedPlantId() {
@@ -62,8 +62,8 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Verifies that the plant's common name and Latin name fields are read-only
-   * and disabled for user input on the edit screen.
+   * Verifies that the plant's common name and Latin name fields are read-only and disabled for user
+   * input on the edit screen.
    */
   @Test
   fun nameAndLatin_areReadOnlyDisabled() {
@@ -73,8 +73,8 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Tests that the placeholder image is displayed when the plant data does not contain an image URL.
-   * It sets up the screen with default data (which has a null image) and asserts that the
+   * Tests that the placeholder image is displayed when the plant data does not contain an image
+   * URL. It sets up the screen with default data (which has a null image) and asserts that the
    * image composable, identified by its test tag, is present and visible.
    */
   @Test
@@ -84,10 +84,9 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Verifies that the 'Save' button is initially disabled and only becomes enabled
-   * after both the description and the last watered date have been provided by the user.
-   * Once enabled, it confirms that clicking 'Save' triggers the ViewModel's `editPlant`
-   * method and the `onSaved` callback.
+   * Verifies that the 'Save' button is initially disabled and only becomes enabled after both the
+   * description and the last watered date have been provided by the user. Once enabled, it confirms
+   * that clicking 'Save' triggers the ViewModel's `editPlant` method and the `onSaved` callback.
    */
   @Test
   fun save_disabledUntilDescriptionAndDateProvided_thenCallsVmAndCallback() {
@@ -137,9 +136,8 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Tests that clicking the delete button triggers the corresponding
-   * ViewModel method `deletePlant` with the correct plant ID, and
-   * also invokes the `onDeleted` callback.
+   * Tests that clicking the delete button triggers the corresponding ViewModel method `deletePlant`
+   * with the correct plant ID, and also invokes the `onDeleted` callback.
    */
   @Test
   fun delete_callsVmAndCallback() {
@@ -156,11 +154,7 @@ class EditPlantScreenTest {
     assertTrue(onDeleted.isNotEmpty())
   }
 
-
-  /**
-   * Verifies that clicking the back button in the top app bar
-   * invokes the `goBack` callback.
-   */
+  /** Verifies that clicking the back button in the top app bar invokes the `goBack` callback. */
   @Test
   fun backButton_invokesGoBack() {
     val goBack = mutableListOf<Boolean>()
@@ -171,10 +165,10 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Tests that the validation error for a blank description field only appears after the
-   * user has interacted with (focused on) the input field. It verifies that initially, with a
-   * blank description, no error is shown. After simulating a click on the description input,
-   * it asserts that an error message becomes visible.
+   * Tests that the validation error for a blank description field only appears after the user has
+   * interacted with (focused on) the input field. It verifies that initially, with a blank
+   * description, no error is shown. After simulating a click on the description input, it asserts
+   * that an error message becomes visible.
    */
   @Test
   fun description_errorAppears_onlyAfterUserFocus_whenBlank() {
@@ -198,11 +192,10 @@ class EditPlantScreenTest {
         .assertCountEquals(1)
   }
 
-    /**
-     * Verifies that the validation error message for the "last watered" date
-     * is only displayed after the user has interacted with the date picker icon,
-     * not on initial screen load.
-     */
+  /**
+   * Verifies that the validation error message for the "last watered" date is only displayed after
+   * the user has interacted with the date picker icon, not on initial screen load.
+   */
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun lastWatered_errorAppears_onlyAfterUserInteraction_whenMissing() {
