@@ -157,25 +157,20 @@ class EditPlantScreenTest {
     setContentWith(vm = vm)
 
     // No error initially
-    composeRule.onAllNodesWithTag(
-      EditPlantScreenTestTags.ERROR_MESSAGE,
-      useUnmergedTree = true
-    ).assertCountEquals(0)
+    composeRule
+        .onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
+        .assertCountEquals(0)
 
     // User presses the calendar button (marks date as 'touched')
     composeRule.onNodeWithTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON).performClick()
     composeRule.waitForIdle()
 
     // Now an error should be visible for the date field
-    composeRule.waitUntilAtLeastOneExists(
-      hasTestTag(EditPlantScreenTestTags.ERROR_MESSAGE),
-      5_000
-    )
+    composeRule.waitUntilAtLeastOneExists(hasTestTag(EditPlantScreenTestTags.ERROR_MESSAGE), 5_000)
 
-    composeRule.onAllNodesWithTag(
-      EditPlantScreenTestTags.ERROR_MESSAGE,
-      useUnmergedTree = true
-    ).assertCountEquals(1)
+    composeRule
+        .onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
+        .assertCountEquals(1)
   }
 }
 
