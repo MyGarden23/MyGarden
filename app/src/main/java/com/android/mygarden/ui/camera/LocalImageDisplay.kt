@@ -1,7 +1,6 @@
 package com.android.mygarden.ui.camera
 
 import android.R.attr.contentDescription
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,6 +31,7 @@ import java.io.File
 fun LocalImageDisplay(
     imagePath: String,
     modifier: Modifier = Modifier,
+    contentDescription: String = "default",
     testVersionRemeberAsync: Boolean = false
 ) {
   if (testVersionRemeberAsync) {
@@ -39,16 +39,15 @@ fun LocalImageDisplay(
     Box(modifier = Modifier.fillMaxSize()) {
       Image(
           painter = painter,
-          contentDescription = "Plant image",
+          contentDescription = contentDescription,
           contentScale = ContentScale.Crop,
           modifier = modifier)
     }
   } else {
     Box(modifier = Modifier.fillMaxSize()) {
-      Log.d("ImageCheck", File(imagePath).exists().toString())
       AsyncImage(
           model = ImageRequest.Builder(LocalContext.current).data(imagePath).build(),
-          contentDescription = "Plant image",
+          contentDescription = contentDescription,
           modifier =
               Modifier.fillMaxWidth(0.6f)
                   .height(220.dp)

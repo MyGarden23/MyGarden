@@ -63,8 +63,6 @@ class CameraViewModel : ViewModel() {
                * and the path of the plant to the next screen
                * */
               onPictureTaken(file.absolutePath)
-
-              Log.d("CameraViewModel", "Image saved at: ${file.absolutePath}")
             } catch (e: Exception) {
               toastPictureFail(context)
               Log.e(CAMERA_ERROR_TAG, "ImageProxy could not be converted to a Bitmap", e)

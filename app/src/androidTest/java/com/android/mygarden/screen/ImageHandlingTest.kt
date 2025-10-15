@@ -41,7 +41,7 @@ class ImageHandlingTest {
     val loadedBitmap = BitmapFactory.decodeFile(file.absolutePath)
 
     // Check that the bitmap exists and has the right dimensions
-    assertNotNull("L’image relue ne doit pas être nulle", loadedBitmap)
+    assertNotNull("The image should not be null", loadedBitmap)
     assertEquals(100, loadedBitmap.width)
     assertEquals(100, loadedBitmap.height)
   }
@@ -62,7 +62,10 @@ class ImageHandlingTest {
 
     // Display the image with the AsyncImage version
     composeTestRule.setContent {
-      LocalImageDisplay(imagePath = file.absolutePath, testVersionRemeberAsync = false)
+      LocalImageDisplay(
+          imagePath = file.absolutePath,
+          testVersionRemeberAsync = false,
+          contentDescription = "Plant image")
     }
 
     // Check that the image is displayed
@@ -85,7 +88,10 @@ class ImageHandlingTest {
 
     // Display the image with the rememberAsyncImagePainter version
     composeTestRule.setContent {
-      LocalImageDisplay(imagePath = file.absolutePath, testVersionRemeberAsync = true)
+      LocalImageDisplay(
+          imagePath = file.absolutePath,
+          testVersionRemeberAsync = true,
+          contentDescription = "Plant image")
     }
 
     // Check that the image is displayed
