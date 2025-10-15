@@ -135,8 +135,8 @@ class CameraScreenWithoutPermissionTest {
   fun setup() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     InstrumentationRegistry.getInstrumentation()
-      .uiAutomation
-      .executeShellCommand("pm revoke ${context.packageName} android.permission.CAMERA")
+        .uiAutomation
+        .executeShellCommand("pm revoke ${context.packageName} android.permission.CAMERA")
 
     Intents.init()
     viewModel = CameraViewModel()
