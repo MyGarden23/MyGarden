@@ -71,16 +71,31 @@ jobs:
             echo "branch=manual" >> $GITHUB_OUTPUT
           else
             branch="${{ github.ref_name }}"
-            # Remove 'release/' prefix if present
-            branch_clean=$(echo "$branch" | sed 's/^release\///')
+            # Remove 'release/' prefix if present and replace slashes with dashes
+            branch_clean=$(echo "$branch" | sed 's/^release\///' | sed 's/\//-/g')
             echo "branch=$branch_clean" >> $GITHUB_OUTPUT
           fi
+
+      # Step 8.5: Debug - Check what APK files exist
+      - name: Debug APK files
+        run: |
+          echo "Looking for APK files..."
+          find . -name "*.apk" -type f
+          ls -la app/build/outputs/apk/release/ || echo "Release directory not found"
+          ls -la app/build/outputs/apk/ || echo "APK directory not found"
 
       # Step 9: Rename APK with meaningful name
       - name: Rename APK
         run: |
           cd app/build/outputs/apk/release/
-          mv app-release.apk MyGarden-${{ steps.branch-name.outputs.branch }}-${{ github.run_number }}-release.apk
+          # Find the actual APK file (might not be named exactly app-release.apk)
+          apk_file=$(find . -name "*.apk" -type f | head -n 1)
+          if [ -z "$apk_file" ]; then
+            echo "No APK file found!"
+            exit 1
+          fi
+          echo "Found APK file: $apk_file"
+          mv "$apk_file" MyGarden-${{ steps.branch-name.outputs.branch }}-${{ github.run_number }}-release.apk
           ls -la *.apk
 
       # Step 10: Upload APK as artifact
