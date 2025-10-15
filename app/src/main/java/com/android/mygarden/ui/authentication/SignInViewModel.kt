@@ -1,9 +1,12 @@
 package com.android.mygarden.ui.authentication
 
 import android.content.Context
+import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
@@ -30,6 +33,8 @@ data class AuthUIState(
     val errorMsg: String? = null,
     val signedOut: Boolean = false
 )
+
+private const val TAG = "SignIn"
 
 /**
  * ViewModel for the Sign-In view.
@@ -84,27 +89,32 @@ class SignInViewModel(private val repository: AuthRepository = AuthRepositoryFir
           }
         }
       } catch (e: GetCredentialCancellationException) {
-        // User cancelled the sign-in flow
+        Log.w(TAG, "User cancelled sheet", e)
         _uiState.update {
           it.copy(isLoading = false, errorMsg = "Sign-in cancelled", signedOut = true, user = null)
         }
-      } catch (e: androidx.credentials.exceptions.GetCredentialException) {
-        // Other credential errors
+      } catch (e: NoCredentialException) {
+        Log.w(TAG, "No credentials available (no Google account / provider not ready)", e)
         _uiState.update {
           it.copy(
               isLoading = false,
-              errorMsg = "Failed to get credentials: ${e.localizedMessage}",
+              errorMsg = "No Google account found on device",
+              signedOut = true,
+              user = null)
+        }
+      } catch (e: GetCredentialException) {
+        Log.w(TAG, "Other credential error: ${e::class.simpleName} ${e.message}", e)
+        _uiState.update {
+          it.copy(
+              isLoading = false,
+              errorMsg = "Failed to get credentials",
               signedOut = true,
               user = null)
         }
       } catch (e: Exception) {
-        // Unexpected errors
+        Log.e(TAG, "Unexpected error: ${e.message}", e)
         _uiState.update {
-          it.copy(
-              isLoading = false,
-              errorMsg = "Unexpected error: ${e.localizedMessage}",
-              signedOut = true,
-              user = null)
+          it.copy(isLoading = false, errorMsg = "Unexpected error", signedOut = true, user = null)
         }
       }
     }
