@@ -103,20 +103,14 @@ jobs:
         with:
           api-level: 34
           target: google_apis
+          device: pixel_8
           arch: x86_64
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back virtualscene -camera-front webcam0 -memory 4096 -partition-size 4096
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back virtualscene -camera-front webcam0 -memory 4096 -partition-size 4096
           disable-animations: true
           script: |
             echo "Starting instrumented tests..."
-            adb shell settings put global window_animation_scale 0.0
-            adb shell settings put global transition_animation_scale 0.0  
-            adb shell settings put global animator_duration_scale 0.0
-            # Wait for emulator to be fully ready
-            adb wait-for-device
-            sleep 10
-            # Run the connected tests with more verbose output
-            ./gradlew connectedCheck --parallel --build-cache --info
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresNoCamera
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report

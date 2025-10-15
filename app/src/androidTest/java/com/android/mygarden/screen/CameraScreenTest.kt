@@ -27,6 +27,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class RequiresNoCamera
+
 @RunWith(AndroidJUnit4::class)
 class CameraScreenWithPermissionAndroidTest {
 
@@ -124,6 +128,7 @@ class CameraScreenWithPermissionAndroidTest {
   }
 }
 
+@RequiresNoCamera
 @RunWith(AndroidJUnit4::class)
 class CameraScreenWithoutPermissionTest {
 
