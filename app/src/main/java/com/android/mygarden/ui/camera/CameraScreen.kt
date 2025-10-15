@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.CameraSelector
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
@@ -143,19 +144,27 @@ fun CameraScreen(
                     .background(MaterialTheme.colorScheme.background)) {
               /* Camera preview displayed when the user gave access to the camera */
               if (cameraPermission.value) {
-                val controller = remember {
-                  // Enable the camera controller to capture images
-                  LifecycleCameraController(context).apply {
-                    setEnabledUseCases(CameraController.IMAGE_CAPTURE)
-                  }
-                }
+                val controller =
+                    remember(uiState.value.cameraSelector) {
+                      // Enable the camera controller to capture images
+                      try {
+                        LifecycleCameraController(context).apply {
+                          // Set the camera selector first, before enabling use cases
+                          cameraSelector = uiState.value.cameraSelector
+                          setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+                        }
+                      } catch (e: Exception) {
+                        // If no front camera just go to back camera
+                        LifecycleCameraController(context).apply {
+                          cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                          setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+                        }
+                      }
+                    }
                 CameraPreview(controller = controller, modifier = modifier.fillMaxSize())
                 // Button for switching between back camera and front camera
                 IconButton(
-                    onClick = {
-                      cameraViewModel.switchOrientation()
-                      controller.cameraSelector = uiState.value.cameraSelector
-                    },
+                    onClick = { cameraViewModel.switchOrientation() },
                     modifier =
                         modifier
                             .padding(20.dp, 20.dp)

@@ -129,12 +129,15 @@ class CameraViewModel : ViewModel() {
    * that contains the camera selector.
    */
   fun switchOrientation() {
-    _uiState.value.cameraSelector =
+    val targetCameraSelector =
         if (_uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
           CameraSelector.DEFAULT_FRONT_CAMERA
         } else {
           CameraSelector.DEFAULT_BACK_CAMERA
         }
+
+    // Error handling will be done at the camera binding level
+    _uiState.value = _uiState.value.copy(cameraSelector = targetCameraSelector)
   }
 
   /**

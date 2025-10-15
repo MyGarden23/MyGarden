@@ -74,11 +74,11 @@ class CameraScreenWithPermissionAndroidTest {
 
   @Test
   fun switchCameraButtonWorks() {
-    /* assertEquals(viewModel.uiState.value.cameraSelector, CameraSelector.DEFAULT_BACK_CAMERA)
+    assertEquals(viewModel.uiState.value.cameraSelector, CameraSelector.DEFAULT_BACK_CAMERA)
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).performClick()
     assertEquals(viewModel.uiState.value.cameraSelector, CameraSelector.DEFAULT_FRONT_CAMERA)
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).performClick()
-    assertEquals(viewModel.uiState.value.cameraSelector, CameraSelector.DEFAULT_BACK_CAMERA) */
+    assertEquals(viewModel.uiState.value.cameraSelector, CameraSelector.DEFAULT_BACK_CAMERA)
   }
 
   @Test
