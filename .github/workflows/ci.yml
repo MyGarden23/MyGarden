@@ -110,7 +110,8 @@ jobs:
           disable-animations: true
           script: |
             echo "Starting instrumented tests..."
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresNoCamera
+            export CI=true
+            ./gradlew connectedCheck --parallel --build-cache
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report

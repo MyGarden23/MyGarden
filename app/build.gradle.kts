@@ -76,6 +76,9 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+
+        // Add arguments for instrumentation tests
+        animationsDisabled = true
     }
 
 
