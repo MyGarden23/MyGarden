@@ -134,14 +134,24 @@ class CameraScreenWithoutPermissionTest {
   @Before
   fun setup() {
     val context = ApplicationProvider.getApplicationContext<Context>()
+
+    // Revoke camera permission
     InstrumentationRegistry.getInstrumentation()
         .uiAutomation
         .executeShellCommand("pm revoke ${context.packageName} android.permission.CAMERA")
 
+    // Wait for the permission change to apply
+    Thread.sleep(1000)
+
     Intents.init()
     viewModel = CameraViewModel()
+
+    // Set the content and wait for idle to ensure composition is complete
     composeTestRule.setContent { CameraScreen(cameraViewModel = viewModel) }
     composeTestRule.waitForIdle()
+
+    // Additional wait to ensure permission is correctly revoked
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.hasCameraPermission(context) }
   }
 
   @After
@@ -151,6 +161,9 @@ class CameraScreenWithoutPermissionTest {
 
   @Test
   fun cameraScreenNoAccessButtonsTestTagsAreDisplayed() {
+    // Wait for UI to settle after permission revocation
+    composeTestRule.waitForIdle()
+
     composeTestRule
         .onNodeWithTag(CameraScreenTestTags.ENABLE_CAMERA_PERMISSION)
         .assertExists()
@@ -163,6 +176,9 @@ class CameraScreenWithoutPermissionTest {
 
   @Test
   fun cameraScreenNoAccessButtonsAreEnabled() {
+    // Wait for UI to settle after permission revocation
+    composeTestRule.waitForIdle()
+
     composeTestRule
         .onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON)
         .assertIsEnabled()
@@ -170,11 +186,12 @@ class CameraScreenWithoutPermissionTest {
 
   @Test
   fun cameraPreviewIsNotVisibleWithNoAccess() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    assertFalse("Camera permission should be revoked", viewModel.hasCameraPermission(context))
+
     // Check that the camera preview is inactive when no camera access is granted
     composeTestRule.onNodeWithTag(CameraScreenTestTags.PREVIEW_VIEW).assertDoesNotExist()
   }
-
-  // Instead of using real intents mock them using intending()
 
   @Test
   fun reAskForPermissionLaunchesCorrectIntent() {
@@ -194,5 +211,26 @@ class CameraScreenWithoutPermissionTest {
   fun hasCameraAccessWorksWhenNoAccessIsGranted() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     assertFalse(viewModel.hasCameraPermission(context))
+  }
+
+  @Test
+  fun noCameraAccessScreenElementsAreVisibleWhenPermissionDenied() {
+    // Wait a bit more for UI to stabilize after permission revocation
+    Thread.sleep(2000)
+    composeTestRule.waitForIdle()
+
+    // Verify that no camera access elements are shown
+    composeTestRule
+        .onNodeWithTag(CameraScreenTestTags.ENABLE_CAMERA_PERMISSION)
+        .assertExists()
+        .assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON)
+        .assertExists()
+        .assertIsDisplayed()
+
+    // Ensure camera preview is not shown
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.PREVIEW_VIEW).assertDoesNotExist()
   }
 }
