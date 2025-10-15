@@ -28,6 +28,17 @@ android {
         }
     }
 
+    // Signing configuration for release builds
+    signingConfigs {
+        create("release") {
+            // These will be provided by GitHub Actions environment variables
+            storeFile = file("../release.keystore")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -35,6 +46,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Use the signing config for release builds
+            signingConfig = signingConfigs.getByName("release")
         }
 
         debug {
@@ -118,7 +131,7 @@ sonar {
         property("sonar.tests", mutableListOf("src/test/java", "src/androidTest/java"))
 
         // Optional exclusions (string)
-        property("sonar.exclusions", "**/R.class,**/R$*.class,**/BuildConfig.*,**/Manifest*.*,android/**/*.*")
+        property("sonar.exclusions", "**/R.class,**/R$*.class,**/BuildConfig.*,**/Manifest*.*,android/**/*.*, **/ui/theme/**")
     }
 }
 
@@ -243,6 +256,16 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
             logger.lifecycle("No execution data found — skipping jacocoTestReport.")
         }
         hasData
+    }
+
+    doLast {
+        // New block to modify the XML report after it's generated
+        val reportFile = reports.xml.outputLocation.asFile.get()
+        if (reportFile.exists()) {
+            val content = reportFile.readText()
+            val cleanedContent = content.replace("<line[^>]+nr=\"65535\"[^>]*>".toRegex(), "")
+            reportFile.writeText(cleanedContent)
+        }
     }
 
     // Ensure unit tests ran

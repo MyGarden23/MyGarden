@@ -24,7 +24,7 @@ class PlantsRepositoryLocal : PlantsRepository {
   }
 
   override suspend fun getAllOwnedPlants(): List<OwnedPlant> {
-    return ownedPlants
+    return ownedPlants.toList()
   }
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
