@@ -89,7 +89,7 @@ jobs:
       - name: Assemble
         run: |
           # To run the CI with debug information, add --info
-          ./gradlew assemble lint --parallel --build-cache
+          ./gradlew assembleDebug lint --parallel --build-cache
 
       # Run Unit tests
       - name: Run tests
@@ -105,6 +105,7 @@ jobs:
           target: google_apis
           device: pixel_8
           arch: x86_64
+          device: pixel_8
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back emulated  -camera-front webcam0 -memory 4096 -partition-size 4096
           disable-animations: true

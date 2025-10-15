@@ -1,6 +1,7 @@
 [versions]
 agp = "8.3.0"
 espressoIntents = "3.5.1"
+coilCompose = "2.6.0"
 kotlin = "1.8.10"
 coreKtx = "1.12.0"
 ktfmt = "0.17.0"
@@ -48,6 +49,7 @@ androidx-credentials-play-services-auth = { module = "androidx.credentials:crede
 androidx-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espressoIntents" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }

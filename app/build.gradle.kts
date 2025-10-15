@@ -30,6 +30,17 @@ android {
         multiDexEnabled = true
     }
 
+    // Signing configuration for release builds
+    signingConfigs {
+        create("release") {
+            // These will be provided by GitHub Actions environment variables
+            storeFile = file("../release.keystore")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -37,6 +48,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Use the signing config for release builds
+            signingConfig = signingConfigs.getByName("release")
         }
 
         debug {
@@ -196,6 +209,10 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
+
+    // ----------         Coil      ------------
+    // Compatible with Kotlin 1.8
+    implementation("io.coil-kt:coil-compose:2.6.0")
 }
 
 

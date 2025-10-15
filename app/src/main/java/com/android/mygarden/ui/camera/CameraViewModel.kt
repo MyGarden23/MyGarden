@@ -16,6 +16,8 @@ import androidx.camera.view.LifecycleCameraController
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
+import java.io.File
+import java.io.FileOutputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,7 +51,7 @@ class CameraViewModel : ViewModel() {
   fun takePicture(
       context: Context,
       controller: LifecycleCameraController,
-      onPictureTaken: (Bitmap) -> Unit
+      onPictureTaken: (String) -> Unit
   ) {
     controller.takePicture(
         ContextCompat.getMainExecutor(context),
@@ -58,9 +60,19 @@ class CameraViewModel : ViewModel() {
           override fun onCaptureSuccess(image: ImageProxy) {
             super.onCaptureSuccess(image)
             try {
-              onPictureTaken(image.toBitmap())
+              // We convert the image to a Bitmap because it will be useful later for sending it to
+              // an API
+              val bitmap = image.toBitmap()
               image.close()
-            } catch (e: IllegalArgumentException) {
+
+              // Save the image locally
+              val file = saveBitmapToFile(context, bitmap, "plant_${System.currentTimeMillis()}")
+
+              /* Give the image of the plant in Bitmap (to give to an API eventually)
+               * and the path of the plant to the next screen
+               * */
+              onPictureTaken(file.absolutePath)
+            } catch (e: Exception) {
               toastPictureFail(context)
               Log.e(CAMERA_ERROR_TAG, "ImageProxy could not be converted to a Bitmap", e)
             }
@@ -151,5 +163,19 @@ class CameraViewModel : ViewModel() {
   fun uriToBitmap(context: Context, uri: Uri): Bitmap {
     val source = ImageDecoder.createSource(context.contentResolver, uri)
     return ImageDecoder.decodeBitmap(source)
+  }
+
+  /**
+   * Takes the image given in Bitmap type, compress it in JPEG format and store it in
+   * context.filesDir which is a local memory place accessible when you have the context of the app.
+   *
+   * @param context the context of the app
+   * @param bitmap the image in bitmap type
+   * @param fileName the name we want to give to the image that will be stored
+   */
+  private fun saveBitmapToFile(context: Context, bitmap: Bitmap, fileName: String): File {
+    val file = File(context.filesDir, "$fileName.jpg")
+    FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out) }
+    return file
   }
 }

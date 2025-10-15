@@ -6,6 +6,9 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -86,7 +89,7 @@ private val BUTTONS_COLOR = Color.White
 fun CameraScreen(
     modifier: Modifier = Modifier,
     cameraViewModel: CameraViewModel = viewModel(),
-    onPictureTaken: (Bitmap) -> Unit = {}
+    onPictureTaken: (String) -> Unit = {}
 ) {
   val uiState = cameraViewModel.uiState.collectAsState()
   val context = LocalContext.current
