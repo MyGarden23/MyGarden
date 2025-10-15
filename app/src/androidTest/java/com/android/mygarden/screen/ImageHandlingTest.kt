@@ -47,7 +47,7 @@ class ImageHandlingTest {
   }
 
   @Test
-  fun loadLocalImage_displaysImageSuccessfully() {
+  fun loadLocalImage_displaysImageSuccessfully_version_1() {
     // Give the Android context
     val context = ApplicationProvider.getApplicationContext<Context>()
 
@@ -60,7 +60,33 @@ class ImageHandlingTest {
     val file = File(context.filesDir, "test_app_logo.png")
     FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
 
-    composeTestRule.setContent { LocalImageDisplay(imagePath = file.absolutePath) }
+    // Display the image with the AsyncImage version
+    composeTestRule.setContent {
+      LocalImageDisplay(imagePath = file.absolutePath, testVersionRemeberAsync = false)
+    }
+
+    // Check that the image is displayed
+    composeTestRule.onNodeWithContentDescription("Plant image").assertExists()
+  }
+
+  @Test
+  fun loadLocalImage_displaysImageSuccessfully_version_2() {
+    // Give the Android context
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    // Take the image app_logo for the test
+    val inputStream = context.resources.openRawResource(R.drawable.app_logo)
+    val bitmap = BitmapFactory.decodeStream(inputStream)
+    inputStream.close()
+
+    // Compress and save this image in context.filesDir
+    val file = File(context.filesDir, "test_app_logo.png")
+    FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
+
+    // Display the image with the rememberAsyncImagePainter version
+    composeTestRule.setContent {
+      LocalImageDisplay(imagePath = file.absolutePath, testVersionRemeberAsync = true)
+    }
 
     // Check that the image is displayed
     composeTestRule.onNodeWithContentDescription("Plant image").assertExists()
