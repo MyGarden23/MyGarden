@@ -163,4 +163,18 @@ class CameraViewModel : ViewModel() {
     FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out) }
     return file
   }
+
+  /**
+   * Takes the image given in Bitmap type, compress it in JPEG format and store it in
+   * context.filesDir which is a local memory place accessible when you have the context of the app.
+   *
+   * @param context the context of the app
+   * @param bitmap the image in bitmap type
+   * @param fileName the name we want to give to the image that will be stored
+   */
+  private fun saveBitmapToFile(context: Context, bitmap: Bitmap, fileName: String): File {
+    val file = File(context.filesDir, "$fileName.jpg")
+    FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out) }
+    return file
+  }
 }
