@@ -1,6 +1,7 @@
 package com.android.mygarden.screen
 
 import android.content.Context
+import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -17,10 +18,12 @@ import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.camera.CameraViewModel
+import java.io.IOException
 import org.hamcrest.Matchers.allOf
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -90,6 +93,18 @@ class CameraScreenWithPermissionAndroidTest {
         .assertIsDisplayed()
   }
 
+  @Test
+  fun takePictureButtonDoNotCrash() {
+    // Should not crash
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON)
+  }
+
+  @Test
+  fun accessGalleryButtonDoNotCrash() {
+    // Should not crash
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON)
+  }
+
   /* ViewModel tests (need context hence not "real" unit tests) */
 
   @Test
@@ -123,8 +138,9 @@ class CameraScreenWithPermissionAndroidTest {
   }
 
   @Test
-  fun takePictureButtonCallsViewModel() {
-    // TODO: Implement when requires logic works
+  fun uriToBitmapTrows() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    assertThrows(IOException::class.java) { viewModel.uriToBitmap(context, Uri.EMPTY) }
   }
 }
 
