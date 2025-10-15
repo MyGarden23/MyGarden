@@ -128,6 +128,7 @@ class CameraScreenWithPermissionAndroidTest {
   }
 }
 
+@RequiresNoCamera
 @RunWith(AndroidJUnit4::class)
 class CameraScreenWithoutPermissionTest {
 
