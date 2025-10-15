@@ -26,6 +26,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        // Enable multidex for large applications
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -80,7 +82,6 @@ android {
         // Add arguments for instrumentation tests
         animationsDisabled = true
     }
-
 
     // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
     // The next lines transfers the src/test/* from shared to the testDebug one
@@ -140,6 +141,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // Multidex support
+    implementation(libs.androidx.multidex)
+
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
