@@ -2,10 +2,11 @@ name: Build APK Release
 
 # Trigger the workflow
 on:
-  # Automatic trigger: any branch starting with 'release/'
+  # Automatic trigger: any branch starting with 'release/' AND feature/apk-workflow for testing
   push:
     branches:
       - 'release/**'
+      - 'feature/apk-workflow'  # Temporary for testing
   
   # Manual trigger: button in GitHub Actions tab
   workflow_dispatch:
