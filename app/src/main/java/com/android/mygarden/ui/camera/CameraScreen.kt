@@ -3,7 +3,6 @@ package com.android.mygarden.ui.camera
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.CameraController
@@ -68,7 +67,7 @@ private val BUTTONS_COLOR = Color.White
 fun CameraScreen(
     modifier: Modifier = Modifier,
     cameraViewModel: CameraViewModel = viewModel(),
-    onPictureTaken: (Bitmap, String) -> Unit = { b, s -> }
+    onPictureTaken: (String) -> Unit = {}
 ) {
   val uiState = cameraViewModel.uiState.collectAsState()
   val context = LocalContext.current

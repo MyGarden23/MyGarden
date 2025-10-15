@@ -42,7 +42,7 @@ class CameraViewModel : ViewModel() {
   fun takePicture(
       context: Context,
       controller: LifecycleCameraController,
-      onPictureTaken: (Bitmap, String) -> Unit
+      onPictureTaken: (String) -> Unit
   ) {
     controller.takePicture(
         ContextCompat.getMainExecutor(context),
@@ -62,7 +62,7 @@ class CameraViewModel : ViewModel() {
               /* Give the image of the plant in Bitmap (to give to an API eventually)
                * and the path of the plant to the next screen
                * */
-              onPictureTaken(bitmap, file.absolutePath)
+              onPictureTaken(file.absolutePath)
 
               Log.d("CameraViewModel", "Image saved at: ${file.absolutePath}")
             } catch (e: Exception) {
