@@ -142,6 +142,40 @@ class CameraScreenWithPermissionAndroidTest {
     val context = ApplicationProvider.getApplicationContext<Context>()
     assertThrows(IOException::class.java) { viewModel.uriToBitmap(context, Uri.EMPTY) }
   }
+
+  @Test
+  fun cameraUIStateInitializesWithBackCamera() {
+    // Test that UI state initializes correctly
+    assertEquals(CameraSelector.DEFAULT_BACK_CAMERA, viewModel.uiState.value.cameraSelector)
+  }
+
+  @Test
+  fun viewModelSharedPreferencesHandling() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    // Test initial state
+    val initialState = viewModel.hasAlreadyDeniedCameraPermission(context)
+
+    // Set to true and verify
+    viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+    assertTrue(viewModel.hasAlreadyDeniedCameraPermission(context))
+
+    // Set to false and verify
+    viewModel.sethasAlreadyDeniedCameraPermission(context, false)
+    assertFalse(viewModel.hasAlreadyDeniedCameraPermission(context))
+
+    // Reset to original state
+    viewModel.sethasAlreadyDeniedCameraPermission(context, initialState)
+  }
+
+  @Test
+  fun cameraPermissionCheckReturnsBoolean() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val hasPermission = viewModel.hasCameraPermission(context)
+
+    // Should return a boolean value (either true or false)
+    assertTrue("Permission check should return true", hasPermission)
+  }
 }
 
 @RequiresNoCamera
