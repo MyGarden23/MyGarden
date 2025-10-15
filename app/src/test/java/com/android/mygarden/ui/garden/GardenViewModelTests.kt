@@ -37,7 +37,7 @@ class GardenViewModelTests {
 
   /** Sets up the repository and the view model and the test dispatcher to simulate the app */
   @Before
-  fun setUp() = runTest {
+  fun setUp() {
     Dispatchers.setMain(testDispatcher)
     repo = PlantsRepositoryLocal()
     vm = GardenViewModel(plantsRepo = repo)

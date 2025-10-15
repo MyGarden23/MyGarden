@@ -62,7 +62,7 @@ class GardenViewModel(
         _uiState.value = GardenUIState(plants = plants)
       } catch (e: Exception) {
         Log.e("GardenViewModel", "Owned plants couldn't be retrieved from repository", e)
-        setErrorMsg("getAllPlants failed : ${e.message}")
+        setErrorMsg("getAllPlants failed : Owned plants couldn't be retrieved from repository")
       }
     }
   }
