@@ -187,6 +187,10 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
+
+    // ----------         Coil      ------------
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
 }
 
 
