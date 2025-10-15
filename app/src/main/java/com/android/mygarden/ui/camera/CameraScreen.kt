@@ -36,6 +36,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
+import com.android.mygarden.ui.navigation.NavigationTestTags
 
 /** Test tags used for testing the camera screen */
 object CameraScreenTestTags {
@@ -92,54 +93,61 @@ fun CameraScreen(
   Scaffold(
       bottomBar = { /* TODO: Add the navigation bottom bar when ready */},
       content = { paddingValues ->
-        Box(modifier = modifier.fillMaxSize().padding(paddingValues)) {
-          CameraPreview(controller = controller, modifier = modifier.fillMaxSize())
-          // Button for switching between back camera and front camera
-          IconButton(
-              onClick = {
-                cameraViewModel.switchOrientation()
-                controller.cameraSelector = uiState.value.cameraSelector
-              },
-              modifier =
-                  modifier.padding(20.dp, 20.dp).testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
-                Icon(
-                    Icons.Default.FlipCameraAndroid,
-                    contentDescription = "Flip Camera Icon",
-                    modifier = modifier.size(30.dp),
-                    tint = BUTTONS_COLOR)
-              }
-          // Button for taking picture
-          IconButton(
-              modifier =
-                  modifier
-                      .align(Alignment.BottomCenter)
-                      .padding(bottom = 60.dp)
-                      .size(70.dp)
-                      .testTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON),
-              onClick = { cameraViewModel.takePicture(context, controller, onPictureTaken) }) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_photo_button_mygarden),
-                    contentDescription = "Take picture Icon",
-                    modifier = modifier.size(70.dp),
-                    tint = BUTTONS_COLOR)
-              }
-          // Button for accessing the gallery
-          IconButton(
-              modifier =
-                  modifier
-                      .align(Alignment.BottomCenter)
-                      .offset(x = 100.dp)
-                      .padding(bottom = 60.dp)
-                      .size(70.dp)
-                      .testTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON),
-              onClick = { /* TODO: Handle gallery access logic */}) {
-                Icon(
-                    Icons.Default.Photo,
-                    contentDescription = "Open Gallery Icon",
-                    modifier = modifier.size(40.dp),
-                    tint = BUTTONS_COLOR)
-              }
-        }
+        Box(
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .testTag(NavigationTestTags.CAMERA_SCREEN)) {
+              CameraPreview(controller = controller, modifier = modifier.fillMaxSize())
+              // Button for switching between back camera and front camera
+              IconButton(
+                  onClick = {
+                    cameraViewModel.switchOrientation()
+                    controller.cameraSelector = uiState.value.cameraSelector
+                  },
+                  modifier =
+                      modifier
+                          .padding(20.dp, 20.dp)
+                          .testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
+                    Icon(
+                        Icons.Default.FlipCameraAndroid,
+                        contentDescription = "Flip Camera Icon",
+                        modifier = modifier.size(30.dp),
+                        tint = BUTTONS_COLOR)
+                  }
+              // Button for taking picture
+              IconButton(
+                  modifier =
+                      modifier
+                          .align(Alignment.BottomCenter)
+                          .padding(bottom = 60.dp)
+                          .size(70.dp)
+                          .testTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON),
+                  onClick = { cameraViewModel.takePicture(context, controller, onPictureTaken) }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_photo_button_mygarden),
+                        contentDescription = "Take picture Icon",
+                        modifier = modifier.size(70.dp),
+                        tint = BUTTONS_COLOR)
+                  }
+              // Button for accessing the gallery
+              IconButton(
+                  modifier =
+                      modifier
+                          .align(Alignment.BottomCenter)
+                          .offset(x = 100.dp)
+                          .padding(bottom = 60.dp)
+                          .size(70.dp)
+                          .testTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON),
+                  onClick = { /* TODO: Handle gallery access logic */}) {
+                    Icon(
+                        Icons.Default.Photo,
+                        contentDescription = "Open Gallery Icon",
+                        modifier = modifier.size(40.dp),
+                        tint = BUTTONS_COLOR)
+                  }
+            }
       })
 }
 
