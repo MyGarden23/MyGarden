@@ -79,7 +79,7 @@ class EditPlantViewModel(
 
   override fun editPlant(ownedPlantId: String) {
     val newPlant = newOwnedPlant
-    val waterd = _uiState.value.lastWatered
+    val watered = _uiState.value.lastWatered
     val description = _uiState.value.description
 
     if (newPlant == null) {
@@ -95,7 +95,7 @@ class EditPlantViewModel(
     }
 
     // Not suppose to occur with the workflow of the app.
-    if (waterd == null) {
+    if (watered == null) {
       Log.e("EditPlantViewModel", "Failed to edit plant. (no last time watered selected).")
       setErrorMsg("Please select the last time watered")
       return
@@ -103,7 +103,7 @@ class EditPlantViewModel(
 
     val updated =
         newPlant.copy(
-            lastWatered = waterd,
+            lastWatered = watered,
             plant = newPlant.plant.copy(description = _uiState.value.description))
 
     viewModelScope.launch {

@@ -1,8 +1,9 @@
 package com.android.mygarden.ui.editPlant
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -17,6 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
@@ -32,7 +34,9 @@ object EditPlantScreenTestTags {
   const val PLANT_LATIN = "plantLatin"
   const val INPUT_PLANT_DESCRIPTION = "inputPlantDescription"
   const val INPUT_LAST_WATERED = "inputLastWatered"
-  const val ERROR_MESSAGE = "errorMessage"
+  const val ERROR_MESSAGE_DATE = "errorMessageDate"
+  const val ERROR_MESSAGE_DESCRIPTION = "errorMessageDescription"
+
   const val PLANT_SAVE = "plantSave"
   const val PLANT_DELETE = "plantDelete"
   const val DATE_PICKER_BUTTON = "datePicker"
@@ -54,7 +58,7 @@ object EditPlantScreenTestTags {
 @Composable
 fun EditPlantScreen(
     ownedPlantId: String,
-    editPlantViewModel: EditPlantViewModelInterface = EditPlantViewModel(),
+    editPlantViewModel: EditPlantViewModelInterface = viewModel<EditPlantViewModel>(),
     onSaved: () -> Unit = {},
     onDeleted: () -> Unit = {},
     goBack: () -> Unit = {},
@@ -64,10 +68,12 @@ fun EditPlantScreen(
 
   val plantUIState by editPlantViewModel.uiState.collectAsState()
 
-  val context = LocalContext.current
+  val snackbarHostState = remember { SnackbarHostState() }
+
   LaunchedEffect(plantUIState.errorMsg) {
-    plantUIState.errorMsg?.let {
-      Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+    plantUIState.errorMsg?.let { msg ->
+      snackbarHostState.showSnackbar(
+          message = msg, withDismissAction = true, duration = SnackbarDuration.Short)
       editPlantViewModel.clearErrorMsg()
     }
   }
@@ -111,9 +117,14 @@ fun EditPlantScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
               }
             })
-      }) { padding ->
+      },
+      snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
               // Plant image
@@ -186,7 +197,7 @@ fun EditPlantScreen(
                     text = "Description cannot be empty",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE))
+                    modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_DESCRIPTION))
               }
 
               // Last time watered
@@ -225,7 +236,7 @@ fun EditPlantScreen(
                       text = "Last time watered is required",
                       color = MaterialTheme.colorScheme.error,
                       style = MaterialTheme.typography.bodySmall,
-                      modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE))
+                      modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_DATE))
                 }
               }
 

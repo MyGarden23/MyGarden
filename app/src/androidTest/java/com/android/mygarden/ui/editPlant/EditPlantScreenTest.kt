@@ -179,7 +179,9 @@ class EditPlantScreenTest {
     setContentWith(vm = vm)
 
     // Error not shown before interaction
-    composeRule.onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE).assertCountEquals(0)
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_DESCRIPTION)
+        .assertDoesNotExist()
 
     // Focus into description -> mark as touched
     composeRule.onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION).performClick()
@@ -187,9 +189,7 @@ class EditPlantScreenTest {
     composeRule.waitForIdle()
 
     // Now an error helper text should appear
-    composeRule
-        .onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
-        .assertCountEquals(1)
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_DESCRIPTION).isDisplayed()
   }
 
   /**
@@ -203,20 +203,15 @@ class EditPlantScreenTest {
     setContentWith(vm = vm)
 
     // No error initially
-    composeRule
-        .onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
-        .assertCountEquals(0)
+
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_DATE).assertDoesNotExist()
 
     // User presses the calendar button (marks date as 'touched')
     composeRule.onNodeWithTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON).performClick()
     composeRule.waitForIdle()
 
     // Now an error should be visible for the date field
-    composeRule.waitUntilAtLeastOneExists(hasTestTag(EditPlantScreenTestTags.ERROR_MESSAGE), 5_000)
-
-    composeRule
-        .onAllNodesWithTag(EditPlantScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
-        .assertCountEquals(1)
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_DATE).isDisplayed()
   }
 }
 
