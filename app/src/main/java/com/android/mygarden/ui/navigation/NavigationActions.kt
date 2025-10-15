@@ -1,54 +1,62 @@
 package com.android.mygarden.ui.navigation
 
+import android.util.Log
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
 /**
- * Representation of a specific screen of the app
- *
- * @param route the route of the screen
- * @param name the name of the screen
- * @param isTopLevel whether the screen is a core screen that can be accessible from the bottom bar
- *   or not
- */
-sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean = false) {
-  object Camera : Screen(route = "camera", name = "Camera", isTopLevel = true)
-  // These 2 screens will be useful for next sprints
-  // object SignIn: Screen(route = "sign_in", name = "Sign In", isTopLevel = true)
-  // object PlantView: Screen(route = "plant_view", name = "Plant View")
-  object Profile : Screen(route = "profile", name = "Profile", isTopLevel = true)
-}
-
-/**
- * Class that represent the different possible navigations through the screens
+ * Class that represents the different possible navigations through the screens.
  *
  * @param controller the NavHostController used to navigate
  */
-class NavigationActions(val controller: NavHostController) {
+class NavigationActions(private val controller: NavHostController) {
+
   /**
-   * Navigate to the given screen
-   *
-   * @param destination the screen to navigate to
+   * Navigate to the given screen.
+   * - If it's a top-level screen, delegates to [navToTopLevel] for proper tab behavior.
+   * - Otherwise, performs a simple navigate with singleTop and optional restoreState.
    */
   fun navTo(destination: Screen) {
-    // ensures the destination is not top level and the current route is not the destination route
-    // meaning that a navigation actually happens if we don't try to go in a top level destination
-    // from itself
-    if (!(destination.isTopLevel &&
-        (controller.currentDestination?.route ?: "") == destination.route)) {
-      controller.navigate(destination.route) {
-        // ensures a top level destination appears only once in the stack
-        if (destination.isTopLevel) {
-          launchSingleTop = true
-          popUpTo(destination.route) { inclusive = true }
-        }
+    if (destination == null) {
+      Log.w("NavigationActions", "navTo() called with null destination — ignored")
+      return
+    }
+    if (destination.isTopLevel) {
+      navToTopLevel(destination)
+      return
+    }
+    controller.navigate(destination.route) {
+      launchSingleTop = true
+      // Typically we want to restore state when navigating within the main graph,
+      // but avoid restoring when going to the auth flow.
+      if (destination != Screen.Auth) {
+        restoreState = true
       }
     }
   }
 
-  /* TODO: uncomment this function when a back button is actually implemented
+  /**
+   * Navigate to a top-level destination (e.g., bottom bar tab). Ensures:
+   * - Only one instance (launchSingleTop)
+   * - State is saved/restored when switching between tabs
+   * - We pop up to the graph's start destination instead of the destination itself
+   */
+  fun navToTopLevel(destination: Screen) {
+    val current = currentRoute()
+    if (current == destination.route) return
+
+    controller.navigate(destination.route) {
+      launchSingleTop = true
+      restoreState = true
+      popUpTo(controller.graph.findStartDestination().id) { saveState = true }
+    }
+  }
+
   /** Navigate back to previous screen. */
   fun navBack() {
     controller.popBackStack()
   }
-   */
+
+  /** Helper to fetch the current route safely. */
+  private fun currentRoute(): String? = controller.currentDestination?.route
 }
