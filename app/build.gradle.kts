@@ -28,6 +28,17 @@ android {
         }
     }
 
+    // Signing configuration for release builds
+    signingConfigs {
+        create("release") {
+            // These will be provided by GitHub Actions environment variables
+            storeFile = file("../release.keystore")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -35,6 +46,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Use the signing config for release builds
+            signingConfig = signingConfigs.getByName("release")
         }
 
         debug {
