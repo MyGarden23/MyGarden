@@ -33,17 +33,18 @@ fun AppNavHost(
           credentialManager = credentialManagerProvider(),
           onSignedIn = { navigationActions.navTo(Screen.Camera) })
     }
-      // Profile
-      composable(Screen.Profile.route) {
-          // TODO: ProfileScreen(...)
-      }
+    // Profile
+    composable(Screen.Profile.route) {
+      // TODO: ProfileScreen(...)
+    }
 
     // Camera
     composable(Screen.Camera.route) {
-        CameraScreen(onPictureTaken = {
+      CameraScreen(
+          onPictureTaken = {
             // Navigate to PlantView and remove Camera from back stack to prevent navigation issues
             navigationActions.navTo(Screen.PlantView)
-        })
+          })
     }
 
     // Garden
@@ -54,34 +55,32 @@ fun AppNavHost(
     }
 
     // Plant View
-    composable(Screen.PlantView.route) {
+    composable(Screen.PlantView.route) { backStackEntry ->
+      val imagePath = backStackEntry.savedStateHandle.get<String>("imagePath")
+      val plantInfoViewModel: PlantInfoViewModel = viewModel()
       // Shows plant details after a photo is taken
       // Right now it just uses a mock Plant object for demo purposes
-        val plant = Plant(
-            name = "Rose",
-            image = null,
-            latinName = "Rosum",
-            description = "Roses are red",
-            healthStatus = PlantHealthStatus.HEALTHY,
-            healthStatusDescription = PlantHealthStatus.HEALTHY.description,
-            wateringFrequency = 2
-        )
-
-        val plantInfoViewModel: PlantInfoViewModel = viewModel()
-
-        PlantInfosScreen(
+      val plant =
+          Plant(
+              name = "Rose",
+              image = null,
+              latinName = "Rosum",
+              description = "Roses are red",
+              healthStatus = PlantHealthStatus.HEALTHY,
+              healthStatusDescription = PlantHealthStatus.HEALTHY.description,
+              wateringFrequency = 2)
+      PlantInfosScreen(
           plant = plant,
-          plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
           onSavePlant = {
-              // First save the plant to repository, then navigate to Garden
-              plantInfoViewModel.savePlant(plant)
-              // Use navToTopLevel to properly clear the back stack and avoid returning to PlantInfoScreen
-              navigationActions.navToTopLevel(Screen.Garden)
+            plantInfoViewModel.savePlant(plant)
+            // Use navToTopLevel to navigate to Garden (top-level screen)
+            // This will naturally handle the navigation stack properly
+            navigationActions.navToTopLevel(Screen.Garden)
           })
     }
     // EditPlant
-      // Not yet in the sprint 2 version
+    // Not yet in the sprint 2 version
     composable(Screen.EditPlant.route) {
       // TODO: for sprint 3
     }
