@@ -65,6 +65,21 @@ class NewProfileScreenTests {
   }
 
   /**
+   * Helper function to perform text input and verify that the text is displayed correctly.
+   *
+   * This function encapsulates the common pattern of:
+   * 1. Performing text input on a field identified by a test tag
+   * 2. Asserting that the field contains the expected text
+   *
+   * @param testTag The test tag identifying the UI component to interact with
+   * @param inputText The text to input into the field
+   */
+  private fun performTextInputAndAssert(testTag: String, inputText: String) {
+    composeTestRule.onNodeWithTag(testTag).performTextInput(inputText)
+    composeTestRule.onNodeWithTag(testTag).assertTextContains(inputText)
+  }
+
+  /**
    * Verifies that all essential UI components are properly rendered and visible.
    *
    * This test ensures that the screen layout is complete and all required elements are present for
@@ -148,14 +163,7 @@ class NewProfileScreenTests {
     val testInput = "John"
 
     // Enter text into the first name field
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.FIRST_NAME_FIELD)
-        .performTextInput(testInput)
-
-    // Verify the entered text is displayed
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.FIRST_NAME_FIELD)
-        .assertTextContains(testInput)
+    performTextInputAndAssert(NewProfileScreenTestTags.FIRST_NAME_FIELD, testInput)
   }
 
   /**
@@ -173,14 +181,7 @@ class NewProfileScreenTests {
     val testInput = "Doe"
 
     // Enter text into the last name field
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.LAST_NAME_FIELD)
-        .performTextInput(testInput)
-
-    // Verify the entered text is displayed
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.LAST_NAME_FIELD)
-        .assertTextContains(testInput)
+    performTextInputAndAssert(NewProfileScreenTestTags.LAST_NAME_FIELD, testInput)
   }
 
   /**
@@ -198,14 +199,7 @@ class NewProfileScreenTests {
     val testInput = "Rose"
 
     // Enter text into the favorite plant field
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.FAVORITE_PLANT_FIELD)
-        .performTextInput(testInput)
-
-    // Verify the entered text is displayed
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.FAVORITE_PLANT_FIELD)
-        .assertTextContains(testInput)
+    performTextInputAndAssert(NewProfileScreenTestTags.FAVORITE_PLANT_FIELD, testInput)
   }
 
   /**
@@ -225,14 +219,7 @@ class NewProfileScreenTests {
     val testInput = "France"
 
     // Enter text into the country field
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD)
-        .performTextInput(testInput)
-
-    // Verify the entered text is displayed
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD)
-        .assertTextContains(testInput)
+    performTextInputAndAssert(NewProfileScreenTestTags.COUNTRY_FIELD, testInput)
   }
 
   /**
@@ -613,13 +600,9 @@ class NewProfileScreenTests {
     setContent()
 
     // Fill in all mandatory fields
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.FIRST_NAME_FIELD)
-        .performTextInput("John")
-
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
-
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD).performTextInput("Canada")
+    performTextInputAndAssert(NewProfileScreenTestTags.FIRST_NAME_FIELD, "John")
+    performTextInputAndAssert(NewProfileScreenTestTags.LAST_NAME_FIELD, "Doe")
+    performTextInputAndAssert(NewProfileScreenTestTags.COUNTRY_FIELD, "Canada")
 
     // Wait for UI to process all input changes
     composeTestRule.waitForIdle()
@@ -649,11 +632,8 @@ class NewProfileScreenTests {
     setContent()
 
     // Fill in only some mandatory fields (leaving country empty)
-    composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.FIRST_NAME_FIELD)
-        .performTextInput("John")
-
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
+    performTextInputAndAssert(NewProfileScreenTestTags.FIRST_NAME_FIELD, "John")
+    performTextInputAndAssert(NewProfileScreenTestTags.LAST_NAME_FIELD, "Doe")
 
     // Attempt to register with incomplete information
     composeTestRule.onNodeWithTag(NewProfileScreenTestTags.REGISTER_BUTTON).performClick()
