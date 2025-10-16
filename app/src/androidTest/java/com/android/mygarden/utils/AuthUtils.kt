@@ -1,4 +1,4 @@
-package com.android.mygarden.testutils
+package com.android.mygarden.utils
 
 import android.content.Context
 import android.util.Base64
