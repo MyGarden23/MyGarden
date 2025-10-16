@@ -3,7 +3,6 @@ agp = "8.3.0"
 json = "20231013"
 espressoIntents = "3.5.1"
 coilCompose = "2.6.0"
-json = "20231013"
 kotlin = "1.8.10"
 coreKtx = "1.12.0"
 ktfmt = "0.17.0"
@@ -94,10 +93,6 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleCompose" }
 
-mockk = { module = "io.mockk:mockk", version = "1.13.11" }
-mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk" }
-
-json = { module = "org.json:json", version.ref = "json" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -109,7 +109,10 @@ class AuthenticationTest {
     }
 
     // Tap the sign-in button
-    compose.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).assertIsDisplayed().performClick()
+    compose
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
 
     // Wait until we hit Camera OR the user is set on Firebase
     compose.waitUntil(TIMEOUT) {
@@ -154,7 +157,10 @@ class AuthenticationTest {
           }
         }
 
-        compose.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).assertIsDisplayed().performClick()
+        compose
+            .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
 
         // Wait for Firebase to have a current user and for the route to switch
         compose.waitUntil(TIMEOUT) {
