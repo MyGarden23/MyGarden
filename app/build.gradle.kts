@@ -26,6 +26,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        // Enable multidex for large applications
+        multiDexEnabled = true
     }
 
     // Signing configuration for release builds
@@ -70,12 +72,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     packaging {
@@ -89,8 +91,10 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
-    }
 
+        // Add arguments for instrumentation tests
+        animationsDisabled = true
+    }
 
     // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
     // The next lines transfers the src/test/* from shared to the testDebug one
@@ -150,9 +154,14 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // Multidex support
+    implementation(libs.androidx.multidex)
+
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
+    globalTestImplementation(libs.androidx.espresso.intents)
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
@@ -209,6 +218,10 @@ dependencies {
     // ----------         Coil      ------------
     // Compatible with Kotlin 1.8
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // ----------         Mockito      ------------
+    implementation(libs.mockito.core)
+    implementation(libs.mockito.kotlin)
 }
 
 
