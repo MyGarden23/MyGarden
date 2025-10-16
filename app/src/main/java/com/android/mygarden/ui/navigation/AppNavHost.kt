@@ -9,6 +9,8 @@ import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
+import com.android.mygarden.ui.editPlant.EditPlantScreen
+import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
 
 @Composable
@@ -40,9 +42,11 @@ fun AppNavHost(
           })
     }
 
-    // Profile
-    composable(Screen.Profile.route) {
-      // TODO: ProfileScreen(...)
+    // Garden
+    composable(Screen.Garden.route) {
+      GardenScreen(
+          onEditProfile = { /* TODO: Navigate to Profile edit */},
+          onAddPlant = { navigationActions.navTo(Screen.Camera) })
     }
 
     // Plant View
@@ -60,7 +64,22 @@ fun AppNavHost(
                   healthStatus = PlantHealthStatus.HEALTHY,
                   healthStatusDescription = PlantHealthStatus.HEALTHY.description,
                   wateringFrequency = 2),
-          onBackPressed = { navigationActions.navBack() })
+          onBackPressed = { navigationActions.navBack() },
+          onSavePlant = {
+            // First save the plant to repository, then navigate to EditPlant
+            // TODO: Pass the actual plant ID from the save operation
+            navigationActions.navTo(Screen.EditPlant)
+          })
+    }
+
+    // EditPlant
+    composable(Screen.EditPlant.route) {
+      // For now, we use a mock plant ID. Later this should come from navigation arguments
+      EditPlantScreen(
+          ownedPlantId = "mock-plant-id", // TODO: Get from navigation arguments
+          onSaved = { navigationActions.navTo(Screen.Garden) },
+          onDeleted = { navigationActions.navTo(Screen.Garden) },
+          goBack = { navigationActions.navBack() })
     }
   }
 }
