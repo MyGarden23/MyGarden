@@ -138,12 +138,6 @@ class CameraScreenWithPermissionAndroidTest {
   }
 
   @Test
-  fun uriToBitmapTrows() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    assertThrows(IOException::class.java) { viewModel.uriToBitmap(context, Uri.EMPTY) }
-  }
-
-  @Test
   fun cameraUIStateInitializesWithBackCamera() {
     // Test that UI state initializes correctly
     assertEquals(CameraSelector.DEFAULT_BACK_CAMERA, viewModel.uiState.value.cameraSelector)

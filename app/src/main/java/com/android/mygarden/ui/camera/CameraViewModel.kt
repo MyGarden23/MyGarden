@@ -153,19 +153,6 @@ class CameraViewModel : ViewModel() {
   }
 
   /**
-   * Transforms an image from the given Uri into a Bitmap. This function allow us to process the
-   * same way photos from the gallery and from the CameraX takePicture function
-   *
-   * @param context the context used to access the content resolver
-   * @param uri the uri of the given image that needs to be transformed
-   * @return the transformed image into a Bitmap
-   */
-  fun uriToBitmap(context: Context, uri: Uri): Bitmap {
-    val source = ImageDecoder.createSource(context.contentResolver, uri)
-    return ImageDecoder.decodeBitmap(source)
-  }
-
-  /**
    * Takes the image given in Bitmap type, compress it in JPEG format and store it in
    * context.filesDir which is a local memory place accessible when you have the context of the app.
    *

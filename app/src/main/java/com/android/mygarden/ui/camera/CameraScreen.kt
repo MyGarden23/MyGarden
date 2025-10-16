@@ -109,7 +109,7 @@ fun CameraScreen(
           contract = ActivityResultContracts.PickVisualMedia(),
           onResult = { uri ->
             if (uri != null) {
-              onPictureTaken(cameraViewModel.uriToBitmap(context, uri))
+              onPictureTaken(uri.toString())
             }
           })
 
