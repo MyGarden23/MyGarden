@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * UI state data class for the new profile creation screen Contains all the form fields and
+ * UI state data class for the new profile creation screen, contains all the form fields and
  * validation state
  */
 data class NewProfileUIState(
