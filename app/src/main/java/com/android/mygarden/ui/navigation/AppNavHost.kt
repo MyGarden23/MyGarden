@@ -43,6 +43,8 @@ fun AppNavHost(
       CameraScreen(
           onPictureTaken = {
             // Navigate to PlantView and remove Camera from back stack to prevent navigation issues
+          onPictureTaken = { imagePath ->
+            navController.currentBackStackEntry?.savedStateHandle?.set("imagePath", imagePath)
             navigationActions.navTo(Screen.PlantView)
           })
     }
@@ -83,6 +85,16 @@ fun AppNavHost(
     // Not yet in the sprint 2 version
     composable(Screen.EditPlant.route) {
       // TODO: for sprint 3
+          plant =
+              Plant(
+                  name = "Rose",
+                  image = imagePath,
+                  latinName = "Rosum",
+                  description = "Roses are red",
+                  healthStatus = PlantHealthStatus.HEALTHY,
+                  healthStatusDescription = PlantHealthStatus.HEALTHY.description,
+                  wateringFrequency = 2),
+          onBackPressed = { navigationActions.navBack() })
     }
   }
 }
