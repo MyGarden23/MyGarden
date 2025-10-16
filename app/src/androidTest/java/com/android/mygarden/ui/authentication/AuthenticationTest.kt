@@ -16,9 +16,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.mygarden.testutils.FakeCredentialManager
-import com.android.mygarden.testutils.FakeJwtGenerator
-import com.android.mygarden.testutils.FirebaseEmulator
+import com.android.mygarden.utils.FakeCredentialManager
+import com.android.mygarden.utils.FakeJwtGenerator
+import com.android.mygarden.utils.FirebaseEmulator
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.theme.MyGardenTheme
