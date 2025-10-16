@@ -187,7 +187,11 @@ dependencies {
     //testing Unit
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
-    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk.android) {
+        exclude(group = "org.junit.jupiter")
+        exclude(group = "org.junit.platform")
+        exclude(group = "org.junit") // safe extra guard
+    }
     androidTestImplementation(libs.json)
 
     // --------- Kaspresso test framework ----------
