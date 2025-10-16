@@ -254,7 +254,13 @@ private fun CameraPreview(controller: LifecycleCameraController, modifier: Modif
           controller.bindToLifecycle(lifeCycleOwner)
         }
       },
-      modifier = modifier.testTag(CameraScreenTestTags.PREVIEW_VIEW))
+      modifier = modifier.testTag(CameraScreenTestTags.PREVIEW_VIEW),
+      update = { view ->
+        if (view.controller !== controller) {
+          view.controller = controller
+          controller.bindToLifecycle(lifeCycleOwner)
+        }
+      })
 }
 
 /**
