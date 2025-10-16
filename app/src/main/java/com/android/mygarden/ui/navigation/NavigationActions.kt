@@ -47,7 +47,8 @@ class NavigationActions(private val controller: NavHostController) {
 
     controller.navigate(destination.route) {
       launchSingleTop = true
-      restoreState = true
+      // Don't restore state to avoid navigation issues with temporary screens
+      // restoreState = true  // Commented out to prevent PlantView restoration
       popUpTo(controller.graph.findStartDestination().id) { saveState = true }
     }
   }
