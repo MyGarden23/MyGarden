@@ -44,8 +44,7 @@ class EndToEndM1 {
    * testing without user interaction prompts.
    */
   @get:Rule
-  val permissionRule: GrantPermissionRule =
-      GrantPermissionRule.grant(Manifest.permission.CAMERA)
+  val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
 
   private val TIMEOUT = 10_000L
 
