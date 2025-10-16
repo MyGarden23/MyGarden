@@ -58,7 +58,7 @@ object EditPlantScreenTestTags {
 @Composable
 fun EditPlantScreen(
     ownedPlantId: String,
-    editPlantViewModel: EditPlantViewModelInterface = viewModel<EditPlantViewModel>(),
+    editPlantViewModel: EditPlantViewModelInterface_ = viewModel<EditPlantViewModel>(),
     onSaved: () -> Unit = {},
     onDeleted: () -> Unit = {},
     goBack: () -> Unit = {},

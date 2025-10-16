@@ -45,71 +45,71 @@ class NavigationS2Tests {
 
   @Test
   fun starts_at_Auth_when_requested() {
-    setApp(Screen.Auth.route)
-    compose.runOnIdle { assertEquals(Screen.Auth.route, currentRoute.value) }
+    setApp(Screen_.Auth.route)
+    compose.runOnIdle { assertEquals(Screen_.Auth.route, currentRoute.value) }
   }
 
   @Test
   fun starts_at_Camera_when_requested() {
-    setApp(Screen.Camera.route)
-    compose.runOnIdle { assertEquals(Screen.Camera.route, currentRoute.value) }
+    setApp(Screen_.Camera.route)
+    compose.runOnIdle { assertEquals(Screen_.Camera.route, currentRoute.value) }
   }
 
   @Test
   fun camera_navigates_to_plantView() {
-    setApp(Screen.Camera.route)
-    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
-    compose.runOnIdle { assertEquals(Screen.PlantView.route, currentRoute.value) }
+    setApp(Screen_.Camera.route)
+    compose.runOnIdle { navController.navigate(Screen_.PlantView.route) }
+    compose.runOnIdle { assertEquals(Screen_.PlantView.route, currentRoute.value) }
   }
 
   @Test
   fun back_from_plantView_returns_to_camera() {
-    setApp(Screen.Camera.route)
+    setApp(Screen_.Camera.route)
 
     // Camera -> Plant View
-    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
-    waitForRoute(Screen.PlantView.route)
+    compose.runOnIdle { navController.navigate(Screen_.PlantView.route) }
+    waitForRoute(Screen_.PlantView.route)
 
     // popBackStack -> Camera
     compose.runOnIdle { navController.popBackStack() }
-    waitForRoute(Screen.Camera.route)
-    compose.runOnIdle { assertEquals(Screen.Camera.route, currentRoute.value) }
+    waitForRoute(Screen_.Camera.route)
+    compose.runOnIdle { assertEquals(Screen_.Camera.route, currentRoute.value) }
   }
 
   @Test
   fun can_reach_profile_destination() {
-    setApp(Screen.Camera.route)
-    compose.runOnIdle { navController.navigate(Screen.Profile.route) }
-    compose.runOnIdle { assertEquals(Screen.Profile.route, currentRoute.value) }
+    setApp(Screen_.Camera.route)
+    compose.runOnIdle { navController.navigate(Screen_.Profile.route) }
+    compose.runOnIdle { assertEquals(Screen_.Profile.route, currentRoute.value) }
   }
 
   @Test
   fun onSignedIn_from_auth_navigates_to_camera() {
     // AppNavHost wires SignInScreen.onSignedIn -> navigate(Camera)
-    setApp(Screen.Auth.route)
+    setApp(Screen_.Auth.route)
 
     // Emulate the onSignedIn callback effect
-    compose.runOnIdle { navController.navigate(Screen.Camera.route) }
+    compose.runOnIdle { navController.navigate(Screen_.Camera.route) }
 
     // Wait for recomposition / back stack update, then assert
-    waitForRoute(Screen.Camera.route)
-    compose.runOnIdle { assertEquals(Screen.Camera.route, currentRoute.value) }
+    waitForRoute(Screen_.Camera.route)
+    compose.runOnIdle { assertEquals(Screen_.Camera.route, currentRoute.value) }
   }
 
   @Test
   fun onBackPressed_from_plantView_returns_to_camera() {
     // AppNavHost wires PlantInfosScreen.onBackPressed -> navBack()
-    setApp(Screen.Camera.route)
+    setApp(Screen_.Camera.route)
 
     // Camera -> PlantView (same as tapping from CameraScreen)
-    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
-    waitForRoute(Screen.PlantView.route)
+    compose.runOnIdle { navController.navigate(Screen_.PlantView.route) }
+    waitForRoute(Screen_.PlantView.route)
 
     // Emulate the onBackPressed callback effect
     compose.runOnIdle { navController.popBackStack() }
-    waitForRoute(Screen.Camera.route)
+    waitForRoute(Screen_.Camera.route)
 
-    compose.runOnIdle { assertEquals(Screen.Camera.route, currentRoute.value) }
+    compose.runOnIdle { assertEquals(Screen_.Camera.route, currentRoute.value) }
   }
 
   private fun waitForRoute(expected: String, timeoutMillis: Long = DEFAULT_WAIT_MS) {

@@ -9,7 +9,7 @@ import java.sql.Timestamp
  * This repository handles both general plant information retrieval and the management of the user's
  * virtual garden.
  */
-interface PlantsRepository {
+interface PlantsRepository_ {
 
   /**
    * Identifies a plant from an image using recognition technology.

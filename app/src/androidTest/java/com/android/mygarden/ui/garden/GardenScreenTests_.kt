@@ -9,7 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantsRepository
+import com.android.mygarden.model.plant.PlantsRepository_
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import java.sql.Timestamp
@@ -21,7 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class GardenScreenTests {
+class GardenScreenTests_ {
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -63,7 +63,7 @@ class GardenScreenTests {
           "is ?",
           8)
 
-  private lateinit var repo: PlantsRepository
+  private lateinit var repo: PlantsRepository_
 
   /**
    * Sets the [repo] as a local repository for testing and sets the provider's repo to this one to

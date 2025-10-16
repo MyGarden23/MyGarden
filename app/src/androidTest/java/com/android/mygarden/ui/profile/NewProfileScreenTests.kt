@@ -98,24 +98,24 @@ class NewProfileScreenTests {
     setContent()
 
     // Verify the main screen container is displayed
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.SCREEN).assertIsDisplayed()
 
     // Verify header components
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.TITLE).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.AVATAR).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.AVATAR).assertIsDisplayed()
 
     // Verify all input fields are displayed
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.FIRST_NAME_FIELD).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.LAST_NAME_FIELD).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.EXPERIENCE_FIELD).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.FAVORITE_PLANT_FIELD).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.FIRST_NAME_FIELD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.LAST_NAME_FIELD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.EXPERIENCE_FIELD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.FAVORITE_PLANT_FIELD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).assertIsDisplayed()
 
     // Verify interactive elements
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_ICON)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_ICON)
         .assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.REGISTER_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.REGISTER_BUTTON).assertIsDisplayed()
   }
 
   /**
@@ -129,7 +129,7 @@ class NewProfileScreenTests {
     setContent()
 
     // Verify the title shows the expected text
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.TITLE).assertTextEquals("New Profile")
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.TITLE).assertTextEquals("New Profile")
   }
 
   /**
@@ -144,7 +144,7 @@ class NewProfileScreenTests {
 
     // Verify the register button shows the expected text
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.REGISTER_BUTTON)
+        .onNodeWithTag(NewProfileScreenTestTags_.REGISTER_BUTTON)
         .assertTextContains("Register Profile")
   }
 
@@ -163,7 +163,7 @@ class NewProfileScreenTests {
     val testInput = "John"
 
     // Enter text into the first name field
-    performTextInputAndAssert(NewProfileScreenTestTags.FIRST_NAME_FIELD, testInput)
+    performTextInputAndAssert(NewProfileScreenTestTags_.FIRST_NAME_FIELD, testInput)
   }
 
   /**
@@ -181,7 +181,7 @@ class NewProfileScreenTests {
     val testInput = "Doe"
 
     // Enter text into the last name field
-    performTextInputAndAssert(NewProfileScreenTestTags.LAST_NAME_FIELD, testInput)
+    performTextInputAndAssert(NewProfileScreenTestTags_.LAST_NAME_FIELD, testInput)
   }
 
   /**
@@ -199,7 +199,7 @@ class NewProfileScreenTests {
     val testInput = "Rose"
 
     // Enter text into the favorite plant field
-    performTextInputAndAssert(NewProfileScreenTestTags.FAVORITE_PLANT_FIELD, testInput)
+    performTextInputAndAssert(NewProfileScreenTestTags_.FAVORITE_PLANT_FIELD, testInput)
   }
 
   /**
@@ -219,7 +219,7 @@ class NewProfileScreenTests {
     val testInput = "France"
 
     // Enter text into the country field
-    performTextInputAndAssert(NewProfileScreenTestTags.COUNTRY_FIELD, testInput)
+    performTextInputAndAssert(NewProfileScreenTestTags_.COUNTRY_FIELD, testInput)
   }
 
   /**
@@ -233,11 +233,11 @@ class NewProfileScreenTests {
     setContent()
 
     // Click the experience field to trigger dropdown opening
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.EXPERIENCE_FIELD).performClick()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.EXPERIENCE_FIELD).performClick()
 
     // Verify the dropdown menu becomes visible
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.EXPERIENCE_DROPDOWN_MENU)
+        .onNodeWithTag(NewProfileScreenTestTags_.EXPERIENCE_DROPDOWN_MENU)
         .assertIsDisplayed()
   }
 
@@ -256,12 +256,12 @@ class NewProfileScreenTests {
     setContent()
 
     // Open the experience dropdown
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.EXPERIENCE_FIELD).performClick()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.EXPERIENCE_FIELD).performClick()
 
     // Verify each gardening skill is displayed and clickable
     GardeningSkill.values().forEach { skill ->
       composeTestRule
-          .onNodeWithTag(NewProfileScreenTestTags.getExperienceItemTag(skill))
+          .onNodeWithTag(NewProfileScreenTestTags_.getExperienceItemTag(skill))
           .assertIsDisplayed()
           .assertHasClickAction()
     }
@@ -284,14 +284,14 @@ class NewProfileScreenTests {
     val selectedSkill = GardeningSkill.INTERMEDIATE
 
     // Open dropdown and select a specific skill
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.EXPERIENCE_FIELD).performClick()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.EXPERIENCE_FIELD).performClick()
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.getExperienceItemTag(selectedSkill))
+        .onNodeWithTag(NewProfileScreenTestTags_.getExperienceItemTag(selectedSkill))
         .performClick()
 
     // Verify the field displays the selected skill name
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.EXPERIENCE_FIELD)
+        .onNodeWithTag(NewProfileScreenTestTags_.EXPERIENCE_FIELD)
         .assertTextContains(selectedSkill.name)
   }
 
@@ -307,11 +307,11 @@ class NewProfileScreenTests {
     setContent()
 
     // Type in the country field to trigger search functionality
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD).performTextInput("Fr")
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).performTextInput("Fr")
 
     // Verify the dropdown opens automatically to show search results
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)
         .assertIsDisplayed()
   }
 
@@ -326,11 +326,11 @@ class NewProfileScreenTests {
     setContent()
 
     // Click the dropdown icon to open the country list
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_ICON).performClick()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_ICON).performClick()
 
     // Verify the dropdown menu opens
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)
         .assertIsDisplayed()
   }
 
@@ -349,16 +349,16 @@ class NewProfileScreenTests {
     setContent()
 
     // Click the dropdown icon when the country field is empty
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_ICON).performClick()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_ICON).performClick()
 
     // Verify dropdown opens with all countries available
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)
         .assertIsDisplayed()
 
     // Verify that a results count is displayed showing total countries
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_RESULTS_COUNT)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_RESULTS_COUNT)
         .assertIsDisplayed()
   }
 
@@ -374,11 +374,11 @@ class NewProfileScreenTests {
     setContent()
 
     // Type in the country field to trigger a search
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD).performTextInput("Fr")
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).performTextInput("Fr")
 
     // Verify that a results count indicator is displayed
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_RESULTS_COUNT)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_RESULTS_COUNT)
         .assertIsDisplayed()
   }
 
@@ -395,12 +395,12 @@ class NewProfileScreenTests {
 
     // Type a country name that doesn't exist
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD)
         .performTextInput("NonExistentCountry")
 
     // Verify that a "no results" message is displayed
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_NO_RESULTS)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_NO_RESULTS)
         .assertIsDisplayed()
         .assertTextEquals("No countries found")
   }
@@ -419,16 +419,16 @@ class NewProfileScreenTests {
     setContent()
 
     // Type to filter countries and open the dropdown
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD).performTextInput("Fr")
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).performTextInput("Fr")
 
     // Select France from the filtered results
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.getCountryItemTag("France"))
+        .onNodeWithTag(NewProfileScreenTestTags_.getCountryItemTag("France"))
         .performClick()
 
     // Verify the field now shows the selected country
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD)
         .assertTextContains("France")
   }
 
@@ -447,16 +447,16 @@ class NewProfileScreenTests {
     setContent()
 
     // Search for a specific country
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD).performTextInput("France")
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).performTextInput("France")
 
     // Verify France appears in the filtered results
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.getCountryItemTag("France"))
+        .onNodeWithTag(NewProfileScreenTestTags_.getCountryItemTag("France"))
         .assertIsDisplayed()
 
     // Verify a results count is displayed for the filtered results
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_RESULTS_COUNT)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_RESULTS_COUNT)
         .assertIsDisplayed()
   }
 
@@ -472,16 +472,16 @@ class NewProfileScreenTests {
     setContent()
 
     // Type a broad search term that matches many countries
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD).performTextInput("a")
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).performTextInput("a")
 
     // Verify the dropdown opens and functions properly
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)
         .assertIsDisplayed()
 
     // Verify a results count is displayed
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_RESULTS_COUNT)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_RESULTS_COUNT)
         .assertIsDisplayed()
   }
 
@@ -497,24 +497,24 @@ class NewProfileScreenTests {
     setContent()
 
     // Open dropdown with empty field to show all 195 countries
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_ICON).performClick()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_ICON).performClick()
 
     // Wait for the UI to fully render with all countries
     composeTestRule.waitForIdle()
 
     // Verify dropdown opens successfully
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)
         .assertIsDisplayed()
 
     // Scroll to find the "more results" indicator
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)
-        .performScrollToNode(hasTestTag(NewProfileScreenTestTags.COUNTRY_MORE_RESULTS))
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)
+        .performScrollToNode(hasTestTag(NewProfileScreenTestTags_.COUNTRY_MORE_RESULTS))
 
     // With 195 countries (> display limit), should show "more results" indicator
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_MORE_RESULTS)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_MORE_RESULTS)
         .assertExists()
         .assertTextContains("more countries", substring = true, ignoreCase = false)
   }
@@ -531,23 +531,23 @@ class NewProfileScreenTests {
     setContent()
 
     // Search with a common letter that matches many countries
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD).performTextInput("a")
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).performTextInput("a")
 
     // Wait for search results to be processed and displayed
     composeTestRule.waitForIdle()
 
     // Verify dropdown opens with search results
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)
         .assertIsDisplayed()
 
     // Scroll to find the "more results" indicator
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)
-        .performScrollToNode(hasTestTag(NewProfileScreenTestTags.COUNTRY_MORE_RESULTS))
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)
+        .performScrollToNode(hasTestTag(NewProfileScreenTestTags_.COUNTRY_MORE_RESULTS))
 
     // Verify the "more results" indicator exists for this broad search
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_MORE_RESULTS).assertExists()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_MORE_RESULTS).assertExists()
   }
 
   /**
@@ -566,25 +566,25 @@ class NewProfileScreenTests {
     setContent()
 
     // Type partial country name to search for Canada
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD).performTextInput("anada")
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).performTextInput("anada")
 
     // Wait for search results to be processed
     composeTestRule.waitForIdle()
 
     // Scroll to find Canada in the search results
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)
         .performScrollToNode(
-            matcher = hasTestTag(NewProfileScreenTestTags.getCountryItemTag("Canada")))
+            matcher = hasTestTag(NewProfileScreenTestTags_.getCountryItemTag("Canada")))
 
     // Select Canada from the search results
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.getCountryItemTag("Canada"))
+        .onNodeWithTag(NewProfileScreenTestTags_.getCountryItemTag("Canada"))
         .performClick()
 
     // Verify the field now contains the selected country
     composeTestRule
-        .onNodeWithTag(NewProfileScreenTestTags.COUNTRY_FIELD)
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD)
         .assertTextContains("Canada")
   }
 
@@ -600,15 +600,15 @@ class NewProfileScreenTests {
     setContent()
 
     // Fill in all mandatory fields
-    performTextInputAndAssert(NewProfileScreenTestTags.FIRST_NAME_FIELD, "John")
-    performTextInputAndAssert(NewProfileScreenTestTags.LAST_NAME_FIELD, "Doe")
-    performTextInputAndAssert(NewProfileScreenTestTags.COUNTRY_FIELD, "Canada")
+    performTextInputAndAssert(NewProfileScreenTestTags_.FIRST_NAME_FIELD, "John")
+    performTextInputAndAssert(NewProfileScreenTestTags_.LAST_NAME_FIELD, "Doe")
+    performTextInputAndAssert(NewProfileScreenTestTags_.COUNTRY_FIELD, "Canada")
 
     // Wait for UI to process all input changes
     composeTestRule.waitForIdle()
 
     // Attempt to register the profile
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.REGISTER_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.REGISTER_BUTTON).performClick()
 
     // Wait for registration callback to be processed
     composeTestRule.waitForIdle()
@@ -632,11 +632,11 @@ class NewProfileScreenTests {
     setContent()
 
     // Fill in only some mandatory fields (leaving country empty)
-    performTextInputAndAssert(NewProfileScreenTestTags.FIRST_NAME_FIELD, "John")
-    performTextInputAndAssert(NewProfileScreenTestTags.LAST_NAME_FIELD, "Doe")
+    performTextInputAndAssert(NewProfileScreenTestTags_.FIRST_NAME_FIELD, "John")
+    performTextInputAndAssert(NewProfileScreenTestTags_.LAST_NAME_FIELD, "Doe")
 
     // Attempt to register with incomplete information
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.REGISTER_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.REGISTER_BUTTON).performClick()
 
     // Verify registration callback was NOT triggered due to missing country
     assertEquals(false, onRegisterPressedCalled)

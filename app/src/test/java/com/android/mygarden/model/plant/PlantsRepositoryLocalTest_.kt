@@ -1,13 +1,12 @@
 package com.android.mygarden.model.plant
 
 import java.sql.Timestamp
-import kotlin.collections.get
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
-class PlantsRepositoryLocalTest {
+class PlantsRepositoryLocalTest_ {
 
   private lateinit var repository: PlantsRepositoryLocal
 

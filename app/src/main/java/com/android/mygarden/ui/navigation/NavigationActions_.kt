@@ -9,14 +9,14 @@ import androidx.navigation.NavHostController
  *
  * @param controller the NavHostController used to navigate
  */
-class NavigationActions(private val controller: NavHostController) {
+class NavigationActions_(private val controller: NavHostController) {
 
   /**
    * Navigate to the given screen.
    * - If it's a top-level screen, delegates to [navToTopLevel] for proper tab behavior.
    * - Otherwise, performs a simple navigate with singleTop and optional restoreState.
    */
-  fun navTo(destination: Screen) {
+  fun navTo(destination: Screen_) {
     if (destination == null) {
       Log.w("NavigationActions", "navTo() called with null destination — ignored")
       return
@@ -29,7 +29,7 @@ class NavigationActions(private val controller: NavHostController) {
       launchSingleTop = true
       // Typically we want to restore state when navigating within the main graph,
       // but avoid restoring when going to the auth flow.
-      if (destination != Screen.Auth) {
+      if (destination != Screen_.Auth) {
         restoreState = true
       }
     }
@@ -41,7 +41,7 @@ class NavigationActions(private val controller: NavHostController) {
    * - State is saved/restored when switching between tabs
    * - We pop up to the graph's start destination instead of the destination itself
    */
-  fun navToTopLevel(destination: Screen) {
+  fun navToTopLevel(destination: Screen_) {
     val current = currentRoute()
     if (current == destination.route) return
 

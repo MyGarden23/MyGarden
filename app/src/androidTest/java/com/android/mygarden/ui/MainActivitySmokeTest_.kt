@@ -5,7 +5,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
-import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.navigation.NavigationTestTags_
 import org.junit.Rule
 import org.junit.Test
 
@@ -15,7 +15,7 @@ import org.junit.Test
  * - Best-effort probe for bottom bar (if app lands on a top-level screen)
  * - No emulator, no network, no brittle text assumptions
  */
-class MainActivitySmokeTest {
+class MainActivitySmokeTest_ {
 
   @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
@@ -28,8 +28,8 @@ class MainActivitySmokeTest {
 
     // Best-effort probes (won’t fail if absent):
     // 1) Bottom bar present? show it’s displayed
-    if (nodeExistsWithTag(NavigationTestTags.BOTTOM_BAR)) {
-      rule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
+    if (nodeExistsWithTag(NavigationTestTags_.BOTTOM_BAR)) {
+      rule.onNodeWithTag(NavigationTestTags_.BOTTOM_BAR).assertIsDisplayed()
     }
 
     // 2) If you DO render a sign-in button with text, this won’t fail if it’s not there.
@@ -53,8 +53,8 @@ class MainActivitySmokeTest {
     waitForRoot()
 
     // Best-effort: if bottom bar renders, assert it’s displayed
-    if (nodeExistsWithTag(NavigationTestTags.BOTTOM_BAR)) {
-      rule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
+    if (nodeExistsWithTag(NavigationTestTags_.BOTTOM_BAR)) {
+      rule.onNodeWithTag(NavigationTestTags_.BOTTOM_BAR).assertIsDisplayed()
     }
   }
 

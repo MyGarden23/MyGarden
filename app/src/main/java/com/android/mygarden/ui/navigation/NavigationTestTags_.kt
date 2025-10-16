@@ -1,6 +1,6 @@
 package com.android.mygarden.ui.navigation
 
-object NavigationTestTags {
+object NavigationTestTags_ {
   const val BOTTOM_BAR = "BottomBar"
   const val CAMERA_BUTTON = "CameraButton"
   const val PROFILE_BUTTON = "ProfileButton"

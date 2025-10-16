@@ -94,7 +94,7 @@ fun SignInScreen(
       modifier =
           Modifier.fillMaxSize()
               .background(MaterialTheme.colorScheme.background)
-              .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_BACKGROUND)) {
+              .testTag(SignInScreenTestTags_.SIGN_IN_SCREEN_BACKGROUND)) {
         Column(
             modifier = Modifier.fillMaxSize().padding(top = 120.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -106,7 +106,7 @@ fun SignInScreen(
               modifier =
                   Modifier.fillMaxWidth(0.9f)
                       .aspectRatio(1f)
-                      .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
+                      .testTag(SignInScreenTestTags_.SIGN_IN_SCREEN_APP_LOGO)
                       .semantics { this.logoRes = resName })
 
           Spacer(modifier = Modifier.fillMaxHeight(0.4f))
@@ -121,7 +121,7 @@ fun SignInScreen(
                     Modifier.height(60.dp)
                         .fillMaxWidth(0.75f)
                         .border(BorderStroke(2.dp, Color.Gray), RoundedCornerShape(50))
-                        .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON),
+                        .testTag(SignInScreenTestTags_.SIGN_IN_SCREEN_GOOGLE_BUTTON),
                 shape = RoundedCornerShape(50),
                 colors =
                     ButtonDefaults.outlinedButtonColors(

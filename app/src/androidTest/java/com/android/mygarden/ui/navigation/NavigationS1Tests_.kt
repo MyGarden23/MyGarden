@@ -27,12 +27,12 @@ import org.junit.runner.RunWith
  * test it on the real app.
  */
 @RunWith(AndroidJUnit4::class)
-class NavigationS1Tests {
+class NavigationS1Tests_ {
 
   @Composable
-  fun FictionalProfileScreen(navActions: NavigationActions? = null) {
+  fun FictionalProfileScreen(navActions: NavigationActions_? = null) {
     Scaffold(
-        modifier = Modifier.testTag(NavigationTestTags.PROFILE_SCREEN),
+        modifier = Modifier.testTag(NavigationTestTags_.PROFILE_SCREEN),
         bottomBar = {
           BottomBar(
               selectedPage = Page.Profile,
@@ -42,9 +42,9 @@ class NavigationS1Tests {
   }
 
   @Composable
-  fun FictionalCameraScreen(navActions: NavigationActions? = null) {
+  fun FictionalCameraScreen(navActions: NavigationActions_? = null) {
     Scaffold(
-        modifier = Modifier.testTag(NavigationTestTags.CAMERA_SCREEN),
+        modifier = Modifier.testTag(NavigationTestTags_.CAMERA_SCREEN),
         bottomBar = {
           BottomBar(
               selectedPage = Page.Camera,
@@ -56,14 +56,14 @@ class NavigationS1Tests {
   @Composable
   fun FictionalApp() {
     val navController = rememberNavController()
-    val navActions = NavigationActions(navController)
-    val startDest = Screen.Camera.name
+    val navActions = NavigationActions_(navController)
+    val startDest = Screen_.Camera.name
     NavHost(navController = navController, startDestination = startDest) {
-      navigation(startDestination = Screen.Camera.route, route = Screen.Camera.name) {
-        composable(route = Screen.Camera.route) { FictionalCameraScreen(navActions) }
+      navigation(startDestination = Screen_.Camera.route, route = Screen_.Camera.name) {
+        composable(route = Screen_.Camera.route) { FictionalCameraScreen(navActions) }
       }
-      navigation(startDestination = Screen.Profile.route, route = Screen.Profile.name) {
-        composable(route = Screen.Profile.route) { FictionalProfileScreen(navActions) }
+      navigation(startDestination = Screen_.Profile.route, route = Screen_.Profile.name) {
+        composable(route = Screen_.Profile.route) { FictionalProfileScreen(navActions) }
       }
     }
   }
@@ -78,39 +78,39 @@ class NavigationS1Tests {
 
   @Test
   fun allTagsAreDisplayed() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.BOTTOM_BAR).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.CAMERA_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.PROFILE_BUTTON).assertIsDisplayed()
   }
 
   @Test
   fun bottomBarIsDisplayedOnCameraScreen() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.CAMERA_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.BOTTOM_BAR).assertIsDisplayed()
   }
 
   @Test
   fun bottomBarIsDisplayedOnProfileScreen() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.CAMERA_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.BOTTOM_BAR).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.PROFILE_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.PROFILE_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.BOTTOM_BAR).assertIsDisplayed()
   }
 
   @Test
   fun canNavigateFromCameraToProfileUsingBottomBar() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.CAMERA_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.PROFILE_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.PROFILE_SCREEN).assertIsDisplayed()
   }
 
   @Test
   fun canNavigateFromProfileToCameraUsingBottomBar() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.CAMERA_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.PROFILE_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.PROFILE_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.CAMERA_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags_.CAMERA_SCREEN).assertIsDisplayed()
   }
 }

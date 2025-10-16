@@ -51,7 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.mygarden.model.profile.Countries
+import com.android.mygarden.model.profile.Countries_
 import com.android.mygarden.model.profile.GardeningSkill
 
 // Layout proportions
@@ -101,7 +101,7 @@ private fun ProfileHeader(modifier: Modifier = Modifier) {
               fontSize = TITLE_FONT_SIZE,
               fontWeight = FontWeight.Medium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.testTag(NewProfileScreenTestTags.TITLE))
+              modifier = Modifier.testTag(NewProfileScreenTestTags_.TITLE))
 
           // Avatar placeholder with person icon
           Box(
@@ -110,7 +110,7 @@ private fun ProfileHeader(modifier: Modifier = Modifier) {
                       .aspectRatio(1f)
                       .clip(CircleShape)
                       .background(MaterialTheme.colorScheme.surfaceVariant)
-                      .testTag(NewProfileScreenTestTags.AVATAR),
+                      .testTag(NewProfileScreenTestTags_.AVATAR),
               contentAlignment = Alignment.Center) {
                 Icon(
                     Icons.Default.Person,
@@ -147,7 +147,7 @@ private fun ProfileForm(
         onValueChange = { newProfileViewModel.setFirstName(it) },
         label = { Text("First Name *") },
         placeholder = { Text("Enter your first name") },
-        modifier = Modifier.fillMaxWidth().testTag(NewProfileScreenTestTags.FIRST_NAME_FIELD),
+        modifier = Modifier.fillMaxWidth().testTag(NewProfileScreenTestTags_.FIRST_NAME_FIELD),
         isError = uiState.firstNameIsError(),
         singleLine = true)
 
@@ -156,7 +156,7 @@ private fun ProfileForm(
         onValueChange = { newProfileViewModel.setLastName(it) },
         label = { Text("Last Name *") },
         placeholder = { Text("Enter your last name") },
-        modifier = Modifier.fillMaxWidth().testTag(NewProfileScreenTestTags.LAST_NAME_FIELD),
+        modifier = Modifier.fillMaxWidth().testTag(NewProfileScreenTestTags_.LAST_NAME_FIELD),
         isError = uiState.lastNameIsError(),
         singleLine = true)
 
@@ -172,7 +172,7 @@ private fun ProfileForm(
         onValueChange = { newProfileViewModel.setFavoritePlant(it) },
         label = { Text("Favorite Plant") },
         placeholder = { Text("Enter your favorite plant") },
-        modifier = Modifier.fillMaxWidth().testTag(NewProfileScreenTestTags.FAVORITE_PLANT_FIELD),
+        modifier = Modifier.fillMaxWidth().testTag(NewProfileScreenTestTags_.FAVORITE_PLANT_FIELD),
         singleLine = true)
 
     CountryDropdown(
@@ -203,7 +203,7 @@ private fun ExperienceDropdown(
   ExposedDropdownMenuBox(
       expanded = isExpanded,
       onExpandedChange = onExpandedChange,
-      modifier = Modifier.testTag(NewProfileScreenTestTags.EXPERIENCE_DROPDOWN)) {
+      modifier = Modifier.testTag(NewProfileScreenTestTags_.EXPERIENCE_DROPDOWN)) {
         OutlinedTextField(
             value = uiState.gardeningSkill?.name ?: "",
             onValueChange = {},
@@ -213,13 +213,13 @@ private fun ExperienceDropdown(
             modifier =
                 Modifier.fillMaxWidth()
                     .menuAnchor()
-                    .testTag(NewProfileScreenTestTags.EXPERIENCE_FIELD),
+                    .testTag(NewProfileScreenTestTags_.EXPERIENCE_FIELD),
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) })
 
         DropdownMenu(
             expanded = isExpanded,
             onDismissRequest = { onExpandedChange(false) },
-            modifier = Modifier.testTag(NewProfileScreenTestTags.EXPERIENCE_DROPDOWN_MENU)) {
+            modifier = Modifier.testTag(NewProfileScreenTestTags_.EXPERIENCE_DROPDOWN_MENU)) {
               GardeningSkill.values().forEach { skill ->
                 DropdownMenuItem(
                     text = { Text(skill.name) },
@@ -228,7 +228,7 @@ private fun ExperienceDropdown(
                       onExpandedChange(false)
                     },
                     modifier =
-                        Modifier.testTag(NewProfileScreenTestTags.getExperienceItemTag(skill)))
+                        Modifier.testTag(NewProfileScreenTestTags_.getExperienceItemTag(skill)))
               }
             }
       }
@@ -253,9 +253,9 @@ private fun CountryDropdown(
 ) {
   val filteredCountries =
       if (uiState.country.isBlank()) {
-        Countries.ALL
+        Countries_.ALL
       } else {
-        Countries.ALL.filter { it.contains(uiState.country, ignoreCase = true) }
+        Countries_.ALL.filter { it.contains(uiState.country, ignoreCase = true) }
       }
 
   Box(modifier = Modifier.fillMaxWidth()) {
@@ -270,7 +270,7 @@ private fun CountryDropdown(
         modifier =
             Modifier.fillMaxWidth()
                 .focusRequester(countryFocusRequester)
-                .testTag(NewProfileScreenTestTags.COUNTRY_FIELD),
+                .testTag(NewProfileScreenTestTags_.COUNTRY_FIELD),
         isError = uiState.countryIsError(),
         singleLine = true,
         trailingIcon = {
@@ -279,7 +279,7 @@ private fun CountryDropdown(
               contentDescription = "Country dropdown",
               modifier =
                   Modifier.clickable { onExpandedChange(!isExpanded) }
-                      .testTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_ICON))
+                      .testTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_ICON))
         })
 
     if (isExpanded) {
@@ -310,16 +310,16 @@ private fun CountryDropdownMenu(
           Modifier.fillMaxWidth()
               .height(DROPDOWN_HEIGHT)
               .offset(y = DROPDOWN_OFFSET)
-              .testTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN),
+              .testTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        LazyColumn(modifier = Modifier.testTag(NewProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)) {
+        LazyColumn(modifier = Modifier.testTag(NewProfileScreenTestTags_.COUNTRY_DROPDOWN_MENU)) {
           // Search results count
           item {
             Text(
                 text = "${filteredCountries.size} countries found",
                 modifier =
                     Modifier.padding(STANDARD_PADDING)
-                        .testTag(NewProfileScreenTestTags.COUNTRY_RESULTS_COUNT),
+                        .testTag(NewProfileScreenTestTags_.COUNTRY_RESULTS_COUNT),
                 fontSize = CAPTION_FONT_SIZE,
                 fontStyle = FontStyle.Italic,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -333,7 +333,7 @@ private fun CountryDropdownMenu(
                     Modifier.fillMaxWidth()
                         .clickable { onCountrySelected(country) }
                         .padding(horizontal = STANDARD_PADDING, vertical = ITEM_VERTICAL_PADDING)
-                        .testTag(NewProfileScreenTestTags.getCountryItemTag(country)),
+                        .testTag(NewProfileScreenTestTags_.getCountryItemTag(country)),
                 color = MaterialTheme.colorScheme.onSurface)
           }
 
@@ -345,7 +345,7 @@ private fun CountryDropdownMenu(
                       "... and ${filteredCountries.size - MAX_COUNTRIES_DISPLAYED} more countries",
                   modifier =
                       Modifier.padding(STANDARD_PADDING)
-                          .testTag(NewProfileScreenTestTags.COUNTRY_MORE_RESULTS),
+                          .testTag(NewProfileScreenTestTags_.COUNTRY_MORE_RESULTS),
                   fontSize = CAPTION_FONT_SIZE,
                   fontStyle = FontStyle.Italic,
                   color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -359,7 +359,7 @@ private fun CountryDropdownMenu(
                   text = "No countries found",
                   modifier =
                       Modifier.padding(STANDARD_PADDING)
-                          .testTag(NewProfileScreenTestTags.COUNTRY_NO_RESULTS),
+                          .testTag(NewProfileScreenTestTags_.COUNTRY_NO_RESULTS),
                   fontSize = BODY_FONT_SIZE,
                   color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -392,7 +392,7 @@ private fun RegisterButton(
           Modifier.fillMaxWidth()
               .height(BUTTON_HEIGHT)
               .padding(horizontal = HORIZONTAL_PADDING, vertical = VERTICAL_PADDING)
-              .testTag(NewProfileScreenTestTags.REGISTER_BUTTON),
+              .testTag(NewProfileScreenTestTags_.REGISTER_BUTTON),
       colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
       shape = RoundedCornerShape(BUTTON_CORNER_RADIUS)) {
         Text(
@@ -424,7 +424,7 @@ fun NewProfileScreen(
   val uiState by newProfileViewModel.uiState.collectAsState()
 
   Scaffold(
-      modifier = Modifier.testTag(NewProfileScreenTestTags.SCREEN),
+      modifier = Modifier.testTag(NewProfileScreenTestTags_.SCREEN),
       bottomBar = {
         RegisterButton(
             uiState = uiState,

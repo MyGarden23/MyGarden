@@ -11,7 +11,7 @@ import com.android.mygarden.model.plant.PlantHealthStatus
 import org.junit.Rule
 import org.junit.Test
 
-class PlantInfoScreenTests {
+class PlantInfoScreenTests_ {
   @get:Rule val composeTestRule = createComposeRule()
 
   val plant: Plant =

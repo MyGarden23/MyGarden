@@ -66,7 +66,7 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
-class MyGardenThemeColorTest {
+class MyGardenThemeColorTest_ {
 
   @get:Rule val composeRule = createComposeRule()
 

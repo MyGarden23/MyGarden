@@ -24,11 +24,11 @@ private val profileIconId = R.drawable.plant_profile_icon
  * @param iconId the id of the icon
  * @param testTag the test tag of the page
  */
-sealed class Page(val name: String, val destination: Screen, val iconId: Int, val testTag: String) {
-  object Camera : Page("CameraPage", Screen.Camera, cameraIconId, NavigationTestTags.CAMERA_BUTTON)
+sealed class Page(val name: String, val destination: Screen_, val iconId: Int, val testTag: String) {
+  object Camera : Page("CameraPage", Screen_.Camera, cameraIconId, NavigationTestTags_.CAMERA_BUTTON)
 
   object Profile :
-      Page("ProfilePage", Screen.Profile, profileIconId, NavigationTestTags.PROFILE_BUTTON)
+      Page("ProfilePage", Screen_.Profile, profileIconId, NavigationTestTags_.PROFILE_BUTTON)
 }
 
 /**
@@ -39,7 +39,7 @@ sealed class Page(val name: String, val destination: Screen, val iconId: Int, va
 fun BottomBar(selectedPage: Page, onSelect: (Page) -> Unit, modifier: Modifier = Modifier) {
   val pages = listOf(Page.Camera, Page.Profile)
   NavigationBar(
-      modifier = modifier.fillMaxWidth().height(100.dp).testTag(NavigationTestTags.BOTTOM_BAR),
+      modifier = modifier.fillMaxWidth().height(100.dp).testTag(NavigationTestTags_.BOTTOM_BAR),
       containerColor = MaterialTheme.colorScheme.background,
       content = {
         pages.forEach { page ->

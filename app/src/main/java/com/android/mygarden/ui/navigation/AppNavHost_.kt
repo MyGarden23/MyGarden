@@ -23,30 +23,30 @@ fun AppNavHost(
   // Each composable() below defines one destination (screen) and what to do when navigating there.
   NavHost(navController = navController, startDestination = startDestination) {
     // handy wrapper so we don’t call navController.navigate() directly everywhere
-    val navigationActions = NavigationActions(navController)
+    val navigationActions = NavigationActions_(navController)
     // Auth
-    composable(Screen.Auth.route) {
+    composable(Screen_.Auth.route) {
       SignInScreen(
           credentialManager = credentialManagerProvider(),
-          onSignedIn = { navigationActions.navTo(Screen.Camera) })
+          onSignedIn = { navigationActions.navTo(Screen_.Camera) })
     }
 
     // Camera
-    composable(Screen.Camera.route) {
+    composable(Screen_.Camera.route) {
       CameraScreen(
           onPictureTaken = { imagePath ->
             navController.currentBackStackEntry?.savedStateHandle?.set("imagePath", imagePath)
-            navigationActions.navTo(Screen.PlantView)
+            navigationActions.navTo(Screen_.PlantView)
           })
     }
 
     // Profile
-    composable(Screen.Profile.route) {
+    composable(Screen_.Profile.route) {
       // TODO: ProfileScreen(...)
     }
 
     // Plant View
-    composable(Screen.PlantView.route) { backStackEntry ->
+    composable(Screen_.PlantView.route) { backStackEntry ->
       val imagePath = backStackEntry.savedStateHandle.get<String>("imagePath")
       // Shows plant details after a photo is taken
       // Right now it just uses a mock Plant object for demo purposes

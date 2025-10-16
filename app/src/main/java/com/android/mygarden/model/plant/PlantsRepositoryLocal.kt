@@ -4,7 +4,7 @@ import android.media.Image
 import java.sql.Timestamp
 
 /** Represents a repository that manages Plant and OwnedPlant objects. */
-class PlantsRepositoryLocal : PlantsRepository {
+class PlantsRepositoryLocal : PlantsRepository_ {
 
   private var counter = 0
   private val ownedPlants: MutableList<OwnedPlant> = mutableListOf()

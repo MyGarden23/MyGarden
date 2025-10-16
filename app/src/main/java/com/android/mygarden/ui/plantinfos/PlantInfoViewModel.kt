@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantsRepository
+import com.android.mygarden.model.plant.PlantsRepository_
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +32,7 @@ data class PlantInfoUIState(
 
 /** ViewModel for managing the plant information screen state. */
 class PlantInfoViewModel(
-    private val plantsRepository: PlantsRepository = PlantsRepositoryProvider.repository
+    private val plantsRepository: PlantsRepository_ = PlantsRepositoryProvider.repository
 ) : ViewModel() {
   // Private mutable state flow
   private val _uiState = MutableStateFlow(PlantInfoUIState())

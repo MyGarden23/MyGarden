@@ -11,7 +11,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SignInScreenTest {
+class SignInScreenTest_ {
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -20,7 +20,7 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen() }
 
     composeTestRule
-        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+        .onNodeWithTag(SignInScreenTestTags_.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
   }
 
@@ -28,7 +28,7 @@ class SignInScreenTest {
   fun appLogo_isDisplay() {
     composeTestRule.setContent { SignInScreen() }
 
-    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(SignInScreenTestTags_.SIGN_IN_SCREEN_APP_LOGO).assertIsDisplayed()
   }
 
   @Test
@@ -36,7 +36,7 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen() }
 
     composeTestRule
-        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_BACKGROUND)
+        .onNodeWithTag(SignInScreenTestTags_.SIGN_IN_SCREEN_BACKGROUND)
         .assertIsDisplayed()
   }
 
@@ -46,7 +46,7 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen(isDarkTheme = true) }
 
     composeTestRule
-        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
+        .onNodeWithTag(SignInScreenTestTags_.SIGN_IN_SCREEN_APP_LOGO)
         .assert(SemanticsMatcher.expectValue(LogoResNameKey, "app_logo_dark"))
   }
 
@@ -56,7 +56,7 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen(isDarkTheme = false) }
 
     composeTestRule
-        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
+        .onNodeWithTag(SignInScreenTestTags_.SIGN_IN_SCREEN_APP_LOGO)
         .assert(SemanticsMatcher.expectValue(LogoResNameKey, "app_logo_light"))
   }
 }

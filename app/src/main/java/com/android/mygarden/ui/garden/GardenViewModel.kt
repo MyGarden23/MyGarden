@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.plant.OwnedPlant
-import com.android.mygarden.model.plant.PlantsRepository
+import com.android.mygarden.model.plant.PlantsRepository_
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +26,7 @@ data class GardenUIState(val plants: List<OwnedPlant> = emptyList(), val errorMs
  * @property plantsRepo the repository of the plants to store them
  */
 class GardenViewModel(
-    private val plantsRepo: PlantsRepository = PlantsRepositoryProvider.repository,
+    private val plantsRepo: PlantsRepository_ = PlantsRepositoryProvider.repository,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(GardenUIState())
   val uiState: StateFlow<GardenUIState> = _uiState.asStateFlow()

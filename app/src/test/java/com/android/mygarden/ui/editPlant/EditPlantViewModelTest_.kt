@@ -16,7 +16,7 @@ import org.junit.Test
 
 /** Tests for [EditPlantViewModel]. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class EditPlantViewModelTest {
+class EditPlantViewModelTest_ {
 
   private lateinit var repository: PlantsRepositoryLocal
   private lateinit var viewModel: EditPlantViewModel

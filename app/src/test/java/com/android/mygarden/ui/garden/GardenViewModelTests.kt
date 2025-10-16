@@ -3,7 +3,7 @@ package com.android.mygarden.ui.garden
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantsRepository
+import com.android.mygarden.model.plant.PlantsRepository_
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +21,7 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class GardenViewModelTests {
 
-  private lateinit var repo: PlantsRepository
+  private lateinit var repo: PlantsRepository_
   private lateinit var vm: GardenViewModel
   private lateinit var ownedPlant: OwnedPlant
   val plant1 =

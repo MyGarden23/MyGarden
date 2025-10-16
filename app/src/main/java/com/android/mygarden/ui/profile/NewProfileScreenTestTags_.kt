@@ -3,7 +3,7 @@ package com.android.mygarden.ui.profile
 import com.android.mygarden.model.profile.GardeningSkill
 
 /** Test tags for NewProfileScreen components to enable UI testing */
-object NewProfileScreenTestTags {
+object NewProfileScreenTestTags_ {
   const val SCREEN = "new_profile_screen"
   const val TITLE = "profile_title"
   const val AVATAR = "profile_avatar"

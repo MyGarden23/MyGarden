@@ -12,7 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class CameraUnitTests {
+class CameraUnitTests_ {
 
   private lateinit var viewModel: CameraViewModel
   private lateinit var context: Context

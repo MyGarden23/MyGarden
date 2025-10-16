@@ -1,7 +1,7 @@
 package com.android.mygarden.ui.profile
 
 import androidx.lifecycle.ViewModel
-import com.android.mygarden.model.profile.Countries
+import com.android.mygarden.model.profile.Countries_
 import com.android.mygarden.model.profile.GardeningSkill
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,7 +61,7 @@ data class NewProfileUIState(
    * @return true if country is valid, false otherwise
    */
   private fun countryValid(): Boolean {
-    return Countries.ALL.contains(country)
+    return Countries_.ALL.contains(country)
   }
 
   /**

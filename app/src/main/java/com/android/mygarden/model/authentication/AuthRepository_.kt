@@ -5,7 +5,7 @@ import com.google.firebase.auth.FirebaseUser
 
 // Defines a common interface for handling authentication logic.
 // This helps separate the Firebase implementation from the rest of the app logic.
-interface AuthRepository {
+interface AuthRepository_ {
 
   // Signs in a user with a Google credential (from Credential Manager).
   // Returns a Result wrapping the signed-in FirebaseUser on success,

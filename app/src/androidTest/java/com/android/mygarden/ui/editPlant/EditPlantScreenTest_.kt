@@ -216,7 +216,7 @@ class EditPlantScreenTest {
 }
 
 /** Recording fake VM for UI tests (no mocking framework needed). */
-private class FakeEditPlantViewModel : EditPlantViewModelInterface {
+private class FakeEditPlantViewModel : EditPlantViewModelInterface_ {
   private val _ui =
       MutableStateFlow(
           EditPlantUIState(

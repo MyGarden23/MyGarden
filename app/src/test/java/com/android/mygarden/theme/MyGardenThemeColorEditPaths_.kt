@@ -15,7 +15,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-class MyGardenThemeColorEditPaths {
+class MyGardenThemeColorEditPaths_ {
 
   @get:Rule val compose = createComposeRule()
 

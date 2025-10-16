@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
  * Interface representing the UI state of an edit plant screen. Add this for the convenience of
  * testing.
  */
-interface EditPlantViewModelInterface {
+interface EditPlantViewModelInterface_ {
   val uiState: StateFlow<EditPlantUIState>
 
   /** Clears the error message in the UI state. */

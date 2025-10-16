@@ -1,6 +1,6 @@
 package com.android.mygarden.ui.profile
 
-import com.android.mygarden.model.profile.Countries
+import com.android.mygarden.model.profile.Countries_
 import com.android.mygarden.model.profile.GardeningSkill
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -363,7 +363,7 @@ class NewProfileViewModelTest {
   @Test
   fun validCountriesFromCountriesList_canRegister() = runTest {
     // Test a few random countries from the actual Countries.ALL list
-    val testCountries = Countries.ALL.take(5) // Take first 5 countries from the real list
+    val testCountries = Countries_.ALL.take(5) // Take first 5 countries from the real list
 
     testCountries.forEach { country ->
       viewModel.setFirstName("John")

@@ -13,7 +13,7 @@ import kotlinx.coroutines.tasks.await
 class AuthRepositoryFirebase(
     private val auth: FirebaseAuth = Firebase.auth,
     private val helper: GoogleSignInHelper = DefaultGoogleSignInHelper()
-) : AuthRepository {
+) : AuthRepository_ {
 
   fun getGoogleSignInOption(serverClientId: String) =
       GetSignInWithGoogleOption.Builder(serverClientId = serverClientId).build()

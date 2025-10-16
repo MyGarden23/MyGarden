@@ -9,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-class MyGardenThemeStatusBarInstrumentedTest {
+class MyGardenThemeStatusBarInstrumentedTest_ {
 
   @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 

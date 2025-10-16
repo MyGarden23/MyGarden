@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.plant.OwnedPlant
-import com.android.mygarden.model.plant.PlantsRepository
+import com.android.mygarden.model.plant.PlantsRepository_
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,8 +22,8 @@ data class EditPlantUIState(
 )
 
 class EditPlantViewModel(
-    private val repository: PlantsRepository = PlantsRepositoryProvider.repository,
-) : ViewModel(), EditPlantViewModelInterface {
+    private val repository: PlantsRepository_ = PlantsRepositoryProvider.repository,
+) : ViewModel(), EditPlantViewModelInterface_ {
   private val _uiState = MutableStateFlow(EditPlantUIState())
   override val uiState: StateFlow<EditPlantUIState> = _uiState.asStateFlow()
 

@@ -13,9 +13,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.BottomBar
-import com.android.mygarden.ui.navigation.NavigationActions
+import com.android.mygarden.ui.navigation.NavigationActions_
 import com.android.mygarden.ui.navigation.Page
-import com.android.mygarden.ui.navigation.Screen
+import com.android.mygarden.ui.navigation.Screen_
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.google.firebase.auth.FirebaseAuth
 
@@ -39,7 +39,7 @@ fun MyGardenApp() {
   // The main NavController drives all navigation between screens
   val navController = rememberNavController()
   // Small wrapper to simplify navigation calls
-  val actions = remember(navController) { NavigationActions(navController) }
+  val actions = remember(navController) { NavigationActions_(navController) }
   // Determine where to start: if the user is logged in, skip Sign-In
   val user = remember {
     runCatching { FirebaseAuth.getInstance().currentUser }
@@ -48,7 +48,7 @@ fun MyGardenApp() {
         }
         .getOrNull()
   }
-  val startDestination = if (user == null) Screen.Auth.route else Screen.Camera.route
+  val startDestination = if (user == null) Screen_.Auth.route else Screen_.Camera.route
   // Observe the current destination so we can update UI accordingly
   val backStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = backStackEntry?.destination?.route
@@ -59,7 +59,7 @@ fun MyGardenApp() {
   Scaffold(
       bottomBar = {
         // only show the bottom for Camera and Profile for now, add screen if needed
-        if (currentScreen == Screen.Camera || currentScreen == Screen.Profile) {
+        if (currentScreen == Screen_.Camera || currentScreen == Screen_.Profile) {
           BottomBar(
               selectedPage = selectedPage ?: Page.Camera,
               onSelect = { actions.navToTopLevel(it.destination) })
@@ -75,18 +75,18 @@ fun MyGardenApp() {
 }
 
 // Maps the current route (String) to its Screen object
-private fun routeToScreen(route: String): Screen? =
+private fun routeToScreen(route: String): Screen_? =
     when (route) {
-      Screen.Auth.route -> Screen.Auth
-      Screen.Camera.route -> Screen.Camera
-      Screen.PlantView.route -> Screen.PlantView
-      Screen.Profile.route -> Screen.Profile
+      Screen_.Auth.route -> Screen_.Auth
+      Screen_.Camera.route -> Screen_.Camera
+      Screen_.PlantView.route -> Screen_.PlantView
+      Screen_.Profile.route -> Screen_.Profile
       else -> null
     }
 // Maps the current route (String) to its Page (used for bottom bar selection)
 private fun routeToPage(route: String): Page? =
     when (route) {
-      Screen.Camera.route -> Page.Camera
-      Screen.Profile.route -> Page.Profile
+      Screen_.Camera.route -> Page.Camera
+      Screen_.Profile.route -> Page.Profile
       else -> null
     }

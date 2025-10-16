@@ -10,7 +10,7 @@ import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
-import com.android.mygarden.model.authentication.AuthRepository
+import com.android.mygarden.model.authentication.AuthRepository_
 import com.android.mygarden.model.authentication.AuthRepositoryFirebase
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.firebase.auth.FirebaseUser
@@ -41,7 +41,7 @@ private const val TAG = "SignIn"
  *
  * @property repository The repository used to perform authentication operations.
  */
-class SignInViewModel(private val repository: AuthRepository = AuthRepositoryFirebase()) :
+class SignInViewModel(private val repository: AuthRepository_ = AuthRepositoryFirebase()) :
     ViewModel() {
   private val _uiState = MutableStateFlow(AuthUIState())
   val uiState: StateFlow<AuthUIState> = _uiState

@@ -21,7 +21,7 @@ import org.junit.Test
  * These tests verify the business logic of the ViewModel without UI dependencies.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class PlantInfoViewModelTest {
+class PlantInfoViewModelTest_ {
 
   private lateinit var viewModel: PlantInfoViewModel
   private lateinit var repository: PlantsRepositoryLocal
