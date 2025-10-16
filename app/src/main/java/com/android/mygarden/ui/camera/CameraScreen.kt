@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -148,7 +149,6 @@ fun CameraScreen(
                       // Enable the camera controller to capture images
                       try {
                         LifecycleCameraController(context).apply {
-                          // Set the camera selector first, before enabling use cases
                           cameraSelector = uiState.value.cameraSelector
                           setEnabledUseCases(CameraController.IMAGE_CAPTURE)
                         }
@@ -223,6 +223,7 @@ fun CameraScreen(
                       try {
                         context.startActivity(intent)
                       } catch (_: ActivityNotFoundException) {
+                          Log.e("NoCameraAccessScreen", "Error accessing the settings app.")
                         Toast.makeText(
                                 context, "Error accessing the settings app :(", Toast.LENGTH_SHORT)
                             .show()
