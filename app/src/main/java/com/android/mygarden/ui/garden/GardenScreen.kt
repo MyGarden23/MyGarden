@@ -38,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.ui.navigation.NavigationTestTags
 
 /** Test tags to test the screen displays */
 object GardenScreenTestTags {
@@ -84,6 +85,7 @@ fun GardenScreen(
   }
 
   Scaffold(
+      modifier = Modifier.testTag(NavigationTestTags.GARDEN_SCREEN),
       // The top bar is only used to display the title of the screen
       topBar = {
         CenterAlignedTopAppBar(

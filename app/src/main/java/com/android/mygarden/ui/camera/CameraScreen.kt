@@ -52,6 +52,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
+import com.android.mygarden.ui.navigation.NavigationTestTags
 
 /** Test tags used for testing the camera screen */
 object CameraScreenTestTags {
@@ -135,6 +136,7 @@ fun CameraScreen(
   }
 
   Scaffold(
+      modifier = modifier.testTag(NavigationTestTags.CAMERA_SCREEN),
       content = { paddingValues ->
         Box(
             modifier =

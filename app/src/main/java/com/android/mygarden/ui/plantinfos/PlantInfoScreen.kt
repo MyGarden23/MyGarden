@@ -16,13 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.model.plant.Plant
-import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.ui.theme.MyGardenTheme
 
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
@@ -54,13 +51,15 @@ object PlantInfoScreenTestTags {
  * @param plant The plant to display information for
  * @param plantInfoViewModel ViewModel managing the UI state
  * @param onBackPressed Callback when the back button is pressed
+ * @param onSavePlant Callback when the Save Plant button is clicked
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantInfosScreen(
     plant: Plant,
     plantInfoViewModel: PlantInfoViewModel = viewModel(),
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onSavePlant: () -> Unit = {}
 ) {
   // Observe UI state from ViewModel
   val uiState by plantInfoViewModel.uiState.collectAsState()
@@ -82,10 +81,7 @@ fun PlantInfosScreen(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             contentAlignment = Alignment.Center) {
               Button(
-                  onClick = {
-                    // TODO Maybe later add a field to put in the last watered time
-                    plantInfoViewModel.savePlant(plant)
-                  },
+                  onClick = onSavePlant,
                   modifier =
                       Modifier.fillMaxWidth()
                           .height(56.dp)
@@ -115,7 +111,7 @@ fun PlantInfosScreen(
 
                 // Back button overlaid on top-left corner of image
                 IconButton(
-                    onClick = onBackPressed,
+                    onClick = { onBackPressed() },
                     modifier =
                         Modifier.align(Alignment.TopStart)
                             .padding(8.dp)
@@ -232,7 +228,6 @@ fun ModulableTabRow(
                     Modifier.testTag(PlantInfoScreenTestTags.DESCRIPTION_TAB)
                 SelectedPlantInfoTab.HEALTH_STATUS ->
                     Modifier.testTag(PlantInfoScreenTestTags.HEALTH_TAB)
-                else -> Modifier
               }
 
           Tab(
@@ -248,20 +243,4 @@ fun ModulableTabRow(
               })
         }
       }
-}
-
-@Preview
-@Composable
-fun PlantDetailScreenPreview() {
-  val plant =
-      Plant(
-          name = "test name",
-          image = null,
-          latinName = "latin name",
-          description = "Description of the plant",
-          healthStatus = PlantHealthStatus.HEALTHY,
-          healthStatusDescription = "The plant is healthy",
-          wateringFrequency = 0, // in days
-      )
-  MyGardenTheme { PlantInfosScreen(plant) {} }
 }

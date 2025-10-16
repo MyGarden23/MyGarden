@@ -40,15 +40,28 @@ fun MyGardenApp() {
   val navController = rememberNavController()
   // Small wrapper to simplify navigation calls
   val actions = remember(navController) { NavigationActions(navController) }
+
   // Determine where to start: if the user is logged in, skip Sign-In
-  val user = remember {
-    runCatching { FirebaseAuth.getInstance().currentUser }
-        .onFailure {
-          android.util.Log.w("MyGarden", "FirebaseAuth unavailable; defaulting to Auth", it)
-        }
-        .getOrNull()
+  // For end-to-end tests, we can force starting on camera
+  val startDestination = remember {
+    // Simple check for end-to-end test mode via system property
+    val isEndToEndTest = System.getProperty("mygarden.e2e") == "true"
+
+    if (isEndToEndTest) {
+      // In end-to-end test mode, always start on camera screen
+      Screen.Camera.route
+    } else {
+      // In normal app mode, check authentication
+      val user =
+          runCatching { FirebaseAuth.getInstance().currentUser }
+              .onFailure {
+                android.util.Log.w("MyGarden", "FirebaseAuth unavailable; defaulting to Auth", it)
+              }
+              .getOrNull()
+      if (user == null) Screen.Auth.route else Screen.Camera.route
+    }
   }
-  val startDestination = if (user == null) Screen.Auth.route else Screen.Camera.route
+
   // Observe the current destination so we can update UI accordingly
   val backStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = backStackEntry?.destination?.route
@@ -58,11 +71,22 @@ fun MyGardenApp() {
 
   Scaffold(
       bottomBar = {
-        // only show the bottom for Camera and Profile for now, add screen if needed
-        if (currentScreen == Screen.Camera || currentScreen == Screen.Profile) {
+        // Show bottom bar for main screens: Camera, Profile, and Garden
+        if (currentScreen == Screen.Camera ||
+            currentScreen == Screen.Profile ||
+            currentScreen == Screen.Garden) {
+          // Determine selected page more carefully - don't default to Camera
+          // if we're coming from a non-top-level screen
+          val pageToSelect =
+              selectedPage
+                  ?: when (currentScreen) {
+                    Screen.Garden -> Page.Garden
+                    Screen.Profile -> Page.Profile
+                    Screen.Camera -> Page.Camera
+                    else -> Page.Camera
+                  }
           BottomBar(
-              selectedPage = selectedPage ?: Page.Camera,
-              onSelect = { actions.navToTopLevel(it.destination) })
+              selectedPage = pageToSelect, onSelect = { actions.navToTopLevel(it.destination) })
         }
       }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
@@ -81,6 +105,8 @@ private fun routeToScreen(route: String): Screen? =
       Screen.Camera.route -> Screen.Camera
       Screen.PlantView.route -> Screen.PlantView
       Screen.Profile.route -> Screen.Profile
+      Screen.Garden.route -> Screen.Garden
+      Screen.EditPlant.route -> Screen.EditPlant
       else -> null
     }
 // Maps the current route (String) to its Page (used for bottom bar selection)
@@ -88,5 +114,6 @@ private fun routeToPage(route: String): Page? =
     when (route) {
       Screen.Camera.route -> Page.Camera
       Screen.Profile.route -> Page.Profile
+      Screen.Garden.route -> Page.Garden
       else -> null
     }
