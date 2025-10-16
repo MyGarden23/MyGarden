@@ -1,6 +1,8 @@
 package com.android.mygarden.ui.camera
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
@@ -10,6 +12,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.LifecycleCameraController
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import java.io.File
 import java.io.FileOutputStream
@@ -17,11 +20,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+/** The camera permission */
+val CAMERAX_PERMISSION = Manifest.permission.CAMERA
+
 /** UI state contains the orientation of the camera (initially back camera). */
 data class CameraUIState(var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA)
 
-/** Error tag used to indicate errors coming from taking picture */
 private const val CAMERA_ERROR_TAG = "CameraPicture"
+private const val PREFS_NAME = "camera_prefs"
+private const val HAS_DENIED_CAMERA = "has_denied_camera"
 
 /**
  * ViewModel responsible for managing camera state and actions. It should be used with a
@@ -87,17 +94,60 @@ class CameraViewModel : ViewModel() {
     Toast.makeText(context, "Failed to take picture.", Toast.LENGTH_SHORT).show()
   }
 
+  /* Camera permission handling */
+
+  /**
+   * Returns true or false depending on whether the user has granted camera permission
+   *
+   * @param context the context used to access permission state
+   * @return true if the user has granted the app camera permission, false otherwise
+   */
+  fun hasCameraPermission(context: Context): Boolean {
+    return ContextCompat.checkSelfPermission(context, CAMERAX_PERMISSION) ==
+        PackageManager.PERMISSION_GRANTED
+  }
+
+  /**
+   * Returns whether the user has previously denied the camera permission
+   *
+   * Used to avoid repeatedly asking the user for permission and to provide a better experience even
+   * with not every access. The value is stored in SharedPreferences to persist across app launches.
+   *
+   * @param context the context used to access the Shared Preferences
+   */
+  fun hasAlreadyDeniedCameraPermission(context: Context): Boolean {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    return prefs.getBoolean(HAS_DENIED_CAMERA, false)
+  }
+
+  /**
+   * Updates the stored Shared Preferences indicating whether the user has already denied the camera
+   * permission. Works with hasAlreadyDeniedCameraPermission()
+   *
+   * @param context the context used to access the Shared Preferences
+   * @param value true if the user has already denied camera permission, false otherwise
+   */
+  fun sethasAlreadyDeniedCameraPermission(context: Context, value: Boolean) {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    prefs.edit { putBoolean(HAS_DENIED_CAMERA, value) }
+  }
+
+  /* Others useful camera screen functions */
+
   /**
    * Switches the orientation of the camera (Front or Back) by changing the value of the UI state
    * that contains the camera selector.
    */
   fun switchOrientation() {
-    _uiState.value.cameraSelector =
+    val targetCameraSelector =
         if (_uiState.value.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
           CameraSelector.DEFAULT_FRONT_CAMERA
         } else {
           CameraSelector.DEFAULT_BACK_CAMERA
         }
+
+    // Error handling will be done at the camera binding level
+    _uiState.value = _uiState.value.copy(cameraSelector = targetCameraSelector)
   }
 
   /**
