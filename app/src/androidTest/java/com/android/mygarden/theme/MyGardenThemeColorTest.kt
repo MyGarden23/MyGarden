@@ -1,4 +1,4 @@
-package theme
+package com.android.mygarden.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
