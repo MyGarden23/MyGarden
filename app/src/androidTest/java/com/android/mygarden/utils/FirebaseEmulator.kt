@@ -20,15 +20,36 @@ import org.json.JSONObject
  * - Focused on Auth (Firestore omitted)
  */
 object FirebaseEmulator {
+  private fun pickEmulatorHost(): String {
+    // 1) CI can force the device-side host explicitly
+    System.getenv("FIREBASE_EMULATOR_DEVICE_HOST")?.let { forced ->
+      Log.d("FirebaseEmulator", "Using forced emulator host from env: $forced")
+      return forced
+    }
 
-  private val DEVICE_HOST: String by lazy {
-    // 1) explicit override
-    System.getenv("FIREBASE_EMULATOR_DEVICE_HOST")
-        // 2) on CI, default to 127.0.0.1 (adb reverse)
-        ?: if ((System.getenv("CI") ?: "").equals("true", ignoreCase = true)) "127.0.0.1"
-        // 3) local dev default
-        else "10.0.2.2"
+    // 2) Otherwise auto-detect: prefer 127.0.0.1 (works with `adb reverse`) then 10.0.2.2 (local)
+    val candidates = listOf("127.0.0.1", "10.0.2.2")
+    for (host in candidates) {
+      if (canReach(host, AUTH_PORT, timeoutMs = 400)) {
+        Log.d("FirebaseEmulator", "Chose emulator host by probe: $host")
+        return host
+      }
+    }
+    Log.d("FirebaseEmulator", "No host reachable quickly, defaulting to 10.0.2.2")
+    return "10.0.2.2"
   }
+
+  private fun canReach(host: String, port: Int, timeoutMs: Int): Boolean =
+      try {
+        Socket().use {
+          it.connect(InetSocketAddress(host, port), timeoutMs)
+          true
+        }
+      } catch (_: Exception) {
+        false
+      }
+
+  private val DEVICE_HOST: String by lazy { pickEmulatorHost() }
 
   const val AUTH_PORT = 9099
   private var configured = false
