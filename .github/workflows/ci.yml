@@ -103,7 +103,6 @@ jobs:
         with:
           api-level: 34
           target: google_apis
-          device: pixel_8
           arch: x86_64
           device: pixel_8
           force-avd-creation: false
