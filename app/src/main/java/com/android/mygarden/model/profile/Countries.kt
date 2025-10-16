@@ -1,5 +1,6 @@
 package com.android.mygarden.model.profile
 
+// TODO discuss wether we use xml or an api or leave like that
 /** Comprehensive list of all world countries. Source: ISO 3166-1 alpha-2 country codes */
 object Countries {
   val ALL =
