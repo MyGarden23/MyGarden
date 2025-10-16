@@ -93,13 +93,13 @@ class CameraScreenWithPermissionAndroidTest {
   @Test
   fun takePictureButtonDoNotCrash() {
     // Should not crash
-    composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON)
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
   }
 
   @Test
   fun accessGalleryButtonDoNotCrash() {
     // Should not crash
-    composeTestRule.onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON)
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON).performClick()
   }
 
   /* ViewModel tests (need context hence not "real" unit tests) */

@@ -72,12 +72,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     packaging {
@@ -213,6 +213,10 @@ dependencies {
     // ----------         Coil      ------------
     // Compatible with Kotlin 1.8
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // ----------         Mockito      ------------
+    implementation(libs.mockito.core)
+    implementation(libs.mockito.kotlin)
 }
 
 
