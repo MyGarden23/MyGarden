@@ -2,6 +2,7 @@ package com.android.mygarden.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.credentials.CredentialManager
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,8 +10,8 @@ import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
-import com.android.mygarden.ui.editPlant.EditPlantScreen
 import com.android.mygarden.ui.garden.GardenScreen
+import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
 
 @Composable
@@ -32,14 +33,17 @@ fun AppNavHost(
           credentialManager = credentialManagerProvider(),
           onSignedIn = { navigationActions.navTo(Screen.Camera) })
     }
+      // Profile
+      composable(Screen.Profile.route) {
+          // TODO: ProfileScreen(...)
+      }
 
     // Camera
     composable(Screen.Camera.route) {
-      CameraScreen(
-          onPictureTaken = { imagePath ->
-            navController.currentBackStackEntry?.savedStateHandle?.set("imagePath", imagePath)
+        CameraScreen(onPictureTaken = {
+            // Navigate to PlantView and remove Camera from back stack to prevent navigation issues
             navigationActions.navTo(Screen.PlantView)
-          })
+        })
     }
 
     // Garden
@@ -50,36 +54,36 @@ fun AppNavHost(
     }
 
     // Plant View
-    composable(Screen.PlantView.route) { backStackEntry ->
-      val imagePath = backStackEntry.savedStateHandle.get<String>("imagePath")
+    composable(Screen.PlantView.route) {
       // Shows plant details after a photo is taken
       // Right now it just uses a mock Plant object for demo purposes
-      PlantInfosScreen(
-          plant =
-              Plant(
-                  name = "Rose",
-                  image = imagePath,
-                  latinName = "Rosum",
-                  description = "Roses are red",
-                  healthStatus = PlantHealthStatus.HEALTHY,
-                  healthStatusDescription = PlantHealthStatus.HEALTHY.description,
-                  wateringFrequency = 2),
+        val plant = Plant(
+            name = "Rose",
+            image = null,
+            latinName = "Rosum",
+            description = "Roses are red",
+            healthStatus = PlantHealthStatus.HEALTHY,
+            healthStatusDescription = PlantHealthStatus.HEALTHY.description,
+            wateringFrequency = 2
+        )
+
+        val plantInfoViewModel: PlantInfoViewModel = viewModel()
+
+        PlantInfosScreen(
+          plant = plant,
+          plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
           onSavePlant = {
-            // First save the plant to repository, then navigate to EditPlant
-            // TODO: Pass the actual plant ID from the save operation
-            navigationActions.navTo(Screen.EditPlant)
+              // First save the plant to repository, then navigate to Garden
+              plantInfoViewModel.savePlant(plant)
+              // Use navToTopLevel to properly clear the back stack and avoid returning to PlantInfoScreen
+              navigationActions.navToTopLevel(Screen.Garden)
           })
     }
-
     // EditPlant
+      // Not yet in the sprint 2 version
     composable(Screen.EditPlant.route) {
-      // For now, we use a mock plant ID. Later this should come from navigation arguments
-      EditPlantScreen(
-          ownedPlantId = "mock-plant-id", // TODO: Get from navigation arguments
-          onSaved = { navigationActions.navTo(Screen.Garden) },
-          onDeleted = { navigationActions.navTo(Screen.Garden) },
-          goBack = { navigationActions.navBack() })
+      // TODO: for sprint 3
     }
   }
 }
