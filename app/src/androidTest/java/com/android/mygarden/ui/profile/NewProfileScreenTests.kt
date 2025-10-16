@@ -108,7 +108,9 @@ class NewProfileScreenTests {
     composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.FIRST_NAME_FIELD).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.LAST_NAME_FIELD).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.EXPERIENCE_FIELD).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.FAVORITE_PLANT_FIELD).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NewProfileScreenTestTags_.FAVORITE_PLANT_FIELD)
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).assertIsDisplayed()
 
     // Verify interactive elements
@@ -447,7 +449,9 @@ class NewProfileScreenTests {
     setContent()
 
     // Search for a specific country
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD).performTextInput("France")
+    composeTestRule
+        .onNodeWithTag(NewProfileScreenTestTags_.COUNTRY_FIELD)
+        .performTextInput("France")
 
     // Verify France appears in the filtered results
     composeTestRule

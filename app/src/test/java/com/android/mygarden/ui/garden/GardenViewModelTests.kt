@@ -3,8 +3,8 @@ package com.android.mygarden.ui.garden
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantsRepository_
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
+import com.android.mygarden.model.plant.PlantsRepository_
 import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

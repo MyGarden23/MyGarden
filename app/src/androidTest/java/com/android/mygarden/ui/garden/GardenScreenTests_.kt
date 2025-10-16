@@ -9,9 +9,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantsRepository_
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.plant.PlantsRepository_
 import java.sql.Timestamp
 import kotlinx.coroutines.test.runTest
 import org.junit.After

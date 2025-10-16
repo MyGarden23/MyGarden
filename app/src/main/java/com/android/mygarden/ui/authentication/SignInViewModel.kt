@@ -10,8 +10,8 @@ import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
-import com.android.mygarden.model.authentication.AuthRepository_
 import com.android.mygarden.model.authentication.AuthRepositoryFirebase
+import com.android.mygarden.model.authentication.AuthRepository_
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow

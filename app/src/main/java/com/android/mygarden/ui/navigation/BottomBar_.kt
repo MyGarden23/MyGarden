@@ -24,8 +24,14 @@ private val profileIconId = R.drawable.plant_profile_icon
  * @param iconId the id of the icon
  * @param testTag the test tag of the page
  */
-sealed class Page(val name: String, val destination: Screen_, val iconId: Int, val testTag: String) {
-  object Camera : Page("CameraPage", Screen_.Camera, cameraIconId, NavigationTestTags_.CAMERA_BUTTON)
+sealed class Page(
+    val name: String,
+    val destination: Screen_,
+    val iconId: Int,
+    val testTag: String
+) {
+  object Camera :
+      Page("CameraPage", Screen_.Camera, cameraIconId, NavigationTestTags_.CAMERA_BUTTON)
 
   object Profile :
       Page("ProfilePage", Screen_.Profile, profileIconId, NavigationTestTags_.PROFILE_BUTTON)
