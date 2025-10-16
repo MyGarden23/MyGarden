@@ -11,6 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
 import com.android.mygarden.ui.camera.CameraScreenTestTags
+import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import org.junit.After
@@ -20,8 +21,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * End-to-end tests for MyGarden application. These tests assume the user is already signed in so we
- * begin on the camera screen.
+ * End-to-end test for MyGarden's core user flow.
+ *
+ * Tests the complete journey: Camera → Plant Info → Garden → Navigation Runs in authenticated mode
+ * (skips sign-in) via system property.
  */
 @RunWith(AndroidJUnit4::class)
 class EndToEndM1 {
@@ -33,10 +36,6 @@ class EndToEndM1 {
     }
   }
 
-  /**
-   * Main compose test rule that creates and manages the MainActivity for testing. Provides access
-   * to the full app UI hierarchy and interaction methods.
-   */
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
   /**
@@ -63,29 +62,39 @@ class EndToEndM1 {
     waitForAppToLoad()
   }
 
+  /**
+   * Tests the complete user flow:
+   * 1. Camera screen - take photo
+   * 2. Plant info screen - view description/health tabs
+   * 3. Navigation - back/forth between screens
+   * 4. Garden screen - save plant, use ADD
+   * 5. Bottom bar navigation
+   */
   @Test
   fun endToEndTest() {
-    // === 1. CAMERA SCREEN VALIDATION ===
+    // === CAMERA SCREEN ===
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
-    // assertEquals(Screen.Camera.route, currentRoute.value)
-    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
-
-    // === 2. PHOTO CAPTURE & NAVIGATION ===
-    // Take a picture
-    composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
-
-    // Wait for navigation to plant info screen (async operation)
+    // Wait for camera ready
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).isDisplayed()
+      composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
     }
 
-    // === 3. PLANT INFO VALIDATION - DESCRIPTION TAB ===
+    // Verify UI elements
+    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).assertIsDisplayed()
+
+    // Take photo
+    composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
+
+    // === PLANT INFO SCREEN ===
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
+    }
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).isDisplayed()
+
+    // Test description tab content
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TAB).assertIsDisplayed()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
@@ -96,7 +105,7 @@ class EndToEndM1 {
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME)
         .assertTextEquals("Rosum")
 
-    // === 4. PLANT INFO VALIDATION - HEALTH TAB ===
+    // Test health tab
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
@@ -109,18 +118,42 @@ class EndToEndM1 {
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
         .assertTextEquals("Watering Frequency: Every 2 days")
 
-    // === 5. NAVIGATION FLOW TESTING ===
-    // Back to Camera and return to PlantInfoScreen
+    // === BACK TO CAMERA ===
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).isDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).performClick()
+
+    // === PLANT INFO AGAIN ===
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
     }
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SAVE_BUTTON).assertIsDisplayed()
 
-    // TODO: Continue to profile navigation via bottom bar
+    // === GARDEN SCREEN ===
+    // Save plant and navigate to garden
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SAVE_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
 
+    // Verify garden elements
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.ADD_PLANT_FAB).assertIsDisplayed()
+
+    // Test FAB navigation
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.ADD_PLANT_FAB).performClick()
+
+    // === BOTTOM BAR NAVIGATION ===
+    // Verify back on camera from FAB
+    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
+
+    // Test garden button
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+
+    // Test camera button
+    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
   }
 
   /** Waits for the app to fully load by checking for key UI elements */
