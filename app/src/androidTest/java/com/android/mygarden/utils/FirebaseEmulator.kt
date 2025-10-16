@@ -1,6 +1,7 @@
 package com.android.mygarden.utils
 
 import android.content.Context
+import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -20,64 +21,53 @@ import org.json.JSONObject
  */
 object FirebaseEmulator {
 
-  // Host seen from *inside* the Android emulator:
-  // - Local dev: 10.0.2.2
-  // - CI with adb reverse: 127.0.0.1
-  private val DEVICE_HOST: String = System.getenv("FIREBASE_EMULATOR_DEVICE_HOST") ?: "10.0.2.2"
+  private val DEVICE_HOST: String by lazy {
+    // 1) explicit override
+    System.getenv("FIREBASE_EMULATOR_DEVICE_HOST")
+        // 2) on CI, default to 127.0.0.1 (adb reverse)
+        ?: if ((System.getenv("CI") ?: "").equals("true", ignoreCase = true)) "127.0.0.1"
+        // 3) local dev default
+        else "10.0.2.2"
+  }
 
   const val AUTH_PORT = 9099
-  // Optional: emulators hub
-  const val EMULATORS_PORT = 4400
-
   private var configured = false
 
-  /** Get FirebaseAuth bound to the emulator (lazy-configured). */
   val auth: FirebaseAuth
     get() {
       ensureConfigured()
       return FirebaseAuth.getInstance()
     }
 
-  /** Initialize Firebase and point Auth to emulator (idempotent). */
   fun ensureConfigured() {
     if (configured) return
     val ctx: Context = ApplicationProvider.getApplicationContext()
-    if (FirebaseApp.getApps(ctx).isEmpty()) {
-      FirebaseApp.initializeApp(ctx)
-    }
+    if (FirebaseApp.getApps(ctx).isEmpty()) FirebaseApp.initializeApp(ctx)
+    Log.d("FirebaseEmulator", "Using Auth emulator at $DEVICE_HOST:$AUTH_PORT")
     FirebaseAuth.getInstance().useEmulator(DEVICE_HOST, AUTH_PORT)
     configured = true
   }
 
-  /** Check if the Auth emulator is reachable (fast TCP check). */
   val isRunning: Boolean
     get() =
         try {
-          Socket().use { socket ->
-            socket.connect(InetSocketAddress(DEVICE_HOST, AUTH_PORT), /* timeoutMs = */ 500)
+          Socket().use {
+            it.connect(InetSocketAddress(DEVICE_HOST, AUTH_PORT), 500)
             true
           }
         } catch (_: Exception) {
           false
         }
 
-  /** DELETE all accounts in the Auth emulator (good cleanup between tests). */
   fun clearAuthEmulator(projectId: String = currentProjectId()) {
-    val url = URL("http://$DEVICE_HOST:$AUTH_PORT/emulator/v1/projects/$projectId/accounts")
-    httpDelete(url)
+    httpDelete(URL("http://$DEVICE_HOST:$AUTH_PORT/emulator/v1/projects/$projectId/accounts"))
   }
 
-  /**
-   * Create/sign-in a Google user in the Auth emulator with a fake JWT (no Play Services).
-   *
-   * @param fakeIdToken e.g., from FakeJwtGenerator (header.payload.sig)
-   */
   fun createGoogleUser(fakeIdToken: String) {
     val url =
         URL(
             "http://$DEVICE_HOST:$AUTH_PORT/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=fake-api-key")
     val postBody = "id_token=$fakeIdToken&providerId=google.com"
-
     val payload =
         JSONObject()
             .put("postBody", postBody)
@@ -85,26 +75,8 @@ object FirebaseEmulator {
             .put("returnIdpCredential", true)
             .put("returnSecureToken", true)
             .toString()
-
     httpPostJson(url, payload)
   }
-
-  /** (Optional) Change email of a signed-in user using emulator REST API. */
-  fun changeEmail(idToken: String, newEmail: String) {
-    val url =
-        URL(
-            "http://$DEVICE_HOST:$AUTH_PORT/identitytoolkit.googleapis.com/v1/accounts:update?key=fake-api-key")
-    val payload =
-        JSONObject()
-            .put("idToken", idToken)
-            .put("email", newEmail)
-            .put("returnSecureToken", true)
-            .toString()
-
-    httpPostJson(url, payload)
-  }
-
-  // -------- Internals --------
 
   private fun currentProjectId(): String {
     val ctx: Context = ApplicationProvider.getApplicationContext()
@@ -114,31 +86,31 @@ object FirebaseEmulator {
   }
 
   private fun httpDelete(url: URL) {
-    val conn =
+    val c =
         (url.openConnection() as HttpURLConnection).apply {
           requestMethod = "DELETE"
           setRequestProperty("Content-Type", "application/json; charset=UTF-8")
           doInput = true
         }
-    val code = conn.responseCode
-    if (code !in 200..299) error("DELETE $url failed: $code ${conn.responseMessage}")
-    conn.disconnect()
+    val code = c.responseCode
+    if (code !in 200..299) error("DELETE $url failed: $code ${c.responseMessage}")
+    c.disconnect()
   }
 
   private fun httpPostJson(url: URL, json: String) {
-    val conn =
+    val c =
         (url.openConnection() as HttpURLConnection).apply {
           requestMethod = "POST"
           setRequestProperty("Content-Type", "application/json; charset=UTF-8")
           doOutput = true
           doInput = true
         }
-    OutputStreamWriter(conn.outputStream, Charsets.UTF_8).use { it.write(json) }
-    val code = conn.responseCode
+    OutputStreamWriter(c.outputStream, Charsets.UTF_8).use { it.write(json) }
+    val code = c.responseCode
     if (code !in 200..299) {
-      val err = conn.errorStream?.bufferedReader()?.use(BufferedReader::readText)
-      error("POST $url failed: $code ${conn.responseMessage}. Body: $err")
+      val err = c.errorStream?.bufferedReader()?.use(BufferedReader::readText)
+      error("POST $url failed: $code ${c.responseMessage}. Body: $err")
     }
-    conn.disconnect()
+    c.disconnect()
   }
 }
