@@ -21,38 +21,39 @@ import org.json.JSONObject
  * These helpers allow you to test sign-in flows without hitting Google Play Services.
  */
 object FakeJwtGenerator {
-    private var counter = 0
+  private var counter = 0
 
-    private fun base64UrlEncode(input: ByteArray): String {
-        return Base64.encodeToString(input, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-    }
+  private fun base64UrlEncode(input: ByteArray): String {
+    return Base64.encodeToString(input, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+  }
 
-    /**
-     * Creates a fake JWT-shaped Google ID token that can be used with the Firebase Auth Emulator.
-     *
-     * @param name Display name to embed in the token payload.
-     * @param email Email to embed in the token payload.
-     */
-    fun createFakeGoogleIdToken(name: String = "Test User", email: String = "test@example.com"): String {
-        val header = JSONObject(mapOf("alg" to "none"))
-        val payload =
-            JSONObject(
-                mapOf(
-                    "sub" to (counter++).toString(),
-                    "email" to email,
-                    "name" to name,
-                    "picture" to "http://example.com/avatar.png",
-                    "iss" to "https://accounts.google.com",
-                    "aud" to "fake"
-                )
-            )
+  /**
+   * Creates a fake JWT-shaped Google ID token that can be used with the Firebase Auth Emulator.
+   *
+   * @param name Display name to embed in the token payload.
+   * @param email Email to embed in the token payload.
+   */
+  fun createFakeGoogleIdToken(
+      name: String = "Test User",
+      email: String = "test@example.com"
+  ): String {
+    val header = JSONObject(mapOf("alg" to "none"))
+    val payload =
+        JSONObject(
+            mapOf(
+                "sub" to (counter++).toString(),
+                "email" to email,
+                "name" to name,
+                "picture" to "http://example.com/avatar.png",
+                "iss" to "https://accounts.google.com",
+                "aud" to "fake"))
 
-        val headerEncoded = base64UrlEncode(header.toString().toByteArray())
-        val payloadEncoded = base64UrlEncode(payload.toString().toByteArray())
-        val signature = "sig" // emulator doesn't check signature
+    val headerEncoded = base64UrlEncode(header.toString().toByteArray())
+    val payloadEncoded = base64UrlEncode(payload.toString().toByteArray())
+    val signature = "sig" // emulator doesn't check signature
 
-        return "$headerEncoded.$payloadEncoded.$signature"
-    }
+    return "$headerEncoded.$payloadEncoded.$signature"
+  }
 }
 
 /**
@@ -72,36 +73,35 @@ object FakeJwtGenerator {
 class FakeCredentialManager private constructor(private val context: Context) :
     CredentialManager by CredentialManager.create(context) {
 
-    companion object {
-        /**
-         * Creates a mock CredentialManager that always returns a CustomCredential containing
-         * the given fakeUserIdToken when getCredential() is called.
-         */
-        fun create(fakeUserIdToken: String, context: Context): CredentialManager {
-            // Mock static creation of GoogleIdTokenCredential
-            mockkObject(GoogleIdTokenCredential)
-            val googleIdTokenCredential = mockk<GoogleIdTokenCredential>()
-            every { googleIdTokenCredential.idToken } returns fakeUserIdToken
-            every { GoogleIdTokenCredential.createFrom(any()) } returns googleIdTokenCredential
+  companion object {
+    /**
+     * Creates a mock CredentialManager that always returns a CustomCredential containing the given
+     * fakeUserIdToken when getCredential() is called.
+     */
+    fun create(fakeUserIdToken: String, context: Context): CredentialManager {
+      // Mock static creation of GoogleIdTokenCredential
+      mockkObject(GoogleIdTokenCredential)
+      val googleIdTokenCredential = mockk<GoogleIdTokenCredential>()
+      every { googleIdTokenCredential.idToken } returns fakeUserIdToken
+      every { GoogleIdTokenCredential.createFrom(any()) } returns googleIdTokenCredential
 
-            // Build a fake CustomCredential (same type as real Google sign-in)
-            val fakeCustomCredential =
-                CustomCredential(
-                    type = TYPE_GOOGLE_ID_TOKEN_CREDENTIAL,
-                    data = bundleOf("id_token" to fakeUserIdToken)
-                )
+      // Build a fake CustomCredential (same type as real Google sign-in)
+      val fakeCustomCredential =
+          CustomCredential(
+              type = TYPE_GOOGLE_ID_TOKEN_CREDENTIAL,
+              data = bundleOf("id_token" to fakeUserIdToken))
 
-            // Mock the response returned by CredentialManager.getCredential()
-            val mockResponse = mockk<GetCredentialResponse>()
-            every { mockResponse.credential } returns fakeCustomCredential
+      // Mock the response returned by CredentialManager.getCredential()
+      val mockResponse = mockk<GetCredentialResponse>()
+      every { mockResponse.credential } returns fakeCustomCredential
 
-            // Mock CredentialManager to return that response
-            val fakeCredentialManager = mockk<FakeCredentialManager>(relaxed = true)
-            coEvery {
-                fakeCredentialManager.getCredential(any<Context>(), any<GetCredentialRequest>())
-            } returns mockResponse
+      // Mock CredentialManager to return that response
+      val fakeCredentialManager = mockk<FakeCredentialManager>(relaxed = true)
+      coEvery {
+        fakeCredentialManager.getCredential(any<Context>(), any<GetCredentialRequest>())
+      } returns mockResponse
 
-            return fakeCredentialManager
-        }
+      return fakeCredentialManager
     }
+  }
 }
