@@ -104,6 +104,17 @@ jobs:
           node-version: 20
       - name: Install Firebase tools
         run: npm i -g firebase-tools
+          
+      #bind Auth emulator to 0.0.0.0 so 10.0.2.2 works reliably
+      - name: Configure Firebase emulator host/port  # ADDED
+        run: |  # ADDED
+          cat > firebase.json <<'JSON'
+          {
+            "emulators": {
+              "auth": { "port": 9099, "host": "0.0.0.0" }
+            }
+          }
+          JSON
       - name: Start Firebase Auth emulator (host:9099)
         run: |
           nohup bash -c 'firebase emulators:start --only auth --project demo-ci --ui=false </dev/null >/tmp/firebase-emu.log 2>&1' &
