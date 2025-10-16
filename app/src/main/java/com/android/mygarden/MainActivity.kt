@@ -75,17 +75,18 @@ fun MyGardenApp() {
         if (currentScreen == Screen.Camera ||
             currentScreen == Screen.Profile ||
             currentScreen == Screen.Garden) {
-            // Determine selected page more carefully - don't default to Camera
-            // if we're coming from a non-top-level screen
-            val pageToSelect = selectedPage ?: when (currentScreen) {
-                Screen.Garden -> Page.Garden
-                Screen.Profile -> Page.Profile
-                Screen.Camera -> Page.Camera
-                else -> Page.Camera
-            }
+          // Determine selected page more carefully - don't default to Camera
+          // if we're coming from a non-top-level screen
+          val pageToSelect =
+              selectedPage
+                  ?: when (currentScreen) {
+                    Screen.Garden -> Page.Garden
+                    Screen.Profile -> Page.Profile
+                    Screen.Camera -> Page.Camera
+                    else -> Page.Camera
+                  }
           BottomBar(
-              selectedPage = pageToSelect,
-              onSelect = { actions.navToTopLevel(it.destination) })
+              selectedPage = pageToSelect, onSelect = { actions.navToTopLevel(it.destination) })
         }
       }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
