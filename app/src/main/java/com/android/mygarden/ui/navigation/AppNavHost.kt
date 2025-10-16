@@ -25,14 +25,16 @@ fun AppNavHost(
   // This NavHost is basically the "map" of all screens in the app.
   // Each composable() below defines one destination (screen) and what to do when navigating there.
   NavHost(navController = navController, startDestination = startDestination) {
-    // handy wrapper so we don’t call navController.navigate() directly everywhere
+    // handy wrapper so we don't call navController.navigate() directly everywhere
     val navigationActions = NavigationActions(navController)
+
     // Auth
     composable(Screen.Auth.route) {
       SignInScreen(
           credentialManager = credentialManagerProvider(),
           onSignedIn = { navigationActions.navTo(Screen.Camera) })
     }
+
     // Profile
     composable(Screen.Profile.route) {
       // TODO: ProfileScreen(...)
@@ -41,9 +43,8 @@ fun AppNavHost(
     // Camera
     composable(Screen.Camera.route) {
       CameraScreen(
-          onPictureTaken = {
-            // Navigate to PlantView and remove Camera from back stack to prevent navigation issues
           onPictureTaken = { imagePath ->
+            // Store image path in saved state and navigate to PlantView
             navController.currentBackStackEntry?.savedStateHandle?.set("imagePath", imagePath)
             navigationActions.navTo(Screen.PlantView)
           })
@@ -81,20 +82,11 @@ fun AppNavHost(
             navigationActions.navToTopLevel(Screen.Garden)
           })
     }
+
     // EditPlant
     // Not yet in the sprint 2 version
     composable(Screen.EditPlant.route) {
       // TODO: for sprint 3
-          plant =
-              Plant(
-                  name = "Rose",
-                  image = imagePath,
-                  latinName = "Rosum",
-                  description = "Roses are red",
-                  healthStatus = PlantHealthStatus.HEALTHY,
-                  healthStatusDescription = PlantHealthStatus.HEALTHY.description,
-                  wateringFrequency = 2),
-          onBackPressed = { navigationActions.navBack() })
     }
   }
 }
