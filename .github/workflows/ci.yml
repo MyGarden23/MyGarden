@@ -96,7 +96,7 @@ jobs:
         run: |
           # To run the CI with debug information, add --info
           ./gradlew testDebugUnitTest --parallel --build-cache
-          
+
       #Firebase emulator setup
       - name: Install Node + Firebase CLI
         uses: actions/setup-node@v4
@@ -120,12 +120,12 @@ jobs:
       - name: Start Firebase Auth emulator (host:9099) and wait
         run: |
           nohup bash -c 'firebase emulators:start --only auth --project demo-ci --ui=false </dev/null >/tmp/firebase-emu.log 2>&1' &
-          # Wait for TCP 9099 on host to be ready
           for i in {1..60}; do
             (echo > /dev/tcp/127.0.0.1/9099) >/dev/null 2>&1 && echo "Auth emulator is UP" && break
             sleep 1
           done
-          tail -n +200 /tmp/firebase-emu.log || true
+          curl -s http://127.0.0.1:9099/emulators || true
+          tail -n +1 /tmp/firebase-emu.log || true
 
       # Run connected tests on the emulator
       - name: Run tests with camera
@@ -139,6 +139,9 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back emulated  -camera-front webcam0 -memory 4096 -partition-size 4096
           disable-animations: true
           script: |
+            adb reverse tcp:9099 tcp:9099
+            export FIREBASE_EMULATOR_DEVICE_HOST=127.0.0.1
+            export FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099
             echo "Starting instrumented tests..."
             export CI=true
             ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresNoCamera
@@ -154,6 +157,9 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096 -partition-size 4096
           disable-animations: true
           script: |
+            adb reverse tcp:9099 tcp:9099
+            export FIREBASE_EMULATOR_DEVICE_HOST=127.0.0.1
+            export FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099
             echo "Starting instrumented tests..."
             export CI=true
             echo "Revoking camera permission"
