@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
+import com.android.mygarden.screen.RequiresCamera
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
@@ -27,6 +28,7 @@ import org.junit.runner.RunWith
  * Tests the complete journey: Camera → Plant Info → Garden → Navigation Runs in authenticated mode
  * (skips sign-in) via system property.
  */
+@RequiresCamera
 @RunWith(AndroidJUnit4::class)
 class EndToEndM1 {
 
