@@ -106,8 +106,8 @@ jobs:
         run: npm i -g firebase-tools
           
       #bind Auth emulator to 0.0.0.0 so 10.0.2.2 works reliably
-      - name: Configure Firebase emulator host/port  # ADDED
-        run: |  # ADDED
+      - name: Configure Firebase emulator host/port  # NEW (tiny)
+        run: |
           cat > firebase.json <<'JSON'
           {
             "emulators": {
@@ -115,15 +115,16 @@ jobs:
             }
           }
           JSON
-      - name: Start Firebase Auth emulator (host:9099)
+
+      - name: Start Firebase Auth emulator (host:9099)  # replace your current start step with this
         run: |
           nohup bash -c 'firebase emulators:start --only auth --project demo-ci --ui=false </dev/null >/tmp/firebase-emu.log 2>&1' &
-          # Wait until the emulator is ready
+          # Wait until TCP 9099 is accepting connections on the host
           for i in {1..60}; do
-            curl -sf http://127.0.0.1:9099/ >/dev/null 2>&1 && echo "Auth emulator is up" && break
+            (echo > /dev/tcp/127.0.0.1/9099) >/dev/null 2>&1 && echo "Auth emulator is up" && break
             sleep 1
           done
-          tail -n +200 /tmp/firebase-emu.log || true
+          tail -n +1 /tmp/firebase-emu.log || true
 
       # Run connected tests on the emulator
       - name: Run tests with camera
