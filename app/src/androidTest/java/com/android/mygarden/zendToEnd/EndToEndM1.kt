@@ -1,5 +1,6 @@
-package com.android.mygarden.endToEnd
+package com.android.mygarden.zendToEnd
 
+import android.Manifest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
@@ -44,7 +45,7 @@ class EndToEndM1 {
    */
   @get:Rule
   val permissionRule: GrantPermissionRule =
-      GrantPermissionRule.grant(android.Manifest.permission.CAMERA)
+      GrantPermissionRule.grant(Manifest.permission.CAMERA)
 
   private val TIMEOUT = 10_000L
 
