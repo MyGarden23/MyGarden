@@ -140,4 +140,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar --info --build-cache -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./gradlew sonar --info --build-cache \
+          -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
+          -Dsonar.pullrequest.key= \
+          -Dsonar.pullrequest.branch= \
+          -Dsonar.pullrequest.base=
