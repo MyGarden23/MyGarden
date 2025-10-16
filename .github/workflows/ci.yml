@@ -156,6 +156,11 @@ jobs:
           script: |
             echo "Starting instrumented tests..."
             export CI=true
+            
+            adb reverse tcp:9099 tcp:9099
+            export FIREBASE_EMULATOR_DEVICE_HOST=127.0.0.1
+            export FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099
+            
             echo "Revoking camera permission"
             adb shell pm revoke com.android.mygarden android.permission.CAMERA
             ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
