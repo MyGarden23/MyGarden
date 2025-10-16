@@ -141,7 +141,7 @@ jobs:
           script: |
             echo "Starting instrumented tests..."
             export CI=true
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.screen.RequiresCamera -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresNoCamera
 
       - name: Run tests no camera
         uses: reactivecircus/android-emulator-runner@v2
@@ -163,7 +163,7 @@ jobs:
             
             echo "Revoking camera permission"
             adb shell pm revoke com.android.mygarden android.permission.CAMERA
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.screen.RequiresNoCamera
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
