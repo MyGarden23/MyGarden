@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
@@ -60,7 +61,16 @@ class CameraViewModel : ViewModel() {
             try {
               // We convert the image to a Bitmap because it will be useful later for sending it to
               // an API
-              val bitmap = image.toBitmap()
+              var bitmap = image.toBitmap()
+
+              // If the conversion to Bitmap rotated the image, we rotate it back such that it
+              // doesn't have rotation
+              val rotationDegrees = image.imageInfo.rotationDegrees
+              if (rotationDegrees != 0) {
+                val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+                bitmap =
+                    Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+              }
               image.close()
 
               // Save the image locally

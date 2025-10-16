@@ -14,11 +14,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.android.mygarden.model.plant.Plant
 
 /** Test tags for PlantInfoScreen components */
@@ -103,11 +107,18 @@ fun PlantInfosScreen(
                       .background(MaterialTheme.colorScheme.primary)
                       .testTag(PlantInfoScreenTestTags.PLANT_IMAGE)) {
                 // Placeholder for plant image
-                Text(
-                    text = "Plant Image",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = 16.sp,
-                    modifier = Modifier.align(Alignment.Center))
+                Box(modifier = Modifier.fillMaxSize()) {
+                  AsyncImage(
+                      model =
+                          ImageRequest.Builder(LocalContext.current)
+                              .data(plant.image ?: "")
+                              .build(),
+                      contentDescription = "Image of the plant",
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .background(MaterialTheme.colorScheme.surfaceVariant),
+                      contentScale = ContentScale.Crop)
+                }
 
                 // Back button overlaid on top-left corner of image
                 IconButton(

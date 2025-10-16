@@ -59,14 +59,15 @@ fun AppNavHost(
 
     // Plant View
     composable(Screen.PlantView.route) { backStackEntry ->
-      val imagePath = backStackEntry.savedStateHandle.get<String>("imagePath")
       val plantInfoViewModel: PlantInfoViewModel = viewModel()
+      val imagePath =
+          navController.previousBackStackEntry?.savedStateHandle?.get<String>("imagePath")
       // Shows plant details after a photo is taken
       // Right now it just uses a mock Plant object for demo purposes
       val plant =
           Plant(
               name = "Rose",
-              image = null,
+              image = imagePath,
               latinName = "Rosum",
               description = "Roses are red",
               healthStatus = PlantHealthStatus.HEALTHY,
