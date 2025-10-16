@@ -113,7 +113,7 @@ fun PlantInfosScreen(
                           ImageRequest.Builder(LocalContext.current)
                               .data(plant.image ?: "")
                               .build(),
-                      contentDescription = "",
+                      contentDescription = "Image of the plant",
                       modifier =
                           Modifier.fillMaxWidth()
                               .background(MaterialTheme.colorScheme.surfaceVariant),
