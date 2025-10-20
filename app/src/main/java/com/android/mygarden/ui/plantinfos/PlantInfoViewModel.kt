@@ -28,7 +28,18 @@ data class PlantInfoUIState(
     val healthStatusDescription: String = "",
     val wateringFrequency: Int = 0,
     val selectedTab: SelectedPlantInfoTab = SelectedPlantInfoTab.DESCRIPTION,
-)
+) {
+  fun savePlant(): Plant {
+    return Plant(
+        name = name,
+        image = image,
+        latinName = latinName,
+        description = description,
+        healthStatus = healthStatus,
+        healthStatusDescription = healthStatusDescription,
+        wateringFrequency = wateringFrequency)
+  }
+}
 
 /** ViewModel for managing the plant information screen state. */
 class PlantInfoViewModel(
@@ -42,16 +53,20 @@ class PlantInfoViewModel(
 
   /** Initialize the UI state with plant data. Called when the screen is first displayed. */
   fun initializeUIState(plant: Plant) {
-    _uiState.value =
-        PlantInfoUIState(
-            plant.name,
-            plant.image,
-            plant.latinName,
-            plant.description,
-            plant.healthStatus,
-            plant.healthStatusDescription,
-            plant.wateringFrequency,
-        )
+    viewModelScope.launch {
+      _uiState.value = _uiState.value.copy(description = "Loading Plant Infos...")
+      val generatedPlant = plantsRepository.identifyPlant(plant.image)
+      _uiState.value =
+          PlantInfoUIState(
+              generatedPlant.name,
+              generatedPlant.image,
+              generatedPlant.latinName,
+              generatedPlant.description,
+              generatedPlant.healthStatus,
+              generatedPlant.healthStatusDescription,
+              generatedPlant.wateringFrequency,
+          )
+    }
   }
 
   /**
