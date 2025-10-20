@@ -54,12 +54,19 @@ class PlantInfoViewModel(
   /** Initialize the UI state with plant data. Called when the screen is first displayed. */
   fun initializeUIState(plant: Plant) {
     viewModelScope.launch {
-      _uiState.value = _uiState.value.copy(description = "Loading Plant Infos...")
-      val generatedPlant = plantsRepository.identifyPlant(plant.image)
+      _uiState.value =
+          _uiState.value.copy(description = "Loading Plant Infos...", image = plant.image)
+      // firewall to not regenerate is no picture taken
+      val generatedPlant =
+          if (!plant.image.isNullOrEmpty()) {
+            plantsRepository.identifyPlant(plant.image)
+          } else {
+            plant // On garde la plante telle quelle, pas d'identification
+          }
       _uiState.value =
           PlantInfoUIState(
               generatedPlant.name,
-              generatedPlant.image,
+              plant.image,
               generatedPlant.latinName,
               generatedPlant.description,
               generatedPlant.healthStatus,
@@ -67,6 +74,10 @@ class PlantInfoViewModel(
               generatedPlant.wateringFrequency,
           )
     }
+  }
+
+  fun resetUIState() {
+    _uiState.value = PlantInfoUIState()
   }
 
   /**
