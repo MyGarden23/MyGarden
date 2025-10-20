@@ -87,7 +87,9 @@ fun PlantInfosScreen(
             contentAlignment = Alignment.Center) {
               Button(
                   onClick = {
-                    plantInfoViewModel.savePlant(uiState.savePlant())
+                    val plantToSave = uiState.savePlant()
+                    plantInfoViewModel.savePlant(plantToSave)
+                    plantInfoViewModel.resetUIState()
                     onSavePlant()
                   },
                   modifier =
@@ -126,7 +128,10 @@ fun PlantInfosScreen(
 
                 // Back button overlaid on top-left corner of image
                 IconButton(
-                    onClick = { onBackPressed() },
+                    onClick = {
+                      plantInfoViewModel.resetUIState()
+                      onBackPressed()
+                    },
                     modifier =
                         Modifier.align(Alignment.TopStart)
                             .padding(8.dp)
