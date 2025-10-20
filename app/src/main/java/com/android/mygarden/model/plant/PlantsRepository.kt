@@ -73,9 +73,8 @@ interface PlantsRepository {
 
     try {
       val res =
-          Plant(
+          basePlant.copy(
               name = jsonObject["name"]?.jsonPrimitive?.content ?: basePlant.name,
-              latinName = basePlant.latinName,
               description =
                   jsonObject["description"]?.jsonPrimitive?.content ?: basePlant.description,
               wateringFrequency =
