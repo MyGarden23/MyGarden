@@ -1,6 +1,5 @@
 package com.android.mygarden.model.plant
 
-import android.media.Image
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
@@ -13,8 +12,6 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
-import org.json.JSONArray
-import org.json.JSONObject
 
 /**
  * Repository interface for managing plants in the application.
@@ -57,50 +54,36 @@ interface PlantsRepository {
    * @param basePlant The base Plant object to use for default values and structure
    * @return A Plant object containing the AI-generated information
    */
-  suspend fun generatePlantWithAI(plantName: String, basePlant: Plant): Plant {
+  suspend fun generatePlantWithAI(plantLatinName: String, basePlant: Plant): Plant {
     val model =
         Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-2.5-flash")
     val prompt =
-        "Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. The response must start with { and end with }. Describe the plant '$plantName'. The object should include: name, latinName, description, wateringFrequency. 'wateringFrequency' must be an integer representing the number of days between waterings."
+        "Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. The response must start with { and end with }. The formatting of the JSON MUST be a single object, NOT an array. Describe the plant by its latin name '$plantLatinName'. The object should include: name, latinName, description, wateringFrequency. For 'name', use the simple/common name (e.g., 'tomato' not 'garden tomato'). 'wateringFrequency' must be an integer representing the number of days between waterings."
     val response: GenerateContentResponse = model.generateContent(prompt)
 
-    // Robustly parse AI output
-    val jsonString =
-        try {
-          val outputStr = response.text ?: "{}"
-          if (outputStr.trim().startsWith("{")) {
-            // Direct JSON
-            outputStr
-          } else if (outputStr.trim().startsWith("[")) {
-            // Parse array
-            val arr = JSONArray(outputStr)
-            val obj = arr.getJSONObject(0)
-            val msgObj = obj.getJSONObject("message")
-            val contentArr = msgObj.getJSONArray("content")
-            val textBlock = contentArr.getJSONObject(0).getString("text")
-            textBlock.replace("```json", "").replace("```", "").trim()
-          } else {
-            // Try to just remove markdown explicitly
-            outputStr.replace("```json", "").replace("```", "").trim()
-          }
-        } catch (e: Exception) {
-          Log.d("plantGeneratingLog", e.toString())
-          "{}"
-        }
+    Log.d("plantGeneratingLog", response.text.toString())
 
-    val newPlant =
-        try {
-          val jsonObj = JSONObject(jsonString)
-          basePlant.copy(
-              name = jsonObj.optString("name", plantName),
-              latinName = jsonObj.optString("latinName", ""),
-              description = jsonObj.optString("description", ""),
-              wateringFrequency = jsonObj.optInt("wateringFrequency", basePlant.wateringFrequency))
-        } catch (e: Exception) {
-          Log.d("plantGeneratingLog", e.toString())
-          basePlant.copy(latinName = "Error while generating plant")
-        }
-    return newPlant
+    val outputStr = response.text ?: ""
+    if (outputStr.isEmpty())
+        return basePlant.copy(description = "Error while generating plant details")
+
+    val jsonObject = Json.parseToJsonElement(outputStr).jsonObject
+
+    try {
+      val res =
+          Plant(
+              name = jsonObject["name"]?.jsonPrimitive?.content ?: basePlant.name,
+              description =
+                  jsonObject["description"]?.jsonPrimitive?.content ?: basePlant.description,
+              wateringFrequency =
+                  jsonObject["wateringFrequency"]?.jsonPrimitive?.doubleOrNull?.toInt()
+                      ?: basePlant.wateringFrequency)
+
+      return res
+    } catch (e: Exception) {
+      Log.d("plantGeneratingLog", e.toString())
+      return basePlant.copy(description = "Error while generating plant details")
+    }
   }
 
   /**
@@ -109,10 +92,10 @@ interface PlantsRepository {
    * This function analyzes an image and returns plant information, including name, latin name,
    * description, and care requirements.
    *
-   * @param image The image of the plant to identify
+   * @param path The file path of the image of the plant to identify
    * @return A Plant object containing the identified plant's information
    */
-  suspend fun identifyPlant(image: Image): Plant
+  suspend fun identifyPlant(path: String): Plant
 
   /**
    * Identifies a plant's Latin name using the PlantNet API from a provided image file path.
