@@ -7,6 +7,12 @@ import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerateContentResponse
 import com.google.firebase.ai.type.GenerativeBackend
 import java.sql.Timestamp
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import okhttp3.MediaType.Companion.toMediaType
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -17,6 +23,28 @@ import org.json.JSONObject
  * virtual garden.
  */
 interface PlantsRepository {
+
+  companion object {
+    const val SCORE_THRESHOLD = 0.5
+  }
+
+  /**
+   * Helper function to read a file into a ByteArray from its path on disk.
+   *
+   * Reads the image given its file path and returns its byte contents. This is needed for uploading
+   * as part of PlantNet or other Plant recognition API calls. If the file cannot be read or doesn't
+   * exist, returns an empty ByteArray.
+   *
+   * @param path The absolute file path of the image to read
+   * @return The file's contents as a ByteArray, or empty ByteArray if file not found
+   */
+  fun imageFileToByteArray(path: String): ByteArray {
+    return try {
+      java.io.File(path).readBytes()
+    } catch (e: Exception) {
+      byteArrayOf()
+    }
+  }
 
   /**
    * Generates plant information using AI based on the provided plant name and a base Plant object.
@@ -85,6 +113,82 @@ interface PlantsRepository {
    * @return A Plant object containing the identified plant's information
    */
   suspend fun identifyPlant(image: Image): Plant
+
+  /**
+   * Identifies a plant's Latin name using the PlantNet API from a provided image file path.
+   *
+   * This method uploads an image to the PlantNet plant identification API and attempts to retrieve
+   * the scientific (Latin) name of the plant depicted. If the image file cannot be read or the
+   * identification confidence is low, an appropriate message is set in the returned Plant object.
+   *
+   * @param path Absolute file path to the image to be analyzed.
+   * @return A Plant object with the identified Latin name (if found), or a message about
+   *   errors/failure.
+   */
+  suspend fun identifyLatinNameWithPlantNet(path: String): Plant {
+    // Read image file into byte array
+    val imageBytes = imageFileToByteArray(path)
+
+    // Initialize API client and API key
+    val client = okhttp3.OkHttpClient()
+    val apiKey = "2b10vR85MRLoZFey45nBR41LRO"
+    val url = "https://my-api.plantnet.org/v2/identify/all?api-key=$apiKey"
+
+    // If image cannot be read, return a Plant with error description
+    if (imageBytes.isEmpty()) {
+      println("plantNetApiLog: Image file at $path could not be read or is empty.")
+      return Plant(image = path, description = "Could not be read the image or is empty.")
+    }
+
+    // Build multipart request for image upload and API call
+    val requestBody =
+        okhttp3.MultipartBody.Builder()
+            .setType(okhttp3.MultipartBody.FORM)
+            .addFormDataPart(
+                "images",
+                java.io.File(path).name,
+                okhttp3.RequestBody.create("image/jpeg".toMediaType(), imageBytes))
+            .addFormDataPart("organs", "auto")
+            .build()
+
+    val request = okhttp3.Request.Builder().url(url).post(requestBody).build()
+
+    // handle response
+    try {
+      // Execute the API request
+      val response = client.newCall(request).execute()
+      val rawBody = response.body?.string() ?: ""
+
+      // Parse API response JSON
+      val json = Json.parseToJsonElement(rawBody)
+
+      // Get first result from PlantNet and its confidence score
+      val firstResult = json.jsonObject["results"]?.jsonArray?.first()
+
+      val score = firstResult?.jsonObject?.get("score")?.jsonPrimitive?.doubleOrNull ?: 0.0
+      if (score < SCORE_THRESHOLD) {
+        // Low confidence: let user know identification failed
+        return Plant(image = path, description = "The AI was not able to identify the plant.")
+      }
+
+      // Extract Latin name from response JSON
+      val latinName =
+          firstResult
+              ?.jsonObject
+              ?.get("species")
+              ?.jsonObject
+              ?.get("scientificNameWithoutAuthor")
+              ?.jsonPrimitive
+              ?.content ?: "Unknown"
+
+      return Plant(latinName = latinName, image = path)
+    } catch (e: Exception) {
+      // Log and handle API/network errors
+      println("plantNetApiLog: Error during PlantNet API call: $e")
+    }
+    // Fallback for any errors encountered
+    return Plant(image = path, description = "There was an error getting the plant informations.")
+  }
 
   /**
    * Generates a new unique identifier for a plant.
