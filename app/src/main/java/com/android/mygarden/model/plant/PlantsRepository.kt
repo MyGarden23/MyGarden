@@ -54,11 +54,11 @@ interface PlantsRepository {
    * @param basePlant The base Plant object to use for default values and structure
    * @return A Plant object containing the AI-generated information
    */
-  suspend fun generatePlantWithAI(plantLatinName: String, basePlant: Plant): Plant {
+  suspend fun generatePlantWithAI(basePlant: Plant): Plant {
     val model =
         Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-2.5-flash")
     val prompt =
-        "Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. The response must start with { and end with }. The formatting of the JSON MUST be a single object, NOT an array. Describe the plant by its latin name '$plantLatinName'. The object should include: name, latinName, description, wateringFrequency. For 'name', use the simple/common name (e.g., 'tomato' not 'garden tomato'). 'wateringFrequency' must be an integer representing the number of days between waterings."
+        "Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. The response must start with { and end with }. The formatting of the JSON MUST be a single object, NOT an array. Describe the plant by its latin name '${basePlant.latinName}'. The object should include: name, latinName, description, wateringFrequency. For 'name', use the simple/common name (e.g., 'tomato' not 'garden tomato'). 'wateringFrequency' must be an integer representing the number of days between waterings."
     val response: GenerateContentResponse = model.generateContent(prompt)
 
     Log.d("plantGeneratingLog", response.text.toString())
@@ -85,17 +85,6 @@ interface PlantsRepository {
       return basePlant.copy(description = "Error while generating plant details")
     }
   }
-
-  /**
-   * Identifies a plant from an image using recognition technology.
-   *
-   * This function analyzes an image and returns plant information, including name, latin name,
-   * description, and care requirements.
-   *
-   * @param path The file path of the image of the plant to identify
-   * @return A Plant object containing the identified plant's information
-   */
-  suspend fun identifyPlant(path: String): Plant
 
   /**
    * Identifies a plant's Latin name using the PlantNet API from a provided image file path.
@@ -170,7 +159,25 @@ interface PlantsRepository {
       println("plantNetApiLog: Error during PlantNet API call: $e")
     }
     // Fallback for any errors encountered
-    return Plant(image = path, description = "There was an error getting the plant informations.")
+    return Plant(image = path, description = "There was an error getting the plant latin name.")
+  }
+
+  /**
+   * Identifies a plant from an image using recognition technology.
+   *
+   * This function analyzes an image and returns plant information, including name, latin name,
+   * description, and care requirements.
+   *
+   * @param path The file path of the image of the plant to identify
+   * @return A Plant object containing the identified plant's information
+   */
+  suspend fun identifyPlant(path: String): Plant {
+    val plantWLatinName = identifyLatinNameWithPlantNet(path)
+    if (plantWLatinName.latinName == Plant().latinName) {
+      Log.d("plantNetApiLog", "PlantNet API call failed)")
+      return plantWLatinName
+    }
+    return generatePlantWithAI(plantWLatinName)
   }
 
   /**
