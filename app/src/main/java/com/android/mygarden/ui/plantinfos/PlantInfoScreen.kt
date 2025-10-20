@@ -86,7 +86,10 @@ fun PlantInfosScreen(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             contentAlignment = Alignment.Center) {
               Button(
-                  onClick = onSavePlant,
+                  onClick = {
+                    plantInfoViewModel.savePlant(uiState.savePlant())
+                    onSavePlant()
+                  },
                   modifier =
                       Modifier.fillMaxWidth()
                           .height(56.dp)
