@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.sonar)
     id("jacoco")
+    alias(libs.plugins.compose.compiler)
 }
 jacoco {
     toolVersion = "0.8.11"
@@ -65,10 +66,6 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
     }
 
     compileOptions {
@@ -217,6 +214,10 @@ dependencies {
     // ----------         Mockito      ------------
     implementation(libs.mockito.core)
     implementation(libs.mockito.kotlin)
+
+    // --------- Firebase AI Logic (Gemini/Imagen) ---------
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    implementation("com.google.firebase:firebase-ai")
 }
 
 
