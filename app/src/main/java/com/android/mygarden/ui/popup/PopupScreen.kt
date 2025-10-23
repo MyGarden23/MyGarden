@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +30,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.android.mygarden.R
 import com.android.mygarden.ui.theme.MyGardenTheme
+
+object PopupScreenTestTags {
+  const val CARD = "Card"
+  const val TITLE = "Title"
+  const val DISMISS_BUTTON = "DismissButton"
+  const val CONFIRM_BUTTON = "ConfirmButton"
+}
 
 /**
  * Popup that is on screen whenever a plant passes in state NEED_WATER
@@ -37,26 +47,24 @@ import com.android.mygarden.ui.theme.MyGardenTheme
  */
 @Composable
 fun Popup(
-  // default plant name and actions for @Preview
-  plantName: String = "GegeLeCactus",
-  onDismiss: () -> Unit = {},
-  onConfirm: () -> Unit = {}
+  plantName: String,
+  onDismiss: () -> Unit,
+  onConfirm: () -> Unit
 ) {
   Dialog(
-    onDismissRequest = {onDismiss},
+    onDismissRequest = onDismiss,
   ) {
     Card(
       modifier = Modifier
+        .testTag(PopupScreenTestTags.CARD)
         .fillMaxWidth()
         .height(230.dp)
         .padding(16.dp),
       shape = RoundedCornerShape(16.dp),
-      colors = CardColors(
+      colors = CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        disabledContainerColor = MaterialTheme.colorScheme.background,
-        disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-      )
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+      ),
     ) {
       Column(
         modifier = Modifier.fillMaxSize(),
@@ -71,7 +79,7 @@ fun Popup(
         PopupTitle("Your $plantName is thirsty !")
         // Spacer puts the confirm button at the end of the popup
         Spacer(Modifier.weight(1f))
-        PopupButton(onClick = {onConfirm}, text = "Go to Garden")
+        PopupButton(onClick = onConfirm, text = "Go to Garden")
       }
     }
   }
@@ -87,7 +95,7 @@ fun PopupTitle(
   text: String
 ) {
   Text(
-    modifier = Modifier.padding(8.dp),
+    modifier = Modifier.padding(8.dp).testTag(PopupScreenTestTags.TITLE),
     textAlign = TextAlign.Center,
     style = MaterialTheme.typography.titleLarge,
     fontWeight = FontWeight.Bold,
@@ -107,12 +115,10 @@ fun PopupButton(
   text: String
 ) {
   Button(
-    modifier = Modifier.padding(16.dp),
-    colors = ButtonColors(
+    modifier = Modifier.padding(16.dp).testTag(PopupScreenTestTags.CONFIRM_BUTTON),
+    colors = ButtonDefaults.buttonColors(
       containerColor = MaterialTheme.colorScheme.primary,
-      contentColor = MaterialTheme.colorScheme.onPrimary,
-      disabledContainerColor = MaterialTheme.colorScheme.primary,
-      disabledContentColor = MaterialTheme.colorScheme.onPrimary,
+      contentColor = MaterialTheme.colorScheme.onPrimary
     ),
     onClick = onClick) {
     Text(text = text)
@@ -128,16 +134,12 @@ fun PopupButton(
 fun QuitPopup(
   onClick: () -> Unit
 ) {
-  IconButton(onClick = onClick) {
+  IconButton(
+    modifier = Modifier.testTag(PopupScreenTestTags.DISMISS_BUTTON),
+    onClick = onClick) {
     Icon(
       painter = painterResource(R.drawable.x_circle),
       contentDescription = null,
       tint = MaterialTheme.colorScheme.error)
   }
-}
-
-@Preview
-@Composable
-fun Preview() {
-  MyGardenTheme { Popup() }
 }
