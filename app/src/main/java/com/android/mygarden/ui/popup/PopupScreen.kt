@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,11 +23,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.android.mygarden.R
-import com.android.mygarden.ui.theme.MyGardenTheme
 
 object PopupScreenTestTags {
   const val CARD = "Card"
@@ -46,41 +42,28 @@ object PopupScreenTestTags {
  * @param onConfirm the action to do when clicking on the confirm button (Go to Garden)
  */
 @Composable
-fun Popup(
-  plantName: String,
-  onDismiss: () -> Unit,
-  onConfirm: () -> Unit
-) {
+fun Popup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
   Dialog(
-    onDismissRequest = onDismiss,
+      onDismissRequest = onDismiss,
   ) {
     Card(
-      modifier = Modifier
-        .testTag(PopupScreenTestTags.CARD)
-        .fillMaxWidth()
-        .height(230.dp)
-        .padding(16.dp),
-      shape = RoundedCornerShape(16.dp),
-      colors = CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-      ),
+        modifier =
+            Modifier.testTag(PopupScreenTestTags.CARD).fillMaxWidth().height(230.dp).padding(16.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
     ) {
       Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-      ) {
-        // A row to have the red cross button only on top and the rest below
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(6.dp)
-        ) {
-          QuitPopup(onClick = onDismiss)
-        }
-        PopupTitle("Your $plantName is thirsty !")
-        // Spacer puts the confirm button at the end of the popup
-        Spacer(Modifier.weight(1f))
-        PopupButton(onClick = onConfirm, text = "Go to Garden")
-      }
+          modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            // A row to have the red cross button only on top and the rest below
+            Row(modifier = Modifier.fillMaxWidth().padding(6.dp)) { QuitPopup(onClick = onDismiss) }
+            PopupTitle("Your $plantName is thirsty !")
+            // Spacer puts the confirm button at the end of the popup
+            Spacer(Modifier.weight(1f))
+            PopupButton(onClick = onConfirm, text = "Go to Garden")
+          }
     }
   }
 }
@@ -91,16 +74,13 @@ fun Popup(
  * @param text the title text
  */
 @Composable
-fun PopupTitle(
-  text: String
-) {
+fun PopupTitle(text: String) {
   Text(
-    modifier = Modifier.padding(8.dp).testTag(PopupScreenTestTags.TITLE),
-    textAlign = TextAlign.Center,
-    style = MaterialTheme.typography.titleLarge,
-    fontWeight = FontWeight.Bold,
-    text = text
-  )
+      modifier = Modifier.padding(8.dp).testTag(PopupScreenTestTags.TITLE),
+      textAlign = TextAlign.Center,
+      style = MaterialTheme.typography.titleLarge,
+      fontWeight = FontWeight.Bold,
+      text = text)
 }
 
 /**
@@ -110,19 +90,16 @@ fun PopupTitle(
  * @param text the text inside the button
  */
 @Composable
-fun PopupButton(
-  onClick: () -> Unit,
-  text: String
-) {
+fun PopupButton(onClick: () -> Unit, text: String) {
   Button(
-    modifier = Modifier.padding(16.dp).testTag(PopupScreenTestTags.CONFIRM_BUTTON),
-    colors = ButtonDefaults.buttonColors(
-      containerColor = MaterialTheme.colorScheme.primary,
-      contentColor = MaterialTheme.colorScheme.onPrimary
-    ),
-    onClick = onClick) {
-    Text(text = text)
-  }
+      modifier = Modifier.padding(16.dp).testTag(PopupScreenTestTags.CONFIRM_BUTTON),
+      colors =
+          ButtonDefaults.buttonColors(
+              containerColor = MaterialTheme.colorScheme.primary,
+              contentColor = MaterialTheme.colorScheme.onPrimary),
+      onClick = onClick) {
+        Text(text = text)
+      }
 }
 
 /**
@@ -131,15 +108,11 @@ fun PopupButton(
  * @param onClick the action to do when clicked on
  */
 @Composable
-fun QuitPopup(
-  onClick: () -> Unit
-) {
-  IconButton(
-    modifier = Modifier.testTag(PopupScreenTestTags.DISMISS_BUTTON),
-    onClick = onClick) {
+fun QuitPopup(onClick: () -> Unit) {
+  IconButton(modifier = Modifier.testTag(PopupScreenTestTags.DISMISS_BUTTON), onClick = onClick) {
     Icon(
-      painter = painterResource(R.drawable.x_circle),
-      contentDescription = null,
-      tint = MaterialTheme.colorScheme.error)
+        painter = painterResource(R.drawable.x_circle),
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.error)
   }
 }
