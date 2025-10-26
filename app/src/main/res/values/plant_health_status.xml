@@ -3,7 +3,7 @@
     <!-- Plant Health Status Descriptions -->
     <string name="plant_health_severely_overwatered">Severely overwatered 🌊🌊</string>
     <string name="plant_health_overwatered">Overwatered 💦</string>
-    <string name="plant_health_healthy">Healthy and thriving 🌱</string>
+    <string name="plant_health_healthy">The plant is healthy 🌱</string>
     <string name="plant_health_slightly_dry">Could use some water soon 🍂</string>
     <string name="plant_health_needs_water">Needs watering 💧</string>
     <string name="plant_health_severely_dry">Critical - needs water urgently! 🥀</string>

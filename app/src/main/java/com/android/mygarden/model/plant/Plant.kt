@@ -67,5 +67,14 @@ enum class PlantHealthStatus(@StringRes val descriptionRes: Int) {
    * localization, use descriptionRes with Context.getString() instead.
    */
   val description: String
-    get() = this.descriptionRes.toString()
+    get() =
+        when (this) {
+          SEVERELY_OVERWATERED -> "Severely overwatered 🌊🌊"
+          OVERWATERED -> "Overwatered 💦"
+          HEALTHY -> "The plant is healthy 🌱"
+          SLIGHTLY_DRY -> "Could use some water soon 🍂"
+          NEEDS_WATER -> "Needs watering 💧"
+          SEVERELY_DRY -> "Critical - needs water urgently! 🥀"
+          UNKNOWN -> "Status unknown ❓"
+        }
 }
