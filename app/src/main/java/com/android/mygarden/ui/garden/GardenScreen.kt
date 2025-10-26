@@ -213,8 +213,11 @@ fun PlantCard(ownedPlant: OwnedPlant) {
                   when (ownedPlant.plant.healthStatus) {
                     PlantHealthStatus.UNKNOWN -> MaterialTheme.colorScheme.surfaceVariant
                     PlantHealthStatus.HEALTHY -> MaterialTheme.colorScheme.primaryContainer
+                    PlantHealthStatus.SLIGHTLY_DRY -> MaterialTheme.colorScheme.primaryContainer
                     PlantHealthStatus.NEEDS_WATER,
-                    PlantHealthStatus.OVERWATERED -> MaterialTheme.colorScheme.secondaryContainer
+                    PlantHealthStatus.OVERWATERED,
+                    PlantHealthStatus.SEVERELY_OVERWATERED,
+                    PlantHealthStatus.SEVERELY_DRY -> MaterialTheme.colorScheme.secondaryContainer
                   }),
       elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
       shape = RoundedCornerShape(8.dp),
