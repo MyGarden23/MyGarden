@@ -6,6 +6,7 @@ import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerateContentResponse
 import com.google.firebase.ai.type.GenerativeBackend
 import java.sql.Timestamp
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -14,6 +15,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 
 /**
  * Repository interface for managing plants in the application.
@@ -25,6 +27,34 @@ interface PlantsRepository {
 
   companion object {
     const val SCORE_THRESHOLD = 0.3
+      private const val API_KEY = "2b10vR85MRLoZFey45nBR41LRO"
+      private const val PLANTNET_API_URL =
+          "https://my-api.plantnet.org/v2/identify/all?api-key=$API_KEY"
+
+      val client: OkHttpClient = OkHttpClient.Builder()
+          .connectTimeout(30, TimeUnit.SECONDS)
+          .readTimeout(30, TimeUnit.SECONDS)
+          .writeTimeout(30, TimeUnit.SECONDS)
+          .build()
+
+      fun buildRequestBody(imageBytes: ByteArray, fileName: String): okhttp3.RequestBody {
+          return okhttp3.MultipartBody.Builder()
+              .setType(okhttp3.MultipartBody.FORM)
+              .addFormDataPart(
+                  "images",
+                  fileName,
+                  okhttp3.RequestBody.create("image/jpeg".toMediaType(), imageBytes)
+              )
+              .addFormDataPart("organs", "auto")
+              .build()
+      }
+
+      fun buildRequest(requestBody: okhttp3.RequestBody): okhttp3.Request {
+          return okhttp3.Request.Builder()
+              .url(PLANTNET_API_URL)
+              .post(requestBody)
+              .build()
+      }
   }
 
   /**
@@ -52,20 +82,15 @@ interface PlantsRepository {
    * Latin name, description, and watering frequency. It parses the AI output and fills in missing
    * or error details as needed.
    *
-   * @param plantName The name of the plant to generate information for
    * @param basePlant The base Plant object to use for default values and structure
    * @return A Plant object containing the AI-generated information
    */
   suspend fun generatePlantWithAI(basePlant: Plant): Plant {
-    val model =
-        Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-2.5-flash")
     val prompt =
         "Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. The response must start with { and end with }. The formatting of the JSON MUST be a single object, NOT an array. Describe the plant by its latin name '${basePlant.latinName}'. The object should include: name, latinName, description, wateringFrequency. For 'name', use the simple/common name (e.g., 'tomato' not 'garden tomato'). 'wateringFrequency' must be an integer representing the number of days between waterings."
-    val response: GenerateContentResponse = model.generateContent(prompt)
 
-    Log.d("plantGeneratingLog", response.text.toString())
+    val outputStr = plantDescriptionCallGemini(prompt)
 
-    val outputStr = response.text ?: ""
     if (outputStr.isEmpty())
         return basePlant.copy(description = "Error while generating plant details")
 
@@ -88,6 +113,13 @@ interface PlantsRepository {
     }
   }
 
+  suspend fun plantDescriptionCallGemini(prompt: String): String {
+    val model =
+      Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-2.5-flash")
+    val response: GenerateContentResponse = model.generateContent(prompt)
+    return response.text ?: ""
+  }
+
   /**
    * Identifies a plant's Latin name using the PlantNet API from a provided image file path.
    *
@@ -106,11 +138,6 @@ interface PlantsRepository {
       // Read image file into byte array
       val imageBytes = imageFileToByteArray(path)
 
-      // Initialize API client and API key
-      val client = okhttp3.OkHttpClient()
-      val apiKey = "2b10vR85MRLoZFey45nBR41LRO"
-      val url = "https://my-api.plantnet.org/v2/identify/all?api-key=$apiKey"
-
       // If image cannot be read, return a Plant with error description
       if (imageBytes.isEmpty()) {
         println("plantNetApiLog: Image file at $path could not be read or is empty.")
@@ -118,23 +145,13 @@ interface PlantsRepository {
       }
 
       // Build multipart request for image upload and API call
-      val requestBody =
-          okhttp3.MultipartBody.Builder()
-              .setType(okhttp3.MultipartBody.FORM)
-              .addFormDataPart(
-                  "images",
-                  java.io.File(path).name,
-                  okhttp3.RequestBody.create("image/jpeg".toMediaType(), imageBytes))
-              .addFormDataPart("organs", "auto")
-              .build()
-
-      val request = okhttp3.Request.Builder().url(url).post(requestBody).build()
+        val requestBody = buildRequestBody(imageBytes, java.io.File(path).name)
+        val request = buildRequest(requestBody)
 
       // handle response
       try {
         // Execute the API request
-        val response = client.newCall(request).execute()
-        val rawBody = response.body?.string() ?: ""
+          val rawBody = plantNetAPICall(client, request)
 
         // Parse API response JSON
         val json = Json.parseToJsonElement(rawBody)
@@ -162,14 +179,17 @@ interface PlantsRepository {
         return@withContext Plant(latinName = latinName, image = path)
       } catch (e: Exception) {
         // Log and handle API/network errors
-        Log.e("plantNetApiLog1", "Erreur lors de l'appel à l'API PlantNet", e)
-
-        println("plantNetApiLog: Error during PlantNet API call: $e")
+        Log.e("plantNetApiLog", "Error while calling PlantNet API: ", e)
       }
       // Fallback for any errors encountered
       return@withContext Plant(
           image = path, description = "There was an error getting the plant latin name.")
     }
+  }
+
+  suspend fun plantNetAPICall(client: okhttp3.OkHttpClient, request: okhttp3.Request): String {
+    val response = client.newCall(request).execute()
+    return response.body?.string() ?: ""
   }
 
   /**
