@@ -104,7 +104,7 @@ private val WATER_BAR_WRAPPER_HEIGHT = 14.dp
 
 // Font sizes
 private val PLANT_NAME_FONT_SIZE = 20.sp
-private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
+private val PLANT_CARD_INFO_FONT_SIZE = 13.sp
 
 /**
  * The screen of the garden with some user profile infos and the list of plants owned by
@@ -323,17 +323,9 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                     }
                   /* Instead of making one Text for the status make only the plant name ellipse
                   when it is too long and keep the plant's status */
-                    Row {
-                      Text(
-                          text = "Your ${ownedPlant.plant.name}",
-                          fontSize = PLANT_CARD_INFO_FONT_SIZE,
-                          maxLines = 1,
-                          overflow = TextOverflow.Ellipsis,
-                          modifier = modifier.weight(1f, fill = false))
-                      Text(
-                          text = " is ${ownedPlant.plant.healthStatus.name.lowercase()}",
-                          fontSize = PLANT_CARD_INFO_FONT_SIZE)
-                    }
+                  Text(
+                      text = ownedPlant.plant.healthStatus.description,
+                      fontSize = PLANT_CARD_INFO_FONT_SIZE)
                   // Wrap the water level bar in a Box to make it have the right dimensions in the Column
                     Box(modifier = modifier.height(WATER_BAR_WRAPPER_HEIGHT), contentAlignment = Alignment.Center) {
                         // TODO: make the water level bar depend on the plant's last watering time
