@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -69,6 +70,11 @@ object GardenScreenTestTags {
 
   fun getTestTagForOwnedPlant(plant: OwnedPlant): String = "OwnedPlantNumber${plant.id}"
 }
+
+data class PlantColor(val backgroundColor: Color, val wateringColor: Color)
+
+val WATERING_BLUE_COLOR = Color(0xff9dddee)
+val WATERING_ORANGE_COLOR = Color(0xffff9d0a)
 
 /**
  * Represents the screen of the garden with some user profile infos and the list of plants owned by
@@ -218,6 +224,10 @@ fun AddPlantFloatingButton(onAddPlant: () -> Unit) {
  */
 @Composable
 fun PlantCard(ownedPlant: OwnedPlant) {
+  // The color palette of the card depending on the health status of the plant
+  val colorPalette =
+      colorsFromHealthStatus(
+          status = ownedPlant.plant.healthStatus, colorScheme = MaterialTheme.colorScheme)
   // The colored box container
   Card(
       modifier =
@@ -225,18 +235,7 @@ fun PlantCard(ownedPlant: OwnedPlant) {
               .height(110.dp)
               .testTag(GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)),
       // Color changing
-      colors =
-          CardDefaults.cardColors(
-              containerColor =
-                  when (ownedPlant.plant.healthStatus) {
-                    PlantHealthStatus.UNKNOWN -> MaterialTheme.colorScheme.surfaceVariant
-                    PlantHealthStatus.HEALTHY -> MaterialTheme.colorScheme.primaryContainer
-                    PlantHealthStatus.SLIGHTLY_DRY -> MaterialTheme.colorScheme.error
-                    PlantHealthStatus.NEEDS_WATER -> MaterialTheme.colorScheme.error
-                    PlantHealthStatus.OVERWATERED -> MaterialTheme.colorScheme.secondaryContainer
-                    PlantHealthStatus.SEVERELY_OVERWATERED -> MaterialTheme.colorScheme.error
-                    PlantHealthStatus.SEVERELY_DRY -> MaterialTheme.colorScheme.secondaryContainer
-                  }),
+      colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
       elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
       shape = RoundedCornerShape(8.dp),
       content = {
@@ -292,34 +291,34 @@ fun PlantCard(ownedPlant: OwnedPlant) {
                           fontSize = 14.sp)
                     }
                     Box(modifier = Modifier.height(20.dp), contentAlignment = Alignment.Center) {
-                      WaterBar(waterLevel = 0.5f)
+                      WaterBar(waterLevel = 0.5f, color = colorPalette.wateringColor)
                     }
                   }
-              WaterButton()
+              WaterButton(color = colorPalette.wateringColor)
             }
       })
 }
 
 @Composable
-fun WaterButton(modifier: Modifier = Modifier) {
+fun WaterButton(modifier: Modifier = Modifier, color: Color) {
   Box(
       modifier =
           modifier
               .size(35.dp)
               .clip(RoundedCornerShape(8.dp))
-              .border(2.dp, Color(0xff9dddee), RoundedCornerShape(8.dp))
+              .border(2.dp, color, RoundedCornerShape(8.dp))
               .clickable(onClick = {}),
       contentAlignment = Alignment.Center) {
         Icon(
             Icons.Default.WaterDrop,
             contentDescription = "Water plant buton",
-            tint = Color(0xff9dddee),
+            tint = color,
             modifier = modifier.size(20.dp))
       }
 }
 
 @Composable
-fun WaterBar(modifier: Modifier = Modifier, waterLevel: Float) {
+fun WaterBar(modifier: Modifier = Modifier, waterLevel: Float, color: Color) {
   assert(waterLevel >= 0f && waterLevel <= 1f)
   Box(
       modifier =
@@ -329,8 +328,19 @@ fun WaterBar(modifier: Modifier = Modifier, waterLevel: Float) {
               .clip(RoundedCornerShape(8.dp))
               .background(MaterialTheme.colorScheme.background),
       contentAlignment = Alignment.BottomEnd) {
-        Box(
-            modifier =
-                modifier.fillMaxHeight().fillMaxWidth(waterLevel).background(Color(0xff9dddee)))
+        Box(modifier = modifier.fillMaxHeight().fillMaxWidth(waterLevel).background(color))
       }
+}
+
+fun colorsFromHealthStatus(status: PlantHealthStatus, colorScheme: ColorScheme): PlantColor {
+  return when (status) {
+    PlantHealthStatus.UNKNOWN -> PlantColor(colorScheme.surfaceVariant, WATERING_BLUE_COLOR)
+    PlantHealthStatus.HEALTHY -> PlantColor(colorScheme.primaryContainer, WATERING_BLUE_COLOR)
+    PlantHealthStatus.NEEDS_WATER,
+    PlantHealthStatus.OVERWATERED ->
+        PlantColor(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR)
+      PlantHealthStatus.SEVERELY_OVERWATERED -> TODO()
+      PlantHealthStatus.SLIGHTLY_DRY -> TODO()
+      PlantHealthStatus.SEVERELY_DRY -> TODO()
+  }
 }
