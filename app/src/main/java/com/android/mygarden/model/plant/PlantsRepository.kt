@@ -136,8 +136,8 @@ interface PlantsRepository {
 
       // If image cannot be read, return a Plant with error description
       if (imageBytes.isEmpty()) {
-        println("plantNetApiLog: Image file at $path could not be read or is empty.")
-        Plant(image = path, description = "Could not be read the image or is empty.")
+        return@withContext Plant(
+            image = path, description = "Could not be read the image or is empty.")
       }
 
       // Build multipart request for image upload and API call
