@@ -77,7 +77,11 @@ class GardenViewModelTests {
     vm.getAllPlants()
     advanceUntilIdle()
     assertEquals(emptyList<OwnedPlant>(), vm.uiState.value.plants)
-    ownedPlant = repo.saveToGarden(plant1, repo.getNewId(), Timestamp(1))
+    ownedPlant =
+        repo.saveToGarden(
+            plant1,
+            repo.getNewId(),
+            Timestamp(System.currentTimeMillis() - (1L * 24 * 60 * 60 * 1000)))
     advanceUntilIdle()
     vm.getAllPlants()
     advanceUntilIdle()
