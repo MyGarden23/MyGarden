@@ -37,12 +37,12 @@ interface PlantsRepository {
           .writeTimeout(30, TimeUnit.SECONDS)
           .build()
 
-      fun buildRequestBody(imageBytes: ByteArray, fileName: String): okhttp3.RequestBody {
+      fun buildRequestBody(imageBytes: ByteArray): okhttp3.RequestBody {
           return okhttp3.MultipartBody.Builder()
               .setType(okhttp3.MultipartBody.FORM)
               .addFormDataPart(
                   "images",
-                  fileName,
+                  "PlantImage.jpg",
                   okhttp3.RequestBody.create("image/jpeg".toMediaType(), imageBytes)
               )
               .addFormDataPart("organs", "auto")
@@ -145,7 +145,7 @@ interface PlantsRepository {
       }
 
       // Build multipart request for image upload and API call
-        val requestBody = buildRequestBody(imageBytes, java.io.File(path).name)
+        val requestBody = buildRequestBody(imageBytes)
         val request = buildRequest(requestBody)
 
       // handle response
