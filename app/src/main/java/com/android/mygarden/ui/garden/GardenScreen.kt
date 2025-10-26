@@ -1,17 +1,26 @@
 package com.android.mygarden.ui.garden
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -29,12 +38,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthStatus
@@ -114,7 +131,8 @@ fun GardenScreen(
                 modifier =
                     Modifier.fillMaxWidth()
                         .padding(horizontal = 30.dp)
-                        .testTag(GardenScreenTestTags.GARDEN_LIST)) {
+                        .testTag(GardenScreenTestTags.GARDEN_LIST),
+                verticalArrangement = Arrangement.spacedBy(10.dp)) {
                   items(plants.size) { index -> PlantCard(plants[index]) }
                 }
           } else {
@@ -204,7 +222,7 @@ fun PlantCard(ownedPlant: OwnedPlant) {
   Card(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(10.dp)
+              .height(110.dp)
               .testTag(GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)),
       // Color changing
       colors =
@@ -222,20 +240,97 @@ fun PlantCard(ownedPlant: OwnedPlant) {
       elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
       shape = RoundedCornerShape(8.dp),
       content = {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-          // The icon or image of the plant
-          // TODO: change this icon to the plant image later
-          Icon(
-              painter = painterResource(R.drawable.potted_plant_icon),
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.onSecondary)
-          Spacer(modifier = Modifier.width(16.dp))
-          // All the displayed characteristics of the plant
-          Column() {
-            Text(text = ownedPlant.plant.name, fontWeight = FontWeight.Bold)
-            Text(text = ownedPlant.plant.latinName)
-            Text(text = "Status : ${ownedPlant.plant.healthStatus.name}")
-          }
-        }
+        Row(
+            modifier = Modifier.fillMaxSize().padding(12.dp),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceAround) {
+              // The image of the plant
+              Box {
+                AsyncImage(
+                    model =
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(ownedPlant.plant.image ?: "")
+                            .build(),
+                    contentDescription = "Image of a {${ownedPlant.plant.name}}",
+                    modifier =
+                        Modifier.fillMaxHeight()
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentScale = ContentScale.Crop)
+              }
+              // All the displayed characteristics of the plant
+              Column(
+                  modifier = Modifier.fillMaxHeight().weight(1f).padding(horizontal = 10.dp),
+                  verticalArrangement = Arrangement.SpaceAround) {
+                    Row(verticalAlignment = Alignment.Bottom) {
+                      Text(
+                          text = ownedPlant.plant.name,
+                          fontWeight = FontWeight.Bold,
+                          fontSize = 20.sp,
+                          modifier = Modifier.alignByBaseline(),
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis)
+                      Spacer(modifier = Modifier.width(10.dp))
+                      Text(
+                          text = ownedPlant.plant.latinName,
+                          fontStyle = FontStyle.Italic,
+                          fontSize = 14.sp,
+                          modifier = Modifier.alignByBaseline(),
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis)
+                    }
+                    Row {
+                      Text(
+                          text = "Your ${ownedPlant.plant.name}",
+                          fontSize = 14.sp,
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis,
+                          modifier = Modifier.weight(1f, fill = false))
+                      Text(
+                          text = " is ${ownedPlant.plant.healthStatus.name.lowercase()}",
+                          fontSize = 14.sp)
+                    }
+                    Box(modifier = Modifier.height(20.dp), contentAlignment = Alignment.Center) {
+                      WaterBar(waterLevel = 0.5f)
+                    }
+                  }
+              WaterButton()
+            }
       })
+}
+
+@Composable
+fun WaterButton(modifier: Modifier = Modifier) {
+  Box(
+      modifier =
+          modifier
+              .size(35.dp)
+              .clip(RoundedCornerShape(8.dp))
+              .border(2.dp, Color(0xff9dddee), RoundedCornerShape(8.dp))
+              .clickable(onClick = {}),
+      contentAlignment = Alignment.Center) {
+        Icon(
+            Icons.Default.WaterDrop,
+            contentDescription = "Water plant buton",
+            tint = Color(0xff9dddee),
+            modifier = modifier.size(20.dp))
+      }
+}
+
+@Composable
+fun WaterBar(modifier: Modifier = Modifier, waterLevel: Float) {
+  assert(waterLevel >= 0f && waterLevel <= 1f)
+  Box(
+      modifier =
+          modifier
+              .height(14.dp)
+              .fillMaxWidth()
+              .clip(RoundedCornerShape(8.dp))
+              .background(MaterialTheme.colorScheme.background),
+      contentAlignment = Alignment.BottomEnd) {
+        Box(
+            modifier =
+                modifier.fillMaxHeight().fillMaxWidth(waterLevel).background(Color(0xff9dddee)))
+      }
 }
