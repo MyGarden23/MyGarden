@@ -26,11 +26,26 @@ import okhttp3.OkHttpClient
 interface PlantsRepository {
 
   companion object {
+    /**
+     * Minimum confidence score threshold for plant identification results.
+     *
+     * Results from the PlantNet API with a score below this threshold are considered unreliable and
+     * will be rejected.
+     */
     const val SCORE_THRESHOLD = 0.3
+
+    /** API key for authenticating with the PlantNet plant identification service. */
     private const val API_KEY = "2b10vR85MRLoZFey45nBR41LRO"
+
+    /** Base URL for the PlantNet API endpoint, including the API key parameter. */
     private const val PLANTNET_API_URL =
         "https://my-api.plantnet.org/v2/identify/all?api-key=$API_KEY"
 
+    /**
+     * HTTP client configured for PlantNet API requests.
+     *
+     * Configured with extended timeouts (30 seconds) to accommodate image upload and processing.
+     */
     val client: OkHttpClient =
         OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -38,6 +53,15 @@ interface PlantsRepository {
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
 
+    /**
+     * Builds a multipart request body for uploading an image to the PlantNet API.
+     *
+     * Creates a form-data request containing the image file and organ type parameter set to "auto"
+     * for automatic plant part detection.
+     *
+     * @param imageBytes The image data as a byte array
+     * @return A RequestBody configured for the PlantNet API image upload
+     */
     fun buildRequestBody(imageBytes: ByteArray): okhttp3.RequestBody {
       return okhttp3.MultipartBody.Builder()
           .setType(okhttp3.MultipartBody.FORM)
@@ -49,6 +73,12 @@ interface PlantsRepository {
           .build()
     }
 
+    /**
+     * Builds an HTTP POST request for the PlantNet API.
+     *
+     * @param requestBody The multipart request body containing the image data
+     * @return A configured Request object ready to be executed
+     */
     fun buildRequest(requestBody: okhttp3.RequestBody): okhttp3.Request {
       return okhttp3.Request.Builder().url(PLANTNET_API_URL).post(requestBody).build()
     }
@@ -86,7 +116,14 @@ interface PlantsRepository {
     val prompt =
         "Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. The response must start with { and end with }. The formatting of the JSON MUST be a single object, NOT an array. Describe the plant by its latin name '${basePlant.latinName}'. The object should include: name, latinName, description, wateringFrequency. For 'name', use the simple/common name (e.g., 'tomato' not 'garden tomato'). 'wateringFrequency' must be an integer representing the number of days between waterings."
 
-    val outputStr = plantDescriptionCallGemini(prompt)
+    val outputStr =
+        try {
+          plantDescriptionCallGemini(prompt)
+        } catch (e: Exception) {
+          Log.d("plantGeneratingLog", e.toString())
+          return basePlant.copy(
+              description = "The AI couldn't generate a description for this plant.")
+        }
 
     if (outputStr.isEmpty())
         return basePlant.copy(description = "Error while generating plant details")
@@ -109,6 +146,16 @@ interface PlantsRepository {
     }
   }
 
+  /**
+   * Calls the Gemini AI model to generate plant description content.
+   *
+   * This function sends a prompt to Google's Gemini 2.5 Flash model via Firebase AI and returns the
+   * generated text response. The response is expected to be a JSON object containing plant
+   * information.
+   *
+   * @param prompt The prompt text to send to the AI model
+   * @return The AI-generated text response, or an empty string if generation fails
+   */
   suspend fun plantDescriptionCallGemini(prompt: String): String {
     val model =
         Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-2.5-flash")
@@ -183,6 +230,16 @@ interface PlantsRepository {
     }
   }
 
+  /**
+   * Executes a network call to the PlantNet API.
+   *
+   * This function performs the actual HTTP request to the PlantNet service and returns the raw
+   * response body as a string. Used internally by plant identification methods.
+   *
+   * @param client The OkHttpClient to use for the request
+   * @param request The configured HTTP request to execute
+   * @return The response body as a string, or an empty string if the request fails
+   */
   suspend fun plantNetAPICall(client: okhttp3.OkHttpClient, request: okhttp3.Request): String {
     val response = client.newCall(request).execute()
     return response.body?.string() ?: ""
