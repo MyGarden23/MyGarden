@@ -91,9 +91,8 @@ interface PlantsRepository {
     if (outputStr.isEmpty())
         return basePlant.copy(description = "Error while generating plant details")
 
-    val jsonObject = Json.parseToJsonElement(outputStr).jsonObject
-
     try {
+      val jsonObject = Json.parseToJsonElement(outputStr).jsonObject
       val res =
           basePlant.copy(
               name = jsonObject["name"]?.jsonPrimitive?.content ?: basePlant.name,
