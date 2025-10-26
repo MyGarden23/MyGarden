@@ -27,34 +27,31 @@ interface PlantsRepository {
 
   companion object {
     const val SCORE_THRESHOLD = 0.3
-      private const val API_KEY = "2b10vR85MRLoZFey45nBR41LRO"
-      private const val PLANTNET_API_URL =
-          "https://my-api.plantnet.org/v2/identify/all?api-key=$API_KEY"
+    private const val API_KEY = "2b10vR85MRLoZFey45nBR41LRO"
+    private const val PLANTNET_API_URL =
+        "https://my-api.plantnet.org/v2/identify/all?api-key=$API_KEY"
 
-      val client: OkHttpClient = OkHttpClient.Builder()
-          .connectTimeout(30, TimeUnit.SECONDS)
-          .readTimeout(30, TimeUnit.SECONDS)
-          .writeTimeout(30, TimeUnit.SECONDS)
+    val client: OkHttpClient =
+        OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+    fun buildRequestBody(imageBytes: ByteArray): okhttp3.RequestBody {
+      return okhttp3.MultipartBody.Builder()
+          .setType(okhttp3.MultipartBody.FORM)
+          .addFormDataPart(
+              "images",
+              "PlantImage.jpg",
+              okhttp3.RequestBody.create("image/jpeg".toMediaType(), imageBytes))
+          .addFormDataPart("organs", "auto")
           .build()
+    }
 
-      fun buildRequestBody(imageBytes: ByteArray): okhttp3.RequestBody {
-          return okhttp3.MultipartBody.Builder()
-              .setType(okhttp3.MultipartBody.FORM)
-              .addFormDataPart(
-                  "images",
-                  "PlantImage.jpg",
-                  okhttp3.RequestBody.create("image/jpeg".toMediaType(), imageBytes)
-              )
-              .addFormDataPart("organs", "auto")
-              .build()
-      }
-
-      fun buildRequest(requestBody: okhttp3.RequestBody): okhttp3.Request {
-          return okhttp3.Request.Builder()
-              .url(PLANTNET_API_URL)
-              .post(requestBody)
-              .build()
-      }
+    fun buildRequest(requestBody: okhttp3.RequestBody): okhttp3.Request {
+      return okhttp3.Request.Builder().url(PLANTNET_API_URL).post(requestBody).build()
+    }
   }
 
   /**
@@ -115,7 +112,7 @@ interface PlantsRepository {
 
   suspend fun plantDescriptionCallGemini(prompt: String): String {
     val model =
-      Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-2.5-flash")
+        Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-2.5-flash")
     val response: GenerateContentResponse = model.generateContent(prompt)
     return response.text ?: ""
   }
@@ -145,13 +142,13 @@ interface PlantsRepository {
       }
 
       // Build multipart request for image upload and API call
-        val requestBody = buildRequestBody(imageBytes)
-        val request = buildRequest(requestBody)
+      val requestBody = buildRequestBody(imageBytes)
+      val request = buildRequest(requestBody)
 
       // handle response
       try {
         // Execute the API request
-          val rawBody = plantNetAPICall(client, request)
+        val rawBody = plantNetAPICall(client, request)
 
         // Parse API response JSON
         val json = Json.parseToJsonElement(rawBody)
