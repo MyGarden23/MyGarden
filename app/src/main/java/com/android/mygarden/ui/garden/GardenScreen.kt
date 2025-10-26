@@ -68,12 +68,29 @@ object GardenScreenTestTags {
   const val EMPTY_GARDEN_MSG = "EmptyGardenMsg"
   const val ADD_PLANT_FAB = "AddPlantFAB"
 
+  // Test tags that are Plant Card specific
   fun getTestTagForOwnedPlant(plant: OwnedPlant): String = "OwnedPlantNumber${plant.id}"
+
+  fun getTestTagForOwnedPlantImage(plant: OwnedPlant): String = "OwnedPlantNumber${plant.id}_image"
+
+  fun getTestTagForOwnedPlantName(plant: OwnedPlant): String = "OwnedPlantNumber${plant.id}_name"
+
+  fun getTestTagForOwnedPlantLatinName(plant: OwnedPlant): String =
+      "OwnedPlantNumber${plant.id}_latin_name"
+
+  fun getTestTagForOwnedPlantStatus(plant: OwnedPlant): String =
+      "OwnedPlantNumber${plant.id}_status"
+
+  fun getTestTagForOwnedPlantWaterBar(plant: OwnedPlant): String =
+      "OwnedPlantNumber${plant.id}_water_bar"
+
+  fun getTestTagForOwnedPlantWaterButton(plant: OwnedPlant): String =
+      "OwnedPlantNumber${plant.id}_water_button"
 }
 
 /**
- * Represents the color palette used to style a PlantCard composable.
- * These colors should depend on the health status of the plant for which the card is being created.
+ * Represents the color palette used to style a PlantCard composable. These colors should depend on
+ * the health status of the plant for which the card is being created.
  *
  * @param backgroundColor the background color of the card
  * @param wateringColor the color of both the watering button and the water level bar
@@ -107,8 +124,7 @@ private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 13.sp
 
 /**
- * The screen of the garden with some user profile infos and the list of plants owned by
- * the user.
+ * The screen of the garden with some user profile infos and the list of plants owned by the user.
  *
  * @param modifier the optional modifier of the composable
  * @param gardenViewModel the viewModel that manages the user interactions
@@ -191,8 +207,7 @@ fun GardenScreen(
 }
 
 /**
- * The profile row with the user profile picture, its username and a button to edit the
- * profile.
+ * The profile row with the user profile picture, its username and a button to edit the profile.
  *
  * @param onEditProfile the function to launch when the edit button is clicked on
  * @param modifier the optional modifier of the composable
@@ -253,8 +268,7 @@ fun AddPlantFloatingButton(onAddPlant: () -> Unit, modifier: Modifier = Modifier
 }
 
 /**
- * An item of the list of owned plants.
- * Changes color depending on the health status of the plant.
+ * An item of the list of owned plants. Changes color depending on the health status of the plant.
  *
  * @param ownedPlant the owned plant with characteristics to display
  * @param modifier the optional modifier of the composable
@@ -294,22 +308,31 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                             .fillMaxHeight()
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(PLANT_CARD_ROUND_SHAPING))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .testTag(GardenScreenTestTags.getTestTagForOwnedPlantImage(ownedPlant)),
                     contentScale = ContentScale.Crop)
               }
               /* All the characteristics of the plant: it's name, latin name,
               health status and watering level */
               Column(
-                  modifier = modifier.fillMaxHeight().weight(1f).padding(horizontal = PLANT_CHARACTERISTICS_COL_HORIZONTAL_PADDING),
+                  modifier =
+                      modifier
+                          .fillMaxHeight()
+                          .weight(1f)
+                          .padding(horizontal = PLANT_CHARACTERISTICS_COL_HORIZONTAL_PADDING),
                   verticalArrangement = Arrangement.SpaceAround) {
                     Row(verticalAlignment = Alignment.Bottom) {
-                        /* Make both the plant name and the latin name do an ellipsis when
-                        the name is too long to fit on the card */
+                      /* Make both the plant name and the latin name do an ellipsis when
+                      the name is too long to fit on the card */
                       Text(
                           text = ownedPlant.plant.name,
                           fontWeight = FontWeight.Bold,
                           fontSize = PLANT_NAME_FONT_SIZE,
-                          modifier = modifier.alignByBaseline(),
+                          modifier =
+                              modifier
+                                  .alignByBaseline()
+                                  .testTag(
+                                      GardenScreenTestTags.getTestTagForOwnedPlantName(ownedPlant)),
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis)
                       Spacer(modifier = modifier.width(10.dp))
@@ -317,25 +340,42 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                           text = ownedPlant.plant.latinName,
                           fontStyle = FontStyle.Italic,
                           fontSize = PLANT_CARD_INFO_FONT_SIZE,
-                          modifier = modifier.alignByBaseline(),
+                          modifier =
+                              modifier
+                                  .alignByBaseline()
+                                  .testTag(
+                                      GardenScreenTestTags.getTestTagForOwnedPlantLatinName(
+                                          ownedPlant)),
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis)
                     }
-                  /* Instead of making one Text for the status make only the plant name ellipse
-                  when it is too long and keep the plant's status */
-                  Text(
-                      text = ownedPlant.plant.healthStatus.description,
-                      fontSize = PLANT_CARD_INFO_FONT_SIZE)
-                  // Wrap the water level bar in a Box to make it have the right dimensions in the Column
-                    Box(modifier = modifier.height(WATER_BAR_WRAPPER_HEIGHT), contentAlignment = Alignment.Center) {
-                        // TODO: make the water level bar depend on the plant's last watering time
-                      WaterBar(
-                          waterLevel = 0.5f,
-                          color = colorPalette.wateringColor,
-                          modifier = modifier)
-                    }
+                    Text(
+                        text = ownedPlant.plant.healthStatus.description,
+                        modifier =
+                            modifier.testTag(
+                                GardenScreenTestTags.getTestTagForOwnedPlantStatus(ownedPlant)),
+                        fontSize = PLANT_CARD_INFO_FONT_SIZE)
+                    // Wrap the water level bar in a Box to make
+                    // it have the right dimensions in the Column
+                    Box(
+                        modifier = modifier.height(WATER_BAR_WRAPPER_HEIGHT),
+                        contentAlignment = Alignment.Center) {
+                          // TODO: make the water level bar depend on the plant's last watering time
+                          WaterBar(
+                              waterLevel = 0.5f,
+                              color = colorPalette.wateringColor,
+                              modifier =
+                                  modifier.testTag(
+                                      GardenScreenTestTags.getTestTagForOwnedPlantWaterBar(
+                                          ownedPlant)))
+                        }
                   }
-              WaterButton(color = colorPalette.wateringColor, modifier = modifier, onButtonPressed = { /* TODO: add the watering logic*/})
+              WaterButton(
+                  color = colorPalette.wateringColor,
+                  modifier =
+                      modifier.testTag(
+                          GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(ownedPlant)),
+                  onButtonPressed = { /* TODO: add the watering logic*/})
             }
       })
 }
@@ -354,7 +394,8 @@ fun WaterButton(modifier: Modifier = Modifier, color: Color, onButtonPressed: ()
           modifier
               .size(WATER_BUTTON_SIZE)
               .clip(RoundedCornerShape(PLANT_CARD_ROUND_SHAPING))
-              .border(WATER_BUTTON_BORDER_WIDTH, color, RoundedCornerShape(PLANT_CARD_ROUND_SHAPING))
+              .border(
+                  WATER_BUTTON_BORDER_WIDTH, color, RoundedCornerShape(PLANT_CARD_ROUND_SHAPING))
               .clickable(onClick = onButtonPressed),
       contentAlignment = Alignment.Center) {
         Icon(
@@ -395,10 +436,15 @@ fun WaterBar(modifier: Modifier = Modifier, waterLevel: Float, color: Color) {
  * @param colorScheme the colorscheme of the app's theme
  * @return the right palette depending on the plant's health status
  */
-fun colorsFromHealthStatus(status: PlantHealthStatus, colorScheme: ColorScheme): PlantCardColorPalette {
+fun colorsFromHealthStatus(
+    status: PlantHealthStatus,
+    colorScheme: ColorScheme
+): PlantCardColorPalette {
   return when (status) {
-    PlantHealthStatus.UNKNOWN -> PlantCardColorPalette(colorScheme.surfaceVariant, WATERING_BLUE_COLOR)
-    PlantHealthStatus.HEALTHY -> PlantCardColorPalette(colorScheme.primaryContainer, WATERING_BLUE_COLOR)
+    PlantHealthStatus.UNKNOWN ->
+        PlantCardColorPalette(colorScheme.surfaceVariant, WATERING_BLUE_COLOR)
+    PlantHealthStatus.HEALTHY ->
+        PlantCardColorPalette(colorScheme.primaryContainer, WATERING_BLUE_COLOR)
     PlantHealthStatus.NEEDS_WATER,
     PlantHealthStatus.OVERWATERED ->
         PlantCardColorPalette(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR)
