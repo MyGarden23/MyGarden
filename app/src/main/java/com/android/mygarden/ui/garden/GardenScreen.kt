@@ -87,6 +87,7 @@ val WATERING_ORANGE_COLOR = Color(0xffff9d0a)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GardenScreen(
+    modifier: Modifier = Modifier,
     gardenViewModel: GardenViewModel = viewModel(),
     onEditProfile: () -> Unit,
     onAddPlant: () -> Unit
@@ -108,7 +109,7 @@ fun GardenScreen(
   }
 
   Scaffold(
-      modifier = Modifier.testTag(NavigationTestTags.GARDEN_SCREEN),
+      modifier = modifier.testTag(NavigationTestTags.GARDEN_SCREEN),
       // The top bar is only used to display the title of the screen
       topBar = {
         CenterAlignedTopAppBar(
@@ -121,31 +122,33 @@ fun GardenScreen(
             colors =
                 TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background),
-            modifier = Modifier.testTag(GardenScreenTestTags.TITLE))
+            modifier = modifier.testTag(GardenScreenTestTags.TITLE))
       },
       // The button to add a new plant to the collection
-      floatingActionButton = { AddPlantFloatingButton(onAddPlant) },
+      floatingActionButton = { AddPlantFloatingButton(onAddPlant, modifier) },
       containerColor = MaterialTheme.colorScheme.background,
       content = { pd ->
-        Column(modifier = Modifier.fillMaxWidth().padding(pd)) {
+        Column(modifier = modifier.fillMaxWidth().padding(pd)) {
           // Profile row with user profile picture, username and a button to edit the profile
-          ProfileRow(onEditProfile)
-          Spacer(modifier = Modifier.height(16.dp))
+          ProfileRow(onEditProfile, modifier)
+          Spacer(modifier = modifier.height(16.dp))
           if (plants.isNotEmpty()) {
             // The full list of owned plant
             LazyColumn(
                 modifier =
-                    Modifier.fillMaxWidth()
+                    modifier
+                        .fillMaxWidth()
                         .padding(horizontal = 30.dp)
                         .testTag(GardenScreenTestTags.GARDEN_LIST),
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                  items(plants.size) { index -> PlantCard(plants[index]) }
+                  items(plants.size) { index -> PlantCard(plants[index], modifier) }
                 }
           } else {
             // The list of plant is empty : display a simple message instead
             Box(
                 modifier =
-                    Modifier.fillMaxSize()
+                    modifier
+                        .fillMaxSize()
                         .padding(40.dp)
                         .testTag(GardenScreenTestTags.EMPTY_GARDEN_MSG),
                 contentAlignment = Alignment.Center) {
@@ -163,31 +166,31 @@ fun GardenScreen(
  * @param onEditProfile the function to launch when the edit button is clicked on
  */
 @Composable
-fun ProfileRow(onEditProfile: () -> Unit) {
+fun ProfileRow(onEditProfile: () -> Unit, modifier: Modifier = Modifier) {
   Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp),
+      modifier = modifier.fillMaxWidth().padding(horizontal = 40.dp),
       verticalAlignment = Alignment.CenterVertically) {
         // User profile picture
         Icon(
-            modifier = Modifier.testTag(GardenScreenTestTags.USER_PROFILE_PICTURE),
+            modifier = modifier.testTag(GardenScreenTestTags.USER_PROFILE_PICTURE),
             painter = painterResource(R.drawable.profile_unknown_photo_icon_2),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
         )
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = modifier.weight(1f))
 
         // Username
         Text(
-            modifier = Modifier.testTag(GardenScreenTestTags.USERNAME),
+            modifier = modifier.testTag(GardenScreenTestTags.USERNAME),
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.titleMedium,
             text = "Username")
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = modifier.weight(1f))
 
         // Edit profile button
         IconButton(
-            modifier = Modifier.testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON),
+            modifier = modifier.testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON),
             onClick = onEditProfile) {
               Icon(
                   painter = painterResource(R.drawable.edit_icon),
@@ -203,9 +206,9 @@ fun ProfileRow(onEditProfile: () -> Unit) {
  * @param onAddPlant the function to launch when the button is clicked on
  */
 @Composable
-fun AddPlantFloatingButton(onAddPlant: () -> Unit) {
+fun AddPlantFloatingButton(onAddPlant: () -> Unit, modifier: Modifier = Modifier) {
   ExtendedFloatingActionButton(
-      modifier = Modifier.testTag(GardenScreenTestTags.ADD_PLANT_FAB), onClick = onAddPlant) {
+      modifier = modifier.testTag(GardenScreenTestTags.ADD_PLANT_FAB), onClick = onAddPlant) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
           Icon(
               painter = painterResource(R.drawable.tree_icon),
@@ -223,7 +226,7 @@ fun AddPlantFloatingButton(onAddPlant: () -> Unit) {
  * @param ownedPlant the owned plant with characteristics to display
  */
 @Composable
-fun PlantCard(ownedPlant: OwnedPlant) {
+fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
   // The color palette of the card depending on the health status of the plant
   val colorPalette =
       colorsFromHealthStatus(
@@ -231,7 +234,8 @@ fun PlantCard(ownedPlant: OwnedPlant) {
   // The colored box container
   Card(
       modifier =
-          Modifier.fillMaxWidth()
+          modifier
+              .fillMaxWidth()
               .height(110.dp)
               .testTag(GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)),
       // Color changing
@@ -240,7 +244,7 @@ fun PlantCard(ownedPlant: OwnedPlant) {
       shape = RoundedCornerShape(8.dp),
       content = {
         Row(
-            modifier = Modifier.fillMaxSize().padding(12.dp),
+            modifier = modifier.fillMaxSize().padding(12.dp),
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.SpaceAround) {
               // The image of the plant
@@ -252,7 +256,8 @@ fun PlantCard(ownedPlant: OwnedPlant) {
                             .build(),
                     contentDescription = "Image of a {${ownedPlant.plant.name}}",
                     modifier =
-                        Modifier.fillMaxHeight()
+                        modifier
+                            .fillMaxHeight()
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(8.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -260,22 +265,22 @@ fun PlantCard(ownedPlant: OwnedPlant) {
               }
               // All the displayed characteristics of the plant
               Column(
-                  modifier = Modifier.fillMaxHeight().weight(1f).padding(horizontal = 10.dp),
+                  modifier = modifier.fillMaxHeight().weight(1f).padding(horizontal = 10.dp),
                   verticalArrangement = Arrangement.SpaceAround) {
                     Row(verticalAlignment = Alignment.Bottom) {
                       Text(
                           text = ownedPlant.plant.name,
                           fontWeight = FontWeight.Bold,
                           fontSize = 20.sp,
-                          modifier = Modifier.alignByBaseline(),
+                          modifier = modifier.alignByBaseline(),
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis)
-                      Spacer(modifier = Modifier.width(10.dp))
+                      Spacer(modifier = modifier.width(10.dp))
                       Text(
                           text = ownedPlant.plant.latinName,
                           fontStyle = FontStyle.Italic,
                           fontSize = 14.sp,
-                          modifier = Modifier.alignByBaseline(),
+                          modifier = modifier.alignByBaseline(),
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis)
                     }
@@ -285,16 +290,19 @@ fun PlantCard(ownedPlant: OwnedPlant) {
                           fontSize = 14.sp,
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis,
-                          modifier = Modifier.weight(1f, fill = false))
+                          modifier = modifier.weight(1f, fill = false))
                       Text(
                           text = " is ${ownedPlant.plant.healthStatus.name.lowercase()}",
                           fontSize = 14.sp)
                     }
-                    Box(modifier = Modifier.height(20.dp), contentAlignment = Alignment.Center) {
-                      WaterBar(waterLevel = 0.5f, color = colorPalette.wateringColor)
+                    Box(modifier = modifier.height(20.dp), contentAlignment = Alignment.Center) {
+                      WaterBar(
+                          waterLevel = 0.5f,
+                          color = colorPalette.wateringColor,
+                          modifier = modifier)
                     }
                   }
-              WaterButton(color = colorPalette.wateringColor)
+              WaterButton(color = colorPalette.wateringColor, modifier = modifier)
             }
       })
 }
