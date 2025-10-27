@@ -44,10 +44,21 @@ class AuthenticationTest {
 
   private val TIMEOUT = 5_000L
 
+  // Longer timeout for CI environment where network can be slower
+  private val effectiveTimeout: Long
+    get() = if (System.getenv("CI") == "true") 10_000L else TIMEOUT
+
   @Before
   fun setUp() {
     // Point Firebase to the local emulator (idempotent) and reset state.
     FirebaseEmulator.ensureConfigured()
+
+    // Verify emulator is actually running (helps with CI debugging)
+    if (!FirebaseEmulator.isRunning) {
+      android.util.Log.e(
+          "AuthenticationTest", "⚠️ Firebase emulator is not running! Tests will likely fail.")
+    }
+
     FirebaseEmulator.auth.signOut()
     // Optional: clear emulator users between tests if your helper provides it:
     // FirebaseEmulator.clearAuthEmulator()
@@ -56,6 +67,17 @@ class AuthenticationTest {
   @After
   fun tearDown() {
     FirebaseEmulator.auth.signOut()
+  }
+
+  @Test
+  fun aaa_firebase_emulator_is_accessible() {
+    // This test runs first (alphabetically) to verify emulator connectivity
+    // Fail fast if emulator is not reachable
+    assertTrue(
+        "Firebase emulator must be running at ${FirebaseEmulator.isRunning}",
+        FirebaseEmulator.isRunning)
+    assertNotNull("FirebaseAuth instance should be configured", FirebaseEmulator.auth)
+    android.util.Log.i("AuthenticationTest", "✓ Firebase emulator is accessible and configured")
   }
 
   @Test
@@ -115,7 +137,7 @@ class AuthenticationTest {
         .performClick()
 
     // Wait until we hit Camera OR the user is set on Firebase
-    compose.waitUntil(TIMEOUT) {
+    compose.waitUntil(effectiveTimeout) {
       currentRoute.value == Screen.Camera.route && FirebaseEmulator.auth.currentUser != null
     }
 
@@ -163,7 +185,7 @@ class AuthenticationTest {
             .performClick()
 
         // Wait for Firebase to have a current user and for the route to switch
-        compose.waitUntil(TIMEOUT) {
+        compose.waitUntil(effectiveTimeout) {
           val user = FirebaseEmulator.auth.currentUser
           (user?.email == email) && currentRoute.value == Screen.Camera.route
         }
@@ -173,7 +195,7 @@ class AuthenticationTest {
       }
 
   // --- Small helper like in your other tests ---
-  private fun waitForTextAnywhere(text: String, timeoutMs: Long = TIMEOUT) {
+  private fun waitForTextAnywhere(text: String, timeoutMs: Long = effectiveTimeout) {
     compose.waitUntil(timeoutMs) {
       compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
     }
