@@ -97,9 +97,10 @@ object GardenScreenTestTags {
  */
 data class PlantCardColorPalette(val backgroundColor: Color, val wateringColor: Color)
 
-// Colors used for watering button and water level bar depending on the health status
+// Colors used for watering button and water level bar or background depending on the health status
 val WATERING_BLUE_COLOR = Color(0xff9dddee)
 val WATERING_ORANGE_COLOR = Color(0xffff9d0a)
+val BACKGROUND_COLOR_RED = Color(0xffde473f)
 
 // All paddings (excepts the spacers)
 private val PLANT_ITEM_HORIZONTAL_PADDING = 30.dp
@@ -443,13 +444,14 @@ fun colorsFromHealthStatus(
   return when (status) {
     PlantHealthStatus.UNKNOWN ->
         PlantCardColorPalette(colorScheme.surfaceVariant, WATERING_BLUE_COLOR)
-    PlantHealthStatus.HEALTHY ->
+    PlantHealthStatus.HEALTHY -> PlantCardColorPalette(colorScheme.primary, WATERING_BLUE_COLOR)
+    PlantHealthStatus.SLIGHTLY_DRY ->
         PlantCardColorPalette(colorScheme.primaryContainer, WATERING_BLUE_COLOR)
     PlantHealthStatus.NEEDS_WATER,
     PlantHealthStatus.OVERWATERED ->
         PlantCardColorPalette(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR)
-      PlantHealthStatus.SEVERELY_OVERWATERED -> TODO()
-      PlantHealthStatus.SLIGHTLY_DRY -> TODO()
-      PlantHealthStatus.SEVERELY_DRY -> TODO()
+    PlantHealthStatus.SEVERELY_DRY,
+    PlantHealthStatus.SEVERELY_OVERWATERED ->
+        PlantCardColorPalette(BACKGROUND_COLOR_RED, colorScheme.error)
   }
 }
