@@ -1,5 +1,7 @@
 package com.android.mygarden.model.plant
 
+import androidx.annotation.StringRes
+import com.android.mygarden.R
 import java.sql.Timestamp
 
 /**
@@ -8,12 +10,12 @@ import java.sql.Timestamp
  * This data class encapsulates all essential information about a plant, including its
  * identification, visual representation, health status, and care requirements.
  *
- * @param healthStatusDescription A detailed description of the plant's health status
  * @property name The common name of the plant (e.g., "Rose", "Tomato")
  * @property image The visual representation of the plant
  * @property latinName The scientific/botanical name of the plant (e.g., "Rosa rubiginosa")
  * @property description A detailed text description of the plant, including care instructions
  * @property healthStatus The current health condition of the plant
+ * @property healthStatusDescription A detailed description of the plant's health status
  * @property wateringFrequency How often the plant should be watered, measured in days
  */
 data class Plant(
@@ -29,27 +31,47 @@ data class Plant(
 /**
  * Represents a plant owned by a user in their virtual garden.
  *
- * This data class extends the basic Plant information with tracking data specific to the user's
- * care routine, such as watering history.
+ * This data class encapsulates ownership information, including watering history needed to
+ * accurately calculate the plant's current health status.
  *
  * @property id A unique identifier for this owned plant instance
- * @property plant The base plant information (species, care requirements, etc.)
- * @property lastWatered The timestamp of when the plant was last watered
+ * @property plant The plant information (species, care requirements, etc.)
+ * @property lastWatered Timestamp of when the plant was most recently watered
+ * @property previousLastWatered Optional timestamp of the watering before lastWatered.
  */
 data class OwnedPlant(
     val id: String,
     val plant: Plant,
     val lastWatered: Timestamp,
+    val previousLastWatered: Timestamp? = null
 )
 
 /**
  * Represents the health status of a plant.
  *
  * This enum class provides a set of predefined health conditions that a plant can be in.
+ *
+ * @property descriptionRes Resource ID for the localized description from strings.xml
  */
-enum class PlantHealthStatus(val description: String) { // None exhaustive list of status
-  HEALTHY("The plant is healthy 🌱"),
-  NEEDS_WATER("The plant needs water 💧"),
-  OVERWATERED("The plant is overwatered 🌊"),
-  UNKNOWN("The plant’s health status is unknown ❓")
+enum class PlantHealthStatus(@StringRes val descriptionRes: Int) {
+  SEVERELY_OVERWATERED(R.string.plant_health_severely_overwatered),
+  OVERWATERED(R.string.plant_health_overwatered),
+  HEALTHY(R.string.plant_health_healthy),
+  SLIGHTLY_DRY(R.string.plant_health_slightly_dry),
+  NEEDS_WATER(R.string.plant_health_needs_water),
+  SEVERELY_DRY(R.string.plant_health_severely_dry),
+  UNKNOWN(R.string.plant_health_unknown);
+
+  /** Fallback description in English for contexts without Android Resources. Util for tests. */
+  val description: String
+    get() =
+        when (this) {
+          SEVERELY_OVERWATERED -> "Severely overwatered 🌊🌊"
+          OVERWATERED -> "Overwatered 💦"
+          HEALTHY -> "The plant is healthy 🌱"
+          SLIGHTLY_DRY -> "Could use some water soon 🍂"
+          NEEDS_WATER -> "Needs watering 💧"
+          SEVERELY_DRY -> "Critical - needs water urgently! 🥀"
+          UNKNOWN -> "Status unknown ❓"
+        }
 }

@@ -161,7 +161,8 @@ class PlantsRepositoryLocalTest {
   fun getAllOwnedPlants_returnsCorrectPlantsAfterSaving() = runTest {
     val plant1 = createTestPlant(name = "Rose", latinName = "Rosa")
     val plant2 = createTestPlant(name = "Tulip", latinName = "Tulipa")
-    val timestamp = Timestamp(System.currentTimeMillis())
+    // Use recent timestamp to get HEALTHY status after calculation
+    val timestamp = Timestamp(System.currentTimeMillis() - (3L * 24 * 60 * 60 * 1000))
 
     repository.saveToGarden(plant1, "rose-1", timestamp)
     repository.saveToGarden(plant2, "tulip-1", timestamp)
@@ -171,8 +172,8 @@ class PlantsRepositoryLocalTest {
     assertEquals(2, ownedPlants.size)
     assertEquals("rose-1", ownedPlants[0].id)
     assertEquals("tulip-1", ownedPlants[1].id)
-    assertEquals(plant1, ownedPlants[0].plant)
-    assertEquals(plant2, ownedPlants[1].plant)
+    assertEquals("Rose", ownedPlants[0].plant.name)
+    assertEquals("Tulip", ownedPlants[1].plant.name)
   }
 
   @Test
@@ -226,7 +227,7 @@ class PlantsRepositoryLocalTest {
   fun getOwnedPlant_returnsCorrectPlant() = runTest {
     val plant1 = createTestPlant(name = "Rose", latinName = "Rosa")
     val plant2 = createTestPlant(name = "Tulip", latinName = "Tulipa")
-    val timestamp = Timestamp(123456789L)
+    val timestamp = Timestamp(System.currentTimeMillis() - (3L * 24 * 60 * 60 * 1000))
 
     repository.saveToGarden(plant1, "rose-1", timestamp)
     repository.saveToGarden(plant2, "tulip-1", timestamp)
@@ -234,7 +235,6 @@ class PlantsRepositoryLocalTest {
     val retrievedPlant = repository.getOwnedPlant("rose-1")
 
     assertEquals("rose-1", retrievedPlant.id)
-    assertEquals(plant1, retrievedPlant.plant)
     assertEquals(timestamp, retrievedPlant.lastWatered)
     assertEquals("Rose", retrievedPlant.plant.name)
     assertEquals("Rosa", retrievedPlant.plant.latinName)
@@ -354,7 +354,8 @@ class PlantsRepositoryLocalTest {
     val completelDifferentPlant =
         createTestPlant(
             name = "Cactus", latinName = "Cactaceae", healthStatus = PlantHealthStatus.NEEDS_WATER)
-    val timestamp = Timestamp(System.currentTimeMillis())
+    // Use recent timestamp to get HEALTHY status after calculation
+    val timestamp = Timestamp(System.currentTimeMillis() - (3L * 24 * 60 * 60 * 1000))
 
     repository.saveToGarden(originalPlant, "plant-1", timestamp)
 
@@ -364,7 +365,7 @@ class PlantsRepositoryLocalTest {
     val retrievedPlant = repository.getOwnedPlant("plant-1")
     assertEquals("Cactus", retrievedPlant.plant.name)
     assertEquals("Cactaceae", retrievedPlant.plant.latinName)
-    assertEquals(PlantHealthStatus.NEEDS_WATER, retrievedPlant.plant.healthStatus)
+    // Note: health status will be recalculated based on lastWatered, not stored value
   }
 
   @Test

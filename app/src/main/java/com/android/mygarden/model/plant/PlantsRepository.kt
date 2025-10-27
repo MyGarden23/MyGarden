@@ -73,4 +73,22 @@ interface PlantsRepository {
    * @param newOwnedPlant The new ownedPlant
    */
   suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant)
+
+  /**
+   * Records that a plant has been watered right now.
+   *
+   * This method is used when the user performs the real-time action of watering their plant. It
+   * updates the lastWatered timestamp to the current time.
+   *
+   * Note: This differs from editOwnedPlant() which is used for initial configuration (e.g., setting
+   * the lastWatered date when first adding a plant to the garden). Use waterPlant() for the "Just
+   * Watered" action, and editOwnedPlant() for general plant data modifications.
+   *
+   * @param id The unique identifier of the plant that was watered
+   * @param wateringTime The timestamp when the plant was watered (defaults to now)
+   */
+  suspend fun waterPlant(
+      id: String,
+      wateringTime: Timestamp = Timestamp(System.currentTimeMillis())
+  )
 }
