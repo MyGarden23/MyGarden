@@ -25,17 +25,29 @@ object FirebaseEmulator {
 
   // Prefer CI override; else try 127.0.0.1 (if CI set up adb reverse), then 10.0.2.2 (local)
   private fun pickEmulatorHost(): String {
+    // 1. Check explicit env var (set in CI)
     System.getenv("FIREBASE_EMULATOR_DEVICE_HOST")?.let { forced ->
-      Log.d("FirebaseEmulator", "Using forced emulator host from env: $forced")
+      Log.i("FirebaseEmulator", "Using forced emulator host from env: $forced")
       return forced
     }
-    for (host in listOf("127.0.0.1", "10.0.2.2")) {
-      if (canReach(host, AUTH_PORT, 350)) {
-        Log.d("FirebaseEmulator", "Chose emulator host by probe: $host")
+
+    // 2. Try to detect if we're in CI
+    val isCI = System.getenv("CI")?.equals("true", ignoreCase = true) ?: false
+    if (isCI) {
+      Log.i("FirebaseEmulator", "CI environment detected, using 10.0.2.2")
+      return "10.0.2.2"
+    }
+
+    // 3. Probe both possible hosts
+    Log.d("FirebaseEmulator", "Probing emulator hosts...")
+    for (host in listOf("10.0.2.2", "127.0.0.1")) {
+      Log.d("FirebaseEmulator", "Trying host: $host:$AUTH_PORT")
+      if (canReach(host, AUTH_PORT, 500)) {
+        Log.i("FirebaseEmulator", "Chose emulator host by probe: $host")
         return host
       }
     }
-    Log.d("FirebaseEmulator", "No host reachable quickly, defaulting to 10.0.2.2")
+    Log.w("FirebaseEmulator", "No host reachable, defaulting to 10.0.2.2")
     return "10.0.2.2"
   }
 
@@ -87,9 +99,22 @@ object FirebaseEmulator {
     val ctx: Context = ApplicationProvider.getApplicationContext()
     if (FirebaseApp.getApps(ctx).isEmpty()) FirebaseApp.initializeApp(ctx)
     // We point to emulator regardless of hub probe; your tests control when emulator is up.
-    Log.d("FirebaseEmulator", "Using Auth emulator at $HOST:$AUTH_PORT")
-    FirebaseAuth.getInstance().useEmulator(HOST, AUTH_PORT)
-    configured = true
+    Log.i("FirebaseEmulator", "Configuring Firebase Auth to use emulator at $HOST:$AUTH_PORT")
+    try {
+      FirebaseAuth.getInstance().useEmulator(HOST, AUTH_PORT)
+      configured = true
+      Log.i("FirebaseEmulator", "Firebase Auth emulator configured successfully")
+
+      // Verify emulator is reachable
+      if (isRunning) {
+        Log.i("FirebaseEmulator", "✓ Firebase emulator hub is responding at $HOST:$EMULATORS_PORT")
+      } else {
+        Log.w("FirebaseEmulator", "⚠ Firebase emulator hub not responding - tests may fail")
+      }
+    } catch (e: Exception) {
+      Log.e("FirebaseEmulator", "Failed to configure Firebase Auth emulator", e)
+      throw e
+    }
   }
 
   /** Short alias to get Auth after configuration. */
