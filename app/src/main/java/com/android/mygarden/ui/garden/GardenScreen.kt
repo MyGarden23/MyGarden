@@ -45,9 +45,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_7
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -55,8 +59,12 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
+import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
+import com.android.mygarden.ui.theme.MyGardenTheme
 
 /** Test tags to test the screen displays */
 object GardenScreenTestTags {
@@ -100,7 +108,7 @@ data class PlantCardColorPalette(val backgroundColor: Color, val wateringColor: 
 // Colors used for watering button and water level bar or background depending on the health status
 val WATERING_BLUE_COLOR = Color(0xff9dddee)
 val WATERING_ORANGE_COLOR = Color(0xffff9d0a)
-val BACKGROUND_COLOR_RED = Color(0xffde473f)
+val BACKGROUND_COLOR_RED = Color(0xffe46962)
 
 // All paddings (excepts the spacers)
 private val PLANT_ITEM_HORIZONTAL_PADDING = 30.dp
@@ -122,7 +130,7 @@ private val WATER_BAR_WRAPPER_HEIGHT = 14.dp
 
 // Font sizes
 private val PLANT_NAME_FONT_SIZE = 20.sp
-private val PLANT_CARD_INFO_FONT_SIZE = 13.sp
+private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
 
 /**
  * The screen of the garden with some user profile infos and the list of plants owned by the user.
@@ -351,7 +359,9 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                           overflow = TextOverflow.Ellipsis)
                     }
                     Text(
-                        text = ownedPlant.plant.healthStatus.description,
+                        text = stringResource(ownedPlant.plant.healthStatus.descriptionRes),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier =
                             modifier.testTag(
                                 GardenScreenTestTags.getTestTagForOwnedPlantStatus(ownedPlant)),
