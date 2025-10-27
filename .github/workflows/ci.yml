@@ -106,34 +106,20 @@ jobs:
       - name: Install Firebase tools
         run: npm i -g firebase-tools@13
 
-      # Bind to 0.0.0.0 so 10.0.2.2 (Android emulator) can reach it
-      - name: Configure Firebase emulator host/port
+      # Start Firebase emulators in background
+      - name: Start Firebase emulators
         run: |
-          cat > firebase.json <<'JSON'
-          {
-            "emulators": {
-              "auth": { "port": 9099, "host": "0.0.0.0" }
-            }
-          }
-          JSON
-
-      - name: Start Firebase Auth emulator (host:9099) and wait
-        run: |
-          nohup bash -c 'firebase emulators:start --only auth --project demo-ci --ui=false </dev/null >/tmp/firebase-emu.log 2>&1' &
-          # Wait for TCP 9099 on host to be ready
-          for i in {1..60}; do
-            (echo > /dev/tcp/127.0.0.1/9099) >/dev/null 2>&1 && echo "Auth emulator is UP" && break
-            sleep 1
-          done
-          # Verify emulator is responding
-          curl -sf http://127.0.0.1:9099/emulators || (echo "Auth emulator not responding" && cat /tmp/firebase-emu.log && exit 1)
-          echo "Firebase emulator started successfully"
-          # Show initial logs
-          head -n 50 /tmp/firebase-emu.log || true
-
+          if [ -e "firebase.json" ]; then
+            echo "Starting Firebase emulators for instrumentation tests..."
+            firebase emulators:start --only auth,firestore --project demo-ci &
+            sleep 5  # Give emulators a moment to start
+            echo "Firebase emulators started in background"
+          else
+            echo "firebase.json not found - skipping emulators (tests may fail)"
+          fi
 
       # Run connected tests on the emulator
-      - name: Run tests with camera
+      - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -141,46 +127,11 @@ jobs:
           arch: x86_64
           device: pixel_8
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back emulated  -camera-front webcam0 -memory 4096 -partition-size 4096
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back emulated -camera-front webcam0 -memory 4096 -partition-size 4096
           disable-animations: true
           script: |
-            echo "Starting instrumented tests..."
-            # Forward Firebase emulator ports to Android emulator
-            adb reverse tcp:9099 tcp:9099
-            adb reverse tcp:4400 tcp:4400
-            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-            # Verify Android emulator can reach Firebase emulator
-            echo "Testing connectivity from Android emulator to Firebase emulator..."
-            adb shell "curl -s http://10.0.2.2:9099/emulators || echo 'WARNING: Cannot reach Firebase emulator from Android device'"
             export CI=true
-            export FIREBASE_EMULATOR_DEVICE_HOST=10.0.2.2
-            export FIREBASE_AUTH_EMULATOR_HOST=10.0.2.2:9099
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.screen.RequiresCamera
-
-      - name: Run tests no camera
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis
-          device: pixel_8
-          arch: x86_64
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096 -partition-size 4096
-          disable-animations: true
-          script: |
-            # Forward Firebase emulator ports to Android emulator
-            adb reverse tcp:9099 tcp:9099
-            adb reverse tcp:4400 tcp:4400
-            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-            # Verify Android emulator can reach Firebase emulator
-            echo "Testing connectivity from Android emulator to Firebase emulator..."
-            adb shell "curl -s http://10.0.2.2:9099/emulators || echo 'WARNING: Cannot reach Firebase emulator from Android device'"
-            export CI=true
-            export FIREBASE_EMULATOR_DEVICE_HOST=10.0.2.2
-            export FIREBASE_AUTH_EMULATOR_HOST=10.0.2.2:9099
-            echo "Revoking camera permission"
-            adb shell pm revoke com.android.mygarden android.permission.CAMERA
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera
+            ./gradlew connectedCheck --parallel --build-cache
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report

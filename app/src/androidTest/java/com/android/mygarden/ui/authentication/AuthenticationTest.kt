@@ -56,7 +56,7 @@ class AuthenticationTest {
     // Verify emulator is actually running (helps with CI debugging)
     if (!FirebaseEmulator.isRunning) {
       android.util.Log.e(
-          "AuthenticationTest", "⚠️ Firebase emulator is not running! Tests will likely fail.")
+          "AuthenticationTest", " Firebase emulator is not running! Tests will likely fail.")
     }
 
     FirebaseEmulator.auth.signOut()
