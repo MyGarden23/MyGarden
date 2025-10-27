@@ -7,7 +7,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.android.mygarden.model.plant.Plant
-import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.garden.GardenScreen
@@ -64,20 +63,13 @@ fun AppNavHost(
           navController.previousBackStackEntry?.savedStateHandle?.get<String>("imagePath")
       // Shows plant details after a photo is taken
       // Right now it just uses a mock Plant object for demo purposes
-      val plant =
-          Plant(
-              name = "Rose",
-              image = imagePath,
-              latinName = "Rosum",
-              description = "Roses are red",
-              healthStatus = PlantHealthStatus.HEALTHY,
-              healthStatusDescription = PlantHealthStatus.HEALTHY.description,
-              wateringFrequency = 2)
+
+      val plant = Plant(image = imagePath)
+
       PlantInfosScreen(
           plant = plant,
           onBackPressed = { navigationActions.navBack() },
           onSavePlant = {
-            plantInfoViewModel.savePlant(plant)
             // Use navToTopLevel to navigate to Garden (top-level screen)
             // This will naturally handle the navigation stack properly
             navigationActions.navToTopLevel(Screen.Garden)

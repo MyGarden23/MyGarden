@@ -25,10 +25,10 @@ class PlantInfoScreenTests {
           wateringFrequency = 1,
       )
 
-  fun setContent(
-      plant: Plant,
-  ) {
-    composeTestRule.setContent { PlantInfosScreen(plant, onBackPressed = {}) }
+  fun setContent(plant: Plant, onSavePlant: () -> Unit = {}, onBackPressed: () -> Unit = {}) {
+    composeTestRule.setContent {
+      PlantInfosScreen(plant, onBackPressed = onBackPressed, onSavePlant = onSavePlant)
+    }
     composeTestRule.waitForIdle()
   }
 
@@ -232,5 +232,41 @@ class PlantInfoScreenTests {
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION)
         .performScrollTo()
+  }
+
+  @Test
+  fun saveButtonTriggersOnSavePlantCallback() {
+    var savePlantCalled = false
+    setContent(plant, onSavePlant = { savePlantCalled = true })
+
+    // Wait for initialization to complete
+    composeTestRule.waitForIdle()
+
+    // Click the save button
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SAVE_BUTTON).performClick()
+
+    // Wait for the action to complete
+    composeTestRule.waitForIdle()
+
+    // Verify that the callback was called
+    assert(savePlantCalled) { "onSavePlant callback should have been called" }
+  }
+
+  @Test
+  fun backButtonTriggersOnBackPressedCallback() {
+    var backPressedCalled = false
+    setContent(plant, onBackPressed = { backPressedCalled = true })
+
+    // Wait for initialization to complete
+    composeTestRule.waitForIdle()
+
+    // Click the back button
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).performClick()
+
+    // Wait for the action to complete
+    composeTestRule.waitForIdle()
+
+    // Verify that the callback was called
+    assert(backPressedCalled) { "onBackPressed callback should have been called" }
   }
 }

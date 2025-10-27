@@ -1,6 +1,5 @@
 package com.android.mygarden.model.plant
 
-import android.media.Image
 import java.sql.Timestamp
 
 /** Represents a repository that manages Plant and OwnedPlant objects. */
@@ -12,10 +11,6 @@ class PlantsRepositoryLocal : PlantsRepository {
 
   override fun getNewId(): String {
     return counter++.toString()
-  }
-
-  override suspend fun identifyPlant(image: Image): Plant {
-    TODO("Not yet implemented")
   }
 
   override suspend fun saveToGarden(plant: Plant, id: String, lastWatered: Timestamp): OwnedPlant {

@@ -19,13 +19,13 @@ import java.sql.Timestamp
  * @property wateringFrequency How often the plant should be watered, measured in days
  */
 data class Plant(
-    val name: String,
-    val image: String?,
-    val latinName: String,
-    val description: String,
-    val healthStatus: PlantHealthStatus,
-    val healthStatusDescription: String,
-    val wateringFrequency: Int, // in days
+    val name: String = "Unknown",
+    val image: String? = null,
+    val latinName: String = "Unknown",
+    val description: String = "No description available",
+    val healthStatus: PlantHealthStatus = PlantHealthStatus.UNKNOWN,
+    val healthStatusDescription: String = "No health status description available",
+    val wateringFrequency: Int = 0, // in days
 )
 
 /**
