@@ -376,4 +376,19 @@ class NewProfileViewModelTest {
       assertFalse("Country should not be an error: $country", uiState.countryIsError())
     }
   }
+
+  /** Tests the setAvatar function in the NewProfileViewModel. */
+  @Test
+  fun setAvatar_handlesAvatarChange() = runTest {
+    val firstAvatar = Avatar.A2
+    val secondAvatar = Avatar.A3
+
+    viewModel.setAvatar(firstAvatar)
+    advanceUntilIdle()
+    assertEquals(firstAvatar, viewModel.uiState.value.avatar)
+
+    viewModel.setAvatar(secondAvatar)
+    advanceUntilIdle()
+    assertEquals(secondAvatar, viewModel.uiState.value.avatar)
+  }
 }
