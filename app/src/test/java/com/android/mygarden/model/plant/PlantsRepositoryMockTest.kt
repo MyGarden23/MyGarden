@@ -12,8 +12,21 @@ import org.mockito.kotlin.*
  * This approach allows testing the logic without consuming API tokens or making network calls.
  */
 class PlantsRepositoryMockTest {
-  val imagePath: String =
-      "C:/Users/matte/Desktop/MyGarden/app/src/test/resources/plantimage/tomato_test.jpg"
+  // Use a portable way to get the test resource path that works on all environments
+  private fun getTestResourcePath(resourceName: String): String {
+    val resource = javaClass.classLoader?.getResource(resourceName)
+    return resource?.path?.let { path ->
+      // Remove leading '/' on Windows (e.g., '/C:/path' -> 'C:/path')
+      if (path.startsWith("/") && path.contains(":")) {
+        path.substring(1)
+      } else {
+        path
+      }
+    } ?: throw IllegalStateException("Test resource not found: $resourceName")
+  }
+
+  val imagePath: String by lazy { getTestResourcePath("plantimage/tomato_test.jpg") }
+
   val resultPlantNetAPICall: String =
       "{\"query\":{\"project\":\"all\",\"images\":[\"d2f2f1bfaa22ff774fff7251c23a97fd\"],\"organs\":[\"auto\"],\"includeRelatedImages\":false,\"noReject\":false,\"type\":null},\"predictedOrgans\":[{\"image\":\"d2f2f1bfaa22ff774fff7251c23a97fd\",\"filename\":\"tomato_test.jpg\",\"organ\":\"fruit\",\"score\":0.65548}],\"language\":\"en\",\"preferedReferential\":\"useful\",\"bestMatch\":\"Solanum lycopersicum L.\",\"results\":[{\"score\":0.8359,\"species\":{\"scientificNameWithoutAuthor\":\"Solanum lycopersicum\",\"scientificNameAuthorship\":\"L.\",\"genus\":{\"scientificNameWithoutAuthor\":\"Solanum\",\"scientificNameAuthorship\":\"\",\"scientificName\":\"Solanum\"},\"family\":{\"scientificNameWithoutAuthor\":\"Solanaceae\",\"scientificNameAuthorship\":\"\",\"scientificName\":\"Solanaceae\"},\"commonNames\":[\"Garden tomato\",\"Cherry Tomato\",\"Tomato\"],\"scientificName\":\"Solanum lycopersicum L.\"},\"gbif\":{\"id\":\"2930137\"},\"powo\":{\"id\":\"316947-2\"}},{\"score\":0.07904,\"species\":{\"scientificNameWithoutAuthor\":\"Solanum pimpinellifolium\",\"scientificNameAuthorship\":\"L.\",\"genus\":{\"scientificNameWithoutAuthor\":\"Solanum\",\"scientificNameAuthorship\":\"\",\"scientificName\":\"Solanum\"},\"family\":{\"scientificNameWithoutAuthor\":\"Solanaceae\",\"scientificNameAuthorship\":\"\",\"scientificName\":\"Solanaceae\"},\"commonNames\":[\"Currant tomato\",\"Cherry Tomato\",\"Pimp\"],\"scientificName\":\"Solanum pimpinellifolium L.\"},\"gbif\":{\"id\":\"2931738\"},\"powo\":{\"id\":\"820511-1\"},\"iucn\":{\"id\":\"66836393\",\"category\":\"LC\"}}],\"version\":\"2025-08-08 (7.4)\",\"remainingIdentificationRequests\":498}"
 
