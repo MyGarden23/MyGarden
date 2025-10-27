@@ -25,12 +25,21 @@ class PlantsRepositoryLocal : PlantsRepository {
   }
 
   override suspend fun getAllOwnedPlants(): List<OwnedPlant> {
-    return ownedPlants.map { updatePlantHealthStatus(it) }
+    ownedPlants.forEachIndexed { index, ownedPlant ->
+      ownedPlants[index] = updatePlantHealthStatus(ownedPlant)
+    }
+    return ownedPlants.toList()
   }
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
-    val ownedPlant = getRawOwnedPlant(id)
-    return updatePlantHealthStatus(ownedPlant)
+    val index = ownedPlants.indexOfFirst { it.id == id }
+    if (index == -1) {
+      throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
+    }
+
+    val updatedPlant = updatePlantHealthStatus(ownedPlants[index])
+    ownedPlants[index] = updatedPlant
+    return updatedPlant
   }
 
   override suspend fun deleteFromGarden(id: String) {
@@ -56,25 +65,15 @@ class PlantsRepositoryLocal : PlantsRepository {
   }
 
   override suspend fun waterPlant(id: String, wateringTime: Timestamp) {
-    val ownedPlant = getRawOwnedPlant(id)
+    val ownedPlant =
+        ownedPlants.find { it.id == id }
+            ?: throw IllegalArgumentException(
+                "PlantsRepositoryLocal: OwnedPlant with id $id not found")
     val previousWatering = ownedPlant.lastWatered
     val updatedPlant =
         ownedPlant.copy(lastWatered = wateringTime, previousLastWatered = previousWatering)
     val index = ownedPlants.indexOfFirst { it.id == id }
     ownedPlants[index] = updatedPlant
-  }
-
-  /**
-   * Retrieves an owned plant from the internal list without calculating health status. Used
-   * internally for operations that don't need the calculated status.
-   *
-   * @param id The unique identifier of the plant to retrieve
-   * @return The OwnedPlant object as stored (without health status calculation)
-   * @throws IllegalArgumentException if plant with given id is not found
-   */
-  private fun getRawOwnedPlant(id: String): OwnedPlant {
-    return ownedPlants.find { it.id == id }
-        ?: throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
   }
 
   /**

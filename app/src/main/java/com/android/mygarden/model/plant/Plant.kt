@@ -62,10 +62,7 @@ enum class PlantHealthStatus(@StringRes val descriptionRes: Int) {
   SEVERELY_DRY(R.string.plant_health_severely_dry),
   UNKNOWN(R.string.plant_health_unknown);
 
-  /**
-   * Fallback description in English for contexts without Android Resources. For UI with proper
-   * localization, use descriptionRes with Context.getString() instead.
-   */
+  /** Fallback description in English for contexts without Android Resources. Util for tests. */
   val description: String
     get() =
         when (this) {

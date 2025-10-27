@@ -213,10 +213,10 @@ fun PlantCard(ownedPlant: OwnedPlant) {
                   when (ownedPlant.plant.healthStatus) {
                     PlantHealthStatus.UNKNOWN -> MaterialTheme.colorScheme.surfaceVariant
                     PlantHealthStatus.HEALTHY -> MaterialTheme.colorScheme.primaryContainer
-                    PlantHealthStatus.SLIGHTLY_DRY -> MaterialTheme.colorScheme.primaryContainer
-                    PlantHealthStatus.NEEDS_WATER,
-                    PlantHealthStatus.OVERWATERED,
-                    PlantHealthStatus.SEVERELY_OVERWATERED,
+                    PlantHealthStatus.SLIGHTLY_DRY -> MaterialTheme.colorScheme.error
+                    PlantHealthStatus.NEEDS_WATER -> MaterialTheme.colorScheme.error
+                    PlantHealthStatus.OVERWATERED -> MaterialTheme.colorScheme.secondaryContainer
+                    PlantHealthStatus.SEVERELY_OVERWATERED -> MaterialTheme.colorScheme.error
                     PlantHealthStatus.SEVERELY_DRY -> MaterialTheme.colorScheme.secondaryContainer
                   }),
       elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
