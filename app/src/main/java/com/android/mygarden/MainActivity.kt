@@ -107,6 +107,7 @@ private fun routeToScreen(route: String): Screen? =
       Screen.Profile.route -> Screen.Profile
       Screen.Garden.route -> Screen.Garden
       Screen.EditPlant.route -> Screen.EditPlant
+      Screen.ChooseAvatar.route -> Screen.ChooseAvatar
       else -> null
     }
 // Maps the current route (String) to its Page (used for bottom bar selection)

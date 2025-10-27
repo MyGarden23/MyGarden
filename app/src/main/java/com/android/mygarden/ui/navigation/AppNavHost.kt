@@ -12,6 +12,7 @@ import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
+import com.android.mygarden.ui.profile.ChooseProfilePictureScreen
 
 @Composable
 fun AppNavHost(
@@ -74,6 +75,19 @@ fun AppNavHost(
             // This will naturally handle the navigation stack properly
             navigationActions.navToTopLevel(Screen.Garden)
           })
+    }
+
+    // Choose Avatar
+    composable(Screen.ChooseAvatar.route) {
+      ChooseProfilePictureScreen(
+          onAvatarChosen = { avatar ->
+            // Return the selection to the previous screen (Profile/NewProfile)
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set("chosen_avatar", avatar.name)
+            navController.popBackStack()
+          },
+          onBack = { navController.popBackStack() })
     }
 
     // EditPlant
