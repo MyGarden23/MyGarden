@@ -106,7 +106,17 @@ jobs:
       - name: Install Firebase tools
         run: npm i -g firebase-tools@13
 
-      # Start Firebase emulators in background
+      # Bind to 0.0.0.0 so 10.0.2.2 (Android emulator) can reach it
+      - name: Configure Firebase emulator host/port
+        run: |
+          cat > firebase.json <<'JSON'
+          {
+            "emulators": {
+              "auth": { "port": 9099, "host": "0.0.0.0" }
+            }
+          }
+          JSON
+
       - name: Start Firebase emulators
         run: |
           if [ -e "firebase.json" ]; then
@@ -118,8 +128,10 @@ jobs:
             echo "firebase.json not found - skipping emulators (tests may fail)"
           fi
 
+
+
       # Run connected tests on the emulator
-      - name: Run instrumented tests
+      - name: Run tests with camera
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -127,11 +139,37 @@ jobs:
           arch: x86_64
           device: pixel_8
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back emulated -camera-front webcam0 -memory 4096 -partition-size 4096
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back emulated  -camera-front webcam0 -memory 4096 -partition-size 4096
           disable-animations: true
           script: |
+            echo "Starting instrumented tests..."
             export CI=true
-            ./gradlew connectedCheck --parallel --build-cache
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.screen.RequiresCamera -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
+
+      - name: Run tests no camera
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          device: pixel_8
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096 -partition-size 4096
+          disable-animations: true
+          script: |
+            # Forward Firebase emulator ports to Android emulator
+            adb reverse tcp:9099 tcp:9099
+            adb reverse tcp:4400 tcp:4400
+            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+            # Verify Android emulator can reach Firebase emulator
+            echo "Testing connectivity from Android emulator to Firebase emulator..."
+            adb shell "curl -s http://10.0.2.2:9099/emulators || echo 'WARNING: Cannot reach Firebase emulator from Android device'"
+            export CI=true
+            export FIREBASE_EMULATOR_DEVICE_HOST=10.0.2.2
+            export FIREBASE_AUTH_EMULATOR_HOST=10.0.2.2:9099
+            echo "Revoking camera permission"
+            adb shell pm revoke com.android.mygarden android.permission.CAMERA
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
