@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.profile
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,11 +47,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
 
@@ -60,7 +63,6 @@ private const val CONTENT_SECTION_WEIGHT = 0.3f
 private const val FORM_SECTION_WEIGHT = 0.6f
 private const val SPACER_SECTION_WEIGHT = 0.1f
 private const val AVATAR_WIDTH_FRACTION = 0.25f
-private const val AVATAR_ICON_SIZE_FRACTION = 0.5f
 
 // Dimensions
 private val BUTTON_HEIGHT = 56.dp
@@ -90,7 +92,11 @@ private const val MAX_COUNTRIES_DISPLAYED = 15
  * @param modifier Modifier for customizing the layout
  */
 @Composable
-private fun ProfileHeader(modifier: Modifier = Modifier) {
+private fun ProfileHeader(
+    modifier: Modifier = Modifier,
+    uiState: NewProfileUIState,
+    onAvatarClick: () -> Unit,
+) {
   Row(modifier = modifier) {
     Column(
         modifier = Modifier.weight(CONTENT_SECTION_WEIGHT).fillMaxHeight(),
@@ -110,13 +116,13 @@ private fun ProfileHeader(modifier: Modifier = Modifier) {
                       .aspectRatio(1f)
                       .clip(CircleShape)
                       .background(MaterialTheme.colorScheme.surfaceVariant)
-                      .testTag(NewProfileScreenTestTags.AVATAR),
+                      .testTag(NewProfileScreenTestTags.AVATAR)
+                      .clickable { onAvatarClick() },
               contentAlignment = Alignment.Center) {
-                Icon(
-                    Icons.Default.Person,
+                Image(
+                    painter = painterResource(uiState.avatar.resId),
                     contentDescription = "Profile Avatar",
-                    modifier = Modifier.fillMaxSize(AVATAR_ICON_SIZE_FRACTION),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    modifier = Modifier.fillMaxSize())
               }
         }
   }
@@ -419,9 +425,23 @@ private fun RegisterButton(
 @OptIn(ExperimentalMaterial3Api::class)
 fun NewProfileScreen(
     newProfileViewModel: NewProfileViewModel = viewModel(),
-    onRegisterPressed: () -> Unit
+    onRegisterPressed: () -> Unit,
+    navController: NavHostController? =
+        null, // put as NavHostController? with null by default so that previous test can still run
+    onAvatarClick: () -> Unit = {}, // put {} by default so that previous test can still run
 ) {
   val uiState by newProfileViewModel.uiState.collectAsState()
+
+  LaunchedEffect(Unit) {
+    val handle = navController?.currentBackStackEntry?.savedStateHandle
+    handle?.getStateFlow("chosen_avatar", "")?.collect { name ->
+      if (name.isNotBlank()) {
+        newProfileViewModel.setAvatar(Avatar.valueOf(name))
+        // clear so that it doesn't trigger on recompositions again
+        handle.set("chosen_avatar", "")
+      }
+    }
+  }
 
   Scaffold(
       modifier = Modifier.testTag(NewProfileScreenTestTags.SCREEN),
@@ -437,7 +457,11 @@ fun NewProfileScreen(
                     .padding(paddingValues)
                     .padding(horizontal = HORIZONTAL_PADDING),
             verticalArrangement = Arrangement.SpaceBetween) {
-              ProfileHeader(modifier = Modifier.weight(HEADER_SECTION_WEIGHT))
+              ProfileHeader(
+                  uiState = uiState,
+                  onAvatarClick = onAvatarClick,
+                  modifier = Modifier.weight(HEADER_SECTION_WEIGHT),
+              )
 
               ProfileForm(
                   uiState = uiState,
