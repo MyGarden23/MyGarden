@@ -389,7 +389,11 @@ private fun RegisterButton(
       onClick = {
         newProfileViewModel.setRegisterPressed(true)
         if (uiState.canRegister()) {
-          onRegisterPressed()
+          newProfileViewModel.submit { success ->
+            if (success) {
+              onRegisterPressed()
+            }
+          }
         }
       },
       modifier =
