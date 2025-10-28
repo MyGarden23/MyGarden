@@ -18,7 +18,7 @@ class PopupScreenTests {
   /** Create the Pop-up Screen with default [plantName] and lambdas */
   @Before
   fun setContent() {
-    testRule.setContent { Popup(plantName = "Bertrand", onDismiss = {}, onConfirm = {}) }
+    testRule.setContent { WaterPlantPopup(plantName = "Bertrand", onDismiss = {}, onConfirm = {}) }
   }
 
   /** Tests that all components of the pop-up are displayed */
@@ -32,7 +32,7 @@ class PopupScreenTests {
 
   /** Tests that all buttons present are clickable */
   @Test
-  fun buttonsAreClickable() {
+  fun buttonsAreEnabled() {
     testRule.onNodeWithTag(PopupScreenTestTags.CONFIRM_BUTTON).assertIsEnabled()
     testRule.onNodeWithTag(PopupScreenTestTags.DISMISS_BUTTON).assertIsEnabled()
   }

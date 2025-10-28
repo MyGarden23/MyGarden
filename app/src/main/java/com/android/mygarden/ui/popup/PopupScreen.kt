@@ -34,6 +34,11 @@ object PopupScreenTestTags {
   const val CONFIRM_BUTTON = "ConfirmButton"
 }
 
+const val POPUP_DISMISS_BUTTON_CONTENT_DESCRIPTION = "Quit the popup"
+const val POPUP_CONFIRM_BUTTON_TEXT = "Go to Garden"
+
+fun getPopupTitle(plantName: String): String = "Your $plantName is thirsty!"
+
 /**
  * Popup that is on screen whenever a plant passes in state NEED_WATER
  *
@@ -42,7 +47,7 @@ object PopupScreenTestTags {
  * @param onConfirm the action to do when clicking on the confirm button (Go to Garden)
  */
 @Composable
-fun Popup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+fun WaterPlantPopup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
   Dialog(
       onDismissRequest = onDismiss,
   ) {
@@ -52,17 +57,17 @@ fun Popup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
         shape = RoundedCornerShape(16.dp),
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
     ) {
       Column(
           modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             // A row to have the red cross button only on top and the rest below
             Row(modifier = Modifier.fillMaxWidth().padding(6.dp)) { QuitPopup(onClick = onDismiss) }
-            PopupTitle("Your $plantName is thirsty !")
+            PopupTitle(text = getPopupTitle(plantName))
             // Spacer puts the confirm button at the end of the popup
             Spacer(Modifier.weight(1f))
-            PopupButton(onClick = onConfirm, text = "Go to Garden")
+            PopupButton(onClick = onConfirm, text = POPUP_CONFIRM_BUTTON_TEXT)
           }
     }
   }
@@ -112,7 +117,7 @@ fun QuitPopup(onClick: () -> Unit) {
   IconButton(modifier = Modifier.testTag(PopupScreenTestTags.DISMISS_BUTTON), onClick = onClick) {
     Icon(
         painter = painterResource(R.drawable.x_circle),
-        contentDescription = null,
+        contentDescription = POPUP_DISMISS_BUTTON_CONTENT_DESCRIPTION,
         tint = MaterialTheme.colorScheme.error)
   }
 }
