@@ -1,5 +1,7 @@
 package com.android.mygarden.ui.garden
 
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -13,9 +15,11 @@ import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.ui.theme.MyGardenTheme
 import java.sql.Timestamp
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -204,4 +208,27 @@ class GardenScreenTests {
       }
     }
   }
+
+    /** Tests that the right color palette is returned when a status is given */
+    @Test
+    fun rightColorPaletteForEachStatus() {
+        var colorScheme: ColorScheme? = null
+        composeTestRule.setContent {
+            MyGardenTheme {
+                GardenScreen(onEditProfile = {}, onAddPlant = {})
+            }
+            colorScheme = MaterialTheme.colorScheme
+        }
+        composeTestRule.waitForIdle()
+
+        if (colorScheme != null) {
+            assertEquals(colorsFromHealthStatus(PlantHealthStatus.UNKNOWN, colorScheme), PlantCardColorPalette(colorScheme.surfaceVariant, WATERING_BLUE_COLOR))
+            assertEquals(colorsFromHealthStatus(PlantHealthStatus.HEALTHY, colorScheme), PlantCardColorPalette(colorScheme.primary, WATERING_BLUE_COLOR))
+            assertEquals(colorsFromHealthStatus(PlantHealthStatus.SLIGHTLY_DRY, colorScheme), PlantCardColorPalette(colorScheme.primaryContainer, WATERING_BLUE_COLOR))
+            assertEquals(colorsFromHealthStatus(PlantHealthStatus.NEEDS_WATER, colorScheme), PlantCardColorPalette(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR))
+            assertEquals(colorsFromHealthStatus(PlantHealthStatus.OVERWATERED, colorScheme), PlantCardColorPalette(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR))
+            assertEquals(colorsFromHealthStatus(PlantHealthStatus.SEVERELY_OVERWATERED, colorScheme), PlantCardColorPalette(BACKGROUND_COLOR_RED, colorScheme.error))
+            assertEquals(colorsFromHealthStatus(PlantHealthStatus.SEVERELY_DRY, colorScheme), PlantCardColorPalette(BACKGROUND_COLOR_RED, colorScheme.error))
+        }
+    }
 }
