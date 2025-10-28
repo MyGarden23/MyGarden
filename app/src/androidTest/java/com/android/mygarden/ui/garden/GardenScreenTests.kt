@@ -164,44 +164,44 @@ class GardenScreenTests {
     }
   }
 
-  /** Tests that all plants have a valid status*/
+  /** Tests that all plants have a valid status */
   @Test
   fun statusAreValid() {
     val plants = listOf(plant1, plant2, plant3, plant4)
     setContent(plants)
-      runTest {
-          repo.getAllOwnedPlants().forEach { p ->
-              var success = false
-              for (status in PlantHealthStatus.entries) {
-                  try {
-                      composeTestRule
-                          .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantStatus(p))
-                          .assertTextEquals(status.description)
-                      success = true
-                      break
-                  } catch(e: AssertionError) {
-                      // Do nothing until it matched one of the plant status possible
-                  }
-              }
-              assertTrue(success)
+    runTest {
+      repo.getAllOwnedPlants().forEach { p ->
+        var success = false
+        for (status in PlantHealthStatus.entries) {
+          try {
+            composeTestRule
+                .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantStatus(p))
+                .assertTextEquals(status.description)
+            success = true
+            break
+          } catch (e: AssertionError) {
+            // Do nothing until it matched one of the plant status possible
           }
+        }
+        assertTrue(success)
       }
+    }
   }
 
-    /** Tests that all the names and latin names are corresponding to the actual plant names */
-    @Test
-    fun namesAndLatinNamesAreCorrect() {
-        val plants = listOf(plant1, plant2, plant3, plant4)
-        setContent(plants)
-        runTest {
-            repo.getAllOwnedPlants().forEach { p ->
-                composeTestRule
-                    .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantName(p))
-                    .assertTextEquals(p.plant.name)
-                composeTestRule
-                    .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantLatinName(p))
-                    .assertTextEquals(p.plant.latinName)
-            }
-        }
+  /** Tests that all the names and latin names are corresponding to the actual plant names */
+  @Test
+  fun namesAndLatinNamesAreCorrect() {
+    val plants = listOf(plant1, plant2, plant3, plant4)
+    setContent(plants)
+    runTest {
+      repo.getAllOwnedPlants().forEach { p ->
+        composeTestRule
+            .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantName(p))
+            .assertTextEquals(p.plant.name)
+        composeTestRule
+            .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantLatinName(p))
+            .assertTextEquals(p.plant.latinName)
+      }
     }
+  }
 }
