@@ -67,7 +67,7 @@ class ChooseProfilePictureScreenTest {
     setContentWith()
 
     Avatar.values().forEach { avatar ->
-      val cardTag = "${ChooseProfilePictureScreenTestTags.AVATAR_CARD_PREFIX}${avatar.name}"
+      val cardTag = ChooseProfilePictureScreenTestTags.getTestTagAvatar(avatar)
 
       composeRule
           .onNodeWithTag(ChooseProfilePictureScreenTestTags.AVATAR_GRID)
@@ -87,7 +87,7 @@ class ChooseProfilePictureScreenTest {
     setContentWith(onChosen = chosen)
 
     val first = Avatar.values().first()
-    val cardTag = "${ChooseProfilePictureScreenTestTags.AVATAR_CARD_PREFIX}${first.name}"
+    val cardTag = ChooseProfilePictureScreenTestTags.getTestTagAvatar(first)
 
     composeRule.onNodeWithTag(cardTag).performClick()
 

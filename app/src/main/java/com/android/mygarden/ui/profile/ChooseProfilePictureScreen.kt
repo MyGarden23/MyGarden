@@ -32,6 +32,14 @@ object ChooseProfilePictureScreenTestTags {
   const val BACK_BUTTON = "backButton"
   const val AVATAR_GRID = "avatarGrid"
   const val AVATAR_CARD_PREFIX = "avatarCard_" // for example avatarCard_A1
+
+    /**
+     * Helper function to get the test tag for an avatar card.
+     *
+     * @param avatar The [Avatar] instance for which to generate the test tag
+     * @return The test tag string
+     */
+    fun getTestTagAvatar(avatar: Avatar): String{return "$AVATAR_CARD_PREFIX${avatar.name}"}
 }
 
 /**
@@ -71,7 +79,7 @@ fun ChooseProfilePictureScreen(onAvatarChosen: (Avatar) -> Unit, onBack: () -> U
                         Modifier.clip(CircleShape)
                             .clickable { onAvatarChosen(avatar) }
                             .testTag(
-                                "${ChooseProfilePictureScreenTestTags.AVATAR_CARD_PREFIX}${avatar.name}")) {
+                                ChooseProfilePictureScreenTestTags.getTestTagAvatar(avatar))) {
                       Image(
                           painter = painterResource(avatar.resId),
                           contentDescription = "Avatar ${avatar.name}",
