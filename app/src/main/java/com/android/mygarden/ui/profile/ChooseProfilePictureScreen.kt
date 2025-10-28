@@ -32,7 +32,6 @@ object ChooseProfilePictureScreenTestTags {
   const val BACK_BUTTON = "backButton"
   const val AVATAR_GRID = "avatarGrid"
   const val AVATAR_CARD_PREFIX = "avatarCard_" // for example avatarCard_A1
-  const val AVATAR_IMAGE_PREFIX = "avatarImage_" // for example avatarImage_A1
 }
 
 /**
@@ -76,10 +75,7 @@ fun ChooseProfilePictureScreen(onAvatarChosen: (Avatar) -> Unit, onBack: () -> U
                       Image(
                           painter = painterResource(avatar.resId),
                           contentDescription = "Avatar ${avatar.name}",
-                          modifier =
-                              Modifier.fillMaxSize()
-                                  .testTag(
-                                      "${ChooseProfilePictureScreenTestTags.AVATAR_IMAGE_PREFIX}${avatar.name}"))
+                          modifier = Modifier.fillMaxSize())
                     }
               }
             }

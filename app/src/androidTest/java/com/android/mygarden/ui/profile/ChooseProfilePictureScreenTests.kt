@@ -68,15 +68,12 @@ class ChooseProfilePictureScreenTest {
 
     Avatar.values().forEach { avatar ->
       val cardTag = "${ChooseProfilePictureScreenTestTags.AVATAR_CARD_PREFIX}${avatar.name}"
-      val imageTag = "${ChooseProfilePictureScreenTestTags.AVATAR_IMAGE_PREFIX}${avatar.name}"
 
       composeRule
           .onNodeWithTag(ChooseProfilePictureScreenTestTags.AVATAR_GRID)
           .performScrollToNode(hasTestTag(cardTag))
 
       composeRule.onNodeWithTag(cardTag).assertIsDisplayed().assertHasClickAction()
-
-      composeRule.onNodeWithTag(imageTag, useUnmergedTree = true).assertIsDisplayed()
     }
   }
 
