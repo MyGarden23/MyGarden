@@ -368,10 +368,8 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                           WaterBar(
                               waterLevel = 0.5f,
                               color = colorPalette.wateringColor,
-                              modifier =
-                                  modifier.testTag(
-                                      GardenScreenTestTags.getTestTagForOwnedPlantWaterBar(
-                                          ownedPlant)))
+                              modifier = modifier,
+                              ownedPlant = ownedPlant)
                         }
                   }
               WaterButton(
@@ -416,10 +414,16 @@ fun WaterButton(modifier: Modifier = Modifier, color: Color, onButtonPressed: ()
  * @param modifier the optional modifier of the composable
  * @param waterLevel the water level of the given plant (should be between 0 and 1)
  * @param color the color of the bar
+ * @param ownedPlant the plant to which the water bar is attached to (used for test tags)
  * @throws AssertionError if the waterLevel is not between 0 and 1 (both included)
  */
 @Composable
-fun WaterBar(modifier: Modifier = Modifier, waterLevel: Float, color: Color) {
+fun WaterBar(
+    modifier: Modifier = Modifier,
+    waterLevel: Float,
+    color: Color,
+    ownedPlant: OwnedPlant
+) {
   assert(waterLevel >= 0f && waterLevel <= 1f)
   Box(
       modifier =
@@ -429,7 +433,13 @@ fun WaterBar(modifier: Modifier = Modifier, waterLevel: Float, color: Color) {
               .clip(RoundedCornerShape(PLANT_CARD_ROUND_SHAPING))
               .background(MaterialTheme.colorScheme.background),
       contentAlignment = Alignment.BottomEnd) {
-        Box(modifier = modifier.fillMaxHeight().fillMaxWidth(waterLevel).background(color))
+        Box(
+            modifier =
+                modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(waterLevel)
+                    .background(color)
+                    .testTag(GardenScreenTestTags.getTestTagForOwnedPlantWaterBar(ownedPlant)))
       }
 }
 
