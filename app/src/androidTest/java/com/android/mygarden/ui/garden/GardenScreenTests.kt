@@ -209,26 +209,38 @@ class GardenScreenTests {
     }
   }
 
-    /** Tests that the right color palette is returned when a status is given */
-    @Test
-    fun rightColorPaletteForEachStatus() {
-        var colorScheme: ColorScheme? = null
-        composeTestRule.setContent {
-            MyGardenTheme {
-                GardenScreen(onEditProfile = {}, onAddPlant = {})
-            }
-            colorScheme = MaterialTheme.colorScheme
-        }
-        composeTestRule.waitForIdle()
-
-        if (colorScheme != null) {
-            assertEquals(colorsFromHealthStatus(PlantHealthStatus.UNKNOWN, colorScheme), PlantCardColorPalette(colorScheme.surfaceVariant, WATERING_BLUE_COLOR))
-            assertEquals(colorsFromHealthStatus(PlantHealthStatus.HEALTHY, colorScheme), PlantCardColorPalette(colorScheme.primary, WATERING_BLUE_COLOR))
-            assertEquals(colorsFromHealthStatus(PlantHealthStatus.SLIGHTLY_DRY, colorScheme), PlantCardColorPalette(colorScheme.primaryContainer, WATERING_BLUE_COLOR))
-            assertEquals(colorsFromHealthStatus(PlantHealthStatus.NEEDS_WATER, colorScheme), PlantCardColorPalette(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR))
-            assertEquals(colorsFromHealthStatus(PlantHealthStatus.OVERWATERED, colorScheme), PlantCardColorPalette(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR))
-            assertEquals(colorsFromHealthStatus(PlantHealthStatus.SEVERELY_OVERWATERED, colorScheme), PlantCardColorPalette(BACKGROUND_COLOR_RED, colorScheme.error))
-            assertEquals(colorsFromHealthStatus(PlantHealthStatus.SEVERELY_DRY, colorScheme), PlantCardColorPalette(BACKGROUND_COLOR_RED, colorScheme.error))
-        }
+  /** Tests that the right color palette is returned when a status is given */
+  @Test
+  fun rightColorPaletteForEachStatus() {
+    var colorScheme: ColorScheme? = null
+    composeTestRule.setContent {
+      MyGardenTheme { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
+      colorScheme = MaterialTheme.colorScheme
     }
+    composeTestRule.waitForIdle()
+
+    if (colorScheme != null) {
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.UNKNOWN, colorScheme),
+          PlantCardColorPalette(colorScheme.surfaceVariant, WATERING_BLUE_COLOR))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.HEALTHY, colorScheme),
+          PlantCardColorPalette(colorScheme.primary, WATERING_BLUE_COLOR))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.SLIGHTLY_DRY, colorScheme),
+          PlantCardColorPalette(colorScheme.primaryContainer, WATERING_BLUE_COLOR))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.NEEDS_WATER, colorScheme),
+          PlantCardColorPalette(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.OVERWATERED, colorScheme),
+          PlantCardColorPalette(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.SEVERELY_OVERWATERED, colorScheme),
+          PlantCardColorPalette(BACKGROUND_COLOR_RED, colorScheme.error))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.SEVERELY_DRY, colorScheme),
+          PlantCardColorPalette(BACKGROUND_COLOR_RED, colorScheme.error))
+    }
+  }
 }
