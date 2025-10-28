@@ -94,7 +94,7 @@ data class NewProfileUIState(
  * validation
  */
 class NewProfileViewModel(
-  private val repo: ProfileRepository = ProfileRepositoryProvider.repository
+    private val repo: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
   // Private mutable state flow for internal state management
   private val _uiState = MutableStateFlow(NewProfileUIState())
