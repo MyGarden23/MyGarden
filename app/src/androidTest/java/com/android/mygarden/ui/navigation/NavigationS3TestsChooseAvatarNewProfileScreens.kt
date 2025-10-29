@@ -24,103 +24,86 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class NavigationS3TestsChooseAvatarNewProfileScreens {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    /** Navigation controller used to simulate screen navigation. */
-    private lateinit var navController: NavHostController
+  /** Navigation controller used to simulate screen navigation. */
+  private lateinit var navController: NavHostController
 
-
-    /**
-     * Sets up the Compose test environment before each test.
-     * Initializes the NavController and starts at the NewProfile screen.
-     */
-    @Before
-    fun setUp() {
-        composeTestRule.setContent {
-            val controller = rememberNavController()
-            navController = controller
-            AppNavHost(
-                navController = controller,
-                startDestination = Screen.NewProfile.route
-            )
-        }
+  /**
+   * Sets up the Compose test environment before each test. Initializes the NavController and starts
+   * at the NewProfile screen.
+   */
+  @Before
+  fun setUp() {
+    composeTestRule.setContent {
+      val controller = rememberNavController()
+      navController = controller
+      AppNavHost(navController = controller, startDestination = Screen.NewProfile.route)
     }
+  }
 
-    /** Helper function to clicks the avatar icon on the NewProfile screen. */
-    private fun clickAvatar() =
-        composeTestRule.onNodeWithTag(NewProfileScreenTestTags.AVATAR).performClick()
+  /** Helper function to clicks the avatar icon on the NewProfile screen. */
+  private fun clickAvatar() =
+      composeTestRule.onNodeWithTag(NewProfileScreenTestTags.AVATAR).performClick()
 
+  /** Tests navigation from NewProfile to ChooseAvatar and back after avatar selection. */
+  @Test
+  fun navigate_fromNewProfile_toChooseAvatar_andBack() {
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+    clickAvatar()
+    composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
 
+    val firstAvatar = Avatar.values().first()
+    composeTestRule
+        .onNodeWithTag(ChooseProfilePictureScreenTestTags.getTestTagAvatar(firstAvatar))
+        .performClick()
 
-    /**
-     * Tests navigation from NewProfile to ChooseAvatar and back after avatar selection.
-     */
-    @Test
-    fun navigate_fromNewProfile_toChooseAvatar_andBack() {
-        composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
-        clickAvatar()
-        composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+  }
 
-        val firstAvatar = Avatar.values().first()
-        composeTestRule
-            .onNodeWithTag(ChooseProfilePictureScreenTestTags.getTestTagAvatar(firstAvatar))
-            .performClick()
+  /** Tests that pressing the back button returns from ChooseAvatar to NewProfile. */
+  @Test
+  fun chooseAvatar_backButton_returnsToNewProfile() {
+    clickAvatar()
+    composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.BACK_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+  }
 
-        composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
-    }
+  /**
+   * Verifies that choosing an avatar updates and then resets the SavedStateHandle value
+   * ("chosen_avatar").
+   */
+  @Test
+  fun choosingAvatar_setsAndResetsSavedStateHandleValue() {
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+    clickAvatar()
+    composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
 
+    val firstAvatar = Avatar.values().first()
+    composeTestRule
+        .onNodeWithTag(ChooseProfilePictureScreenTestTags.getTestTagAvatar(firstAvatar))
+        .performClick()
 
-    /**
-     * Tests that pressing the back button returns from ChooseAvatar to NewProfile.
-     */
-    @Test
-    fun chooseAvatar_backButton_returnsToNewProfile() {
-        clickAvatar()
-        composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.BACK_BUTTON).performClick()
-        composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
-    }
+    // Read handle value before reset
+    val currentEntry = navController.currentBackStackEntry
+    val currentVal = currentEntry?.savedStateHandle?.get<String>("chosen_avatar")
+    assertEquals(firstAvatar.name, currentVal)
 
-    /**
-     * Verifies that choosing an avatar updates and then resets
-     * the SavedStateHandle value ("chosen_avatar").
-     */
-    @Test
-    fun choosingAvatar_setsAndResetsSavedStateHandleValue() {
-        composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
-        clickAvatar()
-        composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.waitForIdle()
 
-        val firstAvatar = Avatar.values().first()
-        composeTestRule
-            .onNodeWithTag(ChooseProfilePictureScreenTestTags.getTestTagAvatar(firstAvatar))
-            .performClick()
+    // Read handle value after reset
+    val resetValue = currentEntry?.savedStateHandle?.get<String>("chosen_avatar")
+    assertEquals("", resetValue)
+  }
 
-        // Read handle value before reset
-        val currentEntry = navController.currentBackStackEntry
-        val currentVal = currentEntry?.savedStateHandle?.get<String>("chosen_avatar")
-        assertEquals(firstAvatar.name, currentVal)
+  /** Tests that pressing the register button navigates to the Camera screen. */
+  @Test
+  fun onRegisterPressed_from_newProfile_navigates_to_camera() {
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
 
-        composeTestRule.waitForIdle()
+    composeTestRule.runOnIdle { navController.navigate(Screen.Camera.route) }
 
-        // Read handle value after reset
-        val resetValue = currentEntry?.savedStateHandle?.get<String>("chosen_avatar")
-        assertEquals("", resetValue)
-    }
-
-    /**
-     * Tests that pressing the register button navigates to the Camera screen.
-     */
-    @Test
-    fun onRegisterPressed_from_newProfile_navigates_to_camera() {
-        composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
-
-        composeTestRule.runOnIdle {
-            navController.navigate(Screen.Camera.route)
-        }
-
-        assertEquals(Screen.Camera.route, navController.currentDestination?.route)
-    }
+    assertEquals(Screen.Camera.route, navController.currentDestination?.route)
+  }
 }
-
