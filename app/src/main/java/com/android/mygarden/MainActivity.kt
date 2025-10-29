@@ -104,6 +104,7 @@ private fun routeToScreen(route: String): Screen? =
       Screen.Auth.route -> Screen.Auth
       Screen.Camera.route -> Screen.Camera
       Screen.PlantView.route -> Screen.PlantView
+      Screen.NewProfile.route -> Screen.NewProfile
       Screen.Profile.route -> Screen.Profile
       Screen.Garden.route -> Screen.Garden
       Screen.EditPlant.route -> Screen.EditPlant

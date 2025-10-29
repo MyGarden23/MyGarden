@@ -35,7 +35,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +52,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
 
@@ -426,22 +424,9 @@ private fun RegisterButton(
 fun NewProfileScreen(
     newProfileViewModel: NewProfileViewModel = viewModel(),
     onRegisterPressed: () -> Unit,
-    navController: NavHostController? =
-        null, // put as NavHostController? with null by default so that previous test can still run
     onAvatarClick: () -> Unit = {}, // put {} by default so that previous test can still run
 ) {
   val uiState by newProfileViewModel.uiState.collectAsState()
-
-  LaunchedEffect(Unit) {
-    val handle = navController?.currentBackStackEntry?.savedStateHandle
-    handle?.getStateFlow("chosen_avatar", "")?.collect { name ->
-      if (name.isNotBlank()) {
-        newProfileViewModel.setAvatar(Avatar.valueOf(name))
-        // clear so that it doesn't trigger on recompositions again
-        handle.set("chosen_avatar", "")
-      }
-    }
-  }
 
   Scaffold(
       modifier = Modifier.testTag(NewProfileScreenTestTags.SCREEN),

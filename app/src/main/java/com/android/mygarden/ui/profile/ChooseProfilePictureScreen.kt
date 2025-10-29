@@ -25,6 +25,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
+// Grid proportions and settings
+private const val GRID_NUMBER_OF_AVATAR_PER_ROW = 2
+private val GRID_PADDING = 16.dp
+private val GRID_VERTICAL_ARRANGEMENT = 16.dp
+private val GRID_HORIZONTAL_ARRANGEMENT = 16.dp
+
 /** Test tags for [ChooseProfilePictureScreen]. */
 object ChooseProfilePictureScreenTestTags {
   const val SCREEN = "chooseProfilePictureScreen"
@@ -52,39 +58,45 @@ object ChooseProfilePictureScreenTestTags {
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ChooseProfilePictureScreen(onAvatarChosen: (Avatar) -> Unit, onBack: () -> Unit) {
+fun ChooseProfilePictureScreen(
+    modifier: Modifier = Modifier,
+    onAvatarChosen: (Avatar) -> Unit,
+    onBack: () -> Unit
+) {
   Scaffold(
-      modifier = Modifier.testTag(ChooseProfilePictureScreenTestTags.SCREEN),
+      modifier = modifier.testTag(ChooseProfilePictureScreenTestTags.SCREEN),
       topBar = {
         TopAppBar(
-            modifier = Modifier.testTag(ChooseProfilePictureScreenTestTags.TOP_APP_BAR),
+            modifier = modifier.testTag(ChooseProfilePictureScreenTestTags.TOP_APP_BAR),
             title = { Text("Choose an avatar") },
             navigationIcon = {
               IconButton(
                   onClick = onBack,
-                  modifier = Modifier.testTag(ChooseProfilePictureScreenTestTags.BACK_BUTTON)) {
+                  modifier = modifier.testTag(ChooseProfilePictureScreenTestTags.BACK_BUTTON)) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back arrow")
                   }
             })
       }) { padding ->
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(GRID_NUMBER_OF_AVATAR_PER_ROW),
             modifier =
-                Modifier.padding(padding)
-                    .padding(16.dp)
+                modifier
+                    .padding(padding)
+                    .padding(GRID_PADDING)
                     .testTag(ChooseProfilePictureScreenTestTags.AVATAR_GRID),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            verticalArrangement = Arrangement.spacedBy(GRID_VERTICAL_ARRANGEMENT),
+            horizontalArrangement = Arrangement.spacedBy(GRID_HORIZONTAL_ARRANGEMENT)) {
               items(Avatar.values()) { avatar ->
                 Card(
                     modifier =
-                        Modifier.clip(CircleShape)
+                        modifier
+                            .clip(CircleShape)
                             .clickable { onAvatarChosen(avatar) }
                             .testTag(ChooseProfilePictureScreenTestTags.getTestTagAvatar(avatar))) {
                       Image(
                           painter = painterResource(avatar.resId),
                           contentDescription = "Avatar ${avatar.name}",
-                          modifier = Modifier.fillMaxSize())
+                          modifier = modifier.fillMaxSize())
                     }
               }
             }
