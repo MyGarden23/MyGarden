@@ -110,16 +110,6 @@ jobs:
       - name: Install Firebase tools
         run: npm i -g firebase-tools@13
 
-      # Bind to 0.0.0.0 so 10.0.2.2 (Android emulator) can reach it
-      - name: Configure Firebase emulator host/port
-        run: |
-          cat > firebase.json <<'JSON'
-          {
-            "emulators": {
-              "auth": { "port": 9099, "host": "0.0.0.0" }
-            }
-          }
-          JSON
 
       - name: Start Firebase emulators
         run: |
