@@ -16,11 +16,11 @@ class ProfileRepositoryFirestore(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ProfileRepository {
 
+  override fun getCurrentUserId(): String? = auth.currentUser?.uid
 
-
-    override fun getCurrentUserId(): String? = auth.currentUser?.uid
-    private val userProfile
-        get() = db.collection("users")
+  private val userProfile
+    get() =
+        db.collection("users")
             .document(getCurrentUserId() ?: throw IllegalStateException("User not authenticated"))
 
   override fun getProfile(): Flow<Profile?> {
@@ -41,9 +41,9 @@ class ProfileRepositoryFirestore(
     }
   }
 
-    override suspend fun saveProfile(profile: Profile) {
-        userProfile.set(profile.toMap(), SetOptions.merge()).await()
-    }
+  override suspend fun saveProfile(profile: Profile) {
+    userProfile.set(profile.toMap(), SetOptions.merge()).await()
+  }
 
   private fun DocumentSnapshot.toProfileOrNull(): Profile? {
     val data = this.data ?: return null

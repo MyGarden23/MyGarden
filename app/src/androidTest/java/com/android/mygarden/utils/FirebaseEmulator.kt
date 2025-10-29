@@ -27,7 +27,9 @@ object FirebaseEmulator {
 
   // ---------- Host & ports ----------
   private fun pickEmulatorHost(): String {
-    System.getenv("FIREBASE_EMULATOR_DEVICE_HOST")?.let { return it }
+    System.getenv("FIREBASE_EMULATOR_DEVICE_HOST")?.let {
+      return it
+    }
     val isCI = System.getenv("CI")?.equals("true", ignoreCase = true) ?: false
     if (isCI) return "10.0.2.2"
     // probe 10.0.2.2 then 127.0.0.1
@@ -36,8 +38,16 @@ object FirebaseEmulator {
     }
     return "10.0.2.2"
   }
+
   private fun canReach(host: String, port: Int, timeoutMs: Int) =
-    try { Socket().use { it.connect(InetSocketAddress(host, port), timeoutMs); true } } catch (_: Exception) { false }
+      try {
+        Socket().use {
+          it.connect(InetSocketAddress(host, port), timeoutMs)
+          true
+        }
+      } catch (_: Exception) {
+        false
+      }
 
   private val HOST: String by lazy { pickEmulatorHost() }
   const val EMULATORS_PORT = 4400
@@ -49,18 +59,21 @@ object FirebaseEmulator {
     val ctx: Context = ApplicationProvider.getApplicationContext()
     if (FirebaseApp.getApps(ctx).isEmpty()) FirebaseApp.initializeApp(ctx)
     FirebaseApp.getInstance().options.projectId
-      ?: error("Firebase projectId missing — ensure google-services.json is present.")
+        ?: error("Firebase projectId missing — ensure google-services.json is present.")
   }
 
   // ---------- Emulator hub probe ----------
   val isRunning: Boolean
-    get() = try {
-      val url = URL("http://$HOST:$EMULATORS_PORT/emulators")
-      val c = (url.openConnection() as HttpURLConnection).apply { requestMethod = "GET" }
-      val ok = c.responseCode in 200..299
-      c.disconnect()
-      ok
-    } catch (_: Exception) { false }
+    get() =
+        try {
+          val url = URL("http://$HOST:$EMULATORS_PORT/emulators")
+          val c = (url.openConnection() as HttpURLConnection).apply { requestMethod = "GET" }
+          val ok = c.responseCode in 200..299
+          c.disconnect()
+          ok
+        } catch (_: Exception) {
+          false
+        }
 
   // ---------- Auth wiring ----------
   @Volatile private var authConfigured = false
@@ -93,16 +106,17 @@ object FirebaseEmulator {
       db.useEmulator(HOST, FIRESTORE_PORT)
 
       // Deterministic tests: in-memory cache (no disk), eager GC
-      db.firestoreSettings = FirebaseFirestoreSettings.Builder()
-        .setLocalCacheSettings(
-          MemoryCacheSettings.newBuilder()
-            .setGcSettings(MemoryEagerGcSettings.newBuilder().build())
-            .build()
-        )
-        .build()
+      db.firestoreSettings =
+          FirebaseFirestoreSettings.Builder()
+              .setLocalCacheSettings(
+                  MemoryCacheSettings.newBuilder()
+                      .setGcSettings(MemoryEagerGcSettings.newBuilder().build())
+                      .build())
+              .build()
 
       firestoreConfigured = true
-      Log.i("FirebaseEmulator", "Firestore -> emulator at $HOST:$FIRESTORE_PORT, project=$projectId")
+      Log.i(
+          "FirebaseEmulator", "Firestore -> emulator at $HOST:$FIRESTORE_PORT, project=$projectId")
     }
     return db
   }
@@ -112,7 +126,8 @@ object FirebaseEmulator {
     get() = "http://$HOST:$AUTH_PORT/emulator/v1/projects/$projectId/accounts"
 
   private val firestoreDocsEndpoint: String
-    get() = "http://$HOST:$FIRESTORE_PORT/emulator/v1/projects/$projectId/databases/(default)/documents"
+    get() =
+        "http://$HOST:$FIRESTORE_PORT/emulator/v1/projects/$projectId/databases/(default)/documents"
 
   fun clearAuthEmulator() {
     httpDelete(URL(authAccountsEndpoint))
@@ -125,53 +140,71 @@ object FirebaseEmulator {
 
   // ---------- Seed / update via Auth REST ----------
   fun createGoogleUser(fakeIdToken: String) {
-    val url = URL("http://$HOST:$AUTH_PORT/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=fake-api-key")
+    val url =
+        URL(
+            "http://$HOST:$AUTH_PORT/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=fake-api-key")
     val postBody = "id_token=$fakeIdToken&providerId=google.com"
-    val payload = JSONObject()
-      .put("postBody", postBody)
-      .put("requestUri", "http://localhost")
-      .put("returnIdpCredential", true)
-      .put("returnSecureToken", true)
-      .toString()
+    val payload =
+        JSONObject()
+            .put("postBody", postBody)
+            .put("requestUri", "http://localhost")
+            .put("returnIdpCredential", true)
+            .put("returnSecureToken", true)
+            .toString()
     httpPostJson(url, payload)
   }
 
   fun changeEmail(idToken: String, newEmail: String) {
-    val url = URL("http://$HOST:$AUTH_PORT/identitytoolkit.googleapis.com/v1/accounts:update?key=fake-api-key")
-    val payload = JSONObject()
-      .put("idToken", idToken)
-      .put("email", newEmail)
-      .put("returnSecureToken", true)
-      .toString()
+    val url =
+        URL(
+            "http://$HOST:$AUTH_PORT/identitytoolkit.googleapis.com/v1/accounts:update?key=fake-api-key")
+    val payload =
+        JSONObject()
+            .put("idToken", idToken)
+            .put("email", newEmail)
+            .put("returnSecureToken", true)
+            .toString()
     httpPostJson(url, payload)
   }
 
   // ---------- tiny HTTP helpers ----------
   private fun httpDelete(url: URL) {
-    val c = (url.openConnection() as HttpURLConnection).apply {
-      requestMethod = "DELETE"
-      setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-      doInput = true
-    }
+    val c =
+        (url.openConnection() as HttpURLConnection).apply {
+          requestMethod = "DELETE"
+          setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+          doInput = true
+        }
     val code = c.responseCode
     if (code !in 200..299) {
-      val msg = try { c.errorStream?.let { BufferedReader(InputStreamReader(it)).readText() } ?: "" } catch (_: Exception) { "" }
+      val msg =
+          try {
+            c.errorStream?.let { BufferedReader(InputStreamReader(it)).readText() } ?: ""
+          } catch (_: Exception) {
+            ""
+          }
       error("DELETE $url failed: $code ${c.responseMessage}. $msg")
     }
     c.disconnect()
   }
 
   private fun httpPostJson(url: URL, json: String) {
-    val c = (url.openConnection() as HttpURLConnection).apply {
-      requestMethod = "POST"
-      setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-      doOutput = true
-      doInput = true
-    }
+    val c =
+        (url.openConnection() as HttpURLConnection).apply {
+          requestMethod = "POST"
+          setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+          doOutput = true
+          doInput = true
+        }
     OutputStreamWriter(c.outputStream, Charsets.UTF_8).use { it.write(json) }
     val code = c.responseCode
     if (code !in 200..299) {
-      val err = try { BufferedReader(InputStreamReader(c.errorStream)).readText() } catch (_: Exception) { "" }
+      val err =
+          try {
+            BufferedReader(InputStreamReader(c.errorStream)).readText()
+          } catch (_: Exception) {
+            ""
+          }
       error("POST $url failed: $code ${c.responseMessage}. Body: $err")
     }
     c.disconnect()
