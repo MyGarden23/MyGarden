@@ -60,6 +60,7 @@ fun AppNavHost(
       }
 
       NewProfileScreen(
+          newProfileViewModel = vm,
           onRegisterPressed = { navigationActions.navTo(destination = Screen.Camera) },
           onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
     }
