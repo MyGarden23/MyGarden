@@ -58,6 +58,8 @@ import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.theme.CustomColors
+import com.android.mygarden.ui.theme.ExtendedTheme
 
 /** Test tags to test the screen displays */
 object GardenScreenTestTags {
@@ -97,11 +99,6 @@ object GardenScreenTestTags {
  * @param wateringColor the color of both the watering button and the water level bar
  */
 data class PlantCardColorPalette(val backgroundColor: Color, val wateringColor: Color)
-
-// Colors used for watering button and water level bar or background depending on the health status
-val WATERING_BLUE_COLOR = Color(0xff9dddee)
-val WATERING_ORANGE_COLOR = Color(0xffff9d0a)
-val BACKGROUND_COLOR_RED = Color(0xffe46962)
 
 // All paddings (excepts the spacers)
 private val PLANT_ITEM_HORIZONTAL_PADDING = 30.dp
@@ -280,7 +277,9 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
   // The color palette of the card depending on the health status of the plant
   val colorPalette =
       colorsFromHealthStatus(
-          status = ownedPlant.plant.healthStatus, colorScheme = MaterialTheme.colorScheme)
+          status = ownedPlant.plant.healthStatus,
+          colorScheme = MaterialTheme.colorScheme,
+          customColors = ExtendedTheme.colors)
   // The colored box container
   Card(
       modifier =
@@ -447,24 +446,27 @@ fun WaterBar(
  * Function that returns the right color palette depending on the given plant health status.
  *
  * @param status the status of the plant we create a card for
- * @param colorScheme the colorscheme of the app's theme
+ * @param colorScheme the colorscheme of the app's Material theme
+ * @param customColors the custom colors in the extended theme
  * @return the right palette depending on the plant's health status
  */
 fun colorsFromHealthStatus(
     status: PlantHealthStatus,
-    colorScheme: ColorScheme
+    colorScheme: ColorScheme,
+    customColors: CustomColors
 ): PlantCardColorPalette {
   return when (status) {
     PlantHealthStatus.UNKNOWN ->
-        PlantCardColorPalette(colorScheme.surfaceVariant, WATERING_BLUE_COLOR)
-    PlantHealthStatus.HEALTHY -> PlantCardColorPalette(colorScheme.primary, WATERING_BLUE_COLOR)
+        PlantCardColorPalette(colorScheme.surfaceVariant, customColors.wateringBlue)
+    PlantHealthStatus.HEALTHY ->
+        PlantCardColorPalette(colorScheme.primary, customColors.wateringBlue)
     PlantHealthStatus.SLIGHTLY_DRY ->
-        PlantCardColorPalette(colorScheme.primaryContainer, WATERING_BLUE_COLOR)
+        PlantCardColorPalette(colorScheme.primaryContainer, customColors.wateringBlue)
     PlantHealthStatus.NEEDS_WATER,
     PlantHealthStatus.OVERWATERED ->
-        PlantCardColorPalette(colorScheme.secondaryContainer, WATERING_ORANGE_COLOR)
+        PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringOrange)
     PlantHealthStatus.SEVERELY_DRY,
     PlantHealthStatus.SEVERELY_OVERWATERED ->
-        PlantCardColorPalette(BACKGROUND_COLOR_RED, colorScheme.error)
+        PlantCardColorPalette(customColors.redPlantCardBackground, colorScheme.error)
   }
 }

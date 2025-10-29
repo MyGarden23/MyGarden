@@ -63,3 +63,17 @@ val md_theme_dark_inversePrimary = Color(0xFF367444)
 val md_theme_dark_surfaceTint = Color(0xFF47AC74)
 val md_theme_dark_outlineVariant = Color(0xFF616161)
 val md_theme_dark_scrim = Color(0xFF000000)
+
+/**
+ * Data class containing all the custom colors added to the Material theme.
+ *
+ * @param wateringBlue the blue color used on the watering button and bar in multiple states
+ * @param wateringOrange the orange color used on the watering button and bar in multiple state
+ * @param redPlantCardBackground the red color used on the background on plant cards with critical
+ *   state
+ */
+data class CustomColors(
+    val wateringBlue: Color,
+    val wateringOrange: Color,
+    val redPlantCardBackground: Color
+)
