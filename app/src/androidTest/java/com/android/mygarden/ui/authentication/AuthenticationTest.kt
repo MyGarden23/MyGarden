@@ -51,7 +51,7 @@ class AuthenticationTest {
   @Before
   fun setUp() {
     // Point Firebase to the local emulator (idempotent) and reset state.
-    FirebaseEmulator.ensureConfigured()
+    FirebaseEmulator.connectAuth()
 
     // Verify emulator is actually running (helps with CI debugging)
     if (!FirebaseEmulator.isRunning) {
@@ -138,11 +138,11 @@ class AuthenticationTest {
 
     // Wait until we hit Camera OR the user is set on Firebase
     compose.waitUntil(effectiveTimeout) {
-      currentRoute.value == Screen.Camera.route && FirebaseEmulator.auth.currentUser != null
+      currentRoute.value == Screen.NewProfile.route && FirebaseEmulator.auth.currentUser != null
     }
 
     // Final assertions
-    assertEquals(Screen.Camera.route, currentRoute.value)
+    assertEquals(Screen.NewProfile.route, currentRoute.value)
     assertNotNull(FirebaseEmulator.auth.currentUser)
   }
 
@@ -187,11 +187,11 @@ class AuthenticationTest {
         // Wait for Firebase to have a current user and for the route to switch
         compose.waitUntil(effectiveTimeout) {
           val user = FirebaseEmulator.auth.currentUser
-          (user?.email == email) && currentRoute.value == Screen.Camera.route
+          (user?.email == email) && currentRoute.value == Screen.NewProfile.route
         }
 
         assertEquals(email, FirebaseEmulator.auth.currentUser!!.email)
-        assertEquals(Screen.Camera.route, currentRoute.value)
+        assertEquals(Screen.NewProfile.route, currentRoute.value)
       }
 
   // --- Small helper like in your other tests ---
