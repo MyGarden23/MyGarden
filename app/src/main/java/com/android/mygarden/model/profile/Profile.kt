@@ -18,7 +18,6 @@ package com.android.mygarden.model.profile
  * @param updatedAt Epoch millis when the profile was last updated
  */
 data class Profile(
-    val uid: String = "",
     val firstName: String = "",
     val lastName: String = "",
     val gardeningSkill: GardeningSkill = GardeningSkill.BEGINNER,

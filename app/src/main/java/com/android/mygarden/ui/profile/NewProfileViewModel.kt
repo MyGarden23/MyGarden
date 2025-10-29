@@ -190,7 +190,6 @@ class NewProfileViewModel(
 
     val profile =
         Profile(
-            uid = uid,
             firstName = state.firstName.trim(),
             lastName = state.lastName.trim(),
             gardeningSkill = state.gardeningSkill,

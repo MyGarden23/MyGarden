@@ -16,13 +16,16 @@ class ProfileRepositoryFirestore(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ProfileRepository {
 
-  private val col = db.collection("profiles")
 
-  override fun getCurrentUserId(): String? = auth.currentUser?.uid
+
+    override fun getCurrentUserId(): String? = auth.currentUser?.uid
+    private val userProfile
+        get() = db.collection("users")
+            .document(getCurrentUserId() ?: throw IllegalStateException("User not authenticated"))
 
   override fun getProfile(): Flow<Profile?> {
     val uid = getCurrentUserId() ?: return flowOf(null)
-    val docRef = col.document(uid)
+    val docRef = userProfile
 
     return callbackFlow {
       val reg: ListenerRegistration =
@@ -38,19 +41,13 @@ class ProfileRepositoryFirestore(
     }
   }
 
-  override suspend fun saveProfile(profile: Profile) {
-    val uid =
-        profile.uid.ifBlank {
-          getCurrentUserId()
-              ?: throw IllegalStateException("No authenticated user; cannot save profile")
-        }
-    col.document(uid).set(profile.toMap(), SetOptions.merge()).await()
-  }
+    override suspend fun saveProfile(profile: Profile) {
+        userProfile.set(profile.toMap(), SetOptions.merge()).await()
+    }
 
   private fun DocumentSnapshot.toProfileOrNull(): Profile? {
     val data = this.data ?: return null
 
-    val uid = (data["uid"] as? String) ?: this.id
     val firstName = data["firstName"] as? String ?: return null
     val lastName = data["lastName"] as? String ?: return null
     val favoritePlant = data["favoritePlant"] as? String ?: return null
@@ -63,7 +60,6 @@ class ProfileRepositoryFirestore(
     val hasSignedIn = data["hasSignedIn"] as? Boolean ?: false
 
     return Profile(
-        uid = uid,
         firstName = firstName,
         lastName = lastName,
         gardeningSkill = gardeningSkill,
@@ -74,7 +70,6 @@ class ProfileRepositoryFirestore(
 
   private fun Profile.toMap(): Map<String, Any> =
       mapOf(
-          "uid" to uid,
           "firstName" to firstName,
           "lastName" to lastName,
           "gardeningSkill" to gardeningSkill.name, // stocké en String
