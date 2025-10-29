@@ -48,23 +48,6 @@ class PlantsRepositoryMockTest {
     spyRepository = spy(PlantsRepositoryLocal())
   }
 
-  // Helper function to create a test plant
-  private fun createTestPlant(
-      name: String = "Test Plant",
-      latinName: String = "Testus Plantus",
-      description: String = "Test description",
-      wateringFrequency: Int = 7
-  ): Plant {
-    return Plant(
-        name = name,
-        image = null,
-        latinName = latinName,
-        description = description,
-        healthStatus = PlantHealthStatus.HEALTHY,
-        healthStatusDescription = PlantHealthStatus.HEALTHY.description,
-        wateringFrequency = wateringFrequency)
-  }
-
   // ==================== Tests for identifyLatinNameWithPlantNet ====================
 
   @Test

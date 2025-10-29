@@ -1,6 +1,7 @@
 package com.android.mygarden.model.plant
 
 import android.util.Log
+import com.android.mygarden.BuildConfig
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerateContentResponse
@@ -34,12 +35,14 @@ interface PlantsRepository {
      */
     const val SCORE_THRESHOLD = 0.3
 
-    /** API key for authenticating with the PlantNet plant identification service. */
-    private const val API_KEY = "2b10vR85MRLoZFey45nBR41LRO"
-
-    /** Base URL for the PlantNet API endpoint, including the API key parameter. */
-    private const val PLANTNET_API_URL =
-        "https://my-api.plantnet.org/v2/identify/all?api-key=$API_KEY"
+    /**
+     * Base URL for the PlantNet API endpoint, including the API key parameter.
+     *
+     * The API key is loaded from local.properties (not committed to Git) or from environment
+     * variables in CI/CD.
+     */
+    private val PLANTNET_API_URL =
+        "https://my-api.plantnet.org/v2/identify/all?api-key=${BuildConfig.PLANTNET_API_KEY}"
 
     /**
      * HTTP client configured for PlantNet API requests.

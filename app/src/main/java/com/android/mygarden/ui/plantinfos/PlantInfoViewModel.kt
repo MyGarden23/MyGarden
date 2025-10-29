@@ -61,7 +61,7 @@ class PlantInfoViewModel(
           if (!plant.image.isNullOrEmpty()) {
             plantsRepository.identifyPlant(plant.image)
           } else {
-            plant // On garde la plante telle quelle, pas d'identification
+            plant // Wee keep the plant as it is
           }
       _uiState.value =
           PlantInfoUIState(

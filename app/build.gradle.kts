@@ -29,6 +29,18 @@ android {
         }
         // Enable multidex for large applications
         multiDexEnabled = true
+
+        // Load API key from local.properties
+        val properties = org.jetbrains.kotlin.konan.properties.Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { properties.load(it) }
+        }
+
+        // Make the API key available in BuildConfig
+        val plantnetApiKey =
+            properties.getProperty("PLANTNET_API_KEY") ?: System.getenv("PLANTNET_API_KEY") ?: ""
+        buildConfigField("String", "PLANTNET_API_KEY", "\"$plantnetApiKey\"")
     }
 
     // Signing configuration for release builds
@@ -66,6 +78,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 
     compileOptions {

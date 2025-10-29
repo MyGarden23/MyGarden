@@ -90,12 +90,16 @@ jobs:
         run: |
           # To run the CI with debug information, add --info
           ./gradlew assembleDebug lint --parallel --build-cache
+        env:
+          PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
 
       # Run Unit tests
       - name: Run tests
         run: |
           # To run the CI with debug information, add --info
           ./gradlew testDebugUnitTest --parallel --build-cache
+        env:
+          PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
 
       #Firebase emulator setup
       - name: Install Node + Firebase CLI
@@ -145,6 +149,8 @@ jobs:
             echo "Starting instrumented tests..."
             export CI=true
             ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.screen.RequiresCamera -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
+        env:
+          PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
 
       - name: Run tests no camera
         uses: reactivecircus/android-emulator-runner@v2
@@ -169,6 +175,9 @@ jobs:
             export FIREBASE_AUTH_EMULATOR_HOST=10.0.2.2:9099
             echo "Revoking camera permission"
             adb shell pm revoke com.android.mygarden android.permission.CAMERA
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
+        env:
+          PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
             ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera
 
       # This step generates the coverage report which will be uploaded to sonar
