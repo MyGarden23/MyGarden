@@ -24,10 +24,7 @@ data class Profile(
     val gardeningSkill: GardeningSkill = GardeningSkill.BEGINNER,
     val favoritePlant: String = "",
     val country: String = "",
-    val email: String? = null,
-    val photoUrl: String? = null,
-    val createdAt: Long = 0L,
-    val updatedAt: Long = 0L,
+    val hasSignedIn: Boolean = false,
     // val avatar: Avatar? = null // (à réactiver plus tard)
 )
 /**

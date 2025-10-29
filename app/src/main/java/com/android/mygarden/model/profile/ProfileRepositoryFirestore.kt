@@ -60,6 +60,7 @@ class ProfileRepositoryFirestore(
     val gardeningSkill =
         runCatching { GardeningSkill.valueOf(gardeningSkillName) }
             .getOrElse { GardeningSkill.NOVICE } // fallback robuste
+    val hasSignedIn = data["hasSignedIn"] as? Boolean ?: false
 
     return Profile(
         uid = uid,
@@ -67,7 +68,8 @@ class ProfileRepositoryFirestore(
         lastName = lastName,
         gardeningSkill = gardeningSkill,
         favoritePlant = favoritePlant,
-        country = country)
+        country = country,
+        hasSignedIn = hasSignedIn)
   }
 
   private fun Profile.toMap(): Map<String, Any> =
@@ -77,5 +79,6 @@ class ProfileRepositoryFirestore(
           "lastName" to lastName,
           "gardeningSkill" to gardeningSkill.name, // stocké en String
           "favoritePlant" to favoritePlant,
-          "country" to country)
+          "country" to country,
+          "hasSignedIn" to hasSignedIn)
 }

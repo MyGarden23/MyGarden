@@ -195,7 +195,8 @@ class NewProfileViewModel(
             lastName = state.lastName.trim(),
             gardeningSkill = state.gardeningSkill,
             favoritePlant = state.favoritePlant.trim(),
-            country = state.country.trim())
+            country = state.country.trim(),
+            hasSignedIn = true)
 
     viewModelScope.launch {
       try {
