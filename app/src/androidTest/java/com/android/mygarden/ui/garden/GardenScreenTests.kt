@@ -1,8 +1,11 @@
 package com.android.mygarden.ui.garden
 
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -12,9 +15,14 @@ import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.ui.theme.CustomColors
+import com.android.mygarden.ui.theme.ExtendedTheme
+import com.android.mygarden.ui.theme.MyGardenTheme
 import java.sql.Timestamp
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -106,6 +114,13 @@ class GardenScreenTests {
     runTest {
       repo.getAllOwnedPlants().forEach { p ->
         onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlant(p)).assertIsDisplayed()
+        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantName(p)).assertIsDisplayed()
+        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantStatus(p)).assertIsDisplayed()
+        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantImage(p)).assertIsDisplayed()
+        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantLatinName(p)).assertIsDisplayed()
+        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(p))
+            .assertIsDisplayed()
+        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantWaterBar(p)).assertIsDisplayed()
       }
     }
   }
@@ -140,8 +155,96 @@ class GardenScreenTests {
   /** Tests that all buttons present are clickable */
   @Test
   fun buttonsAreClickable() {
-    setContent()
+    val plants = listOf(plant1, plant2, plant3, plant4)
+    setContent(plants)
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsEnabled()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.ADD_PLANT_FAB).assertIsEnabled()
+
+    // Check that all watering button are clickable
+    runTest {
+      repo.getAllOwnedPlants().forEach { p ->
+        composeTestRule
+            .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(p))
+            .assertIsEnabled()
+      }
+    }
+  }
+
+  /** Tests that all plants have a valid status */
+  @Test
+  fun statusAreValid() {
+    val plants = listOf(plant1, plant2, plant3, plant4)
+    setContent(plants)
+    runTest {
+      repo.getAllOwnedPlants().forEach { p ->
+        var success = false
+        for (status in PlantHealthStatus.entries) {
+          try {
+            composeTestRule
+                .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantStatus(p))
+                .assertTextEquals(status.description)
+            success = true
+            break
+          } catch (e: AssertionError) {
+            // Do nothing until it matched one of the plant status possible
+          }
+        }
+        assertTrue(success)
+      }
+    }
+  }
+
+  /** Tests that all the names and latin names are corresponding to the actual plant names */
+  @Test
+  fun namesAndLatinNamesAreCorrect() {
+    val plants = listOf(plant1, plant2, plant3, plant4)
+    setContent(plants)
+    runTest {
+      repo.getAllOwnedPlants().forEach { p ->
+        composeTestRule
+            .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantName(p))
+            .assertTextEquals(p.plant.name)
+        composeTestRule
+            .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantLatinName(p))
+            .assertTextEquals(p.plant.latinName)
+      }
+    }
+  }
+
+  /** Tests that the right color palette is returned when a status is given */
+  @Test
+  fun rightColorPaletteForEachStatus() {
+    var colorScheme: ColorScheme? = null
+    var customColors: CustomColors? = null
+    composeTestRule.setContent {
+      MyGardenTheme { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
+      colorScheme = MaterialTheme.colorScheme
+      customColors = ExtendedTheme.colors
+    }
+    composeTestRule.waitForIdle()
+
+    if (colorScheme != null && customColors != null) {
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.UNKNOWN, colorScheme, customColors),
+          PlantCardColorPalette(colorScheme.surfaceVariant, customColors.wateringBlue))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.HEALTHY, colorScheme, customColors),
+          PlantCardColorPalette(colorScheme.primary, customColors.wateringBlue))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.SLIGHTLY_DRY, colorScheme, customColors),
+          PlantCardColorPalette(colorScheme.primaryContainer, customColors.wateringBlue))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.NEEDS_WATER, colorScheme, customColors),
+          PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringOrange))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.OVERWATERED, colorScheme, customColors),
+          PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringOrange))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.SEVERELY_OVERWATERED, colorScheme, customColors),
+          PlantCardColorPalette(customColors.redPlantCardBackground, colorScheme.error))
+      assertEquals(
+          colorsFromHealthStatus(PlantHealthStatus.SEVERELY_DRY, colorScheme, customColors),
+          PlantCardColorPalette(customColors.redPlantCardBackground, colorScheme.error))
+    }
   }
 }

@@ -66,12 +66,12 @@ enum class PlantHealthStatus(@StringRes val descriptionRes: Int) {
   val description: String
     get() =
         when (this) {
-          SEVERELY_OVERWATERED -> "Severely overwatered 🌊🌊"
+          SEVERELY_OVERWATERED -> "Severely overwatered 🌊"
           OVERWATERED -> "Overwatered 💦"
           HEALTHY -> "The plant is healthy 🌱"
-          SLIGHTLY_DRY -> "Could use some water soon 🍂"
-          NEEDS_WATER -> "Needs watering 💧"
-          SEVERELY_DRY -> "Critical - needs water urgently! 🥀"
+          SLIGHTLY_DRY -> "A bit dry 🍂"
+          NEEDS_WATER -> "Needs water 💧"
+          SEVERELY_DRY -> "Critically dry 🥀"
           UNKNOWN -> "Status unknown ❓"
         }
 }

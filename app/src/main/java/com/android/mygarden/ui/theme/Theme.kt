@@ -9,7 +9,10 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -81,6 +84,25 @@ private val DarkColorScheme =
         scrim = md_theme_dark_scrim,
     )
 
+/** The custom colors added to the MaterialTheme ones (light mode) */
+private val customColorsLight =
+    CustomColors(
+        wateringBlue = Color(0xff9dddee),
+        wateringOrange = Color(0xffff9d0a),
+        redPlantCardBackground = Color(0xffe46962))
+
+/** The custom colors added to the MaterialTheme ones (dark mode) */
+private val customColorsDark =
+    CustomColors(
+        wateringBlue = Color(0xff9dddee),
+        wateringOrange = Color(0xffff9d0a),
+        redPlantCardBackground = Color(0xffe46962))
+
+/** Local slot that holds the custom colors value in the composition tree */
+val LocalCustomColors = staticCompositionLocalOf {
+  CustomColors(Color.Unspecified, Color.Unspecified, Color.Unspecified)
+}
+
 @Composable
 fun MyGardenTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -97,6 +119,7 @@ fun MyGardenTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
       }
+  val customColors = if (darkTheme) customColorsDark else customColorsLight
   val view = LocalView.current
   if (!view.isInEditMode) {
     SideEffect {
@@ -105,6 +128,13 @@ fun MyGardenTheme(
       WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
     }
   }
+  CompositionLocalProvider(LocalCustomColors provides customColors) {
+    MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+  }
+}
 
-  MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+/** Extends the Material theme with the extra custom colors added */
+object ExtendedTheme {
+  val colors: CustomColors
+    @Composable get() = LocalCustomColors.current
 }
