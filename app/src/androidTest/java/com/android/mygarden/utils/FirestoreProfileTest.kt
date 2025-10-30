@@ -24,6 +24,7 @@ abstract class FirestoreProfileTest {
     FirebaseEmulator.connectAuth()
     FirebaseEmulator.clearAuthEmulator()
     db = FirebaseEmulator.connectFirestore()
+    FirebaseEmulator.clearFirestoreEmulator()
     auth = FirebaseEmulator.auth
 
     // Fake sign-in (suspend)
