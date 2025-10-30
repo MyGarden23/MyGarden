@@ -45,16 +45,16 @@ fun MyGardenApp() {
   // Small wrapper to simplify navigation calls
   val actions = remember(navController) { NavigationActions(navController) }
 
-  // This view model will be used to collect the plants whose status transitioned to NEEDS_WATER in order to display the pop-up
+  // This view model will be used to collect the plants whose status transitioned to NEEDS_WATER in
+  // order to display the pop-up
   val popupVM: PopupViewModel = viewModel()
-  // This var is used to know when to display the pop-up and for which plant ; it is reset to [null] everytime a pop-up is not displayed anymore
+  // This var is used to know when to display the pop-up and for which plant ; it is reset to [null]
+  // everytime a pop-up is not displayed anymore
   var currentThirstyPlant by remember { mutableStateOf<OwnedPlant?>(null) }
 
   LaunchedEffect(Unit) {
     // Collect all the plants that became thirsty from the view model to display the popup
-    popupVM.thirstyPlants.collect { ownedPlant ->
-      currentThirstyPlant = ownedPlant
-    }
+    popupVM.thirstyPlants.collect { ownedPlant -> currentThirstyPlant = ownedPlant }
   }
 
   // Determine where to start: if the user is logged in, skip Sign-In
@@ -112,17 +112,17 @@ fun MyGardenApp() {
           )
 
           // Display a pop-up whenever a newly thirsty plant is collected from the view model
-          currentThirstyPlant?.let { WaterPlantPopup(
-            plantName = it.plant.name,
-            // Reset the var when quitting the pop-up to let a future one be displayed
-            onDismiss = {currentThirstyPlant = null},
-            // Navigate to garden when using this button and reset the var
-            onConfirm = {
-              NavigationActions(navController).navTo(Screen.Garden)
-              currentThirstyPlant = null
-            })
+          currentThirstyPlant?.let {
+            WaterPlantPopup(
+                plantName = it.plant.name,
+                // Reset the var when quitting the pop-up to let a future one be displayed
+                onDismiss = { currentThirstyPlant = null },
+                // Navigate to garden when using this button and reset the var
+                onConfirm = {
+                  NavigationActions(navController).navTo(Screen.Garden)
+                  currentThirstyPlant = null
+                })
           }
-
         }
       }
 }

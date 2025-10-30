@@ -3,12 +3,10 @@ package com.android.mygarden.ui.popup
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.mygarden.MainActivity
 import com.android.mygarden.MyGardenApp
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
@@ -16,46 +14,42 @@ import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
-import com.android.mygarden.ui.camera.CameraScreenTestTags
-import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
+import java.sql.Timestamp
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.sql.Timestamp
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class PopupBackendTests {
 
   @get:Rule
-  //val rule = createAndroidComposeRule<MainActivity>()
+  // val rule = createAndroidComposeRule<MainActivity>()
   val rule = createComposeRule()
 
   val almostThirstyPlant =
-    Plant(
-      name = "Water?",
-      image = null,
-      latinName = "laurem ipsum",
-      description = "edge plant that will soon be thirsty",
-      healthStatus = PlantHealthStatus.UNKNOWN,
-      healthStatusDescription = "we don't care about the initial, will be recomputed soon",
-      wateringFrequency = 1
-    )
+      Plant(
+          name = "Water?",
+          image = null,
+          latinName = "laurem ipsum",
+          description = "edge plant that will soon be thirsty",
+          healthStatus = PlantHealthStatus.UNKNOWN,
+          healthStatusDescription = "we don't care about the initial, will be recomputed soon",
+          wateringFrequency = 1)
   val thirstyPlant =
-    Plant(
-      name = "WATER!",
-      image = null,
-      latinName = "laurem ipsum",
-      description = "already thirsty plant!",
-      healthStatus = PlantHealthStatus.NEEDS_WATER,
-      healthStatusDescription = "already ?!",
-      wateringFrequency = 1
-    )
+      Plant(
+          name = "WATER!",
+          image = null,
+          latinName = "laurem ipsum",
+          description = "already thirsty plant!",
+          healthStatus = PlantHealthStatus.NEEDS_WATER,
+          healthStatusDescription = "already ?!",
+          wateringFrequency = 1)
 
   private lateinit var repo: PlantsRepository
 
@@ -99,12 +93,10 @@ class PopupBackendTests {
   }
 
   fun ComposeTestRule.saveAlmostThirstyPlantInRepo() {
-    val justMoreThanADay = Timestamp(
-      System.currentTimeMillis() - (TimeUnit.DAYS.toMillis(1) - TimeUnit.SECONDS.toMillis(5))
-    )
-    runTest {
-      repo.saveToGarden(almostThirstyPlant, repo.getNewId(), justMoreThanADay)
-    }
+    val justMoreThanADay =
+        Timestamp(
+            System.currentTimeMillis() - (TimeUnit.DAYS.toMillis(1) - TimeUnit.SECONDS.toMillis(5)))
+    runTest { repo.saveToGarden(almostThirstyPlant, repo.getNewId(), justMoreThanADay) }
   }
 
   @Test
@@ -159,9 +151,7 @@ class PopupBackendTests {
     rule.saveAlmostThirstyPlantInRepo()
     Thread.sleep(7000)
     // to trigger the status update
-    runTest {
-      repo.getAllOwnedPlants()
-    }
+    runTest { repo.getAllOwnedPlants() }
     rule.wholePopupIsDisplayed()
   }
 }

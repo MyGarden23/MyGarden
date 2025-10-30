@@ -1,8 +1,8 @@
 package com.android.mygarden.model.plant
 
+import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.sql.Timestamp
 
 /** Represents a repository that manages Plant and OwnedPlant objects. */
 class PlantsRepositoryLocal : PlantsRepository {
