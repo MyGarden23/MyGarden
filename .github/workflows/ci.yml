@@ -160,9 +160,6 @@ jobs:
             adb reverse tcp:8080 tcp:8080   # Firestore
             adb reverse tcp:4400 tcp:4400 || true
 
-            echo "Testing connectivity from Android emulator to Firebase emulator..."
-            adb shell "curl -s http://10.0.2.2:9099/emulators || echo 'WARNING: Cannot reach Firebase emulator from Android device'"
-
             export CI=true
             adb shell pm revoke com.android.mygarden android.permission.CAMERA
 
@@ -171,8 +168,6 @@ jobs:
               -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
         env:
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera
-
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
         run: |
