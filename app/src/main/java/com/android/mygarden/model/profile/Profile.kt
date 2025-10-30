@@ -6,16 +6,13 @@ package com.android.mygarden.model.profile
  * Linked to the Google account used for sign-in via Firebase Auth (field: [uid]). This allows
  * scoping user data (e.g., plants) to a specific authenticated user.
  *
- * @param uid Firebase Auth unique identifier of the user (same as FirebaseUser.uid)
  * @param firstName The user's first name
  * @param lastName The user's last name
  * @param gardeningSkill The user's gardening expertise (e.g., Beginner, Intermediate, Expert)
  * @param favoritePlant The user's favorite plant
  * @param country The user's country of residence
- * @param email The user's email address from Google Sign-In (optional)
- * @param photoUrl The user's avatar URL from Google profile (optional)
- * @param createdAt Epoch millis when the profile was created (server/client set)
- * @param updatedAt Epoch millis when the profile was last updated
+ * @param hasSignedIn The user is signed in
+ * @param avatar the user's avatar
  */
 data class Profile(
     val firstName: String = "",
