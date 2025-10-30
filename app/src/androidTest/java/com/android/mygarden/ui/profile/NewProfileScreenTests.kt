@@ -11,6 +11,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.ui.theme.MyGardenTheme
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -589,6 +594,28 @@ class NewProfileScreenTests {
         .assertTextContains("Canada")
   }
 
+  class FakeProfileRepository : ProfileRepository {
+    override fun getCurrentUserId(): String? = "fake_uid"
+
+    override fun getProfile(): Flow<Profile?> = flowOf(null)
+
+    override suspend fun saveProfile(profile: Profile) {
+      /* no-op, succeed */
+    }
+  }
+
+  private fun setContentWithFakeRepo() {
+    val repo = FakeProfileRepository()
+    val vm = NewProfileViewModel(repo)
+
+    composeTestRule.setContent {
+      MyGardenTheme {
+        NewProfileScreen(
+            newProfileViewModel = vm, onRegisterPressed = { onRegisterPressedCalled = true })
+      }
+    }
+  }
+
   /**
    * Tests successful form submission with all mandatory fields filled.
    *
@@ -598,7 +625,7 @@ class NewProfileScreenTests {
    */
   @Test
   fun canRegisterIfMandatoryFieldsAreFilled() {
-    setContent()
+    setContentWithFakeRepo()
 
     // Fill in all mandatory fields
     performTextInputAndAssert(NewProfileScreenTestTags.FIRST_NAME_FIELD, "John")

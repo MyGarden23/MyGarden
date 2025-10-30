@@ -176,7 +176,7 @@ class NewProfileViewModel(
     // Affiche les erreurs si champs invalides
     setRegisterPressed(true)
     val state = _uiState.value
-    if (!state.canRegister() || state.gardeningSkill == null) {
+    if (!state.canRegister()) {
       onResult(false)
       return
     }
@@ -192,7 +192,7 @@ class NewProfileViewModel(
         Profile(
             firstName = state.firstName.trim(),
             lastName = state.lastName.trim(),
-            gardeningSkill = state.gardeningSkill,
+            gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
             favoritePlant = state.favoritePlant.trim(),
             country = state.country.trim(),
             hasSignedIn = true)
