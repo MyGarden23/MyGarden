@@ -114,6 +114,17 @@ jobs:
         id: firebase_project
         run: |
           echo "project_id=$(jq -r '.project_info.project_id' app/google-services.json)" >> $GITHUB_OUTPUT
+          
+      - name: Create firebase.json
+        run: |
+          cat > firebase.json <<'JSON'
+          {
+            "emulators": {
+              "auth": { "port": 9099, "host": "0.0.0.0" },
+              "firestore": { "port": 8080, "host": "0.0.0.0" }
+            }
+          }
+          JSON
 
       - name: Start Firebase emulators
         run: |
@@ -168,6 +179,7 @@ jobs:
               -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
         env:
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
+
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
         run: |
