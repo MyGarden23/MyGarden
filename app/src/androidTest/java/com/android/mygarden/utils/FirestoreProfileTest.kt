@@ -29,7 +29,8 @@ abstract class FirestoreProfileTest {
 
     // Fake sign-in (suspend)
     auth.signOut()
-    val idToken = FakeJwtGenerator.createFakeGoogleIdToken(email = "test@mygarden.com")
+    val uniqueEmail = "test.profile+${System.currentTimeMillis()}@example.com"
+    val idToken = FakeJwtGenerator.createFakeGoogleIdToken(email = uniqueEmail)
     val cred = GoogleAuthProvider.getCredential(idToken, null)
     val result = auth.signInWithCredential(cred).await() // ✅ dans runTest
     val uid = result.user?.uid

@@ -110,20 +110,21 @@ jobs:
       - name: Install Firebase tools
         run: npm i -g firebase-tools@13
 
+      - name: Read Firebase projectId
+        id: firebase_project
+        run: |
+          echo "project_id=$(jq -r '.project_info.project_id' app/google-services.json)" >> $GITHUB_OUTPUT
 
       - name: Start Firebase emulators
         run: |
           if [ -e "firebase.json" ]; then
             echo "Starting Firebase emulators for instrumentation tests..."
-            firebase emulators:start --only auth,firestore --project demo-ci &
-            sleep 5  # Give emulators a moment to start
+            firebase emulators:start --only auth,firestore --project "${{ steps.firebase_project.outputs.project_id }}" &
+            sleep 5
             echo "Firebase emulators started in background"
           else
             echo "firebase.json not found - skipping emulators (tests may fail)"
           fi
-
-
-
       # Run connected tests on the emulator
       - name: Run tests with camera
         uses: reactivecircus/android-emulator-runner@v2
@@ -153,19 +154,21 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096 -partition-size 4096
           disable-animations: true
           script: |
-            # Forward Firebase emulator ports to Android emulator
-            adb reverse tcp:9099 tcp:9099
-            adb reverse tcp:4400 tcp:4400
             adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-            # Verify Android emulator can reach Firebase emulator
+            # Forward Firebase emulator ports to Android emulator
+            adb reverse tcp:9099 tcp:9099   # Auth
+            adb reverse tcp:8080 tcp:8080   # Firestore
+            adb reverse tcp:4400 tcp:4400 || true
+
             echo "Testing connectivity from Android emulator to Firebase emulator..."
             adb shell "curl -s http://10.0.2.2:9099/emulators || echo 'WARNING: Cannot reach Firebase emulator from Android device'"
+
             export CI=true
-            export FIREBASE_EMULATOR_DEVICE_HOST=10.0.2.2
-            export FIREBASE_AUTH_EMULATOR_HOST=10.0.2.2:9099
-            echo "Revoking camera permission"
             adb shell pm revoke com.android.mygarden android.permission.CAMERA
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
+
+            ./gradlew connectedCheck --parallel --build-cache \
+              -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera \
+              -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
         env:
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
             ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera
