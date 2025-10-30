@@ -24,7 +24,7 @@ data class Profile(
     val favoritePlant: String = "",
     val country: String = "",
     val hasSignedIn: Boolean = false,
-    // val avatar: Avatar? = null // (à réactiver plus tard)
+    val avatar: String? = "A1"
 )
 /**
  * Represents the different levels of gardening experience and skill.

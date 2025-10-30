@@ -195,7 +195,8 @@ class NewProfileViewModel(
             gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
             favoritePlant = state.favoritePlant.trim(),
             country = state.country.trim(),
-            hasSignedIn = true)
+            hasSignedIn = true,
+            avatar = state.avatar.name)
 
     viewModelScope.launch {
       try {
