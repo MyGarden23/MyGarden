@@ -122,6 +122,16 @@ private val WATER_BAR_WRAPPER_HEIGHT = 14.dp
 private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
 
+// Text values
+private const val MY_GARDEN_TITLE_TEXT = "My Garden"
+private const val EMPTY_GARDEN_MESSAGE_TEXT =
+    "You don't have a plant yet ! Use the button below to add a plant."
+private const val ADD_PLANT_FAB_TEXT = "Add a plant"
+private const val WATER_BUTTON_ICON_DESCRIPTION = "Water plant button"
+
+private fun getOwnedPlantImageDescription(ownedPlant: OwnedPlant): String =
+    "Image of a ${ownedPlant.plant.name}"
+
 /**
  * The screen of the garden with some user profile infos and the list of plants owned by the user.
  *
@@ -163,7 +173,7 @@ fun GardenScreen(
               Text(
                   fontWeight = FontWeight.ExtraBold,
                   style = MaterialTheme.typography.titleLarge,
-                  text = "My Garden")
+                  text = MY_GARDEN_TITLE_TEXT)
             },
             colors =
                 TopAppBarDefaults.topAppBarColors(
@@ -198,7 +208,7 @@ fun GardenScreen(
                         .padding(EMPTY_LIST_MESSAGE_PADDING)
                         .testTag(GardenScreenTestTags.EMPTY_GARDEN_MSG),
                 contentAlignment = Alignment.Center) {
-                  Text(text = "You don't have a plant yet ! Use the button below to add a plant.")
+                  Text(text = EMPTY_GARDEN_MESSAGE_TEXT)
                 }
           }
         }
@@ -231,7 +241,7 @@ fun ProfileRow(onEditProfile: () -> Unit, modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.titleMedium,
-            text = "Username")
+            text = "Username") /* TODO: Replace with real user name when implementation is done */
         Spacer(modifier = modifier.weight(1f))
 
         // Edit profile button
@@ -261,7 +271,7 @@ fun AddPlantFloatingButton(onAddPlant: () -> Unit, modifier: Modifier = Modifier
               painter = painterResource(R.drawable.tree_icon),
               contentDescription = null,
               tint = MaterialTheme.colorScheme.primary)
-          Text("Add a plant")
+          Text(text = ADD_PLANT_FAB_TEXT)
         }
       }
 }
@@ -303,7 +313,7 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                         ImageRequest.Builder(LocalContext.current)
                             .data(ownedPlant.plant.image ?: "")
                             .build(),
-                    contentDescription = "Image of a {${ownedPlant.plant.name}}",
+                    contentDescription = getOwnedPlantImageDescription(ownedPlant),
                     modifier =
                         modifier
                             .fillMaxHeight()
@@ -401,7 +411,7 @@ fun WaterButton(modifier: Modifier = Modifier, color: Color, onButtonPressed: ()
       contentAlignment = Alignment.Center) {
         Icon(
             Icons.Default.WaterDrop,
-            contentDescription = "Water plant button",
+            contentDescription = WATER_BUTTON_ICON_DESCRIPTION,
             tint = color,
             modifier = modifier.size(WATER_BUTTON_DROP_ICON_SIZE))
       }
