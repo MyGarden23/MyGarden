@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +57,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
+import com.android.mygarden.model.plant.PlantHealthCalculator
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.CustomColors
@@ -197,7 +199,9 @@ fun GardenScreen(
                         .padding(horizontal = PLANT_ITEM_HORIZONTAL_PADDING)
                         .testTag(GardenScreenTestTags.GARDEN_LIST),
                 verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING)) {
-                  items(plants.size) { index -> PlantCard(plants[index], modifier) }
+                  items(plants.size) { index ->
+                    PlantCard(plants[index], modifier, gardenViewModel)
+                  }
                 }
           } else {
             // The list of plant is empty : display a simple message instead
@@ -283,13 +287,25 @@ fun AddPlantFloatingButton(onAddPlant: () -> Unit, modifier: Modifier = Modifier
  * @param modifier the optional modifier of the composable
  */
 @Composable
-fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
+fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier, viewModel: GardenViewModel) {
   // The color palette of the card depending on the health status of the plant
   val colorPalette =
       colorsFromHealthStatus(
           status = ownedPlant.plant.healthStatus,
           colorScheme = MaterialTheme.colorScheme,
           customColors = ExtendedTheme.colors)
+  // The water level Float used in the water level bar
+  val waterLevel =
+      remember(
+          ownedPlant.lastWatered,
+          ownedPlant.previousLastWatered,
+          ownedPlant.plant.wateringFrequency) {
+            PlantHealthCalculator()
+                .calculateInStatusFloat(
+                    lastWatered = ownedPlant.lastWatered,
+                    wateringFrequency = ownedPlant.plant.wateringFrequency,
+                    previousLastWatered = ownedPlant.previousLastWatered)
+          }
   // The colored box container
   Card(
       modifier =
@@ -373,9 +389,8 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                     Box(
                         modifier = modifier.height(WATER_BAR_WRAPPER_HEIGHT),
                         contentAlignment = Alignment.Center) {
-                          // TODO: make the water level bar depend on the plant's last watering time
                           WaterBar(
-                              waterLevel = 0.5f,
+                              waterLevel = waterLevel,
                               color = colorPalette.wateringColor,
                               modifier = modifier,
                               ownedPlant = ownedPlant)
@@ -386,7 +401,7 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                   modifier =
                       modifier.testTag(
                           GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(ownedPlant)),
-                  onButtonPressed = { /* TODO: add the watering logic*/})
+                  onButtonPressed = { viewModel.waterPlant(ownedPlant) })
             }
       })
 }
