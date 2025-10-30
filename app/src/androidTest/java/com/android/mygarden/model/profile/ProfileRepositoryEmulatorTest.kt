@@ -12,20 +12,28 @@ import org.junit.*
 import org.junit.Assert.*
 import org.junit.runner.RunWith
 
+// Runs the tests on an Android emulator
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
 
+  // Needed to launch a Compose context (for proper Android environment)
   @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
   @Before
   override fun setUp() {
+    // Start up Firebase emulator, clear data, etc. (handled by FirestoreProfileTest)
     super.setUp()
+
+    // Just sets up a Compose theme — no actual UI content here
     compose.setContent { MyGardenTheme {} }
   }
 
+  // --- TESTS START HERE ---
+
   @Test
   fun canSaveAndRetrieveProfile() = runTest {
+    // Create a fake profile and save it to Firestore (via emulator)
     val profile =
         Profile(
             firstName = "Ada",
@@ -37,6 +45,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
 
     repo.saveProfile(profile)
 
+    // Fetch the saved profile from Firestore and check that fields match
     val fetched = repo.getProfile().first()
     assertNotNull(fetched)
     assertEquals("Ada", fetched!!.firstName)
@@ -48,6 +57,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @Test
   fun saveProfile_mergesWithoutOverwriting() = runTest {
+    // Save an initial profile
     val initial =
         Profile(
             firstName = "Alan",
@@ -58,9 +68,11 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
             hasSignedIn = false)
     repo.saveProfile(initial)
 
+    // Update only a few fields (should merge instead of overwrite everything)
     val update = initial.copy(favoritePlant = "Rose", hasSignedIn = true)
     repo.saveProfile(update)
 
+    // Check that the updated fields changed, and the others stayed the same
     val latest = repo.getProfile().first()
     assertNotNull(latest)
     assertEquals("Rose", latest!!.favoritePlant)
@@ -72,6 +84,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @Test
   fun hasSignedInFlagTogglesAndPersists() = runTest {
+    // Save a profile with hasSignedIn = false
     val base =
         Profile(
             firstName = "Grace",
@@ -81,9 +94,12 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
             country = "US",
             hasSignedIn = false)
     repo.saveProfile(base)
+
+    // Verify it starts as false
     var cur = repo.getProfile().first()
     assertFalse(cur!!.hasSignedIn)
 
+    // Update to true and check persistence
     repo.saveProfile(cur.copy(hasSignedIn = true))
     cur = repo.getProfile().first()
     assertTrue(cur!!.hasSignedIn)
@@ -91,6 +107,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @Test
   fun getCurrentUserId_isNotNull() = runTest {
+    // Check that the Firebase emulator returns a valid user ID
     val uid = repo.getCurrentUserId()
     assertNotNull(uid)
     assertTrue(uid!!.isNotBlank())
