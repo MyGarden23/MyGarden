@@ -2,8 +2,12 @@ package com.android.mygarden.ui.profile
 
 import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.model.profile.ProfileRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -22,13 +26,25 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class NewProfileViewModelTest {
 
+  private class FakeProfileRepository : ProfileRepository {
+    private val flow = MutableStateFlow<Profile?>(null)
+
+    override fun getCurrentUserId(): String? = "test-uid"
+
+    override fun getProfile(): Flow<Profile?> = flow
+
+    override suspend fun saveProfile(profile: Profile) {
+      flow.value = profile
+    }
+  }
+
   private lateinit var viewModel: NewProfileViewModel
   private val testDispatcher = StandardTestDispatcher()
 
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = NewProfileViewModel()
+    viewModel = NewProfileViewModel(repo = FakeProfileRepository())
   }
 
   @After
