@@ -74,7 +74,7 @@ class GardenViewModelTests {
   @Test
   fun getAllPlantsWorksCorrectly() = runTest {
     assertEquals(emptyList<OwnedPlant>(), vm.uiState.value.plants)
-    vm.getAllPlants()
+    vm.refreshUIState()
     advanceUntilIdle()
     assertEquals(emptyList<OwnedPlant>(), vm.uiState.value.plants)
     ownedPlant =
@@ -83,7 +83,7 @@ class GardenViewModelTests {
             repo.getNewId(),
             Timestamp(System.currentTimeMillis() - (1L * 24 * 60 * 60 * 1000)))
     advanceUntilIdle()
-    vm.getAllPlants()
+    vm.refreshUIState()
     advanceUntilIdle()
     assertEquals(listOf(ownedPlant), vm.uiState.value.plants)
   }

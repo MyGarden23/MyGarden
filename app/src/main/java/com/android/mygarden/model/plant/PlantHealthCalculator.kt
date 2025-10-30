@@ -23,6 +23,9 @@ class PlantHealthCalculator {
     private const val PERCENTAGE_CALCULATION_UTILITY = 100.0
   }
 
+  /** Double variable used to track each owned plant's "percentage" inside of its status */
+  private var currentStatusPercentage = 0.0
+
   /**
    * Calculates the current health status of a plant based on watering cycle.
    *
@@ -49,6 +52,7 @@ class PlantHealthCalculator {
 
     // Validation: Invalid watering frequency
     if (wateringFrequency <= 0) {
+      currentStatusPercentage = 0.0
       return PlantHealthStatus.UNKNOWN
     }
 
@@ -63,6 +67,9 @@ class PlantHealthCalculator {
           (daysSincePreviousWatering / wateringFrequency) * PERCENTAGE_CALCULATION_UTILITY
 
       if (previousPercentage >= HEALTHY_MAX_THRESHOLD) {
+        currentStatusPercentage =
+            calculateRelativePercentage(
+                x = OVERWATERED_THRESHOLD, y = HEALTHY_MAX_THRESHOLD, z = percentageOfCycle)
         return PlantHealthStatus.HEALTHY
       }
     }
@@ -70,24 +77,97 @@ class PlantHealthCalculator {
     // Standard status determination based on percentage of watering cycle
     return when {
       // Watered very recently (less than 10% of cycle) - severely overwatered
-      percentageOfCycle < SEVERELY_OVERWATERED_THRESHOLD -> PlantHealthStatus.SEVERELY_OVERWATERED
+      percentageOfCycle < SEVERELY_OVERWATERED_THRESHOLD -> {
+        currentStatusPercentage =
+            calculateRelativePercentage(
+                x = 0.0, y = SEVERELY_OVERWATERED_THRESHOLD, z = percentageOfCycle)
+        PlantHealthStatus.SEVERELY_OVERWATERED
+      }
 
       // Watered too recently (10-30% of cycle) - overwatered
-      percentageOfCycle < OVERWATERED_THRESHOLD -> PlantHealthStatus.OVERWATERED
+      percentageOfCycle < OVERWATERED_THRESHOLD -> {
+        currentStatusPercentage =
+            calculateRelativePercentage(
+                x = SEVERELY_OVERWATERED_THRESHOLD,
+                y = OVERWATERED_THRESHOLD,
+                z = percentageOfCycle)
+        PlantHealthStatus.OVERWATERED
+      }
 
       // Healthy range (30-70% of cycle)
-      percentageOfCycle <= HEALTHY_MAX_THRESHOLD -> PlantHealthStatus.HEALTHY
+      percentageOfCycle <= HEALTHY_MAX_THRESHOLD -> {
+        currentStatusPercentage =
+            calculateRelativePercentage(
+                x = OVERWATERED_THRESHOLD, y = HEALTHY_MAX_THRESHOLD, z = percentageOfCycle)
+        PlantHealthStatus.HEALTHY
+      }
 
       // Starting to dry out (70-100% of cycle)
-      percentageOfCycle <= SLIGHTLY_DRY_MAX_THRESHOLD -> PlantHealthStatus.SLIGHTLY_DRY
+      percentageOfCycle <= SLIGHTLY_DRY_MAX_THRESHOLD -> {
+        currentStatusPercentage =
+            calculateRelativePercentage(
+                x = HEALTHY_MAX_THRESHOLD, y = SLIGHTLY_DRY_MAX_THRESHOLD, z = percentageOfCycle)
+        PlantHealthStatus.SLIGHTLY_DRY
+      }
 
       // Needs water (100-130% of cycle)
-      percentageOfCycle <= NEEDS_WATER_MAX_THRESHOLD -> PlantHealthStatus.NEEDS_WATER
+      percentageOfCycle <= NEEDS_WATER_MAX_THRESHOLD -> {
+        currentStatusPercentage =
+            calculateRelativePercentage(
+                x = SLIGHTLY_DRY_MAX_THRESHOLD,
+                y = NEEDS_WATER_MAX_THRESHOLD,
+                z = percentageOfCycle)
+        PlantHealthStatus.NEEDS_WATER
+      }
 
       // Critical - severely dry (>130% of cycle)
-      percentageOfCycle > NEEDS_WATER_MAX_THRESHOLD -> PlantHealthStatus.SEVERELY_DRY
-      else -> PlantHealthStatus.UNKNOWN
+      percentageOfCycle > NEEDS_WATER_MAX_THRESHOLD -> {
+        currentStatusPercentage = 1.0
+        PlantHealthStatus.SEVERELY_DRY
+      }
+      else -> {
+        currentStatusPercentage = 0.0
+        PlantHealthStatus.UNKNOWN
+      }
     }
+  }
+
+  /**
+   * Used to calculate where the given owned plant currently is in its watering status. This float
+   * is used to display the percentage on the water level bar.
+   *
+   * @param lastWatered the last time this plant was watered
+   * @param wateringFrequency the watering frequency of the given plant we want to water (should be
+   *   bigger than 0)
+   *     @param previousLastWatered the previously water field of the owned plant (used to compute
+   *       the health status)
+   * @param currentTime the current time (at which we watered the plant)
+   * @return a Float that represents the percentage of the watering cycle that has been completed
+   */
+  fun calculateInStatusFloat(
+      lastWatered: Timestamp,
+      wateringFrequency: Int,
+      previousLastWatered: Timestamp? = null,
+      currentTime: Timestamp = Timestamp(System.currentTimeMillis())
+  ): Float {
+    calculateHealthStatus(lastWatered, wateringFrequency, previousLastWatered, currentTime)
+    return currentStatusPercentage.toFloat()
+  }
+
+  /**
+   * Helper function that calculates the relative position of z within a given interval [x, y].
+   *
+   * The result is normalized to a 0–1 range:
+   * - Returns 0.0 if z == x or 1.0 if z == y
+   * - Returns a proportional fraction otherwise, i.e. (z - x) / (y - x)
+   *
+   * @param x the lower bound of the interval (start of the range)
+   * @param y the upper bound of the interval (end of the range)
+   * @param z the value whose relative position is being calculated (should satisfy x ≤ z ≤ y)
+   * @return the normalized value between 0.0 and 1.0 representing the relative position of z
+   */
+  private fun calculateRelativePercentage(x: Double, y: Double, z: Double): Double {
+    return (z - x) / (y - x)
   }
 
   /**

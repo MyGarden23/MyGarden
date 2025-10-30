@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,7 +56,7 @@ class GardenViewModel(
   }
 
   /** Fetches all the plants from the [plantsRepo] and set an error message if the fetch failed */
-  fun getAllPlants() {
+  private fun getAllPlants() {
     viewModelScope.launch {
       try {
         val plants = plantsRepo.getAllOwnedPlants()
@@ -64,6 +65,20 @@ class GardenViewModel(
         Log.e("GardenViewModel", "Owned plants couldn't be retrieved from repository", e)
         setErrorMsg("getAllPlants failed : Owned plants couldn't be retrieved from repository")
       }
+    }
+  }
+
+  /**
+   * Wrapper for the repository homologous function that update the given plant last time watered to
+   * the current time of the device.
+   *
+   * @param ownedPlant the plant that is being watered
+   */
+  fun waterPlant(ownedPlant: OwnedPlant) {
+    viewModelScope.launch {
+      plantsRepo.waterPlant(ownedPlant.id, Timestamp(System.currentTimeMillis()))
+      // Refresh UI state
+      getAllPlants()
     }
   }
 }
