@@ -9,13 +9,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.BottomBar
 import com.android.mygarden.ui.navigation.NavigationActions
 import com.android.mygarden.ui.navigation.Page
 import com.android.mygarden.ui.navigation.Screen
+import com.android.mygarden.ui.popup.PopupViewModel
+import com.android.mygarden.ui.popup.WaterPlantPopup
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.google.firebase.auth.FirebaseAuth
 
@@ -40,6 +44,18 @@ fun MyGardenApp() {
   val navController = rememberNavController()
   // Small wrapper to simplify navigation calls
   val actions = remember(navController) { NavigationActions(navController) }
+
+  // This view model will be used to collect the plants whose status transitioned to NEEDS_WATER in
+  // order to display the pop-up
+  val popupVM: PopupViewModel = viewModel()
+  // This var is used to know when to display the pop-up and for which plant ; it is reset to [null]
+  // everytime a pop-up is not displayed anymore
+  var currentThirstyPlant by remember { mutableStateOf<OwnedPlant?>(null) }
+
+  LaunchedEffect(Unit) {
+    // Collect all the plants that became thirsty from the view model to display the popup
+    popupVM.thirstyPlants.collect { ownedPlant -> currentThirstyPlant = ownedPlant }
+  }
 
   // Determine where to start: if the user is logged in, skip Sign-In
   // For end-to-end tests, we can force starting on camera
@@ -94,6 +110,19 @@ fun MyGardenApp() {
               navController = navController,
               startDestination = startDestination,
           )
+
+          // Display a pop-up whenever a newly thirsty plant is collected from the view model
+          currentThirstyPlant?.let {
+            WaterPlantPopup(
+                plantName = it.plant.name,
+                // Reset the var when quitting the pop-up to let a future one be displayed
+                onDismiss = { currentThirstyPlant = null },
+                // Navigate to garden when using this button and reset the var
+                onConfirm = {
+                  actions.navTo(Screen.Garden)
+                  currentThirstyPlant = null
+                })
+          }
         }
       }
 }

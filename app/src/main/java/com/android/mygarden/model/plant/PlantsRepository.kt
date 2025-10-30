@@ -9,6 +9,8 @@ import com.google.firebase.ai.type.GenerativeBackend
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.doubleOrNull
@@ -25,6 +27,9 @@ import okhttp3.OkHttpClient
  * virtual garden.
  */
 interface PlantsRepository {
+
+  val plantsFlow: StateFlow<List<OwnedPlant>>
+    get() = MutableStateFlow(emptyList())
 
   companion object {
     /**

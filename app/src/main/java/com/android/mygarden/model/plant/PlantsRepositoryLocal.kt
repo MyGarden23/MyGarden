@@ -1,6 +1,8 @@
 package com.android.mygarden.model.plant
 
 import java.sql.Timestamp
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /** Represents a repository that manages Plant and OwnedPlant objects. */
 class PlantsRepositoryLocal : PlantsRepository {
@@ -9,6 +11,9 @@ class PlantsRepositoryLocal : PlantsRepository {
   private val ownedPlants: MutableList<OwnedPlant> = mutableListOf()
   private val healthCalculator = PlantHealthCalculator()
 
+  private val _plantsFlow = MutableStateFlow<List<OwnedPlant>>(emptyList())
+  override val plantsFlow: StateFlow<List<OwnedPlant>> = _plantsFlow
+
   override fun getNewId(): String {
     return counter++.toString()
   }
@@ -16,6 +21,8 @@ class PlantsRepositoryLocal : PlantsRepository {
   override suspend fun saveToGarden(plant: Plant, id: String, lastWatered: Timestamp): OwnedPlant {
     val ownedPlant = OwnedPlant(id, plant, lastWatered)
     ownedPlants.add(ownedPlant)
+    // Update the flow value so that it emits the updated list
+    _plantsFlow.value = ownedPlants.toList()
     return ownedPlant
   }
 
@@ -23,6 +30,8 @@ class PlantsRepositoryLocal : PlantsRepository {
     ownedPlants.forEachIndexed { index, ownedPlant ->
       ownedPlants[index] = updatePlantHealthStatus(ownedPlant)
     }
+    // Update the flow value so that it emits the updated list
+    _plantsFlow.value = ownedPlants.toList()
     return ownedPlants.toList()
   }
 
@@ -34,6 +43,8 @@ class PlantsRepositoryLocal : PlantsRepository {
 
     val updatedPlant = updatePlantHealthStatus(ownedPlants[index])
     ownedPlants[index] = updatedPlant
+    // Update the flow value so that it emits the updated list
+    _plantsFlow.value = ownedPlants.toList()
     return updatedPlant
   }
 
@@ -41,6 +52,8 @@ class PlantsRepositoryLocal : PlantsRepository {
     val index = ownedPlants.indexOfFirst { it.id == id }
     if (index != -1) {
       ownedPlants.removeAt(index)
+      // Update the flow value so that it emits the updated list
+      _plantsFlow.value = ownedPlants.toList()
     } else {
       throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
     }
@@ -54,6 +67,8 @@ class PlantsRepositoryLocal : PlantsRepository {
     val index = ownedPlants.indexOfFirst { it.id == id }
     if (index != -1) {
       ownedPlants[index] = newOwnedPlant
+      // Update the flow value so that it emits the updated list
+      _plantsFlow.value = ownedPlants.toList()
     } else {
       throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
     }
@@ -69,6 +84,8 @@ class PlantsRepositoryLocal : PlantsRepository {
         ownedPlant.copy(lastWatered = wateringTime, previousLastWatered = previousWatering)
     val index = ownedPlants.indexOfFirst { it.id == id }
     ownedPlants[index] = updatedPlant
+    // Update the flow value so that it emits the updated list
+    _plantsFlow.value = ownedPlants.toList()
   }
 
   /**
