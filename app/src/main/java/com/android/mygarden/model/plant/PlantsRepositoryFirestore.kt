@@ -16,6 +16,7 @@ class PlantsRepositoryFirestore : PlantsRepository {
 
   private val firestore = FirebaseFirestore.getInstance()
   private val auth: FirebaseAuth = Firebase.auth
+  private val healthCalculator = PlantHealthCalculator()
 
   /** The list of plants owned by the user, in the repository of the user. */
   private fun userPlantsCollection() =
@@ -43,7 +44,9 @@ class PlantsRepositoryFirestore : PlantsRepository {
   override suspend fun getAllOwnedPlants(): List<OwnedPlant> {
     val snapshot = userPlantsCollection().get().await()
     val serializedList = snapshot.toObjects(SerializedOwnedPlant::class.java)
-    return serializedList.map(FirestoreMapper::fromSerializedOwnedPlantToOwnedPlant)
+    val ownedPlantList = serializedList.map(FirestoreMapper::fromSerializedOwnedPlantToOwnedPlant)
+
+    return ownedPlantList.map { p -> updatePlantHealthStatus(p) }
   }
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
@@ -54,7 +57,9 @@ class PlantsRepositoryFirestore : PlantsRepository {
         document.toObject(SerializedOwnedPlant::class.java)
             ?: throw IllegalArgumentException("Failed to parse SerializedOwnedPlant with id $id")
 
-    return fromSerializedOwnedPlantToOwnedPlant(serializedOwnedPlant)
+    val ownedPlant = fromSerializedOwnedPlantToOwnedPlant(serializedOwnedPlant)
+
+    return updatePlantHealthStatus(ownedPlant)
   }
 
   override suspend fun deleteFromGarden(id: String) {
@@ -85,5 +90,21 @@ class PlantsRepositoryFirestore : PlantsRepository {
     val newOwnedPlant =
         ownedPlant.copy(previousLastWatered = ownedPlant.lastWatered, lastWatered = wateringTime)
     docRef.set(fromOwnedPlantToSerializedOwnedPlant(newOwnedPlant), SetOptions.merge()).await()
+  }
+
+  /**
+   * Updates the health status of a plant based on current watering cycle.
+   *
+   * @param ownedPlant The plant to update
+   * @return A copy of the plant with updated health status
+   */
+  private fun updatePlantHealthStatus(ownedPlant: OwnedPlant): OwnedPlant {
+    val calculatedStatus =
+        healthCalculator.calculateHealthStatus(
+            lastWatered = ownedPlant.lastWatered,
+            wateringFrequency = ownedPlant.plant.wateringFrequency,
+            previousLastWatered = ownedPlant.previousLastWatered)
+    val updatedPlant = ownedPlant.plant.copy(healthStatus = calculatedStatus)
+    return ownedPlant.copy(plant = updatedPlant)
   }
 }
