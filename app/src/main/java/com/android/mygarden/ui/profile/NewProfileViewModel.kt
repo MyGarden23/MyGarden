@@ -18,6 +18,7 @@ data class NewProfileUIState(
     val favoritePlant: String = "",
     val country: String = "",
     val registerPressed: Boolean = false,
+    val avatar: Avatar = Avatar.A1 // By default 1st avatar
 ) {
   /**
    * Validates that the first name is not blank
@@ -140,6 +141,15 @@ class NewProfileViewModel() : ViewModel() {
     val capitalizedCountry =
         country.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     _uiState.value = _uiState.value.copy(country = capitalizedCountry)
+  }
+
+  /**
+   * Updates the avatar in the UI state
+   *
+   * @param avatar The selected avatar
+   */
+  fun setAvatar(avatar: Avatar) {
+    _uiState.value = _uiState.value.copy(avatar = avatar)
   }
 
   /**

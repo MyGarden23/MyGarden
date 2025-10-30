@@ -1,6 +1,9 @@
 package com.android.mygarden.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -12,6 +15,10 @@ import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
+import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.ui.profile.ChooseProfilePictureScreen
+import com.android.mygarden.ui.profile.NewProfileScreen
+import com.android.mygarden.ui.profile.NewProfileViewModel
 
 @Composable
 fun AppNavHost(
@@ -32,6 +39,30 @@ fun AppNavHost(
       SignInScreen(
           credentialManager = credentialManagerProvider(),
           onSignedIn = { navigationActions.navTo(Screen.Camera) })
+    }
+
+    // New Profile
+    composable(Screen.NewProfile.route) { backStackEntry ->
+      val vm: NewProfileViewModel = viewModel()
+      val chosenName by
+          backStackEntry.savedStateHandle.getStateFlow("chosen_avatar", "").collectAsState()
+
+      val chosenAvatar =
+          chosenName
+              .takeIf { it.isNotBlank() }
+              ?.let { runCatching { Avatar.valueOf(it) }.getOrNull() }
+
+      LaunchedEffect(chosenAvatar) {
+        if (chosenAvatar != null) {
+          vm.setAvatar(chosenAvatar)
+          backStackEntry.savedStateHandle.set("chosen_avatar", "")
+        }
+      }
+
+      NewProfileScreen(
+          newProfileViewModel = vm,
+          onRegisterPressed = { navigationActions.navTo(destination = Screen.Camera) },
+          onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
     }
 
     // Profile
@@ -74,6 +105,19 @@ fun AppNavHost(
             // This will naturally handle the navigation stack properly
             navigationActions.navToTopLevel(Screen.Garden)
           })
+    }
+
+    // Choose Avatar
+    composable(Screen.ChooseAvatar.route) {
+      ChooseProfilePictureScreen(
+          onAvatarChosen = { avatar ->
+            // Return the selection to the previous screen (Profile/NewProfile)
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set("chosen_avatar", avatar.name)
+            navigationActions.navBack()
+          },
+          onBack = { navigationActions.navBack() })
     }
 
     // EditPlant

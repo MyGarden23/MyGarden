@@ -103,6 +103,7 @@ class NewProfileScreenTests {
     // Verify header components
     composeTestRule.onNodeWithTag(NewProfileScreenTestTags.TITLE).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NewProfileScreenTestTags.AVATAR).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.AVATAR).assertHasClickAction()
 
     // Verify all input fields are displayed
     composeTestRule.onNodeWithTag(NewProfileScreenTestTags.FIRST_NAME_FIELD).assertIsDisplayed()
