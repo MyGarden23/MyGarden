@@ -119,7 +119,7 @@ fun MyGardenApp() {
                 onDismiss = { currentThirstyPlant = null },
                 // Navigate to garden when using this button and reset the var
                 onConfirm = {
-                  NavigationActions(navController).navTo(Screen.Garden)
+                  actions.navTo(Screen.Garden)
                   currentThirstyPlant = null
                 })
           }

@@ -28,10 +28,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PopupBackendTests {
 
-  @get:Rule
-  // val rule = createAndroidComposeRule<MainActivity>()
-  val rule = createComposeRule()
+  @get:Rule val rule = createComposeRule()
 
+  // Some fictional plants to use for the tests
   val almostThirstyPlant =
       Plant(
           name = "Water?",
@@ -53,12 +52,17 @@ class PopupBackendTests {
 
   private lateinit var repo: PlantsRepository
 
+  /** Sets the repo as a local one and ensures the provider's repo is aligned with this new one. */
   @Before
   fun repoSetUp() {
     repo = PlantsRepositoryLocal()
     PlantsRepositoryProvider.repository = repo
   }
 
+  /**
+   * Took the idea from [com.android.mygarden.ui.garden.GardenScreenTests] to populate the repo with
+   * an initial list and set the content to create the app to test
+   */
   fun setContent(initialList: List<Plant> = emptyList()) {
     runTest { initialList.forEach { repo.saveToGarden(it, repo.getNewId(), Timestamp(1)) } }
     rule.setContent { MyGardenTheme { MyGardenApp() } }
@@ -71,6 +75,7 @@ class PopupBackendTests {
     runTest { repo.getAllOwnedPlants().forEach { p -> repo.deleteFromGarden(p.id) } }
   }
 
+  /** To be called to ensure all components of the pop-up are displayed */
   fun ComposeTestRule.wholePopupIsDisplayed() {
     onNodeWithTag(PopupScreenTestTags.CARD).assertIsDisplayed()
     onNodeWithTag(PopupScreenTestTags.TITLE).assertIsDisplayed()
@@ -78,6 +83,7 @@ class PopupBackendTests {
     onNodeWithTag(PopupScreenTestTags.DISMISS_BUTTON).assertIsDisplayed()
   }
 
+  /** To be called to ensure all components of the pop-up are NOT displayed */
   fun ComposeTestRule.wholePopupIsNotDisplayed() {
     onNodeWithTag(PopupScreenTestTags.CARD).assertIsNotDisplayed()
     onNodeWithTag(PopupScreenTestTags.TITLE).assertIsNotDisplayed()
@@ -85,20 +91,26 @@ class PopupBackendTests {
     onNodeWithTag(PopupScreenTestTags.DISMISS_BUTTON).assertIsNotDisplayed()
   }
 
-  fun ComposeTestRule.saveThirstyPlantInRepo() {
+  /** Saves a plant in repo that is already in NEEDS_WATER status */
+  private fun saveThirstyPlantInRepo() {
     runTest {
       repo.saveToGarden(thirstyPlant, repo.getNewId(), Timestamp(1))
       rule.waitForIdle()
     }
   }
 
-  fun ComposeTestRule.saveAlmostThirstyPlantInRepo() {
+  /**
+   * Saves a plant in the repo that will have its status become NEEDS_WATER if it's recalculated at
+   * least 5 seconds after the call to this function
+   */
+  private fun saveAlmostThirstyPlantInRepo() {
     val justMoreThanADay =
         Timestamp(
             System.currentTimeMillis() - (TimeUnit.DAYS.toMillis(1) - TimeUnit.SECONDS.toMillis(5)))
     runTest { repo.saveToGarden(almostThirstyPlant, repo.getNewId(), justMoreThanADay) }
   }
 
+  /** Tests that the pop-up is not displayed when the repo is empty */
   @Test
   fun noPopupWithEmptyRepo() {
     setContent()
@@ -106,49 +118,57 @@ class PopupBackendTests {
     rule.wholePopupIsNotDisplayed()
   }
 
+  /** Tests that the popup gets displayed when the repo receives a thirsty plant */
   @Test
   fun popupPopsWhenThirstyPlantIsSavedInRepo() {
     setContent()
     rule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO).assertIsDisplayed()
-    rule.saveThirstyPlantInRepo()
+    saveThirstyPlantInRepo()
     rule.wholePopupIsDisplayed()
   }
 
+  /** Tests that the dismiss button works correcly */
   @Test
   fun canDismissPopupByClickingOnDismissButton() {
     setContent()
-    rule.saveThirstyPlantInRepo()
+    saveThirstyPlantInRepo()
     rule.wholePopupIsDisplayed()
     rule.onNodeWithTag(PopupScreenTestTags.DISMISS_BUTTON).performClick()
     rule.wholePopupIsNotDisplayed()
   }
 
+  /** Tests that the confirm button makes the pop-up disappear */
   @Test
   fun popupLeavesScreenWhenClickingOnConfirmButton() {
     setContent()
     rule.wholePopupIsNotDisplayed()
-    rule.saveThirstyPlantInRepo()
+    saveThirstyPlantInRepo()
     rule.wholePopupIsDisplayed()
     rule.onNodeWithTag(PopupScreenTestTags.CONFIRM_BUTTON).performClick()
     rule.wholePopupIsNotDisplayed()
   }
 
+  /** Tests that the confirm button makes the user navigate to the garden */
   @Test
   fun popupNavToGardenWhenClickingOnConfirmButton() {
     setContent()
     rule.wholePopupIsNotDisplayed()
-    rule.saveThirstyPlantInRepo()
+    saveThirstyPlantInRepo()
     rule.wholePopupIsDisplayed()
     rule.onNodeWithTag(PopupScreenTestTags.CONFIRM_BUTTON).performClick()
     rule.wholePopupIsNotDisplayed()
     rule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
   }
 
+  /**
+   * Tests that the pop-up is correctly displayed when a plant's status is updated but was already
+   * on the repo
+   */
   @Test
   fun popupPopsWhenPlantsStatusAreUpdatedViaTimestamps() {
     setContent()
     rule.wholePopupIsNotDisplayed()
-    rule.saveAlmostThirstyPlantInRepo()
+    saveAlmostThirstyPlantInRepo()
     Thread.sleep(7000)
     // to trigger the status update
     runTest { repo.getAllOwnedPlants() }

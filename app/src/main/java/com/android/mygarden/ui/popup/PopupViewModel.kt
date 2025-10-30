@@ -10,6 +10,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
+/**
+ * This ViewModel handles the Flow interactions and acts as an intermediate between the flow emitted
+ * by the repository and the flow collected by the UI. It receives all plants updates that are done
+ * in the repository, filters it, and emits the plants that became in status NEEDS_WATER for the UI
+ * to collect it.
+ */
 class PopupViewModel(
     private val plantsRepo: PlantsRepository = PlantsRepositoryProvider.repository
 ) : ViewModel() {
@@ -17,7 +23,7 @@ class PopupViewModel(
   private val _thirstyPlants = MutableSharedFlow<OwnedPlant>(replay = 0, extraBufferCapacity = 64)
   val thirstyPlants: SharedFlow<OwnedPlant> = _thirstyPlants
 
-  var previousCollectedList: List<OwnedPlant> = emptyList()
+  private var previousCollectedList: List<OwnedPlant> = emptyList()
 
   init {
     viewModelScope.launch {
