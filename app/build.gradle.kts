@@ -218,7 +218,9 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
-    // Also add the dependencies for the Credential Manager libraries and specify their versions
+
+
+    //Credential Manager
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
@@ -308,4 +310,8 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     // Ensure unit tests ran
     dependsOn("testDebugUnitTest")
     // do NOT depend on connected tests here; CI runs them separately
+}
+
+configurations.forEach { configuration ->
+    configuration.exclude("com.google.protobuf", "protobuf-lite")
 }

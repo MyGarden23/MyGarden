@@ -38,7 +38,7 @@ fun AppNavHost(
     composable(Screen.Auth.route) {
       SignInScreen(
           credentialManager = credentialManagerProvider(),
-          onSignedIn = { navigationActions.navTo(Screen.Camera) })
+          onSignedIn = { navigationActions.navTo(Screen.NewProfile) })
     }
 
     // New Profile

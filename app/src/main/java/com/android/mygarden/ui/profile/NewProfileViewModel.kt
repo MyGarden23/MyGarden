@@ -1,11 +1,16 @@
 package com.android.mygarden.ui.profile
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * UI state data class for the new profile creation screen, contains all the form fields and
@@ -88,7 +93,9 @@ data class NewProfileUIState(
  * ViewModel for managing the new profile creation screen state Handles user input updates and form
  * validation
  */
-class NewProfileViewModel() : ViewModel() {
+class NewProfileViewModel(
+    private val repo: ProfileRepository = ProfileRepositoryProvider.repository
+) : ViewModel() {
   // Private mutable state flow for internal state management
   private val _uiState = MutableStateFlow(NewProfileUIState())
 
@@ -159,5 +166,43 @@ class NewProfileViewModel() : ViewModel() {
    */
   fun setRegisterPressed(registerPressed: Boolean) {
     _uiState.value = _uiState.value.copy(registerPressed = registerPressed)
+  }
+
+  /** validate and save the profile in firestore through the repository. return true on success */
+  fun submit(onResult: (Boolean) -> Unit) {
+    // show errors if needed
+    setRegisterPressed(true)
+    val state = _uiState.value
+    if (!state.canRegister()) {
+      onResult(false)
+      return
+    }
+
+    val uid = repo.getCurrentUserId()
+    if (uid.isNullOrBlank()) {
+      // no connected user
+      onResult(false)
+      return
+    }
+
+    val profile =
+        Profile(
+            firstName = state.firstName.trim(),
+            lastName = state.lastName.trim(),
+            gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
+            favoritePlant = state.favoritePlant.trim(),
+            country = state.country.trim(),
+            hasSignedIn = true,
+            avatar = state.avatar.name)
+
+    viewModelScope.launch {
+      try {
+        repo.saveProfile(profile)
+        onResult(true)
+      } catch (e: Exception) {
+        // log if needed
+        onResult(false)
+      }
+    }
   }
 }
