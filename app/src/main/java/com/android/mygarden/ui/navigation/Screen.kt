@@ -19,7 +19,12 @@ sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean
 
   object NewProfile : Screen(route = "new_profile", name = "New Profile")
 
-  object EditPlant : Screen(route = "edit_plant", name = "Edit Plant")
+  data class EditPlant(val ownedPlantId: String) :
+      Screen(route = "edit_plant/${ownedPlantId}", name = "Edit Plant") {
+    companion object {
+      const val route = "edit_plant/{ownedPlantId}"
+    }
+  }
 
   object Garden : Screen(route = "garden", name = "Garden", isTopLevel = true)
 

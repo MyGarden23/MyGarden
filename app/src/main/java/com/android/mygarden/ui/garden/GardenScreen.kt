@@ -141,6 +141,8 @@ private fun getOwnedPlantImageDescription(ownedPlant: OwnedPlant): String =
  * @param gardenViewModel the viewModel that manages the user interactions
  * @param onEditProfile the function to launch when a user clicks on the edit profile button
  * @param onAddPlant the function to launch when a user clicks on the FAB (add a plant button)
+ * @param onPlantClick the function to launch when a user clicks on a plant card (default value for
+ *   test compatibility)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -148,7 +150,8 @@ fun GardenScreen(
     modifier: Modifier = Modifier,
     gardenViewModel: GardenViewModel = viewModel(),
     onEditProfile: () -> Unit,
-    onAddPlant: () -> Unit
+    onAddPlant: () -> Unit,
+    onPlantClick: (OwnedPlant) -> Unit = {}
 ) {
 
   val context = LocalContext.current
@@ -200,7 +203,8 @@ fun GardenScreen(
                         .testTag(GardenScreenTestTags.GARDEN_LIST),
                 verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING)) {
                   items(plants.size) { index ->
-                    PlantCard(plants[index], modifier, gardenViewModel)
+                    PlantCard(
+                        plants[index], modifier, { onPlantClick(plants[index]) }, gardenViewModel)
                   }
                 }
           } else {
@@ -285,9 +289,16 @@ fun AddPlantFloatingButton(onAddPlant: () -> Unit, modifier: Modifier = Modifier
  *
  * @param ownedPlant the owned plant with characteristics to display
  * @param modifier the optional modifier of the composable
+ * @param onClick the callback called when clicked on the plant card
+ * @param viewModel the viewModel of the screen (used to update when watering button is pressed)
  */
 @Composable
-fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier, viewModel: GardenViewModel) {
+fun PlantCard(
+    ownedPlant: OwnedPlant,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    viewModel: GardenViewModel
+) {
   // The color palette of the card depending on the health status of the plant
   val colorPalette =
       colorsFromHealthStatus(
@@ -312,6 +323,7 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier, viewModel: 
           modifier
               .fillMaxWidth()
               .height(PLANT_CARD_HEIGHT)
+              .clickable(onClick = { onClick() })
               .testTag(GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)),
       // Color changing
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
