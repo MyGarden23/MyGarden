@@ -151,7 +151,7 @@ class PlantHealthCalculator {
       currentTime: Timestamp = Timestamp(System.currentTimeMillis())
   ): Float {
     calculateHealthStatus(lastWatered, wateringFrequency, previousLastWatered, currentTime)
-    return currentStatusPercentage.toFloat()
+    return 1f - currentStatusPercentage.toFloat()
   }
 
   /**
@@ -167,7 +167,7 @@ class PlantHealthCalculator {
    * @return the normalized value between 0.0 and 1.0 representing the relative position of z
    */
   private fun calculateRelativePercentage(x: Double, y: Double, z: Double): Double {
-    return (z - x) / (y - x)
+    return (z.coerceIn(x, y) - x) / (y - x)
   }
 
   /**
