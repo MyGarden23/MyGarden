@@ -78,6 +78,7 @@ class GardenViewModel(
     viewModelScope.launch {
       plantsRepo.waterPlant(ownedPlant.id, Timestamp(System.currentTimeMillis()))
       // Refresh UI state
+      // TODO: update when the health status update is implemented
       getAllPlants()
     }
   }
