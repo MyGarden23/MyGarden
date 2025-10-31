@@ -19,6 +19,7 @@ import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.theme.MyGardenTheme
 import java.sql.Timestamp
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -27,7 +28,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class GardenScreenTests {
@@ -91,7 +91,12 @@ class GardenScreenTests {
    * @param initialOwnedPlants the list wanted in the repo for the current test
    */
   fun setContent(initialOwnedPlants: List<Plant> = emptyList()) {
-    runTest { initialOwnedPlants.forEach { repo.saveToGarden(it, repo.getNewId(), Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(6))) } }
+    runTest {
+      initialOwnedPlants.forEach {
+        repo.saveToGarden(
+            it, repo.getNewId(), Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(6)))
+      }
+    }
     // Buttons have no use : tests are for the garden screen in isolation
     composeTestRule.setContent { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
     composeTestRule.waitForIdle()
@@ -115,13 +120,21 @@ class GardenScreenTests {
     runTest {
       repo.getAllOwnedPlants().forEach { p ->
         onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlant(p)).assertIsDisplayed()
-        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantName(p), useUnmergedTree = true).assertIsDisplayed()
-        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantStatus(p), useUnmergedTree = true).assertIsDisplayed()
-        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantImage(p), useUnmergedTree = true).assertIsDisplayed()
-        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantLatinName(p), useUnmergedTree = true).assertIsDisplayed()
-        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(p), useUnmergedTree = true)
+        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantName(p), useUnmergedTree = true)
             .assertIsDisplayed()
-        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantWaterBar(p), useUnmergedTree = true).assertIsDisplayed()
+        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantStatus(p), useUnmergedTree = true)
+            .assertIsDisplayed()
+        onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantImage(p), useUnmergedTree = true)
+            .assertIsDisplayed()
+        onNodeWithTag(
+                GardenScreenTestTags.getTestTagForOwnedPlantLatinName(p), useUnmergedTree = true)
+            .assertIsDisplayed()
+        onNodeWithTag(
+                GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(p), useUnmergedTree = true)
+            .assertIsDisplayed()
+        onNodeWithTag(
+                GardenScreenTestTags.getTestTagForOwnedPlantWaterBar(p), useUnmergedTree = true)
+            .assertIsDisplayed()
       }
     }
   }
@@ -182,7 +195,8 @@ class GardenScreenTests {
         for (status in PlantHealthStatus.entries) {
           try {
             composeTestRule
-                .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantStatus(p), useUnmergedTree = true)
+                .onNodeWithTag(
+                    GardenScreenTestTags.getTestTagForOwnedPlantStatus(p), useUnmergedTree = true)
                 .assertTextEquals(status.description)
             success = true
             break
@@ -203,10 +217,12 @@ class GardenScreenTests {
     runTest {
       repo.getAllOwnedPlants().forEach { p ->
         composeTestRule
-            .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantName(p), useUnmergedTree = true)
+            .onNodeWithTag(
+                GardenScreenTestTags.getTestTagForOwnedPlantName(p), useUnmergedTree = true)
             .assertTextEquals(p.plant.name)
         composeTestRule
-            .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantLatinName(p), useUnmergedTree = true)
+            .onNodeWithTag(
+                GardenScreenTestTags.getTestTagForOwnedPlantLatinName(p), useUnmergedTree = true)
             .assertTextEquals(p.plant.latinName)
       }
     }
