@@ -32,12 +32,12 @@ abstract class FirestoreProfileTest {
     val uniqueEmail = "test.profile+${System.currentTimeMillis()}@example.com"
     val idToken = FakeJwtGenerator.createFakeGoogleIdToken(email = uniqueEmail)
     val cred = GoogleAuthProvider.getCredential(idToken, null)
-    val result = auth.signInWithCredential(cred).await() // ✅ dans runTest
+    val result = auth.signInWithCredential(cred).await()
     val uid = result.user?.uid
     assertNotNull(uid)
 
     // Clean user doc (suspend)
-    db.collection("users").document(uid!!).delete().await() // ✅ dans runTest
+    db.collection("users").document(uid!!).delete().await()
 
     // Inject repo
     ProfileRepositoryProvider.repository = ProfileRepositoryFirestore(db, auth)

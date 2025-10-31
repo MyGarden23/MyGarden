@@ -168,12 +168,9 @@ class NewProfileViewModel(
     _uiState.value = _uiState.value.copy(registerPressed = registerPressed)
   }
 
-  /**
-   * Valide et enregistre le profil dans Firestore via le repository. Retourne `true` si succès
-   * (utile pour naviguer), sinon `false`.
-   */
+  /** validate and save the profile in firestore through the repository. return true on success */
   fun submit(onResult: (Boolean) -> Unit) {
-    // Affiche les erreurs si champs invalides
+    // show errors if needed
     setRegisterPressed(true)
     val state = _uiState.value
     if (!state.canRegister()) {
@@ -183,7 +180,7 @@ class NewProfileViewModel(
 
     val uid = repo.getCurrentUserId()
     if (uid.isNullOrBlank()) {
-      // pas d’utilisateur connecté → gérer l’erreur côté UI
+      // no connected user
       onResult(false)
       return
     }
@@ -203,7 +200,7 @@ class NewProfileViewModel(
         repo.saveProfile(profile)
         onResult(true)
       } catch (e: Exception) {
-        // log si besoin
+        // log if needed
         onResult(false)
       }
     }
