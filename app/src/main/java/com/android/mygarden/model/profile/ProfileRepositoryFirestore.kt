@@ -66,7 +66,7 @@ class ProfileRepositoryFirestore(
     val gardeningSkillName = data["gardeningSkill"] as? String ?: return null
     val gardeningSkill =
         runCatching { GardeningSkill.valueOf(gardeningSkillName) }
-            .getOrElse { GardeningSkill.NOVICE }
+            .getOrElse { GardeningSkill.BEGINNER }
 
     val hasSignedIn = data["hasSignedIn"] as? Boolean ?: false
 
