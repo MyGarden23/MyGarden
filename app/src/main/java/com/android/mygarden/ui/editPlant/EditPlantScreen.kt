@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.ZoneId
@@ -109,6 +110,7 @@ fun EditPlantScreen(
   }
 
   Scaffold(
+      modifier = Modifier.testTag(NavigationTestTags.EDIT_PLANT_SCREEN),
       topBar = {
         TopAppBar(
             title = { Text("Edit plant") },
