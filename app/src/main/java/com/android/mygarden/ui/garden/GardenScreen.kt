@@ -440,7 +440,7 @@ fun WaterButton(modifier: Modifier = Modifier, color: Color, onButtonPressed: ()
             Icons.Default.WaterDrop,
             contentDescription = WATER_BUTTON_ICON_DESCRIPTION,
             tint = color,
-            modifier = modifier.size(WATER_BUTTON_DROP_ICON_SIZE))
+            modifier = Modifier.size(WATER_BUTTON_DROP_ICON_SIZE))
       }
 }
 
