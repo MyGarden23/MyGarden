@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -68,6 +69,7 @@ import com.android.mygarden.ui.theme.ExtendedTheme
 /** Test tags to test the screen displays */
 object GardenScreenTestTags {
   const val TITLE = "MyGardenTitle"
+  const val SIGN_OUT_BUTTON = "SignOutButton"
   const val USER_PROFILE_PICTURE = "UserProfilePicture"
   const val USERNAME = "Username"
   const val EDIT_PROFILE_BUTTON = "EditProfileButton"
@@ -133,6 +135,7 @@ private const val EMPTY_GARDEN_MESSAGE_TEXT =
     "You don't have a plant yet ! Use the button below to add a plant."
 private const val ADD_PLANT_FAB_TEXT = "Add a plant"
 private const val WATER_BUTTON_ICON_DESCRIPTION = "Water plant button"
+private const val SIGN_OUT_BUTTON_DESCRIPTION = "Sign out button"
 
 private fun getOwnedPlantImageDescription(ownedPlant: OwnedPlant): String =
     "Image of a ${ownedPlant.plant.name}"
@@ -154,6 +157,7 @@ fun GardenScreen(
     gardenViewModel: GardenViewModel = viewModel(),
     onEditProfile: () -> Unit,
     onAddPlant: () -> Unit,
+    onSignOut: () -> Unit = {},
     onPlantClick: (OwnedPlant) -> Unit = {}
 ) {
 
@@ -186,7 +190,16 @@ fun GardenScreen(
             colors =
                 TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background),
-            modifier = modifier.testTag(GardenScreenTestTags.TITLE))
+            modifier = modifier.testTag(GardenScreenTestTags.TITLE),
+            navigationIcon = {
+              Icon(
+                  imageVector = Icons.AutoMirrored.Filled.Logout,
+                  contentDescription = SIGN_OUT_BUTTON_DESCRIPTION,
+                  modifier =
+                      modifier
+                          .clickable(onClick = onSignOut)
+                          .testTag(GardenScreenTestTags.SIGN_OUT_BUTTON))
+            })
       },
       // The button to add a new plant to the collection
       floatingActionButton = { AddPlantFloatingButton(onAddPlant, modifier) },

@@ -139,6 +139,7 @@ class EndToEndM1 {
     // Verify garden elements
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).assertIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.ADD_PLANT_FAB).assertIsDisplayed()
 

@@ -22,6 +22,7 @@ import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.profile.ChooseProfilePictureScreen
 import com.android.mygarden.ui.profile.EditProfileScreen
 import com.android.mygarden.ui.profile.NewProfileScreen
+import com.google.firebase.auth.FirebaseAuth
 import com.android.mygarden.ui.profile.ProfileViewModel
 
 @Composable
@@ -115,7 +116,10 @@ fun AppNavHost(
           onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
           onAddPlant = { navigationActions.navTo(Screen.Camera) },
           onPlantClick = { ownedPlant -> navigationActions.navTo(Screen.EditPlant(ownedPlant.id)) },
-      )
+          onSignOut = {
+            FirebaseAuth.getInstance().signOut()
+            navigationActions.navTo(Screen.Auth)
+          })
     }
 
     // Plant View

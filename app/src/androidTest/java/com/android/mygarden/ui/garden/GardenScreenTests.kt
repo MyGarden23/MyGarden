@@ -182,6 +182,7 @@ class GardenScreenTests {
   fun correctDisplayWhenEmptyGarden() {
     setContent()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
     composeTestRule.userRowIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsNotDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsDisplayed()
@@ -196,6 +197,7 @@ class GardenScreenTests {
     val plants = listOf(plant1, plant2, plant3, plant4)
     setContent(plants)
     composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
     composeTestRule.userRowIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsNotDisplayed()
