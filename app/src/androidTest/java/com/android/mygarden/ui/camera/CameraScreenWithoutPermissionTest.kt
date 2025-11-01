@@ -52,14 +52,12 @@ class CameraScreenWithoutPermissionTest {
     context.getSharedPreferences("camera_prefs", Context.MODE_PRIVATE).edit().clear().apply()
   }
 
-  private fun revokePermissionReliably() {
-    try {
-      // Primary method: use shell command
-      InstrumentationRegistry.getInstrumentation()
-          .uiAutomation
-          .executeShellCommand("pm revoke ${context.packageName} android.permission.CAMERA")
-          .close()
-      Thread.sleep(1500)
+    private fun revokePermissionReliably() {
+        try {
+            // Primary method: use shell command
+            InstrumentationRegistry.getInstrumentation()
+                .uiAutomation
+            Thread.sleep(1500)
 
       // Ensure SharedPreferences state is correct
       viewModel.sethasAlreadyDeniedCameraPermission(context, true)
