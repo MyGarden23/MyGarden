@@ -200,7 +200,7 @@ class GardenScreenTests {
     setContent(plants)
     composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertHasClickAction()
+      composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertHasClickAction()
     composeTestRule.userRowIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsNotDisplayed()
