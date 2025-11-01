@@ -1,5 +1,6 @@
 package com.android.mygarden.model.profile
 
+import com.android.mygarden.ui.profile.Avatar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -70,8 +71,9 @@ class ProfileRepositoryFirestore(
 
     val hasSignedIn = data["hasSignedIn"] as? Boolean ?: false
 
-    // Default avatar to "A1" if missing (so the app doesn’t crash)
-    val avatar = data["avatar"] as? String ?: "A1"
+    // Deserialize the avatar string (default value is A1)
+    val avatarString = data["avatar"] as? String ?: "A1"
+      val avatar = runCatching { Avatar.valueOf(avatarString) } .getOrElse { Avatar.A1 }
 
     return Profile(
         firstName = firstName,
@@ -92,5 +94,5 @@ class ProfileRepositoryFirestore(
           "favoritePlant" to favoritePlant,
           "country" to country,
           "hasSignedIn" to hasSignedIn,
-          "avatar" to avatar as Any) // avatar is stored as string like "A1"
+          "avatar" to avatar.name) // avatar is stored as string like "A1"
 }
