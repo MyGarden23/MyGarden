@@ -42,15 +42,15 @@ class NewProfileScreenTests {
   @get:Rule val composeTestRule = createComposeRule()
 
   /**
-   * Flag to track whether the onRegisterPressed callback has been invoked. Used to verify that form
+   * Flag to track whether the onSavePressed callback has been invoked. Used to verify that form
    * submission logic works correctly.
    */
-  private var onRegisterPressedCalled: Boolean = false
+  private var onSavePressedCalled: Boolean = false
 
   /**
    * Helper function to set up the composable content for testing.
    *
-   * Initializes the NewProfileScreen with a test callback that sets the onRegisterPressedCalled
+   * Initializes the NewProfileScreen with a test callback that sets the onSavePressedCalled
    * flag when invoked. This allows tests to verify whether the registration callback was triggered
    * by user interactions.
    *
@@ -58,11 +58,11 @@ class NewProfileScreenTests {
    */
   fun setContent() {
     // Reset the callback flag to ensure test isolation
-    onRegisterPressedCalled = false
+    onSavePressedCalled = false
 
     // Set up the NewProfileScreen with a test callback
     composeTestRule.setContent {
-      NewProfileScreen(onRegisterPressed = { onRegisterPressedCalled = true })
+      NewProfileScreen(onSavePressed = { onSavePressedCalled = true })
     }
 
     // Wait for the UI to be fully rendered before proceeding with tests
@@ -149,7 +149,7 @@ class NewProfileScreenTests {
     // Verify the register button shows the expected text
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.REGISTER_BUTTON)
-        .assertTextContains("Register Profile")
+        .assertTextContains("Save Profile")
   }
 
   /**
@@ -581,7 +581,7 @@ class NewProfileScreenTests {
     composeTestRule.setContent {
       MyGardenTheme {
         NewProfileScreen(
-            profileViewModel = vm, onRegisterPressed = { onRegisterPressedCalled = true })
+            profileViewModel = vm, onSavePressed = { onSavePressedCalled = true })
       }
     }
   }
@@ -612,7 +612,7 @@ class NewProfileScreenTests {
     composeTestRule.waitForIdle()
 
     // Verify the registration callback was successfully triggered
-    assertEquals(true, onRegisterPressedCalled)
+    assertEquals(true, onSavePressedCalled)
   }
 
   /**
@@ -637,6 +637,6 @@ class NewProfileScreenTests {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.REGISTER_BUTTON).performClick()
 
     // Verify registration callback was NOT triggered due to missing country
-    assertEquals(false, onRegisterPressedCalled)
+    assertEquals(false, onSavePressedCalled)
   }
 }
