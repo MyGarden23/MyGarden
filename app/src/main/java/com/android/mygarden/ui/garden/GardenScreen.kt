@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +57,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
+import com.android.mygarden.model.plant.PlantHealthCalculator
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.CustomColors
@@ -139,6 +141,8 @@ private fun getOwnedPlantImageDescription(ownedPlant: OwnedPlant): String =
  * @param gardenViewModel the viewModel that manages the user interactions
  * @param onEditProfile the function to launch when a user clicks on the edit profile button
  * @param onAddPlant the function to launch when a user clicks on the FAB (add a plant button)
+ * @param onPlantClick the function to launch when a user clicks on a plant card (default value for
+ *   test compatibility)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -146,7 +150,8 @@ fun GardenScreen(
     modifier: Modifier = Modifier,
     gardenViewModel: GardenViewModel = viewModel(),
     onEditProfile: () -> Unit,
-    onAddPlant: () -> Unit
+    onAddPlant: () -> Unit,
+    onPlantClick: (OwnedPlant) -> Unit = {}
 ) {
 
   val context = LocalContext.current
@@ -197,7 +202,10 @@ fun GardenScreen(
                         .padding(horizontal = PLANT_ITEM_HORIZONTAL_PADDING)
                         .testTag(GardenScreenTestTags.GARDEN_LIST),
                 verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING)) {
-                  items(plants.size) { index -> PlantCard(plants[index], modifier) }
+                  items(plants.size) { index ->
+                    PlantCard(
+                        plants[index], modifier, { onPlantClick(plants[index]) }, gardenViewModel)
+                  }
                 }
           } else {
             // The list of plant is empty : display a simple message instead
@@ -281,21 +289,41 @@ fun AddPlantFloatingButton(onAddPlant: () -> Unit, modifier: Modifier = Modifier
  *
  * @param ownedPlant the owned plant with characteristics to display
  * @param modifier the optional modifier of the composable
+ * @param onClick the callback called when clicked on the plant card
+ * @param viewModel the viewModel of the screen (used to update when watering button is pressed)
  */
 @Composable
-fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
+fun PlantCard(
+    ownedPlant: OwnedPlant,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    viewModel: GardenViewModel
+) {
   // The color palette of the card depending on the health status of the plant
   val colorPalette =
       colorsFromHealthStatus(
           status = ownedPlant.plant.healthStatus,
           colorScheme = MaterialTheme.colorScheme,
           customColors = ExtendedTheme.colors)
+  // The water level Float used in the water level bar
+  val waterLevel =
+      remember(
+          ownedPlant.lastWatered,
+          ownedPlant.previousLastWatered,
+          ownedPlant.plant.wateringFrequency) {
+            PlantHealthCalculator()
+                .calculateInStatusFloat(
+                    lastWatered = ownedPlant.lastWatered,
+                    wateringFrequency = ownedPlant.plant.wateringFrequency,
+                    previousLastWatered = ownedPlant.previousLastWatered)
+          }
   // The colored box container
   Card(
       modifier =
           modifier
               .fillMaxWidth()
               .height(PLANT_CARD_HEIGHT)
+              .clickable(onClick = { onClick() })
               .testTag(GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)),
       // Color changing
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
@@ -373,9 +401,8 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                     Box(
                         modifier = modifier.height(WATER_BAR_WRAPPER_HEIGHT),
                         contentAlignment = Alignment.Center) {
-                          // TODO: make the water level bar depend on the plant's last watering time
                           WaterBar(
-                              waterLevel = 0.5f,
+                              waterLevel = waterLevel,
                               color = colorPalette.wateringColor,
                               modifier = modifier,
                               ownedPlant = ownedPlant)
@@ -386,7 +413,7 @@ fun PlantCard(ownedPlant: OwnedPlant, modifier: Modifier = Modifier) {
                   modifier =
                       modifier.testTag(
                           GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(ownedPlant)),
-                  onButtonPressed = { /* TODO: add the watering logic*/})
+                  onButtonPressed = { viewModel.waterPlant(ownedPlant) })
             }
       })
 }
@@ -413,7 +440,7 @@ fun WaterButton(modifier: Modifier = Modifier, color: Color, onButtonPressed: ()
             Icons.Default.WaterDrop,
             contentDescription = WATER_BUTTON_ICON_DESCRIPTION,
             tint = color,
-            modifier = modifier.size(WATER_BUTTON_DROP_ICON_SIZE))
+            modifier = Modifier.size(WATER_BUTTON_DROP_ICON_SIZE))
       }
 }
 
