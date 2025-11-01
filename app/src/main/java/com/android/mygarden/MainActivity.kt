@@ -91,7 +91,7 @@ fun MyGardenApp() {
       bottomBar = {
         // Show bottom bar for main screens: Camera, Profile, and Garden
         if (currentScreen == Screen.Camera ||
-            currentScreen == Screen.Profile ||
+            currentScreen == Screen.Garden ||
             currentScreen == Screen.Garden) {
           // Determine selected page more carefully - don't default to Camera
           // if we're coming from a non-top-level screen
@@ -99,7 +99,6 @@ fun MyGardenApp() {
               selectedPage
                   ?: when (currentScreen) {
                     Screen.Garden -> Page.Garden
-                    Screen.Profile -> Page.Profile
                     Screen.Camera -> Page.Camera
                     else -> Page.Camera
                   }
@@ -137,7 +136,6 @@ private fun routeToScreen(route: String): Screen? =
       Screen.Camera.route -> Screen.Camera
       Screen.PlantInfo.route -> Screen.PlantInfo
       Screen.NewProfile.route -> Screen.NewProfile
-      Screen.EditProfile.route -> Screen.EditProfile
       Screen.Profile.route -> Screen.Profile
       Screen.Garden.route -> Screen.Garden
       Screen.ChooseAvatar.route -> Screen.ChooseAvatar
@@ -154,7 +152,6 @@ private fun routeToScreen(route: String): Screen? =
 private fun routeToPage(route: String): Page? =
     when (route) {
       Screen.Camera.route -> Page.Camera
-      Screen.Profile.route -> Page.Profile
       Screen.Garden.route -> Page.Garden
       else -> null
     }

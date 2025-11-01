@@ -79,8 +79,8 @@ class NavigationS2Tests {
   @Test
   fun can_reach_profile_destination() {
     setApp(Screen.Camera.route)
-    compose.runOnIdle { navController.navigate(Screen.Profile.route) }
-    compose.runOnIdle { assertEquals(Screen.Profile.route, currentRoute.value) }
+    compose.runOnIdle { navController.navigate(Screen.Garden.route) }
+    compose.runOnIdle { assertEquals(Screen.Garden.route, currentRoute.value) }
   }
 
   @Test
