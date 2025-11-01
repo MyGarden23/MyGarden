@@ -31,7 +31,8 @@ data class AuthUIState(
     val isLoading: Boolean = false,
     val user: FirebaseUser? = null,
     val errorMsg: String? = null,
-    val signedOut: Boolean = false
+    val signedOut: Boolean = false,
+    val isNewUser: Boolean = false
 )
 
 private const val TAG = "SignIn"
@@ -75,9 +76,17 @@ class SignInViewModel(private val repository: AuthRepository = AuthRepositoryFir
       try {
         val credential = getCredential(context, signInRequest, credentialManager)
 
-        repository.signInWithGoogle(credential).fold({ user ->
+        repository.signInWithGoogle(credential).fold({ result ->
+          val user = result.user
+          val isNewUser = result.isNewUser
+
           _uiState.update {
-            it.copy(isLoading = false, user = user, errorMsg = null, signedOut = false)
+            it.copy(
+                isLoading = false,
+                user = user,
+                errorMsg = null,
+                signedOut = false,
+                isNewUser = isNewUser)
           }
         }) { failure ->
           _uiState.update {

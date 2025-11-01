@@ -6,7 +6,6 @@ import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.tasks.await
 
@@ -18,18 +17,24 @@ class AuthRepositoryFirebase(
   fun getGoogleSignInOption(serverClientId: String) =
       GetSignInWithGoogleOption.Builder(serverClientId = serverClientId).build()
 
-  override suspend fun signInWithGoogle(credential: Credential): Result<FirebaseUser> {
+  override suspend fun signInWithGoogle(
+      credential: Credential
+  ): Result<AuthRepository.SignInResult> {
     return try {
       if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
         val idToken = helper.extractIdTokenCredential(credential.data).idToken
         val firebaseCredential = helper.toFirebaseCredential(idToken)
 
+        val authResult = auth.signInWithCredential(firebaseCredential).await()
+
         val user =
-            auth.signInWithCredential(firebaseCredential).await().user
+            authResult.user
                 ?: return Result.failure(
                     IllegalStateException("Login failed : Could not retrieve user information"))
 
-        return Result.success(user)
+        val isNewUser = (authResult.additionalUserInfo?.isNewUser == true)
+
+        return Result.success(AuthRepository.SignInResult(user, isNewUser))
       } else {
         return Result.failure(
             IllegalStateException("Login failed: Credential is not of type Google ID\""))
