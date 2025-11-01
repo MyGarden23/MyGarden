@@ -62,6 +62,7 @@ fun SignInScreen(
     authViewModel: SignInViewModel = viewModel(),
     credentialManager: CredentialManager = CredentialManager.create(LocalContext.current),
     onSignedIn: () -> Unit = {},
+    onLogIn: () -> Unit = {},
     isDarkTheme: Boolean = isSystemInDarkTheme()
 ) {
 
@@ -79,7 +80,7 @@ fun SignInScreen(
   LaunchedEffect(uiState.user) {
     uiState.user?.let {
       Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show()
-      onSignedIn()
+      if (uiState.isNewUser) onSignedIn() else onLogIn()
     }
   }
   val logoRes =
