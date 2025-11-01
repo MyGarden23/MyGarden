@@ -41,6 +41,7 @@ object EditPlantScreenTestTags {
   const val PLANT_SAVE = "plantSave"
   const val PLANT_DELETE = "plantDelete"
   const val DATE_PICKER_BUTTON = "datePicker"
+  const val GO_BACK_BUTTON = "goBack"
 }
 
 /**
@@ -115,9 +116,11 @@ fun EditPlantScreen(
         TopAppBar(
             title = { Text("Edit plant") },
             navigationIcon = {
-              IconButton(onClick = { goBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-              }
+              IconButton(
+                  onClick = { goBack() },
+                  modifier = Modifier.testTag(EditPlantScreenTestTags.GO_BACK_BUTTON)) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                  }
             })
       },
       snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
