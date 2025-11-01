@@ -2,7 +2,6 @@ package com.android.mygarden.model.plant
 
 import com.android.mygarden.model.plant.FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant
 import com.android.mygarden.model.plant.FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -12,10 +11,13 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.tasks.await
 
 /** Repository that implements PlantsRepository but stores the data in Firestore. */
-class PlantsRepositoryFirestore : PlantsRepository {
+class PlantsRepositoryFirestore(
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+) : PlantsRepository {
 
-  private val firestore = FirebaseFirestore.getInstance()
-  private val auth: FirebaseAuth = Firebase.auth
+  //  private val firestore = FirebaseFirestore.getInstance()
+  //  private val auth: FirebaseAuth = Firebase.auth
   private val healthCalculator = PlantHealthCalculator()
 
   /** The list of plants owned by the user, in the repository of the user. */
