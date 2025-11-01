@@ -131,7 +131,7 @@ private fun routeToScreen(route: String): Screen? =
     when (route) {
       Screen.Auth.route -> Screen.Auth
       Screen.Camera.route -> Screen.Camera
-      Screen.PlantView.route -> Screen.PlantView
+      Screen.PlantInfo.route -> Screen.PlantInfo
       Screen.NewProfile.route -> Screen.NewProfile
       Screen.Profile.route -> Screen.Profile
       Screen.Garden.route -> Screen.Garden

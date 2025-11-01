@@ -13,7 +13,7 @@ sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean
 
   object Camera : Screen(route = "camera", name = "Camera", isTopLevel = true)
 
-  object PlantView : Screen(route = "plant_view", name = "Plant View")
+  object PlantInfo : Screen(route = "plant_info", name = "Plant Info")
 
   object Profile : Screen(route = "profile", name = "Profile", isTopLevel = true)
 

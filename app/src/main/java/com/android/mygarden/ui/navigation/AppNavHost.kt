@@ -7,11 +7,14 @@ import androidx.compose.runtime.getValue
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
+import com.android.mygarden.ui.editPlant.EditPlantScreen
 import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
@@ -77,7 +80,7 @@ fun AppNavHost(
           onPictureTaken = { imagePath ->
             // Store image path in saved state and navigate to PlantView
             navController.currentBackStackEntry?.savedStateHandle?.set("imagePath", imagePath)
-            navigationActions.navTo(Screen.PlantView)
+            navigationActions.navTo(Screen.PlantInfo)
           })
     }
 
@@ -92,8 +95,8 @@ fun AppNavHost(
           })
     }
 
-    // Plant View
-    composable(Screen.PlantView.route) { backStackEntry ->
+    // Plant Info
+    composable(Screen.PlantInfo.route) { backStackEntry ->
       val plantInfoViewModel: PlantInfoViewModel = viewModel()
       val imagePath =
           navController.previousBackStackEntry?.savedStateHandle?.get<String>("imagePath")
@@ -104,6 +107,7 @@ fun AppNavHost(
 
       PlantInfosScreen(
           plant = plant,
+          plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
           onSavePlant = { navigationActions.navTo(Screen.Garden) })
     }
