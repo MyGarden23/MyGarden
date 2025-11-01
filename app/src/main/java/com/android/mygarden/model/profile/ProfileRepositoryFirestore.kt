@@ -73,7 +73,7 @@ class ProfileRepositoryFirestore(
 
     // Deserialize the avatar string (default value is A1)
     val avatarString = data["avatar"] as? String ?: "A1"
-      val avatar = runCatching { Avatar.valueOf(avatarString) } .getOrElse { Avatar.A1 }
+    val avatar = runCatching { Avatar.valueOf(avatarString) }.getOrElse { Avatar.A1 }
 
     return Profile(
         firstName = firstName,
