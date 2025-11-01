@@ -50,9 +50,9 @@ class NewProfileScreenTests {
   /**
    * Helper function to set up the composable content for testing.
    *
-   * Initializes the NewProfileScreen with a test callback that sets the onSavePressedCalled
-   * flag when invoked. This allows tests to verify whether the registration callback was triggered
-   * by user interactions.
+   * Initializes the NewProfileScreen with a test callback that sets the onSavePressedCalled flag
+   * when invoked. This allows tests to verify whether the registration callback was triggered by
+   * user interactions.
    *
    * Also resets the callback flag to ensure test isolation.
    */
@@ -61,9 +61,7 @@ class NewProfileScreenTests {
     onSavePressedCalled = false
 
     // Set up the NewProfileScreen with a test callback
-    composeTestRule.setContent {
-      NewProfileScreen(onSavePressed = { onSavePressedCalled = true })
-    }
+    composeTestRule.setContent { NewProfileScreen(onSavePressed = { onSavePressedCalled = true }) }
 
     // Wait for the UI to be fully rendered before proceeding with tests
     composeTestRule.waitForIdle()
@@ -580,8 +578,7 @@ class NewProfileScreenTests {
 
     composeTestRule.setContent {
       MyGardenTheme {
-        NewProfileScreen(
-            profileViewModel = vm, onSavePressed = { onSavePressedCalled = true })
+        NewProfileScreen(profileViewModel = vm, onSavePressed = { onSavePressedCalled = true })
       }
     }
   }
