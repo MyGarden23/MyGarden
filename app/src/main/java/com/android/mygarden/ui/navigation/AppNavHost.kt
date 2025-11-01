@@ -106,7 +106,7 @@ fun AppNavHost(
           onPictureTaken = { imagePath ->
             // Store image path in saved state and navigate to PlantView
             navController.currentBackStackEntry?.savedStateHandle?.set("imagePath", imagePath)
-            navigationActions.navTo(Screen.PlantView)
+            navigationActions.navTo(Screen.PlantInfo)
           })
     }
 
@@ -122,8 +122,8 @@ fun AppNavHost(
           })
     }
 
-    // Plant View
-    composable(Screen.PlantView.route) { backStackEntry ->
+    // Plant Info
+    composable(Screen.PlantInfo.route) { backStackEntry ->
       val plantInfoViewModel: PlantInfoViewModel = viewModel()
       val imagePath =
           navController.previousBackStackEntry?.savedStateHandle?.get<String>("imagePath")

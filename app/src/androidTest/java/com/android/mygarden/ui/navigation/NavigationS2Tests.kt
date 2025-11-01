@@ -58,8 +58,8 @@ class NavigationS2Tests {
   @Test
   fun camera_navigates_to_plantView() {
     setApp(Screen.Camera.route)
-    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
-    compose.runOnIdle { assertEquals(Screen.PlantView.route, currentRoute.value) }
+    compose.runOnIdle { navController.navigate(Screen.PlantInfo.route) }
+    compose.runOnIdle { assertEquals(Screen.PlantInfo.route, currentRoute.value) }
   }
 
   @Test
@@ -67,8 +67,8 @@ class NavigationS2Tests {
     setApp(Screen.Camera.route)
 
     // Camera -> Plant View
-    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
-    waitForRoute(Screen.PlantView.route)
+    compose.runOnIdle { navController.navigate(Screen.PlantInfo.route) }
+    waitForRoute(Screen.PlantInfo.route)
 
     // popBackStack -> Camera
     compose.runOnIdle { navController.popBackStack() }
@@ -102,8 +102,8 @@ class NavigationS2Tests {
     setApp(Screen.Camera.route)
 
     // Camera -> PlantView (same as tapping from CameraScreen)
-    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
-    waitForRoute(Screen.PlantView.route)
+    compose.runOnIdle { navController.navigate(Screen.PlantInfo.route) }
+    waitForRoute(Screen.PlantInfo.route)
 
     // Emulate the onBackPressed callback effect
     compose.runOnIdle { navController.popBackStack() }
