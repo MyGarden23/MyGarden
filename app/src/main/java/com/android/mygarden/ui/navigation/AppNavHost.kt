@@ -132,11 +132,7 @@ fun AppNavHost(
           plant = plant,
           plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
-          onSavePlant = {
-            // Use navToTopLevel to navigate to Garden (top-level screen)
-            // This will naturally handle the navigation stack properly
-            navigationActions.navToTopLevel(Screen.Garden)
-          })
+          onSavePlant = { navigationActions.navTo(Screen.Garden) })
     }
 
     // Choose Avatar

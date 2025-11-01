@@ -103,8 +103,7 @@ fun MyGardenApp() {
                     Screen.Camera -> Page.Camera
                     else -> Page.Camera
                   }
-          BottomBar(
-              selectedPage = pageToSelect, onSelect = { actions.navToTopLevel(it.destination) })
+          BottomBar(selectedPage = pageToSelect, onSelect = { actions.navTo(it.destination) })
         }
       }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
