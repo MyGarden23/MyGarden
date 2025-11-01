@@ -193,7 +193,7 @@ class NewProfileViewModel(
             favoritePlant = state.favoritePlant.trim(),
             country = state.country.trim(),
             hasSignedIn = true,
-            avatar = state.avatar.name)
+            avatar = state.avatar)
 
     viewModelScope.launch {
       try {

@@ -1,5 +1,7 @@
 package com.android.mygarden.model.profile
 
+import com.android.mygarden.ui.profile.Avatar
+
 /**
  * Represents a user's profile within the garden management system.
  *
@@ -21,7 +23,7 @@ data class Profile(
     val favoritePlant: String = "",
     val country: String = "",
     val hasSignedIn: Boolean = false,
-    val avatar: String? = "A1"
+    val avatar: Avatar = Avatar.A1
 )
 /**
  * Represents the different levels of gardening experience and skill.
