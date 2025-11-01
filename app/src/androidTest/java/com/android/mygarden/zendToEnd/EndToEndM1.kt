@@ -11,7 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
-import com.android.mygarden.screen.RequiresCamera
+import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
