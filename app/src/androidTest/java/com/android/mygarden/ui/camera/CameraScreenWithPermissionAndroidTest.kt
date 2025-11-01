@@ -31,8 +31,7 @@ class CameraScreenWithPermissionAndroidTest {
 
   // Grant camera access to avoid requesting access during test which is not possible
   @get:Rule
-  val permissionRule: GrantPermissionRule =
-      GrantPermissionRule.grant(Manifest.permission.CAMERA)
+  val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
   lateinit var viewModel: CameraViewModel
 
   @Before
