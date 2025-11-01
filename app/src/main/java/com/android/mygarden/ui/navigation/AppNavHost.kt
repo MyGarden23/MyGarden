@@ -17,6 +17,7 @@ import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.profile.ChooseProfilePictureScreen
+import com.android.mygarden.ui.profile.EditProfileScreen
 import com.android.mygarden.ui.profile.NewProfileScreen
 import com.android.mygarden.ui.profile.NewProfileViewModel
 
@@ -60,8 +61,33 @@ fun AppNavHost(
       }
 
       NewProfileScreen(
-          newProfileViewModel = vm,
-          onRegisterPressed = { navigationActions.navTo(destination = Screen.Camera) },
+          profileViewModel = vm,
+          onSavePressed = { navigationActions.navTo(destination = Screen.Camera) },
+          onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
+    }
+
+    // Edit Profile
+    composable(Screen.EditProfile.route) { backStackEntry ->
+      val vm: NewProfileViewModel = viewModel()
+      val chosenName by
+          backStackEntry.savedStateHandle.getStateFlow("chosen_avatar", "").collectAsState()
+
+      val chosenAvatar =
+          chosenName
+              .takeIf { it.isNotBlank() }
+              ?.let { runCatching { Avatar.valueOf(it) }.getOrNull() }
+
+      LaunchedEffect(chosenAvatar) {
+        if (chosenAvatar != null) {
+          vm.setAvatar(chosenAvatar)
+          backStackEntry.savedStateHandle.set("chosen_avatar", "")
+        }
+      }
+
+      EditProfileScreen(
+          profileViewModel = vm,
+          onSavePressed = { navigationActions.navTo(destination = Screen.Camera) },
+          onBackPressed = { navigationActions.navBack() },
           onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
     }
 
@@ -83,7 +109,7 @@ fun AppNavHost(
     // Garden
     composable(Screen.Garden.route) {
       GardenScreen(
-          onEditProfile = { /* TODO: Navigate to Profile edit */},
+          onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
           onAddPlant = { navigationActions.navTo(Screen.Camera) })
     }
 
@@ -99,6 +125,7 @@ fun AppNavHost(
 
       PlantInfosScreen(
           plant = plant,
+          plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
           onSavePlant = {
             // Use navToTopLevel to navigate to Garden (top-level screen)

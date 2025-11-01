@@ -19,6 +19,8 @@ sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean
 
   object NewProfile : Screen(route = "new_profile", name = "New Profile")
 
+  object EditProfile : Screen(route = "edit_profile", name = "New Profile")
+
   object EditPlant : Screen(route = "edit_plant", name = "Edit Plant")
 
   object Garden : Screen(route = "garden", name = "Garden", isTopLevel = true)
