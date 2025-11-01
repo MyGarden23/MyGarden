@@ -58,6 +58,14 @@ class CameraScreenWithoutPermissionTest {
             InstrumentationRegistry.getInstrumentation()
                 .uiAutomation
             Thread.sleep(1500)
+  private fun revokePermissionReliably() {
+    try {
+      // Primary method: use shell command
+      InstrumentationRegistry.getInstrumentation()
+          .uiAutomation
+          .executeShellCommand("pm revoke ${context.packageName} android.permission.CAMERA")
+          .close()
+      Thread.sleep(1500)
 
       // Ensure SharedPreferences state is correct
       viewModel.sethasAlreadyDeniedCameraPermission(context, true)
