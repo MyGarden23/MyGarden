@@ -1,4 +1,4 @@
-package com.android.mygarden.screen
+package com.android.mygarden.ui.camera
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -8,7 +8,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.R
-import com.android.mygarden.ui.camera.LocalImageDisplay
 import java.io.File
 import java.io.FileOutputStream
 import org.junit.Assert.*
