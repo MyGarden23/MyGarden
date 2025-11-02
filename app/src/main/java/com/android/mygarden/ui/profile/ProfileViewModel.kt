@@ -10,21 +10,23 @@ import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /**
  * UI state data class for the new profile creation screen, contains all the form fields and
  * validation state
  */
-data class NewProfileUIState(
-    val firstName: String = "",
-    val lastName: String = "",
-    val gardeningSkill: GardeningSkill? = null,
-    val favoritePlant: String = "",
-    val country: String = "",
-    val registerPressed: Boolean = false,
-    val avatar: Avatar = Avatar.A1 // By default 1st avatar
+data class ProfileUIState(
+  val firstName: String = "",
+  val lastName: String = "",
+  val gardeningSkill: GardeningSkill? = null,
+  val favoritePlant: String = "",
+  val country: String = "",
+  val registerPressed: Boolean = false,
+  val avatar: Avatar = Avatar.A1, // By default 1st avatar
 ) {
+
   /**
    * Validates that the first name is not blank
    *
@@ -93,14 +95,36 @@ data class NewProfileUIState(
  * ViewModel for managing the new profile creation screen state Handles user input updates and form
  * validation
  */
-class NewProfileViewModel(
-    private val repo: ProfileRepository = ProfileRepositoryProvider.repository
+class ProfileViewModel(
+  private val repo: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
   // Private mutable state flow for internal state management
-  private val _uiState = MutableStateFlow(NewProfileUIState())
+  private val _uiState = MutableStateFlow(ProfileUIState())
 
   // Public immutable state flow exposed to the UI
-  val uiState: StateFlow<NewProfileUIState> = _uiState.asStateFlow()
+  val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()
+
+  var initialized: Boolean = false
+
+  fun initialize() {
+    if (initialized) return
+    viewModelScope.launch {
+      // Get the first profile emission (or null if no profile exists)
+      val profile = repo.getProfile().firstOrNull()
+
+      // If a profile exists, populate the form fields with its data
+      profile?.let {
+        setFirstName(it.firstName)
+        setLastName(it.lastName)
+        setCountry(it.country)
+        setGardeningSkill(it.gardeningSkill)
+        setAvatar(it.avatar)
+        setFavoritePlant(it.favoritePlant)
+      }
+      // If profile is null, the form keeps its default values from NewProfileUIState
+      initialized = true
+    }
+  }
 
   /**
    * Updates the first name in the UI state
@@ -146,7 +170,7 @@ class NewProfileViewModel(
   fun setCountry(country: String) {
     // Capitalize the first letter of the country name
     val capitalizedCountry =
-        country.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+      country.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     _uiState.value = _uiState.value.copy(country = capitalizedCountry)
   }
 
@@ -186,14 +210,14 @@ class NewProfileViewModel(
     }
 
     val profile =
-        Profile(
-            firstName = state.firstName.trim(),
-            lastName = state.lastName.trim(),
-            gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
-            favoritePlant = state.favoritePlant.trim(),
-            country = state.country.trim(),
-            hasSignedIn = true,
-            avatar = state.avatar)
+      Profile(
+        firstName = state.firstName.trim(),
+        lastName = state.lastName.trim(),
+        gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
+        favoritePlant = state.favoritePlant.trim(),
+        country = state.country.trim(),
+        hasSignedIn = true,
+        avatar = state.avatar)
 
     viewModelScope.launch {
       try {
