@@ -15,9 +15,6 @@ class PlantsRepositoryFirestore(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : PlantsRepository {
-
-  //  private val firestore = FirebaseFirestore.getInstance()
-  //  private val auth: FirebaseAuth = Firebase.auth
   private val healthCalculator = PlantHealthCalculator()
 
   /** The list of plants owned by the user, in the repository of the user. */
@@ -65,6 +62,8 @@ class PlantsRepositoryFirestore(
   }
 
   override suspend fun deleteFromGarden(id: String) {
+    val document = userPlantsCollection().document(id).get().await()
+    if (!document.exists()) throw IllegalArgumentException("OwnedPlant with id $id not found")
     userPlantsCollection().document(id).delete().await()
   }
 

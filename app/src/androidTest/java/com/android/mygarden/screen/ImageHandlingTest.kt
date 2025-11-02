@@ -37,7 +37,7 @@ class ImageHandlingTest {
     val file = File(context.filesDir, "test_image.jpeg")
     FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out) }
 
-    assertTrue("Le fichier doit exister après écriture", file.exists())
+    assertTrue("The file should exist after being written", file.exists())
     val loadedBitmap = BitmapFactory.decodeFile(file.absolutePath)
 
     // Check that the bitmap exists and has the right dimensions

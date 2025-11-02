@@ -22,30 +22,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PlantsRepositoryFirestoreTest {
   private lateinit var repository: PlantsRepository
-
   private lateinit var db: FirebaseFirestore
   private lateinit var auth: FirebaseAuth
   private val healthCalculator = PlantHealthCalculator()
 
   @Before
   fun setup() = runBlocking {
-
-    //    FirebaseEmulator2.ensureConfigured()
-    //    FirebaseEmulator2.clearAuthEmulator()
-    //
-    //    val fakeIdToken = FakeJwtGenerator.createFakeGoogleIdToken(email = "tester@example.com")
-    //    FirebaseEmulator2.createGoogleUser(fakeIdToken)
-    //
-    //    val auth = Firebase.auth
-    //    auth.useEmulator("10.0.2.2", 9099)
-    //
-    //    val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(fakeIdToken,
-    // null)
-    //    val result = auth.signInWithCredential(credential).await()
-    //
-    //    assertNotNull(result.user)
-    //    repository = PlantsRepositoryFirestore()
-    // Emulators
     FirebaseEmulator.connectAuth()
     FirebaseEmulator.clearAuthEmulator()
     db = FirebaseEmulator.connectFirestore()
@@ -86,6 +68,7 @@ class PlantsRepositoryFirestoreTest {
         wateringFrequency = 7)
   }
 
+  /** Plants to use for the tests */
   private val plant1 =
       createTestPlant(
           name = "test plant 1",
@@ -120,24 +103,22 @@ class PlantsRepositoryFirestoreTest {
 
   @Test
   fun saveToGarden_returnsOwnedPlantWithCorrectData() = runBlocking {
-    val plant = createTestPlant(name = "Rose", latinName = "Rosa rubiginosa")
     val id = "test-id-1"
     val timestamp = Timestamp(System.currentTimeMillis())
 
-    val ownedPlant = repository.saveToGarden(plant, id, timestamp)
+    val ownedPlant = repository.saveToGarden(plant1, id, timestamp)
 
     assertEquals(id, ownedPlant.id)
-    assertEquals(plant, ownedPlant.plant)
+    assertEquals(plant1, ownedPlant.plant)
     assertEquals(timestamp, ownedPlant.lastWatered)
   }
 
   @Test
   fun getOwnedPlant_returnsTheSamePlantSavedToGarden1() = runBlocking {
-    val plant = createTestPlant(name = "test getOwned 1", latinName = "test getOwned 1 in latin")
     val id = "test getOwned id 1"
     val timestamp = Timestamp(System.currentTimeMillis())
 
-    val ownedPlantBefore = repository.saveToGarden(plant, id, timestamp)
+    val ownedPlantBefore = repository.saveToGarden(plant2, id, timestamp)
 
     val ownedPlantFromRepo = repository.getOwnedPlant(id)
 
@@ -240,29 +221,56 @@ class PlantsRepositoryFirestoreTest {
     assertEquals(newListBefore, repository.getAllOwnedPlants())
   }
 
-  //  @Test
-  //  fun editOwnedPlant_works() = runBlocking {
-  //    val id1 = "test editOwnedPlant 1 plant 1"
-  //    val timestamp1 = Timestamp(System.currentTimeMillis())
-  //    val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
-  //
-  //    val id2 = "test editOwnedPlant 1 plant 2"
-  //    val timestamp2 = Timestamp(System.currentTimeMillis())
-  //    val ownedPlantBefore2 = repository.saveToGarden(plant2, id2, timestamp2)
-  //
-  //    val id3 = "test editOwnedPlant 1 plant 3"
-  //    val timestamp3 = Timestamp(System.currentTimeMillis())
-  //    val ownedPlantBefore3 = OwnedPlant(id3, plant3, timestamp3)
-  //
-  //    repository.editOwnedPlant(id2, ownedPlantBefore3)
-  //    val allOwnedPlantEdit: List<OwnedPlant> =
-  //        listOf(ownedPlantBefore1, ownedPlantBefore3).map { ownedP ->
-  //          updatePlantHealthStatus(ownedP)
-  //        }
-  //    val allOwnedPlantFromRepo = repository.getAllOwnedPlants()
-  //    // TODO Change the logic of editing a plant ?
-  //    assertEquals(allOwnedPlantEdit, allOwnedPlantFromRepo)
-  //  }
+  @Test
+  fun deleteFromGarden_throwsExceptionWhenWrongId() = runBlocking {
+    val idTest = "delete empty repo"
+    try {
+      repository.deleteFromGarden(idTest)
+      fail("Expected IllegalArgumentException to be thrown")
+    } catch (e: Exception) {
+      assertTrue(e.message?.contains("OwnedPlant with id $idTest not found") == true)
+    }
+  }
+
+  @Test
+  fun editOwnedPlant_works() = runBlocking {
+    val id1 = "test editOwnedPlant 1 plant 1"
+    val timestamp1 = Timestamp(System.currentTimeMillis())
+    val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
+
+    val id2 = "test editOwnedPlant 1 plant 2"
+    val timestamp2 = Timestamp(System.currentTimeMillis())
+    repository.saveToGarden(plant2, id2, timestamp2)
+
+    val timestamp3 = Timestamp(System.currentTimeMillis())
+    val ownedPlantBefore3 = OwnedPlant(id2, plant3, timestamp3)
+
+    repository.editOwnedPlant(id2, ownedPlantBefore3)
+    val allOwnedPlantEdit: List<OwnedPlant> =
+        listOf(ownedPlantBefore1, ownedPlantBefore3).map { ownedP ->
+          updatePlantHealthStatus(ownedP)
+        }
+    val allOwnedPlantFromRepo = repository.getAllOwnedPlants()
+    assertEquals(allOwnedPlantEdit, allOwnedPlantFromRepo)
+  }
+
+  @Test
+  fun waterPlant_works() = runBlocking {
+    val id1 = "test waterPlant_works plant 1"
+    val timestamp1 = Timestamp(System.currentTimeMillis())
+    val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
+
+    val timestamp2 = Timestamp(System.currentTimeMillis())
+
+    repository.waterPlant(id1, timestamp2)
+
+    val wateredOwnedPlant =
+        ownedPlantBefore1.copy(
+            lastWatered = timestamp2, previousLastWatered = ownedPlantBefore1.lastWatered)
+
+    val wateredOwnedPlantFromRepo = repository.getOwnedPlant(id1)
+    assertEquals(wateredOwnedPlant, wateredOwnedPlantFromRepo)
+  }
 
   /**
    * Updates the health status of a plant based on current watering cycle.
