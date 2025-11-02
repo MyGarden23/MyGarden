@@ -25,6 +25,7 @@ sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean
       const val route = "edit_plant/{ownedPlantId}"
     }
   }
+
   object EditProfile : Screen(route = "edit_profile", name = "New Profile")
 
   object Garden : Screen(route = "garden", name = "Garden", isTopLevel = true)
