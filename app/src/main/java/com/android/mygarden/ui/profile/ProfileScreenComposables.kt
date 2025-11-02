@@ -96,7 +96,7 @@ private const val MAX_COUNTRIES_DISPLAYED = 15
 @Composable
 private fun ProfileHeader(
     modifier: Modifier = Modifier,
-    uiState: NewProfileUIState,
+    uiState: ProfileUIState,
     onAvatarClick: () -> Unit,
     title: String = "New Profile",
 ) {
@@ -141,8 +141,8 @@ private fun ProfileHeader(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun ProfileForm(
-    uiState: NewProfileUIState,
-    profileViewModel: NewProfileViewModel,
+    uiState: ProfileUIState,
+    profileViewModel: ProfileViewModel,
     modifier: Modifier = Modifier
 ) {
   var isExperienceExpanded by remember { mutableStateOf(false) }
@@ -204,8 +204,8 @@ private fun ProfileForm(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun ExperienceDropdown(
-    uiState: NewProfileUIState,
-    profileViewModel: NewProfileViewModel,
+    uiState: ProfileUIState,
+    profileViewModel: ProfileViewModel,
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit
 ) {
@@ -253,8 +253,8 @@ private fun ExperienceDropdown(
  */
 @Composable
 private fun CountryDropdown(
-    uiState: NewProfileUIState,
-    profileViewModel: NewProfileViewModel,
+    uiState: ProfileUIState,
+    profileViewModel: ProfileViewModel,
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     countryFocusRequester: FocusRequester
@@ -385,8 +385,8 @@ private fun CountryDropdownMenu(
  */
 @Composable
 private fun SaveButton(
-    uiState: NewProfileUIState,
-    profileViewModel: NewProfileViewModel,
+    uiState: ProfileUIState,
+    profileViewModel: ProfileViewModel,
     onRegisterPressed: () -> Unit
 ) {
   Button(
@@ -425,7 +425,7 @@ private fun SaveButton(
  * - Material 3 theming and accessibility support
  *
  * @param profileViewModel ViewModel managing form state and validation
- * @param onRegisterPressed Callback invoked on successful profile registration
+ * @param onSavePressed Callback invoked on successful profile registration
  * @param onAvatarClick Callback when avatar is clicked
  * @param onNavBackIconClick Optional callback for navigation icon (e.g., back button). If null, no
  *   navigation icon is shown.
@@ -434,8 +434,8 @@ private fun SaveButton(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ProfileScreenBase(
-    profileViewModel: NewProfileViewModel = viewModel(),
-    onRegisterPressed: () -> Unit,
+    profileViewModel: ProfileViewModel = viewModel(),
+    onSavePressed: () -> Unit,
     onAvatarClick: () -> Unit = {}, // put {} by default so that previous test can still run
     onNavBackIconClick: (() -> Unit)? = null,
     title: String = "New Profile",
@@ -464,7 +464,7 @@ fun ProfileScreenBase(
         SaveButton(
             uiState = uiState,
             profileViewModel = profileViewModel,
-            onRegisterPressed = onRegisterPressed)
+            onRegisterPressed = onSavePressed)
       }) { paddingValues ->
         Column(
             modifier =

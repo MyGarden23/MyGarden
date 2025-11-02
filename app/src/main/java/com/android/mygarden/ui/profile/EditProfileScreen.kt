@@ -18,7 +18,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
  */
 @Composable
 fun EditProfileScreen(
-    profileViewModel: NewProfileViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
     onBackPressed: (() -> Unit)? = {},
     onSavePressed: () -> Unit = {},
     onAvatarClick: () -> Unit = {},
@@ -26,7 +26,7 @@ fun EditProfileScreen(
   LaunchedEffect(Unit) { profileViewModel.initialize() }
   ProfileScreenBase(
       profileViewModel = profileViewModel,
-      onRegisterPressed = onSavePressed,
+      onSavePressed = onSavePressed,
       onAvatarClick = onAvatarClick,
       onNavBackIconClick = onBackPressed,
       title = "Edit Profile")

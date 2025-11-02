@@ -17,13 +17,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
  */
 @Composable
 fun NewProfileScreen(
-    profileViewModel: NewProfileViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
     onSavePressed: () -> Unit = {},
     onAvatarClick: () -> Unit = {},
 ) {
   ProfileScreenBase(
       profileViewModel = profileViewModel,
-      onRegisterPressed = onSavePressed,
+      onSavePressed = onSavePressed,
       onAvatarClick = onAvatarClick,
       title = "New Profile")
 }
