@@ -89,10 +89,8 @@ fun MyGardenApp() {
 
   Scaffold(
       bottomBar = {
-        // Show bottom bar for main screens: Camera, Profile, and Garden
-        if (currentScreen == Screen.Camera ||
-            currentScreen == Screen.Garden ||
-            currentScreen == Screen.Garden) {
+        // Show bottom bar for main screens: Camera and Garden
+        if (currentScreen == Screen.Camera || currentScreen == Screen.Garden) {
           // Determine selected page more carefully - don't default to Camera
           // if we're coming from a non-top-level screen
           val pageToSelect =

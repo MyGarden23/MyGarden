@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import com.android.mygarden.R
 
 private val cameraIconId = R.drawable.photo_camera_icon
-private val profileIconId = R.drawable.plant_profile_icon
 private val gardenIconId = R.drawable.plant_profile_icon
 
 /**

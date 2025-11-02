@@ -93,11 +93,6 @@ fun AppNavHost(
           onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
     }
 
-    // Profile
-    composable(Screen.Garden.route) {
-      // TODO: ProfileScreen(...)
-    }
-
     // Camera
     composable(Screen.Camera.route) {
       CameraScreen(
