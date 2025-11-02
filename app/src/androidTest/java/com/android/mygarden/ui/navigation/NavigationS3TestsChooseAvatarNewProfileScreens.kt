@@ -99,7 +99,7 @@ class NavigationS3TestsChooseAvatarNewProfileScreens {
 
   /** Tests that pressing the register button navigates to the Camera screen. */
   @Test
-  fun onRegisterPressed_from_newProfile_navigates_to_camera() {
+  fun onSavePressed_from_newProfile_navigates_to_camera() {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
 
     composeTestRule.runOnIdle { navController.navigate(Screen.Camera.route) }

@@ -117,7 +117,7 @@ class NewProfileScreenTests {
 
     // Verify interactive elements
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_ICON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.REGISTER_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).assertIsDisplayed()
   }
 
   /**
@@ -146,7 +146,7 @@ class NewProfileScreenTests {
 
     // Verify the register button shows the expected text
     composeTestRule
-        .onNodeWithTag(ProfileScreenTestTags.REGISTER_BUTTON)
+        .onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON)
         .assertTextContains("Save Profile")
   }
 
@@ -603,7 +603,7 @@ class NewProfileScreenTests {
     composeTestRule.waitForIdle()
 
     // Attempt to register the profile
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.REGISTER_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
 
     // Wait for registration callback to be processed
     composeTestRule.waitForIdle()
@@ -631,7 +631,7 @@ class NewProfileScreenTests {
     performTextInputAndAssert(ProfileScreenTestTags.LAST_NAME_FIELD, "Doe")
 
     // Attempt to register with incomplete information
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.REGISTER_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
 
     // Verify registration callback was NOT triggered due to missing country
     assertEquals(false, onSavePressedCalled)

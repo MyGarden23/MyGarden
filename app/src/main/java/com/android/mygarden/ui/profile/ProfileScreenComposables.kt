@@ -404,7 +404,7 @@ private fun SaveButton(
           Modifier.fillMaxWidth()
               .height(BUTTON_HEIGHT)
               .padding(horizontal = HORIZONTAL_PADDING, vertical = VERTICAL_PADDING)
-              .testTag(ProfileScreenTestTags.REGISTER_BUTTON),
+              .testTag(ProfileScreenTestTags.SAVE_BUTTON),
       colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
       shape = RoundedCornerShape(BUTTON_CORNER_RADIUS)) {
         Text(
