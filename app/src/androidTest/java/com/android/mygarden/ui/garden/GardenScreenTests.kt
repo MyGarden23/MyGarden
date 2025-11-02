@@ -15,11 +15,17 @@ import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.theme.MyGardenTheme
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -72,16 +78,42 @@ class GardenScreenTests {
           "is ?",
           10)
 
-  private lateinit var repo: PlantsRepository
+  /** Fake profile local repository used to test the viewModel/profile interactions */
+  private class FakeProfileRepository(
+      initialProfile: Profile? =
+          Profile(
+              firstName = "Test",
+              lastName = "User",
+              gardeningSkill = GardeningSkill.BEGINNER,
+              favoritePlant = "Rose",
+              country = "Switzerland",
+              hasSignedIn = true,
+              avatar = Avatar.A1)
+  ) : ProfileRepository {
+
+    private val flow = MutableStateFlow(initialProfile)
+
+    override fun getCurrentUserId(): String = "fake-uid"
+
+    override fun getProfile(): Flow<Profile?> = flow
+
+    override suspend fun saveProfile(profile: Profile) {
+      flow.value = profile
+    }
+  }
+
+  private lateinit var plantsRepo: PlantsRepository
+  private lateinit var profileRepo: ProfileRepository
 
   /**
-   * Sets the [repo] as a local repository for testing and sets the provider's repo to this one to
-   * ensure that the local repo of the test class is the one used by the screen instance
+   * Sets the [plantsRepo] as a local repository for testing and sets the provider's repo to this
+   * one to ensure that the local repo of the test class is the one used by the screen instance
    */
   @Before
   fun setUp() {
-    repo = PlantsRepositoryLocal()
-    PlantsRepositoryProvider.repository = repo
+    plantsRepo = PlantsRepositoryLocal()
+    profileRepo = FakeProfileRepository()
+    PlantsRepositoryProvider.repository = plantsRepo
   }
 
   /**
@@ -93,19 +125,24 @@ class GardenScreenTests {
   fun setContent(initialOwnedPlants: List<Plant> = emptyList()) {
     runTest {
       initialOwnedPlants.forEach {
-        repo.saveToGarden(
-            it, repo.getNewId(), Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(6)))
+        plantsRepo.saveToGarden(
+            it,
+            plantsRepo.getNewId(),
+            Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(6)))
       }
     }
     // Buttons have no use : tests are for the garden screen in isolation
-    composeTestRule.setContent { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
+    val gardenViewModel = GardenViewModel(plantsRepo = plantsRepo, profileRepo = profileRepo)
+    composeTestRule.setContent {
+      GardenScreen(onEditProfile = {}, onAddPlant = {}, gardenViewModel = gardenViewModel)
+    }
     composeTestRule.waitForIdle()
   }
 
   /** Ensures to clear the repo at the end of each test for consistency */
   @After
   fun eraseFromRepo() {
-    runTest { repo.getAllOwnedPlants().forEach { p -> repo.deleteFromGarden(p.id) } }
+    runTest { plantsRepo.getAllOwnedPlants().forEach { p -> plantsRepo.deleteFromGarden(p.id) } }
   }
 
   /** Ensures that all profile-related components are currently displayed */
@@ -115,10 +152,10 @@ class GardenScreenTests {
     onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsDisplayed()
   }
 
-  /** Ensures that all plants currently on the [repo] are displayed on the screen */
+  /** Ensures that all plants currently on the [plantsRepo] are displayed on the screen */
   fun ComposeTestRule.allPlantsAreDisplayed() {
     runTest {
-      repo.getAllOwnedPlants().forEach { p ->
+      plantsRepo.getAllOwnedPlants().forEach { p ->
         onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlant(p)).assertIsDisplayed()
         onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantName(p), useUnmergedTree = true)
             .assertIsDisplayed()
@@ -176,7 +213,7 @@ class GardenScreenTests {
 
     // Check that all watering button are clickable
     runTest {
-      repo.getAllOwnedPlants().forEach { p ->
+      plantsRepo.getAllOwnedPlants().forEach { p ->
         composeTestRule
             .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(p))
             .assertIsEnabled()
@@ -190,7 +227,7 @@ class GardenScreenTests {
     val plants = listOf(plant1, plant2, plant3, plant4)
     setContent(plants)
     runTest {
-      repo.getAllOwnedPlants().forEach { p ->
+      plantsRepo.getAllOwnedPlants().forEach { p ->
         var success = false
         for (status in PlantHealthStatus.entries) {
           try {
@@ -215,7 +252,7 @@ class GardenScreenTests {
     val plants = listOf(plant1, plant2, plant3, plant4)
     setContent(plants)
     runTest {
-      repo.getAllOwnedPlants().forEach { p ->
+      plantsRepo.getAllOwnedPlants().forEach { p ->
         composeTestRule
             .onNodeWithTag(
                 GardenScreenTestTags.getTestTagForOwnedPlantName(p), useUnmergedTree = true)

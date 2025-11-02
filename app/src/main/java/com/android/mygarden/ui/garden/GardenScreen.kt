@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.garden
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WaterDrop
@@ -119,6 +121,7 @@ private val WATER_BUTTON_BORDER_WIDTH = 2.dp
 private val WATER_BUTTON_DROP_ICON_SIZE = 20.dp
 private val WATER_BAR_HEIGHT = 14.dp
 private val WATER_BAR_WRAPPER_HEIGHT = 14.dp
+private val AVATAR_SIZE = 40.dp
 
 // Font sizes
 private val PLANT_NAME_FONT_SIZE = 20.sp
@@ -191,7 +194,7 @@ fun GardenScreen(
       content = { pd ->
         Column(modifier = modifier.fillMaxWidth().padding(pd)) {
           // Profile row with user profile picture, username and a button to edit the profile
-          ProfileRow(onEditProfile, modifier)
+          ProfileRow(onEditProfile, modifier, uiState)
           Spacer(modifier = modifier.height(16.dp))
           if (plants.isNotEmpty()) {
             // The full list of owned plant
@@ -228,19 +231,25 @@ fun GardenScreen(
  *
  * @param onEditProfile the function to launch when the edit button is clicked on
  * @param modifier the optional modifier of the composable
+ * @param uiState the uiState used to have profile name and avatar
  */
 @Composable
-fun ProfileRow(onEditProfile: () -> Unit, modifier: Modifier = Modifier) {
+fun ProfileRow(onEditProfile: () -> Unit, modifier: Modifier = Modifier, uiState: GardenUIState) {
   Row(
       modifier = modifier.fillMaxWidth().padding(horizontal = PROFILE_ROW_HORIZONTAL_PADDING),
       verticalAlignment = Alignment.CenterVertically) {
-        // User profile picture
-        Icon(
-            modifier = modifier.testTag(GardenScreenTestTags.USER_PROFILE_PICTURE),
-            painter = painterResource(R.drawable.profile_unknown_photo_icon_2),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-        )
+        // User avatar
+        Card(
+            modifier =
+                modifier
+                    .clip(CircleShape)
+                    .size(AVATAR_SIZE)
+                    .testTag(GardenScreenTestTags.USER_PROFILE_PICTURE)) {
+              Image(
+                  painter = painterResource(uiState.userAvatar.resId),
+                  contentDescription = "Avatar ${uiState.userAvatar.name}",
+                  modifier = modifier.fillMaxSize())
+            }
         Spacer(modifier = modifier.weight(1f))
 
         // Username
@@ -248,8 +257,8 @@ fun ProfileRow(onEditProfile: () -> Unit, modifier: Modifier = Modifier) {
             modifier = modifier.testTag(GardenScreenTestTags.USERNAME),
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium,
-            text = "Username") /* TODO: Replace with real user name when implementation is done */
+            style = MaterialTheme.typography.titleLarge,
+            text = uiState.userName)
         Spacer(modifier = modifier.weight(1f))
 
         // Edit profile button
