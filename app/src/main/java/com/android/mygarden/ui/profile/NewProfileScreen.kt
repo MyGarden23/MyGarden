@@ -9,9 +9,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
  * This screen reuses [NewProfileScreen] with a back navigation button and "Edit Profile" title. All
  * form fields and validation logic remain the same.
  *
- * @param newProfileViewModel ViewModel managing form state and validation (should be pre-populated
+ * @param profileViewModel ViewModel managing form state and validation (should be pre-populated
  *   with existing profile data)
- * @param onBackPressed Callback invoked when the back button is clicked
  * @param onSavePressed Callback invoked on successful profile update
  * @param onAvatarClick Callback when avatar is clicked to change profile picture
  */
