@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.ZoneId
@@ -40,6 +41,7 @@ object EditPlantScreenTestTags {
   const val PLANT_SAVE = "plantSave"
   const val PLANT_DELETE = "plantDelete"
   const val DATE_PICKER_BUTTON = "datePicker"
+  const val GO_BACK_BUTTON = "goBack"
 }
 
 /**
@@ -109,13 +111,16 @@ fun EditPlantScreen(
   }
 
   Scaffold(
+      modifier = Modifier.testTag(NavigationTestTags.EDIT_PLANT_SCREEN),
       topBar = {
         TopAppBar(
             title = { Text("Edit plant") },
             navigationIcon = {
-              IconButton(onClick = { goBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-              }
+              IconButton(
+                  onClick = { goBack() },
+                  modifier = Modifier.testTag(EditPlantScreenTestTags.GO_BACK_BUTTON)) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                  }
             })
       },
       snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->

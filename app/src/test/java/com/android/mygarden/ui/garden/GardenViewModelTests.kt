@@ -5,9 +5,16 @@ import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
+import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.ui.profile.Avatar
 import java.sql.Timestamp
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -21,7 +28,8 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class GardenViewModelTests {
 
-  private lateinit var repo: PlantsRepository
+  private lateinit var plantsRepo: PlantsRepository
+  private lateinit var profileRepo: ProfileRepository
   private lateinit var vm: GardenViewModel
   private lateinit var ownedPlant: OwnedPlant
   val plant1 =
@@ -35,12 +43,37 @@ class GardenViewModelTests {
           2)
   private val testDispatcher = StandardTestDispatcher()
 
+  /** Fake profile local repository used to test the viewModel/profile interactions */
+  private class FakeProfileRepository(
+      initialProfile: Profile? =
+          Profile(
+              firstName = "Test",
+              lastName = "User",
+              gardeningSkill = GardeningSkill.BEGINNER,
+              favoritePlant = "Rose",
+              country = "Switzerland",
+              hasSignedIn = true,
+              avatar = Avatar.A1)
+  ) : ProfileRepository {
+
+    private val flow = MutableStateFlow(initialProfile)
+
+    override fun getCurrentUserId(): String = "fake-uid"
+
+    override fun getProfile(): Flow<Profile?> = flow
+
+    override suspend fun saveProfile(profile: Profile) {
+      flow.value = profile
+    }
+  }
+
   /** Sets up the repository and the view model and the test dispatcher to simulate the app */
   @Before
   fun setUp() {
     Dispatchers.setMain(testDispatcher)
-    repo = PlantsRepositoryLocal()
-    vm = GardenViewModel(plantsRepo = repo)
+    plantsRepo = PlantsRepositoryLocal()
+    profileRepo = FakeProfileRepository()
+    vm = GardenViewModel(plantsRepo = plantsRepo, profileRepo = profileRepo)
   }
 
   /** Ensures the reset of the dispatcher at each end of test */
@@ -74,17 +107,62 @@ class GardenViewModelTests {
   @Test
   fun getAllPlantsWorksCorrectly() = runTest {
     assertEquals(emptyList<OwnedPlant>(), vm.uiState.value.plants)
-    vm.getAllPlants()
+    vm.refreshUIState()
     advanceUntilIdle()
     assertEquals(emptyList<OwnedPlant>(), vm.uiState.value.plants)
     ownedPlant =
-        repo.saveToGarden(
+        plantsRepo.saveToGarden(
             plant1,
-            repo.getNewId(),
+            plantsRepo.getNewId(),
             Timestamp(System.currentTimeMillis() - (1L * 24 * 60 * 60 * 1000)))
     advanceUntilIdle()
-    vm.getAllPlants()
+    vm.refreshUIState()
     advanceUntilIdle()
     assertEquals(listOf(ownedPlant), vm.uiState.value.plants)
+  }
+
+  /** Tests that fetchProfileInfos works correctly with a fake profile repository */
+  @Test
+  fun fetchProfileInfoWorksCorrectly() = runTest {
+    val expected =
+        Profile(
+            firstName = "Test",
+            lastName = "User",
+            gardeningSkill = GardeningSkill.BEGINNER,
+            favoritePlant = "Rose",
+            country = "Switzerland",
+            hasSignedIn = true,
+            avatar = Avatar.A1)
+
+    vm.refreshUIState()
+    advanceUntilIdle()
+
+    assertEquals(expected.firstName, vm.uiState.value.userName)
+    assertEquals(expected.avatar, vm.uiState.value.userAvatar)
+  }
+
+  @Test
+  fun waterPlantWorksCorrectly() = runTest {
+    // Last watered = 4 days ago
+    val initialLastWatered = Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(4))
+    val saved = plantsRepo.saveToGarden(plant1, plantsRepo.getNewId(), initialLastWatered)
+
+    advanceUntilIdle()
+    vm.refreshUIState()
+    advanceUntilIdle()
+
+    val before = vm.uiState.value.plants.single()
+    assertEquals(saved.id, before.id)
+    assertEquals(before.plant.healthStatus, PlantHealthStatus.SEVERELY_DRY)
+    assertEquals(initialLastWatered.time, before.lastWatered.time)
+
+    vm.waterPlant(before)
+    vm.refreshUIState()
+    advanceUntilIdle()
+
+    val after = vm.uiState.value.plants.single()
+    assertEquals(before.id, after.id)
+    assertEquals(after.plant.healthStatus, PlantHealthStatus.HEALTHY)
+    assertTrue(after.lastWatered.time >= before.lastWatered.time)
   }
 }

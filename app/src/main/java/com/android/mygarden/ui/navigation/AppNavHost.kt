@@ -7,11 +7,14 @@ import androidx.compose.runtime.getValue
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
+import com.android.mygarden.ui.editPlant.EditPlantScreen
 import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
@@ -84,7 +87,8 @@ fun AppNavHost(
     composable(Screen.Garden.route) {
       GardenScreen(
           onEditProfile = { /* TODO: Navigate to Profile edit */},
-          onAddPlant = { navigationActions.navTo(Screen.Camera) })
+          onAddPlant = { navigationActions.navTo(Screen.Camera) },
+          onPlantClick = { ownedPlant -> navigationActions.navTo(Screen.EditPlant(ownedPlant.id)) })
     }
 
     // Plant View
@@ -121,9 +125,15 @@ fun AppNavHost(
     }
 
     // EditPlant
-    // Not yet in the sprint 2 version
-    composable(Screen.EditPlant.route) {
-      // TODO: for sprint 3
-    }
+    composable(
+        route = Screen.EditPlant.route,
+        arguments = listOf(navArgument("ownedPlantId") { type = NavType.StringType })) { entry ->
+          val ownedPlantId = entry.arguments?.getString("ownedPlantId") ?: return@composable
+          EditPlantScreen(
+              ownedPlantId = ownedPlantId,
+              onSaved = { navigationActions.navToTopLevel(Screen.Garden) },
+              onDeleted = { navigationActions.navToTopLevel(Screen.Garden) },
+              goBack = { navigationActions.navBack() })
+        }
   }
 }
