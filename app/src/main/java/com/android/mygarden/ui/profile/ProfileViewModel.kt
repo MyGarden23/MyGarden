@@ -105,6 +105,12 @@ class ProfileViewModel(private val repo: ProfileRepository = ProfileRepositoryPr
 
   var initialized: Boolean = false
 
+  /**
+   * Initializes the profile form state.
+   *
+   * This function is called when the form needs to be prefilled by the current profile values or
+   * defualts values if there is no current profile
+   */
   fun initialize() {
     if (initialized) return
     viewModelScope.launch {
