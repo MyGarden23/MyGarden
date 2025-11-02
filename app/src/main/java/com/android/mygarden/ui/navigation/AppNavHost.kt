@@ -112,11 +112,10 @@ fun AppNavHost(
     // Garden
     composable(Screen.Garden.route) {
       GardenScreen(
-          onEditProfile = { /* TODO: Navigate to Profile edit */},
-          onAddPlant = { navigationActions.navTo(Screen.Camera) },
-          onPlantClick = { ownedPlant -> navigationActions.navTo(Screen.EditPlant(ownedPlant.id)) })
           onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
-          onAddPlant = { navigationActions.navTo(Screen.Camera) })
+          onAddPlant = { navigationActions.navTo(Screen.Camera) },
+          onPlantClick = { ownedPlant -> navigationActions.navTo(Screen.EditPlant(ownedPlant.id)) },
+      )
     }
 
     // Plant View
