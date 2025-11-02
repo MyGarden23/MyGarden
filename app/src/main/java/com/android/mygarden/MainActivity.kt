@@ -82,8 +82,10 @@ fun MyGardenApp() {
   val backStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = backStackEntry?.destination?.route
   // Helper functions to map the route string to our sealed classes
-  val currentScreen = remember(currentRoute) { currentRoute?.let { routeToScreen(it) } }
-  val selectedPage = remember(currentRoute) { currentRoute?.let { routeToPage(it) } }
+  val currentScreen: Screen? =
+      remember(currentRoute) { if (currentRoute != null) routeToScreen(currentRoute) else null }
+  val selectedPage: Page? =
+      remember(currentRoute) { if (currentRoute != null) routeToPage(currentRoute) else null }
 
   Scaffold(
       bottomBar = {
