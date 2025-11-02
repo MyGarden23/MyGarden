@@ -36,10 +36,14 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
     onSavePressedCalled = false
     onBackPressedCalled = false
 
+    val repo = FakeProfileRepository()
+    val vm = ProfileViewModel(repo)
+
     // Set up the EditProfileScreen with a test callback
     composeTestRule.setContent {
       MyGardenTheme {
         EditProfileScreen(
+            profileViewModel = vm,
             onSavePressed = { onSavePressedCalled = true },
             onBackPressed = { onBackPressedCalled = true })
       }
