@@ -18,13 +18,13 @@ import kotlinx.coroutines.launch
  * validation state
  */
 data class ProfileUIState(
-  val firstName: String = "",
-  val lastName: String = "",
-  val gardeningSkill: GardeningSkill? = null,
-  val favoritePlant: String = "",
-  val country: String = "",
-  val registerPressed: Boolean = false,
-  val avatar: Avatar = Avatar.A1, // By default 1st avatar
+    val firstName: String = "",
+    val lastName: String = "",
+    val gardeningSkill: GardeningSkill? = null,
+    val favoritePlant: String = "",
+    val country: String = "",
+    val registerPressed: Boolean = false,
+    val avatar: Avatar = Avatar.A1, // By default 1st avatar
 ) {
 
   /**
@@ -95,9 +95,8 @@ data class ProfileUIState(
  * ViewModel for managing the new profile creation screen state Handles user input updates and form
  * validation
  */
-class ProfileViewModel(
-  private val repo: ProfileRepository = ProfileRepositoryProvider.repository
-) : ViewModel() {
+class ProfileViewModel(private val repo: ProfileRepository = ProfileRepositoryProvider.repository) :
+    ViewModel() {
   // Private mutable state flow for internal state management
   private val _uiState = MutableStateFlow(ProfileUIState())
 
@@ -170,7 +169,7 @@ class ProfileViewModel(
   fun setCountry(country: String) {
     // Capitalize the first letter of the country name
     val capitalizedCountry =
-      country.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        country.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     _uiState.value = _uiState.value.copy(country = capitalizedCountry)
   }
 
@@ -210,14 +209,14 @@ class ProfileViewModel(
     }
 
     val profile =
-      Profile(
-        firstName = state.firstName.trim(),
-        lastName = state.lastName.trim(),
-        gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
-        favoritePlant = state.favoritePlant.trim(),
-        country = state.country.trim(),
-        hasSignedIn = true,
-        avatar = state.avatar)
+        Profile(
+            firstName = state.firstName.trim(),
+            lastName = state.lastName.trim(),
+            gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
+            favoritePlant = state.favoritePlant.trim(),
+            country = state.country.trim(),
+            hasSignedIn = true,
+            avatar = state.avatar)
 
     viewModelScope.launch {
       try {
