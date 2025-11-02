@@ -606,12 +606,12 @@ class NewProfileScreenTests {
 
   private fun setContentWithFakeRepo() {
     val repo = FakeProfileRepository()
-    val vm = NewProfileViewModel(repo)
+    val vm = ProfileViewModel(repo)
 
     composeTestRule.setContent {
       MyGardenTheme {
         NewProfileScreen(
-            newProfileViewModel = vm, onRegisterPressed = { onRegisterPressedCalled = true })
+            profileViewModel = vm, onRegisterPressed = { onRegisterPressedCalled = true })
       }
     }
   }

@@ -24,7 +24,7 @@ import org.junit.Test
  * These tests verify the business logic of the ViewModel without UI dependencies.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class NewProfileViewModelTest {
+class ProfileViewModelTest {
 
   private class FakeProfileRepository : ProfileRepository {
     private val flow = MutableStateFlow<Profile?>(null)
@@ -38,13 +38,13 @@ class NewProfileViewModelTest {
     }
   }
 
-  private lateinit var viewModel: NewProfileViewModel
+  private lateinit var viewModel: ProfileViewModel
   private val testDispatcher = StandardTestDispatcher()
 
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = NewProfileViewModel(repo = FakeProfileRepository())
+    viewModel = ProfileViewModel(repo = FakeProfileRepository())
   }
 
   @After
@@ -406,5 +406,72 @@ class NewProfileViewModelTest {
     viewModel.setAvatar(secondAvatar)
     advanceUntilIdle()
     assertEquals(secondAvatar, viewModel.uiState.value.avatar)
+  }
+
+  @Test
+  fun `initialize loads profile when it exists`() = runTest {
+    val repo = FakeProfileRepository()
+    val viewModel = ProfileViewModel(repo)
+
+    val sampleProfile =
+        Profile(
+            firstName = "Ada",
+            lastName = "Lovelace",
+            country = "UK",
+            gardeningSkill = GardeningSkill.BEGINNER,
+            avatar = Avatar.A1,
+            favoritePlant = "Rose")
+
+    // Save profile in repo (so flow emits it)
+    repo.saveProfile(sampleProfile)
+
+    viewModel.initialize()
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertEquals("Ada", state.firstName)
+    assertEquals("Lovelace", state.lastName)
+    assertEquals("UK", state.country)
+    assertEquals(GardeningSkill.BEGINNER, state.gardeningSkill)
+    assertEquals(Avatar.A1, state.avatar)
+    assertEquals("Rose", state.favoritePlant)
+    assertTrue(viewModel.initialized)
+  }
+
+  @Test
+  fun `initialize keeps default values when profile is null`() = runTest {
+    val repo = FakeProfileRepository()
+    val viewModel = ProfileViewModel(repo)
+
+    // No profile saved → flow emits null by default
+    viewModel.initialize()
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertEquals("", state.firstName)
+    assertEquals("", state.lastName)
+    assertEquals("", state.country)
+    assertTrue(viewModel.initialized)
+  }
+
+  @Test
+  fun `initialize does nothing if already initialized`() = runTest {
+    val repo = FakeProfileRepository()
+    val viewModel = ProfileViewModel(repo)
+
+    // First initialization with profile
+    repo.saveProfile(Profile(firstName = "Ada", lastName = "Lovelace"))
+    viewModel.initialize()
+    advanceUntilIdle()
+
+    // Change state manually
+    viewModel.setFirstName("Grace")
+
+    // Call initialize again
+    viewModel.initialize()
+    advanceUntilIdle()
+
+    // Should remain "Grace", not reset to "Ada"
+    assertEquals("Grace", viewModel.uiState.value.firstName)
   }
 }

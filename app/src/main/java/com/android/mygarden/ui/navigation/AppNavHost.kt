@@ -18,7 +18,7 @@ import com.android.mygarden.ui.plantinfos.PlantInfosScreen
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.profile.ChooseProfilePictureScreen
 import com.android.mygarden.ui.profile.NewProfileScreen
-import com.android.mygarden.ui.profile.NewProfileViewModel
+import com.android.mygarden.ui.profile.ProfileViewModel
 
 @Composable
 fun AppNavHost(
@@ -43,7 +43,7 @@ fun AppNavHost(
 
     // New Profile
     composable(Screen.NewProfile.route) { backStackEntry ->
-      val vm: NewProfileViewModel = viewModel()
+      val vm: ProfileViewModel = viewModel()
       val chosenName by
           backStackEntry.savedStateHandle.getStateFlow("chosen_avatar", "").collectAsState()
 
@@ -60,7 +60,7 @@ fun AppNavHost(
       }
 
       NewProfileScreen(
-          newProfileViewModel = vm,
+          profileViewModel = vm,
           onRegisterPressed = { navigationActions.navTo(destination = Screen.Camera) },
           onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
     }

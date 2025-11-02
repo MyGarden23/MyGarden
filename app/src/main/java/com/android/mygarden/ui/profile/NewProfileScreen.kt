@@ -92,7 +92,7 @@ private const val MAX_COUNTRIES_DISPLAYED = 15
 @Composable
 private fun ProfileHeader(
     modifier: Modifier = Modifier,
-    uiState: NewProfileUIState,
+    uiState: ProfileUIState,
     onAvatarClick: () -> Unit,
 ) {
   Row(modifier = modifier) {
@@ -130,14 +130,14 @@ private fun ProfileHeader(
  * Form section containing all profile input fields with validation.
  *
  * @param uiState Current UI state containing form field values
- * @param newProfileViewModel ViewModel for handling user input
+ * @param profileViewModel ViewModel for handling user input
  * @param modifier Modifier for customizing the layout
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun ProfileForm(
-    uiState: NewProfileUIState,
-    newProfileViewModel: NewProfileViewModel,
+    uiState: ProfileUIState,
+    profileViewModel: ProfileViewModel,
     modifier: Modifier = Modifier
 ) {
   var isExperienceExpanded by remember { mutableStateOf(false) }
@@ -148,7 +148,7 @@ private fun ProfileForm(
     // Required fields with validation
     OutlinedTextField(
         value = uiState.firstName,
-        onValueChange = { newProfileViewModel.setFirstName(it) },
+        onValueChange = { profileViewModel.setFirstName(it) },
         label = { Text("First Name *") },
         placeholder = { Text("Enter your first name") },
         modifier = Modifier.fillMaxWidth().testTag(NewProfileScreenTestTags.FIRST_NAME_FIELD),
@@ -157,7 +157,7 @@ private fun ProfileForm(
 
     OutlinedTextField(
         value = uiState.lastName,
-        onValueChange = { newProfileViewModel.setLastName(it) },
+        onValueChange = { profileViewModel.setLastName(it) },
         label = { Text("Last Name *") },
         placeholder = { Text("Enter your last name") },
         modifier = Modifier.fillMaxWidth().testTag(NewProfileScreenTestTags.LAST_NAME_FIELD),
@@ -166,14 +166,14 @@ private fun ProfileForm(
 
     ExperienceDropdown(
         uiState = uiState,
-        newProfileViewModel = newProfileViewModel,
+        profileViewModel = profileViewModel,
         isExpanded = isExperienceExpanded,
         onExpandedChange = { isExperienceExpanded = it })
 
     // Optional field
     OutlinedTextField(
         value = uiState.favoritePlant,
-        onValueChange = { newProfileViewModel.setFavoritePlant(it) },
+        onValueChange = { profileViewModel.setFavoritePlant(it) },
         label = { Text("Favorite Plant") },
         placeholder = { Text("Enter your favorite plant") },
         modifier = Modifier.fillMaxWidth().testTag(NewProfileScreenTestTags.FAVORITE_PLANT_FIELD),
@@ -181,7 +181,7 @@ private fun ProfileForm(
 
     CountryDropdown(
         uiState = uiState,
-        newProfileViewModel = newProfileViewModel,
+        profileViewModel = profileViewModel,
         isExpanded = isCountryExpanded,
         onExpandedChange = { isCountryExpanded = it },
         countryFocusRequester = countryFocusRequester)
@@ -192,15 +192,15 @@ private fun ProfileForm(
  * Dropdown for selecting gardening experience level from predefined options.
  *
  * @param uiState Current UI state
- * @param newProfileViewModel ViewModel for handling selection
+ * @param profileViewModel ViewModel for handling selection
  * @param isExpanded Whether the dropdown is currently expanded
  * @param onExpandedChange Callback for dropdown expansion state changes
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun ExperienceDropdown(
-    uiState: NewProfileUIState,
-    newProfileViewModel: NewProfileViewModel,
+    uiState: ProfileUIState,
+    profileViewModel: ProfileViewModel,
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit
 ) {
@@ -228,7 +228,7 @@ private fun ExperienceDropdown(
                 DropdownMenuItem(
                     text = { Text(skill.name) },
                     onClick = {
-                      newProfileViewModel.setGardeningSkill(skill)
+                      profileViewModel.setGardeningSkill(skill)
                       onExpandedChange(false)
                     },
                     modifier =
@@ -242,15 +242,15 @@ private fun ExperienceDropdown(
  * Searchable dropdown for country selection with real-time filtering.
  *
  * @param uiState Current UI state
- * @param newProfileViewModel ViewModel for handling input and selection
+ * @param profileViewModel ViewModel for handling input and selection
  * @param isExpanded Whether the dropdown is currently expanded
  * @param onExpandedChange Callback for dropdown expansion state changes
  * @param countryFocusRequester Focus requester for accessibility
  */
 @Composable
 private fun CountryDropdown(
-    uiState: NewProfileUIState,
-    newProfileViewModel: NewProfileViewModel,
+    uiState: ProfileUIState,
+    profileViewModel: ProfileViewModel,
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     countryFocusRequester: FocusRequester
@@ -266,7 +266,7 @@ private fun CountryDropdown(
     OutlinedTextField(
         value = uiState.country,
         onValueChange = { newText ->
-          newProfileViewModel.setCountry(newText)
+          profileViewModel.setCountry(newText)
           onExpandedChange(newText.isNotEmpty())
         },
         label = { Text("Country *") },
@@ -290,7 +290,7 @@ private fun CountryDropdown(
       CountryDropdownMenu(
           filteredCountries = filteredCountries,
           onCountrySelected = { country ->
-            newProfileViewModel.setCountry(country)
+            profileViewModel.setCountry(country)
             onExpandedChange(false)
           })
     }
@@ -376,20 +376,20 @@ private fun CountryDropdownMenu(
  * Registration button that validates form and triggers profile creation.
  *
  * @param uiState Current UI state for validation
- * @param newProfileViewModel ViewModel for triggering registration
+ * @param profileViewModel ViewModel for triggering registration
  * @param onRegisterPressed Callback when registration is successful
  */
 @Composable
 private fun RegisterButton(
-    uiState: NewProfileUIState,
-    newProfileViewModel: NewProfileViewModel,
+    uiState: ProfileUIState,
+    profileViewModel: ProfileViewModel,
     onRegisterPressed: () -> Unit
 ) {
   Button(
       onClick = {
-        newProfileViewModel.setRegisterPressed(true)
+        profileViewModel.setRegisterPressed(true)
         if (uiState.canRegister()) {
-          newProfileViewModel.submit { success ->
+          profileViewModel.submit { success ->
             if (success) {
               onRegisterPressed()
             }
@@ -420,24 +420,24 @@ private fun RegisterButton(
  * - Searchable country dropdown with real-time filtering
  * - Material 3 theming and accessibility support
  *
- * @param newProfileViewModel ViewModel managing form state and validation
+ * @param profileViewModel ViewModel managing form state and validation
  * @param onRegisterPressed Callback invoked on successful profile registration
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun NewProfileScreen(
-    newProfileViewModel: NewProfileViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
     onRegisterPressed: () -> Unit,
     onAvatarClick: () -> Unit = {}, // put {} by default so that previous test can still run
 ) {
-  val uiState by newProfileViewModel.uiState.collectAsState()
+  val uiState by profileViewModel.uiState.collectAsState()
 
   Scaffold(
       modifier = Modifier.testTag(NewProfileScreenTestTags.SCREEN),
       bottomBar = {
         RegisterButton(
             uiState = uiState,
-            newProfileViewModel = newProfileViewModel,
+            profileViewModel = profileViewModel,
             onRegisterPressed = onRegisterPressed)
       }) { paddingValues ->
         Column(
@@ -454,7 +454,7 @@ fun NewProfileScreen(
 
               ProfileForm(
                   uiState = uiState,
-                  newProfileViewModel = newProfileViewModel,
+                  profileViewModel = profileViewModel,
                   modifier = Modifier.weight(FORM_SECTION_WEIGHT))
 
               Spacer(modifier = Modifier.weight(SPACER_SECTION_WEIGHT))

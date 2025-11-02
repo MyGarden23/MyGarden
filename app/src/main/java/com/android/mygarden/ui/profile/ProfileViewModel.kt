@@ -10,21 +10,23 @@ import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /**
  * UI state data class for the new profile creation screen, contains all the form fields and
  * validation state
  */
-data class NewProfileUIState(
+data class ProfileUIState(
     val firstName: String = "",
     val lastName: String = "",
     val gardeningSkill: GardeningSkill? = null,
     val favoritePlant: String = "",
     val country: String = "",
     val registerPressed: Boolean = false,
-    val avatar: Avatar = Avatar.A1 // By default 1st avatar
+    val avatar: Avatar = Avatar.A1, // By default 1st avatar
 ) {
+
   /**
    * Validates that the first name is not blank
    *
@@ -93,14 +95,41 @@ data class NewProfileUIState(
  * ViewModel for managing the new profile creation screen state Handles user input updates and form
  * validation
  */
-class NewProfileViewModel(
-    private val repo: ProfileRepository = ProfileRepositoryProvider.repository
-) : ViewModel() {
+class ProfileViewModel(private val repo: ProfileRepository = ProfileRepositoryProvider.repository) :
+    ViewModel() {
   // Private mutable state flow for internal state management
-  private val _uiState = MutableStateFlow(NewProfileUIState())
+  private val _uiState = MutableStateFlow(ProfileUIState())
 
   // Public immutable state flow exposed to the UI
-  val uiState: StateFlow<NewProfileUIState> = _uiState.asStateFlow()
+  val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()
+
+  var initialized: Boolean = false
+
+  /**
+   * Initializes the profile form state.
+   *
+   * This function is called when the form needs to be prefilled by the current profile values or
+   * defualts values if there is no current profile
+   */
+  fun initialize() {
+    if (initialized) return
+    viewModelScope.launch {
+      // Get the first profile emission (or null if no profile exists)
+      val profile = repo.getProfile().firstOrNull()
+
+      // If a profile exists, populate the form fields with its data
+      profile?.let {
+        setFirstName(it.firstName)
+        setLastName(it.lastName)
+        setCountry(it.country)
+        setGardeningSkill(it.gardeningSkill)
+        setAvatar(it.avatar)
+        setFavoritePlant(it.favoritePlant)
+      }
+      // If profile is null, the form keeps its default values from NewProfileUIState
+      initialized = true
+    }
+  }
 
   /**
    * Updates the first name in the UI state
