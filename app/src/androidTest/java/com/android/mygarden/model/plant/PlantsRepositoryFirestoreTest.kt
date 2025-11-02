@@ -1,52 +1,28 @@
 package com.android.mygarden.model.plant
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.mygarden.utils.FakeJwtGenerator
-import com.android.mygarden.utils.FirebaseEmulator
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.firestore.FirebaseFirestore
+import com.android.mygarden.utils.FirestoreProfileTest
 import java.sql.Timestamp
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
 import org.junit.Assert.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class PlantsRepositoryFirestoreTest {
+class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   private lateinit var repository: PlantsRepository
-  private lateinit var db: FirebaseFirestore
-  private lateinit var auth: FirebaseAuth
   private val healthCalculator = PlantHealthCalculator()
 
   @Before
   fun setup() = runBlocking {
-    FirebaseEmulator.connectAuth()
-    FirebaseEmulator.clearAuthEmulator()
-    db = FirebaseEmulator.connectFirestore()
-    FirebaseEmulator.clearFirestoreEmulator()
-    auth = FirebaseEmulator.auth
+    // Start up Firebase emulator, clear data, etc. (handled by FirestoreProfileTest)
+    super.setUp()
 
-    // Fake sign-in (suspend)
-    auth.signOut()
-    val uniqueEmail = "test.profile+${System.currentTimeMillis()}@example.com"
-    val idToken = FakeJwtGenerator.createFakeGoogleIdToken(email = uniqueEmail)
-    val cred = GoogleAuthProvider.getCredential(idToken, null)
-    val result = auth.signInWithCredential(cred).await()
-    val uid = result.user?.uid
-    assertNotNull(uid)
-
-    // Clean user doc (suspend)
-    db.collection("users").document(uid!!).delete().await()
-
-    // Inject repo
-    PlantsRepositoryProvider.repository = PlantsRepositoryFirestore(db, auth)
-    repository = PlantsRepositoryProvider.repository
+    // Inject PlantsRepositoryFirestore
+    repository = PlantsRepositoryFirestore(db, auth)
   }
 
   // Helper function to create a test plant without needing a real Image

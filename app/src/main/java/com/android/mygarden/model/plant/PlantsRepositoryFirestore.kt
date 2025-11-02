@@ -8,6 +8,12 @@ import com.google.firebase.firestore.SetOptions
 import java.sql.Timestamp
 import kotlinx.coroutines.tasks.await
 
+/** Constant value for the collection of users in firestore. */
+private const val usersCollection = "users"
+
+/** Constant value for the collection of plants in firestore. */
+private const val plantsCollection = "plants"
+
 /** Repository that implements PlantsRepository but stores the data in Firestore. */
 class PlantsRepositoryFirestore(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
@@ -17,7 +23,7 @@ class PlantsRepositoryFirestore(
 
   /** The list of plants owned by the user, in the repository of the user. */
   private fun userPlantsCollection() =
-      firestore.collection("users").document(currentUserId()).collection("plants")
+      firestore.collection(usersCollection).document(currentUserId()).collection(plantsCollection)
 
   /** The id of the current user. Throw IllegalStateException if the user is not authenticated. */
   private fun currentUserId(): String {
