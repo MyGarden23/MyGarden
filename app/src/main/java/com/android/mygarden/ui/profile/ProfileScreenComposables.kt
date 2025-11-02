@@ -451,7 +451,7 @@ fun ProfileScreenBase(
               navigationIcon = {
                 IconButton(
                     onClick = onNavBackIconClick,
-                    modifier = Modifier.testTag("navigation_back_button")) {
+                    modifier = Modifier.testTag(ProfileScreenTestTags.BACK_BUTTON)) {
                       Icon(
                           imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                           contentDescription = "Navigate back",
