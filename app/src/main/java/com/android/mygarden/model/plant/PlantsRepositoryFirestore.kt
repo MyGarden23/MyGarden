@@ -3,11 +3,9 @@ package com.android.mygarden.model.plant
 import com.android.mygarden.model.plant.FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant
 import com.android.mygarden.model.plant.FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import java.sql.Timestamp
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.tasks.await
 
 /** Repository that implements PlantsRepository but stores the data in Firestore. */

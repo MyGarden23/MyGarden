@@ -5,12 +5,10 @@ import com.android.mygarden.utils.FakeJwtGenerator
 import com.android.mygarden.utils.FirebaseEmulator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.sql.Timestamp
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
-import org.junit.*
 import org.junit.Assert.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
