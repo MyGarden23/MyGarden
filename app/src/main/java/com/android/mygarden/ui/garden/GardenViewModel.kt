@@ -111,7 +111,9 @@ class GardenViewModel(
             setErrorMsg("Failed to get user profile")
           }
         }
-      } catch (_: Exception) {}
+      } catch (_: Exception) {
+        setErrorMsg("Failed to get user profile")
+      }
     }
   }
 }

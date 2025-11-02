@@ -18,6 +18,7 @@ import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
@@ -113,6 +114,7 @@ class GardenScreenTests {
   fun setUp() {
     plantsRepo = PlantsRepositoryLocal()
     profileRepo = FakeProfileRepository()
+    ProfileRepositoryProvider.repository = profileRepo
     PlantsRepositoryProvider.repository = plantsRepo
   }
 
@@ -132,10 +134,7 @@ class GardenScreenTests {
       }
     }
     // Buttons have no use : tests are for the garden screen in isolation
-    val gardenViewModel = GardenViewModel(plantsRepo = plantsRepo, profileRepo = profileRepo)
-    composeTestRule.setContent {
-      GardenScreen(onEditProfile = {}, onAddPlant = {}, gardenViewModel = gardenViewModel)
-    }
+    composeTestRule.setContent { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
     composeTestRule.waitForIdle()
   }
 
