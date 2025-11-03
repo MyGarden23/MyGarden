@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.navigation
+package com.android.mygarden.ui.navigation.navS2
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.LaunchedEffect
@@ -8,10 +8,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.navigation.NavDestination
+import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.ui.navigation.AppNavHost
+import com.android.mygarden.ui.navigation.Screen
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -121,8 +125,8 @@ class NavigationS2Tests {
       val knownRoutes =
           try {
             buildList<String?> {
-              fun walk(dest: androidx.navigation.NavDestination) {
-                if (dest is androidx.navigation.NavGraph) {
+              fun walk(dest: NavDestination) {
+                if (dest is NavGraph) {
                   dest.iterator().forEachRemaining { walk(it) }
                 } else add(dest.route)
               }

@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.navigation
+package com.android.mygarden.ui.navigation.navS3
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -13,6 +13,9 @@ import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
+import com.android.mygarden.ui.navigation.AppNavHost
+import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.navigation.Screen
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
@@ -62,7 +65,7 @@ class NavigationS3TestsGardenAndEditPlant {
       }
       val controller = rememberNavController()
       navController = controller
-      AppNavHost(navController = controller, startDestination = Screen.Garden.route)
+        AppNavHost(navController = controller, startDestination = Screen.Garden.route)
     }
   }
 
