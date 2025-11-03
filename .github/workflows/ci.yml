@@ -150,7 +150,7 @@ jobs:
           script: |
             echo "Starting instrumented tests..."
             export CI=true
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.screen.RequiresCamera -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.screen.RequiresCamera
         env:
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
 
@@ -174,7 +174,7 @@ jobs:
             export CI=true
             adb shell pm revoke com.android.mygarden android.permission.CAMERA
 
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zendToEnd
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.screen.RequiresCamera
         env:
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
 
