@@ -7,11 +7,14 @@ import androidx.compose.runtime.getValue
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
+import com.android.mygarden.ui.editPlant.EditPlantScreen
 import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
