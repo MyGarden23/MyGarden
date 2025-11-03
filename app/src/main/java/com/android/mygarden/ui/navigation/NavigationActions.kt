@@ -49,7 +49,7 @@ class NavigationActions(private val controller: NavHostController) {
    * - State is saved/restored when switching between tabs
    * - We pop up to the graph's start destination instead of the destination itself
    */
-  fun navToTopLevel(destination: Screen) {
+  private fun navToTopLevel(destination: Screen) {
     val current = currentRoute()
     if (current == destination.route) return
 
