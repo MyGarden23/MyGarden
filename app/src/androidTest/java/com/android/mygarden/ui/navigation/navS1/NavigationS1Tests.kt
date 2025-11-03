@@ -37,25 +37,25 @@ class NavigationS1Tests {
   @Composable
   fun FictionalGardenScreen(navActions: NavigationActions? = null) {
     Scaffold(
-        modifier = Modifier.Companion.testTag(NavigationTestTags.GARDEN_SCREEN),
+        modifier = Modifier.testTag(NavigationTestTags.GARDEN_SCREEN),
         bottomBar = {
           BottomBar(
               selectedPage = Page.Garden,
               onSelect = { page -> navActions?.navTo(page.destination) })
         },
-        content = { pd -> Row(modifier = Modifier.Companion.padding(pd), content = {}) })
+        content = { pd -> Row(modifier = Modifier.padding(pd), content = {}) })
   }
 
   @Composable
   fun FictionalCameraScreen(navActions: NavigationActions? = null) {
     Scaffold(
-        modifier = Modifier.Companion.testTag(NavigationTestTags.CAMERA_SCREEN),
+        modifier = Modifier.testTag(NavigationTestTags.CAMERA_SCREEN),
         bottomBar = {
           BottomBar(
               selectedPage = Page.Camera,
               onSelect = { page -> navActions?.navTo(page.destination) })
         },
-        content = { pd -> Row(modifier = Modifier.Companion.padding(pd), content = {}) })
+        content = { pd -> Row(modifier = Modifier.padding(pd), content = {}) })
   }
 
   @Composable
