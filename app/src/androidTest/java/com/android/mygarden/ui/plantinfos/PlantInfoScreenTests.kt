@@ -27,7 +27,7 @@ class PlantInfoScreenTests {
 
   fun setContent(plant: Plant, onSavePlant: () -> Unit = {}, onBackPressed: () -> Unit = {}) {
     composeTestRule.setContent {
-      PlantInfosScreen(plant, onBackPressed = onBackPressed, onSavePlant = onSavePlant)
+      PlantInfosScreen(plant, onBackPressed = onBackPressed, onNextPlant = onSavePlant)
     }
     composeTestRule.waitForIdle()
   }
@@ -45,7 +45,7 @@ class PlantInfoScreenTests {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.CONTENT_CONTAINER).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SAVE_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).assertIsDisplayed()
   }
 
   @Test
@@ -243,7 +243,7 @@ class PlantInfoScreenTests {
     composeTestRule.waitForIdle()
 
     // Click the save button
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SAVE_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
 
     // Wait for the action to complete
     composeTestRule.waitForIdle()

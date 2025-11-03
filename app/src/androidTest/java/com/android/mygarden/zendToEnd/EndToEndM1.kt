@@ -11,8 +11,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
-import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.camera.CameraScreenTestTags
+import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
@@ -129,11 +129,11 @@ class EndToEndM1 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
     }
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SAVE_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).assertIsDisplayed()
 
     // === GARDEN SCREEN ===
     // Save plant and navigate to garden
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SAVE_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
 
     // Verify garden elements
