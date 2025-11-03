@@ -272,7 +272,8 @@ class PlantsRepositoryMockTest {
     // Assert: Should use values from incomplete response and fallback to defaults
     assertNotNull(result)
     assertEquals("Rose", result.name) // From incomplete JSON
-    assertEquals("A beautiful flower", result.description) // From incomplete JSON
+    assertTrue(result.description.contains("A beautiful flower")) // From incomplete JSON
+    assertTrue(result.description.contains("Location :")) // From incomplete JSON
     assertEquals("Rosa rubiginosa", result.latinName) // From basePlant (not in response)
     assertEquals(5, result.wateringFrequency) // From basePlant (not in response)
 
@@ -300,7 +301,8 @@ class PlantsRepositoryMockTest {
     assertNotNull(result)
     assertEquals("Test Plant", result.name) // Preserved from basePlant
     assertEquals("Plantus testus", result.latinName) // Preserved from basePlant
-    assertEquals("A test plant", result.description) // From Gemini
+    assertTrue(result.description.contains("A test plant")) // From Gemini
+    assertTrue(result.description.contains("Location :"))
     assertEquals(3, result.wateringFrequency) // From Gemini
 
     verify(spyRepository, times(1)).plantDescriptionCallGemini(any())
@@ -440,7 +442,8 @@ class PlantsRepositoryMockTest {
 
     // Assert: Should handle complex descriptions correctly
     assertNotNull(result)
-    assertEquals(complexDescription, result.description)
+    assertTrue(result.description.contains(complexDescription))
+    assertTrue(result.description.contains("Location :"))
     assertEquals("Lavender", result.name)
 
     verify(spyRepository, times(1)).plantDescriptionCallGemini(any())

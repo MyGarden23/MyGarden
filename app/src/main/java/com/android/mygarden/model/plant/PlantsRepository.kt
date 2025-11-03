@@ -122,8 +122,7 @@ interface PlantsRepository {
    */
   suspend fun generatePlantWithAI(basePlant: Plant): Plant {
     val prompt =
-        "Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. The response must start with { and end with }. The formatting of the JSON MUST be a single object, NOT an array. Describe the plant by its latin name '${basePlant.latinName}'. The object should include: name, latinName, description, wateringFrequency. For 'name', use the simple/common name (e.g., 'tomato' not 'garden tomato'). 'wateringFrequency' must be an integer representing the number of days between waterings."
-
+        "Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. The response must start with { and end with }. The formatting of the JSON MUST be a single object, NOT an array. Describe the plant by its latin name '${basePlant.latinName}'. The object should include: name, latinName, description, wateringFrequency, location. For 'name', use the simple/common name (e.g., 'tomato' not 'garden tomato'). 'wateringFrequency' must be an integer representing the number of days between waterings. 'location' should be a short recommendation about its ideal placement (e.g., 'Best near a bright window', 'BestOutdoor, full sun', 'Ideal for shaded spots' ."
     val outputStr =
         try {
           plantDescriptionCallGemini(prompt)
@@ -142,7 +141,9 @@ interface PlantsRepository {
           basePlant.copy(
               name = jsonObject["name"]?.jsonPrimitive?.content ?: basePlant.name,
               description =
-                  jsonObject["description"]?.jsonPrimitive?.content ?: basePlant.description,
+                  "${jsonObject["description"]?.jsonPrimitive?.content ?: basePlant.description}\n" +
+                      "|" +
+                      "\nLocation : ${jsonObject["location"]?.jsonPrimitive?.content ?: "Unknown"}",
               wateringFrequency =
                   jsonObject["wateringFrequency"]?.jsonPrimitive?.doubleOrNull?.toInt()
                       ?: basePlant.wateringFrequency)
