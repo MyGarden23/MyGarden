@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.profile.ChooseProfilePictureScreenTestTags
-import com.android.mygarden.ui.profile.NewProfileScreenTestTags
+import com.android.mygarden.ui.profile.ProfileScreenTestTags
 import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -44,12 +44,12 @@ class NavigationS3TestsChooseAvatarNewProfileScreens {
 
   /** Helper function to clicks the avatar icon on the NewProfile screen. */
   private fun clickAvatar() =
-      composeTestRule.onNodeWithTag(NewProfileScreenTestTags.AVATAR).performClick()
+      composeTestRule.onNodeWithTag(ProfileScreenTestTags.AVATAR).performClick()
 
   /** Tests navigation from NewProfile to ChooseAvatar and back after avatar selection. */
   @Test
   fun navigate_fromNewProfile_toChooseAvatar_andBack() {
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     clickAvatar()
     composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
 
@@ -58,7 +58,7 @@ class NavigationS3TestsChooseAvatarNewProfileScreens {
         .onNodeWithTag(ChooseProfilePictureScreenTestTags.getTestTagAvatar(firstAvatar))
         .performClick()
 
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
   }
 
   /** Tests that pressing the back button returns from ChooseAvatar to NewProfile. */
@@ -67,7 +67,7 @@ class NavigationS3TestsChooseAvatarNewProfileScreens {
     clickAvatar()
     composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.BACK_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
   }
 
   /**
@@ -76,7 +76,7 @@ class NavigationS3TestsChooseAvatarNewProfileScreens {
    */
   @Test
   fun choosingAvatar_setsAndResetsSavedStateHandleValue() {
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     clickAvatar()
     composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
 
@@ -99,8 +99,8 @@ class NavigationS3TestsChooseAvatarNewProfileScreens {
 
   /** Tests that pressing the register button navigates to the Camera screen. */
   @Test
-  fun onRegisterPressed_from_newProfile_navigates_to_camera() {
-    composeTestRule.onNodeWithTag(NewProfileScreenTestTags.SCREEN).assertIsDisplayed()
+  fun onSavePressed_from_newProfile_navigates_to_camera() {
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
 
     composeTestRule.runOnIdle { navController.navigate(Screen.Camera.route) }
 

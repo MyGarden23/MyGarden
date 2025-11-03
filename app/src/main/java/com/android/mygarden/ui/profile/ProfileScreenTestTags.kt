@@ -2,8 +2,8 @@ package com.android.mygarden.ui.profile
 
 import com.android.mygarden.model.profile.GardeningSkill
 
-/** Test tags for NewProfileScreen components to enable UI testing */
-object NewProfileScreenTestTags {
+/** Test tags for ProfileScreen components to enable UI testing */
+object ProfileScreenTestTags {
   const val SCREEN = "new_profile_screen"
   const val TITLE = "profile_title"
   const val AVATAR = "profile_avatar"
@@ -15,7 +15,8 @@ object NewProfileScreenTestTags {
   const val COUNTRY_FIELD = "country_field"
   const val COUNTRY_DROPDOWN = "country_dropdown"
   const val COUNTRY_DROPDOWN_ICON = "country_dropdown_icon"
-  const val REGISTER_BUTTON = "register_button"
+  const val SAVE_BUTTON = "save_button"
+  const val BACK_BUTTON = "back_button"
 
   // Dropdown menu items
   const val EXPERIENCE_DROPDOWN_MENU = "experience_dropdown_menu"

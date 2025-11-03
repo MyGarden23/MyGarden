@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.profile
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
@@ -11,18 +12,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
  *
  * @param profileViewModel ViewModel managing form state and validation (should be pre-populated
  *   with existing profile data)
+ * @param onBackPressed Callback invoked when the back button is clicked
  * @param onSavePressed Callback invoked on successful profile update
  * @param onAvatarClick Callback when avatar is clicked to change profile picture
  */
 @Composable
-fun NewProfileScreen(
+fun EditProfileScreen(
     profileViewModel: ProfileViewModel = viewModel(),
+    onBackPressed: (() -> Unit)? = {},
     onSavePressed: () -> Unit = {},
     onAvatarClick: () -> Unit = {},
 ) {
+  LaunchedEffect(Unit) { profileViewModel.initialize() }
   ProfileScreenBase(
       profileViewModel = profileViewModel,
       onSavePressed = onSavePressed,
       onAvatarClick = onAvatarClick,
-      title = "New Profile")
+      onNavBackIconClick = onBackPressed,
+      title = "Edit Profile")
 }
