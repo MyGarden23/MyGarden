@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performTextInput
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeProfileRepository
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

@@ -11,10 +11,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import com.android.mygarden.model.profile.GardeningSkill
-import com.android.mygarden.model.profile.Profile
-import com.android.mygarden.model.profile.ProfileRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 
@@ -273,16 +269,6 @@ abstract class ProfileScreenTestBase {
   }
 
   // ========== HELPER CLASSES ==========
-
-  protected class FakeProfileRepository(val profile: Profile? = null) : ProfileRepository {
-    override fun getCurrentUserId(): String? = "fake_uid"
-
-    override fun getProfile(): Flow<Profile?> = flowOf(profile)
-
-    override suspend fun saveProfile(profile: Profile) {
-      /* no-op, succeed */
-    }
-  }
 
   /**
    * Subclasses should implement this to set content with a fake repository for testing successful

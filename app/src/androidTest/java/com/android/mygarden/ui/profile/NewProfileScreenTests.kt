@@ -2,6 +2,7 @@ package com.android.mygarden.ui.profile
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeProfileRepository
 import org.junit.Rule
 
 /**
