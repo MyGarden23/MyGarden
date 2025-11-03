@@ -15,6 +15,7 @@ import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.editPlant.EditPlantScreen
+import com.android.mygarden.ui.editPlant.EditPlantViewModel
 import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
@@ -111,7 +112,9 @@ fun AppNavHost(
       GardenScreen(
           onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
           onAddPlant = { navigationActions.navTo(Screen.Camera) },
-          onPlantClick = { ownedPlant -> navigationActions.navTo(Screen.EditPlant(ownedPlant.id)) },
+          onPlantClick = { ownedPlant ->
+            navigationActions.navTo(Screen.EditPlant(ownedPlant.id, Screen.Garden.route))
+          },
           onSignOut = {
             FirebaseAuth.getInstance().signOut()
             navigationActions.navTo(Screen.Auth)
@@ -132,7 +135,7 @@ fun AppNavHost(
           plant = plant,
           plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
-          onSavePlant = { navigationActions.navTo(Screen.Garden) })
+          onNextPlant = { navigationActions.navTo(Screen.Garden) })
     }
 
     // Choose Avatar
@@ -151,13 +154,31 @@ fun AppNavHost(
     // EditPlant
     composable(
         route = Screen.EditPlant.route,
-        arguments = listOf(navArgument("ownedPlantId") { type = NavType.StringType })) { entry ->
+        arguments =
+            listOf(
+                navArgument("ownedPlantId") { type = NavType.StringType },
+                navArgument("from") {
+                  type = NavType.StringType
+                  nullable = true
+                })) { entry ->
+          val vm: EditPlantViewModel = viewModel()
           val ownedPlantId = entry.arguments?.getString("ownedPlantId") ?: return@composable
           EditPlantScreen(
               ownedPlantId = ownedPlantId,
+              editPlantViewModel = vm,
               onSaved = { navigationActions.navToTopLevel(Screen.Garden) },
               onDeleted = { navigationActions.navToTopLevel(Screen.Garden) },
-              goBack = { navigationActions.navBack() })
+              goBack = {
+                if (entry.arguments?.getString("from") == Screen.PlantInfo.route) {
+                  // Need to delete manually due to our implementation of Screen.PlantInfo.route (we
+                  // add by default the plant to our garden but delete it if the user don't want to
+                  // add the plant to the garden)
+                  vm.deletePlant(ownedPlantId)
+                  navigationActions.navBack()
+                } else {
+                  navigationActions.navBack()
+                }
+              })
         }
   }
 }

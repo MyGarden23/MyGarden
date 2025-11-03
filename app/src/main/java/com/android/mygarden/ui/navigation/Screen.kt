@@ -17,10 +17,21 @@ sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean
 
   object NewProfile : Screen(route = "new_profile", name = "New Profile")
 
-  data class EditPlant(val ownedPlantId: String) :
-      Screen(route = "edit_plant/${ownedPlantId}", name = "Edit Plant") {
+  data class EditPlant(val ownedPlantId: String, val from: String? = null) :
+      Screen(route = buildRoute(ownedPlantId, from), name = "Edit Plant") {
     companion object {
-      const val route = "edit_plant/{ownedPlantId}"
+      const val BASE = "edit_plant"
+      const val ARG_ID = "ownedPlantId"
+      const val ARG_FROM = "from"
+      const val route = "$BASE/{$ARG_ID}?$ARG_FROM={$ARG_FROM}"
+
+      fun buildRoute(ownedPlantId: String, from: String? = null): String {
+        return if (from != null && from.isNotBlank()) {
+          "$BASE/$ownedPlantId?$ARG_FROM=$from"
+        } else {
+          "$BASE/$ownedPlantId"
+        }
+      }
     }
   }
 
