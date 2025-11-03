@@ -24,7 +24,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-
 // Constant string for the e2e test
 private const val LOADING_DESCRIPTION_MESSAGE = "Loading Plant Infos..."
 private const val NOT_IDENTIFY_PLANT_DESCRIPTION = "The AI was not able to identify the plant."
@@ -129,7 +128,9 @@ class EndToEndM1 {
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
         .assertTextEquals(NOT_IDENTIFY_PLANT_DESCRIPTION)
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).assertTextEquals(UNKNOWN_PLANT_NAME)
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME)
+        .assertTextEquals(UNKNOWN_PLANT_NAME)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME).assertIsDisplayed()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME)

@@ -10,7 +10,8 @@ interface AuthRepository {
   /**
    * Represents the result of a sign-in operation.
    *
-   * @property user The FirebaseUser object representing the signed-in user, or null if no user is signed in.
+   * @property user The FirebaseUser object representing the signed-in user, or null if no user is
+   *   signed in.
    * @property isNewUser A Boolean flag indicating whether the user is a new user or not.
    */
   data class SignInResult(val user: FirebaseUser?, val isNewUser: Boolean)

@@ -23,8 +23,8 @@ sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean
     /**
      * Companion object defining constants and utilities for the EditPlant screen navigation.
      *
-     * Contains the base route, argument keys, and a helper function to build
-     * the complete navigation route dynamically.
+     * Contains the base route, argument keys, and a helper function to build the complete
+     * navigation route dynamically.
      *
      * @property BASE The base route used for the EditPlant screen.
      * @property ARG_ID The key for the owned plant ID argument.
