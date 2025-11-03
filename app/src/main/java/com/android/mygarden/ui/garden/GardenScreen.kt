@@ -147,6 +147,7 @@ private fun getOwnedPlantImageDescription(ownedPlant: OwnedPlant): String =
  * @param gardenViewModel the viewModel that manages the user interactions
  * @param onEditProfile the function to launch when a user clicks on the edit profile button
  * @param onAddPlant the function to launch when a user clicks on the FAB (add a plant button)
+ * @param onSignOut the function to sign out the user from the app
  * @param onPlantClick the function to launch when a user clicks on a plant card (default value for
  *   test compatibility)
  */

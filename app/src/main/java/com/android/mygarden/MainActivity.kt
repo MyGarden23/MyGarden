@@ -130,20 +130,20 @@ private const val EDIT_PLANT_BASE = "edit_plant"
 // Maps the current route (String) to its Screen object
 private fun routeToScreen(route: String): Screen? =
     when (route) {
-      Screen.Auth.route -> Screen.Auth
-      Screen.Camera.route -> Screen.Camera
-      Screen.PlantInfo.route -> Screen.PlantInfo
-      Screen.NewProfile.route -> Screen.NewProfile
-      Screen.Garden.route -> Screen.Garden
-      Screen.ChooseAvatar.route -> Screen.ChooseAvatar
-      else -> {
-        if (Screen.EditPlant.route.startsWith(EDIT_PLANT_BASE)) {
-          val ownedPlantId = route.removePrefix("$EDIT_PLANT_BASE/")
-          Screen.EditPlant(ownedPlantId)
-        } else {
-          null
+        Screen.Auth.route -> Screen.Auth
+        Screen.Camera.route -> Screen.Camera
+        Screen.PlantInfo.route -> Screen.PlantInfo
+        Screen.NewProfile.route -> Screen.NewProfile
+        Screen.Garden.route -> Screen.Garden
+        Screen.ChooseAvatar.route -> Screen.ChooseAvatar
+        else -> {
+            if (Screen.EditPlant.route.startsWith(EDIT_PLANT_BASE)) {
+                val ownedPlantId = route.removePrefix("$EDIT_PLANT_BASE/")
+                Screen.EditPlant(ownedPlantId)
+            } else {
+                null
+            }
         }
-      }
     }
 // Maps the current route (String) to its Page (used for bottom bar selection)
 private fun routeToPage(route: String): Page? =
