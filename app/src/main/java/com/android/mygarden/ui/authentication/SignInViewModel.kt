@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
  * @property user The currently signed-in [FirebaseUser], or null if no user is signed in.
  * @property errorMsg An error message when there is one, or null if there is no error.
  * @property signedOut True if the user is signed out, false otherwise.
+ * @property isNewUser True if the user is a new user, false otherwise.
  */
 data class AuthUIState(
     val isLoading: Boolean = false,
