@@ -22,8 +22,8 @@ import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.profile.ChooseProfilePictureScreen
 import com.android.mygarden.ui.profile.EditProfileScreen
 import com.android.mygarden.ui.profile.NewProfileScreen
-import com.google.firebase.auth.FirebaseAuth
 import com.android.mygarden.ui.profile.ProfileViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavHost(
