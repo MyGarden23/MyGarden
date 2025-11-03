@@ -89,7 +89,7 @@ fun AppNavHost(
 
       EditProfileScreen(
           profileViewModel = vm,
-          onSavePressed = { navigationActions.navTo(destination = Screen.Camera) },
+          onSavePressed = { navigationActions.navBack() },
           onBackPressed = { navigationActions.navBack() },
           onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
     }
