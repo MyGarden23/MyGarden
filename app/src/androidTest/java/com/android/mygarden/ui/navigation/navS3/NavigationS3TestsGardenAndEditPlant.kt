@@ -65,7 +65,7 @@ class NavigationS3TestsGardenAndEditPlant {
       }
       val controller = rememberNavController()
       navController = controller
-        AppNavHost(navController = controller, startDestination = Screen.Garden.route)
+      AppNavHost(navController = controller, startDestination = Screen.Garden.route)
     }
   }
 

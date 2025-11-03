@@ -36,26 +36,26 @@ class NavigationS1Tests {
 
   @Composable
   fun FictionalGardenScreen(navActions: NavigationActions? = null) {
-      Scaffold(
-          modifier = Modifier.Companion.testTag(NavigationTestTags.GARDEN_SCREEN),
-          bottomBar = {
-              BottomBar(
-                  selectedPage = Page.Garden,
-                  onSelect = { page -> navActions?.navTo(page.destination) })
-          },
-          content = { pd -> Row(modifier = Modifier.Companion.padding(pd), content = {}) })
+    Scaffold(
+        modifier = Modifier.Companion.testTag(NavigationTestTags.GARDEN_SCREEN),
+        bottomBar = {
+          BottomBar(
+              selectedPage = Page.Garden,
+              onSelect = { page -> navActions?.navTo(page.destination) })
+        },
+        content = { pd -> Row(modifier = Modifier.Companion.padding(pd), content = {}) })
   }
 
   @Composable
   fun FictionalCameraScreen(navActions: NavigationActions? = null) {
-      Scaffold(
-          modifier = Modifier.Companion.testTag(NavigationTestTags.CAMERA_SCREEN),
-          bottomBar = {
-              BottomBar(
-                  selectedPage = Page.Camera,
-                  onSelect = { page -> navActions?.navTo(page.destination) })
-          },
-          content = { pd -> Row(modifier = Modifier.Companion.padding(pd), content = {}) })
+    Scaffold(
+        modifier = Modifier.Companion.testTag(NavigationTestTags.CAMERA_SCREEN),
+        bottomBar = {
+          BottomBar(
+              selectedPage = Page.Camera,
+              onSelect = { page -> navActions?.navTo(page.destination) })
+        },
+        content = { pd -> Row(modifier = Modifier.Companion.padding(pd), content = {}) })
   }
 
   @Composable
@@ -63,18 +63,17 @@ class NavigationS1Tests {
     val navController = rememberNavController()
     val navActions = NavigationActions(navController)
     val startDest = Screen.Camera.name
-      NavHost(navController = navController, startDestination = startDest) {
-          navigation(startDestination = Screen.Camera.route, route = Screen.Camera.name) {
-              composable(route = Screen.Camera.route) { FictionalCameraScreen(navActions) }
-          }
-          navigation(startDestination = Screen.Garden.route, route = Screen.Garden.name) {
-              composable(route = Screen.Garden.route) { FictionalGardenScreen(navActions) }
-          }
+    NavHost(navController = navController, startDestination = startDest) {
+      navigation(startDestination = Screen.Camera.route, route = Screen.Camera.name) {
+        composable(route = Screen.Camera.route) { FictionalCameraScreen(navActions) }
       }
+      navigation(startDestination = Screen.Garden.route, route = Screen.Garden.name) {
+        composable(route = Screen.Garden.route) { FictionalGardenScreen(navActions) }
+      }
+    }
   }
 
-  @get:Rule
-  val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
   fun setUp() {
