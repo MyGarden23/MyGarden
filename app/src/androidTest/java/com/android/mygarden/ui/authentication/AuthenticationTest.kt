@@ -138,11 +138,11 @@ class AuthenticationTest {
 
     // Wait until we hit Camera OR the user is set on Firebase
     compose.waitUntil(effectiveTimeout) {
-      currentRoute.value == Screen.Camera.route && FirebaseEmulator.auth.currentUser != null
+      currentRoute.value == Screen.NewProfile.route && FirebaseEmulator.auth.currentUser != null
     }
 
     // Final assertions
-    assertEquals(Screen.Camera.route, currentRoute.value)
+    assertEquals(Screen.NewProfile.route, currentRoute.value)
     assertNotNull(FirebaseEmulator.auth.currentUser)
   }
 
