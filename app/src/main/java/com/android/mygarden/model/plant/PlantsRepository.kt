@@ -28,6 +28,8 @@ import okhttp3.OkHttpClient
  */
 interface PlantsRepository {
 
+  // This is defined here to let View Models that use the repository Provider to have access to the
+  // plantsFlow
   val plantsFlow: StateFlow<List<OwnedPlant>>
     get() = MutableStateFlow(emptyList())
 
