@@ -2,6 +2,7 @@ package com.android.mygarden.ui.garden
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -182,6 +183,8 @@ class GardenScreenTests {
   fun correctDisplayWhenEmptyGarden() {
     setContent()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertHasClickAction()
     composeTestRule.userRowIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsNotDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsDisplayed()
@@ -196,6 +199,8 @@ class GardenScreenTests {
     val plants = listOf(plant1, plant2, plant3, plant4)
     setContent(plants)
     composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertHasClickAction()
     composeTestRule.userRowIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsNotDisplayed()

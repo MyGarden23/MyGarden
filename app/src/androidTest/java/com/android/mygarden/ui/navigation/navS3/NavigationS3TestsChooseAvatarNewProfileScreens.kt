@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.navigation
+package com.android.mygarden.ui.navigation.navS3
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -7,6 +7,8 @@ import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.ui.navigation.AppNavHost
+import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.profile.ChooseProfilePictureScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags

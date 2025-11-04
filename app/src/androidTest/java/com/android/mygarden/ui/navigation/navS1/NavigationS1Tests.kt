@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.navigation
+package com.android.mygarden.ui.navigation.navS1
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Row
@@ -16,6 +16,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.ui.navigation.BottomBar
+import com.android.mygarden.ui.navigation.NavigationActions
+import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.navigation.Page
+import com.android.mygarden.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -30,12 +35,12 @@ import org.junit.runner.RunWith
 class NavigationS1Tests {
 
   @Composable
-  fun FictionalProfileScreen(navActions: NavigationActions? = null) {
+  fun FictionalGardenScreen(navActions: NavigationActions? = null) {
     Scaffold(
-        modifier = Modifier.testTag(NavigationTestTags.PROFILE_SCREEN),
+        modifier = Modifier.testTag(NavigationTestTags.GARDEN_SCREEN),
         bottomBar = {
           BottomBar(
-              selectedPage = Page.Profile,
+              selectedPage = Page.Garden,
               onSelect = { page -> navActions?.navTo(page.destination) })
         },
         content = { pd -> Row(modifier = Modifier.padding(pd), content = {}) })
@@ -62,8 +67,8 @@ class NavigationS1Tests {
       navigation(startDestination = Screen.Camera.route, route = Screen.Camera.name) {
         composable(route = Screen.Camera.route) { FictionalCameraScreen(navActions) }
       }
-      navigation(startDestination = Screen.Profile.route, route = Screen.Profile.name) {
-        composable(route = Screen.Profile.route) { FictionalProfileScreen(navActions) }
+      navigation(startDestination = Screen.Garden.route, route = Screen.Garden.name) {
+        composable(route = Screen.Garden.route) { FictionalGardenScreen(navActions) }
       }
     }
   }
@@ -80,7 +85,7 @@ class NavigationS1Tests {
   fun allTagsAreDisplayed() {
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).assertIsDisplayed()
   }
 
   @Test
@@ -93,23 +98,23 @@ class NavigationS1Tests {
   fun bottomBarIsDisplayedOnProfileScreen() {
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
   }
 
   @Test
   fun canNavigateFromCameraToProfileUsingBottomBar() {
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
   }
 
   @Test
   fun canNavigateFromProfileToCameraUsingBottomBar() {
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
   }

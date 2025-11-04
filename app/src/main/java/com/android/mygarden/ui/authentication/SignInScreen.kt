@@ -55,6 +55,7 @@ var SemanticsPropertyReceiver.logoRes by LogoResNameKey
  * @param authViewModel ViewModel used to handle the logic
  * @param credentialManager Optional [CredentialManager] instance for managing credentials.
  * @param onSignedIn Lambda triggered when the user is successfully signed in
+ * @param onLogIn Lambda triggered when the user is already signed in and wants to log in again
  * @param isDarkTheme Boolean flag indicating whether the system is in dark theme.
  */
 @Composable
@@ -62,6 +63,7 @@ fun SignInScreen(
     authViewModel: SignInViewModel = viewModel(),
     credentialManager: CredentialManager = CredentialManager.create(LocalContext.current),
     onSignedIn: () -> Unit = {},
+    onLogIn: () -> Unit = {},
     isDarkTheme: Boolean = isSystemInDarkTheme()
 ) {
 
@@ -79,7 +81,7 @@ fun SignInScreen(
   LaunchedEffect(uiState.user) {
     uiState.user?.let {
       Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show()
-      onSignedIn()
+      if (uiState.isNewUser) onSignedIn() else onLogIn()
     }
   }
   val logoRes =

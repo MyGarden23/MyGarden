@@ -1,6 +1,8 @@
 package com.android.mygarden.zendToEnd
 
 import android.Manifest
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
@@ -11,19 +13,30 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
-import com.android.mygarden.screen.RequiresCamera
+import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.camera.CameraScreenTestTags
+import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+// Constant string for the e2e test
+private const val LOADING_DESCRIPTION_MESSAGE = "Loading Plant Infos..."
+private const val ERROR_LATIN_NAME_DESCRIPTION = "There was an error getting the plant latin name."
+private const val NOT_IDENTIFY_PLANT_DESCRIPTION = "The AI was not able to identify the plant."
+private const val UNKNOWN_PLANT_NAME = "Unknown"
+private const val NO_HEALTH_DESCRIPTION = "No health status description available"
+private const val WATERING_FREQUENCY_0 = "Watering Frequency: Every 0 days"
+private val UNKNOWN_STATUS_PLANT = "Status: ${PlantHealthStatus.UNKNOWN.description}"
 /**
- * End-to-end test for MyGarden's core user flow.
+ * End-to-end test for MyGarden's core user flow. This test assume that we have an internet
+ * connection
  *
  * Tests the complete journey: Camera → Plant Info → Garden → Navigation Runs in authenticated mode
  * (skips sign-in) via system property.
@@ -84,7 +97,7 @@ class EndToEndM1 {
 
     // Verify UI elements
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).assertIsDisplayed()
 
     // Take photo
@@ -98,27 +111,63 @@ class EndToEndM1 {
 
     // Test description tab content
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TAB).assertIsDisplayed()
+
+    // This handles the non-deterministic behavior of the AI (between 2 possible cases)
+    val text =
+        composeTestRule
+            .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
+            .fetchSemanticsNode()
+            .config
+            .getOrNull(SemanticsProperties.Text)
+            ?.joinToString()
+    assertTrue(
+        "Expected one of the possible texts, but was: $text",
+        text == LOADING_DESCRIPTION_MESSAGE || text == ERROR_LATIN_NAME_DESCRIPTION)
+
+    /**
+     * This is in the specific case where the AI does not return the [ERROR_LATIN_NAME_DESCRIPTION]
+     * description
+     *
+     * Need to wait for Gemini description, assume that it takes < 10 seconds. The pictures are
+     * taken from the emulator, hence the AI does not recognize plants
+     */
+    if (text == LOADING_DESCRIPTION_MESSAGE) {
+      composeTestRule.waitUntil(TIMEOUT) {
+        val currentText =
+            composeTestRule
+                .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
+                .fetchSemanticsNode()
+                .config
+                .getOrNull(SemanticsProperties.Text)
+                ?.joinToString(separator = "") { it.text } ?: ""
+
+        currentText.contains(NOT_IDENTIFY_PLANT_DESCRIPTION)
+      }
+      composeTestRule
+          .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
+          .assertTextEquals(NOT_IDENTIFY_PLANT_DESCRIPTION)
+    }
+
     composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-        .assertTextEquals("Roses are red")
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).assertTextEquals("Rose")
+        .onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME)
+        .assertTextEquals(UNKNOWN_PLANT_NAME)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME).assertIsDisplayed()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME)
-        .assertTextEquals("Rosum")
+        .assertTextEquals(UNKNOWN_PLANT_NAME)
 
     // Test health tab
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION)
-        .assertTextEquals("The plant is healthy 🌱")
+        .assertTextEquals(NO_HEALTH_DESCRIPTION)
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals("Status: The plant is healthy 🌱")
+        .assertTextEquals(UNKNOWN_STATUS_PLANT)
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
-        .assertTextEquals("Watering Frequency: Every 2 days")
+        .assertTextEquals(WATERING_FREQUENCY_0)
 
     // === BACK TO CAMERA ===
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).isDisplayed()
@@ -129,17 +178,22 @@ class EndToEndM1 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
     }
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SAVE_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).assertIsDisplayed()
 
     // === GARDEN SCREEN ===
     // Save plant and navigate to garden
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SAVE_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
 
     // Verify garden elements
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertIsDisplayed()
+    // assertExists and not assertIsDisplayed because the username is an empty string for this test.
+    // Hence the Node exists but is not displayed
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).assertExists()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.ADD_PLANT_FAB).assertIsDisplayed()
 
     // Test FAB navigation

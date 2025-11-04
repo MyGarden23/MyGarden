@@ -26,6 +26,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.model.plant.Plant
 
+// Text for the button to go from plant info screen to edit plant screen before saving the plant in
+// the garden
+private const val NEXT_BUTTON_TXT = "Next"
+
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
   const val SCREEN = "plant_info_screen"
@@ -41,7 +45,7 @@ object PlantInfoScreenTestTags {
   const val HEALTH_STATUS_DESCRIPTION = "health_status_description"
   const val HEALTH_STATUS = "health_status"
   const val WATERING_FREQUENCY = "watering_frequency"
-  const val SAVE_BUTTON = "save_button"
+  const val NEXT_BUTTON = "next_button"
 }
 
 /**
@@ -56,7 +60,7 @@ object PlantInfoScreenTestTags {
  * @param plant The plant to display information for
  * @param plantInfoViewModel ViewModel managing the UI state
  * @param onBackPressed Callback when the back button is pressed
- * @param onSavePlant Callback when the Save Plant button is clicked
+ * @param onNextPlant Callback when the Save Plant button is clicked
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +68,7 @@ fun PlantInfosScreen(
     plant: Plant,
     plantInfoViewModel: PlantInfoViewModel = viewModel(),
     onBackPressed: () -> Unit,
-    onSavePlant: () -> Unit = {}
+    onNextPlant: () -> Unit = {}
 ) {
   // Observe UI state from ViewModel
   val uiState by plantInfoViewModel.uiState.collectAsState()
@@ -90,17 +94,17 @@ fun PlantInfosScreen(
                     val plantToSave = uiState.savePlant()
                     plantInfoViewModel.savePlant(plantToSave)
                     plantInfoViewModel.resetUIState()
-                    onSavePlant()
+                    onNextPlant()
                   },
                   modifier =
                       Modifier.fillMaxWidth()
                           .height(56.dp)
-                          .testTag(PlantInfoScreenTestTags.SAVE_BUTTON),
+                          .testTag(PlantInfoScreenTestTags.NEXT_BUTTON),
                   shape = RoundedCornerShape(28.dp),
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = MaterialTheme.colorScheme.primaryContainer)) {
-                    Text(text = "Save Plant", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                    Text(text = NEXT_BUTTON_TXT, fontSize = 18.sp, fontWeight = FontWeight.Medium)
                   }
             }
       }) { paddingValues ->

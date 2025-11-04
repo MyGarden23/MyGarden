@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import com.android.mygarden.R
 
 private val cameraIconId = R.drawable.photo_camera_icon
-private val profileIconId = R.drawable.plant_profile_icon
 private val gardenIconId = R.drawable.plant_profile_icon
 
 /**
@@ -28,9 +27,6 @@ private val gardenIconId = R.drawable.plant_profile_icon
 sealed class Page(val name: String, val destination: Screen, val iconId: Int, val testTag: String) {
   object Camera : Page("CameraPage", Screen.Camera, cameraIconId, NavigationTestTags.CAMERA_BUTTON)
 
-  object Profile :
-      Page("ProfilePage", Screen.Profile, profileIconId, NavigationTestTags.PROFILE_BUTTON)
-
   object Garden : Page("GardenPage", Screen.Garden, gardenIconId, NavigationTestTags.GARDEN_BUTTON)
 }
 
@@ -40,7 +36,7 @@ sealed class Page(val name: String, val destination: Screen, val iconId: Int, va
  */
 @Composable
 fun BottomBar(selectedPage: Page, onSelect: (Page) -> Unit, modifier: Modifier = Modifier) {
-  val pages = listOf(Page.Camera, Page.Profile, Page.Garden)
+  val pages = listOf(Page.Camera, Page.Garden)
   NavigationBar(
       modifier = modifier.fillMaxWidth().height(100.dp).testTag(NavigationTestTags.BOTTOM_BAR),
       containerColor = MaterialTheme.colorScheme.background,

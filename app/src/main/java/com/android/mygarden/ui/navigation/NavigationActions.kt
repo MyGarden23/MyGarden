@@ -25,7 +25,15 @@ class NavigationActions(private val controller: NavHostController) {
       navToTopLevel(destination)
       return
     }
-    controller.navigate(destination.route) {
+
+    val route =
+        when (destination) {
+          is Screen.EditPlant ->
+              Screen.EditPlant.buildRoute(destination.ownedPlantId, destination.from)
+          else -> destination.route
+        }
+
+    controller.navigate(route) {
       launchSingleTop = true
       // Typically we want to restore state when navigating within the main graph,
       // but avoid restoring when going to the auth flow.
@@ -41,7 +49,7 @@ class NavigationActions(private val controller: NavHostController) {
    * - State is saved/restored when switching between tabs
    * - We pop up to the graph's start destination instead of the destination itself
    */
-  fun navToTopLevel(destination: Screen) {
+  private fun navToTopLevel(destination: Screen) {
     val current = currentRoute()
     if (current == destination.route) return
 

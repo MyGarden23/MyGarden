@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.navigation
+package com.android.mygarden.ui.navigation.navS2
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.LaunchedEffect
@@ -8,10 +8,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.navigation.NavDestination
+import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.ui.navigation.AppNavHost
+import com.android.mygarden.ui.navigation.Screen
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -58,8 +62,8 @@ class NavigationS2Tests {
   @Test
   fun camera_navigates_to_plantView() {
     setApp(Screen.Camera.route)
-    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
-    compose.runOnIdle { assertEquals(Screen.PlantView.route, currentRoute.value) }
+    compose.runOnIdle { navController.navigate(Screen.PlantInfo.route) }
+    compose.runOnIdle { assertEquals(Screen.PlantInfo.route, currentRoute.value) }
   }
 
   @Test
@@ -67,8 +71,8 @@ class NavigationS2Tests {
     setApp(Screen.Camera.route)
 
     // Camera -> Plant View
-    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
-    waitForRoute(Screen.PlantView.route)
+    compose.runOnIdle { navController.navigate(Screen.PlantInfo.route) }
+    waitForRoute(Screen.PlantInfo.route)
 
     // popBackStack -> Camera
     compose.runOnIdle { navController.popBackStack() }
@@ -77,10 +81,10 @@ class NavigationS2Tests {
   }
 
   @Test
-  fun can_reach_profile_destination() {
+  fun can_reach_garden_destination() {
     setApp(Screen.Camera.route)
-    compose.runOnIdle { navController.navigate(Screen.Profile.route) }
-    compose.runOnIdle { assertEquals(Screen.Profile.route, currentRoute.value) }
+    compose.runOnIdle { navController.navigate(Screen.Garden.route) }
+    compose.runOnIdle { assertEquals(Screen.Garden.route, currentRoute.value) }
   }
 
   @Test
@@ -102,8 +106,8 @@ class NavigationS2Tests {
     setApp(Screen.Camera.route)
 
     // Camera -> PlantView (same as tapping from CameraScreen)
-    compose.runOnIdle { navController.navigate(Screen.PlantView.route) }
-    waitForRoute(Screen.PlantView.route)
+    compose.runOnIdle { navController.navigate(Screen.PlantInfo.route) }
+    waitForRoute(Screen.PlantInfo.route)
 
     // Emulate the onBackPressed callback effect
     compose.runOnIdle { navController.popBackStack() }
@@ -121,8 +125,8 @@ class NavigationS2Tests {
       val knownRoutes =
           try {
             buildList<String?> {
-              fun walk(dest: androidx.navigation.NavDestination) {
-                if (dest is androidx.navigation.NavGraph) {
+              fun walk(dest: NavDestination) {
+                if (dest is NavGraph) {
                   dest.iterator().forEachRemaining { walk(it) }
                 } else add(dest.route)
               }

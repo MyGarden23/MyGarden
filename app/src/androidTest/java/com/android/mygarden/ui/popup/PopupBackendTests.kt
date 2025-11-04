@@ -158,6 +158,7 @@ class PopupBackendTests {
     rule.onNodeWithTag(PopupScreenTestTags.CONFIRM_BUTTON).performClick()
     rule.wholePopupIsNotDisplayed()
     rule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
+    rule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
   }
 
   /**

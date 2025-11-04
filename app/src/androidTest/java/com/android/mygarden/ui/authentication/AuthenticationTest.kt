@@ -187,11 +187,11 @@ class AuthenticationTest {
         // Wait for Firebase to have a current user and for the route to switch
         compose.waitUntil(effectiveTimeout) {
           val user = FirebaseEmulator.auth.currentUser
-          (user?.email == email) && currentRoute.value == Screen.NewProfile.route
+          (user?.email == email) && currentRoute.value == Screen.Camera.route
         }
 
         assertEquals(email, FirebaseEmulator.auth.currentUser!!.email)
-        assertEquals(Screen.NewProfile.route, currentRoute.value)
+        assertEquals(Screen.Camera.route, currentRoute.value)
       }
 
   // --- Small helper like in your other tests ---
