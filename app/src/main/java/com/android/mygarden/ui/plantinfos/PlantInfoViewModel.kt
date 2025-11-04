@@ -83,12 +83,14 @@ class PlantInfoViewModel(
   /**
    * Save the plant to the user's garden.
    *
-   * TODO: Update to allow user to specify last watered time.
+   * @param plant The plant to save
+   * @param onPlantSaved Callback called with the ID of the saved plant
    */
-  fun savePlant(plant: Plant) {
+  fun savePlant(plant: Plant, onPlantSaved: (String) -> Unit) {
     viewModelScope.launch {
-      plantsRepository.saveToGarden(
-          plant, plantsRepository.getNewId(), Timestamp(3000000000000L)) // TODO Change lastwatered
+      val newId = plantsRepository.getNewId()
+      plantsRepository.saveToGarden(plant, newId, Timestamp(System.currentTimeMillis()))
+      onPlantSaved(newId)
     }
   }
 
