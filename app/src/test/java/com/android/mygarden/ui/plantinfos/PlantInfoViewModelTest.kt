@@ -172,11 +172,16 @@ class PlantInfoViewModelTest {
   @Test
   fun savePlant_callsRepositorySaveToGarden() = runTest {
     val plant = createTestPlant(name = "Orchid")
+    var savedPlantId: String? = null
 
-    viewModel.savePlant(plant)
+    viewModel.savePlant(plant, onPlantSaved = { plantId -> savedPlantId = plantId })
     advanceUntilIdle()
 
-    // Verify the plant was saved by checking the repository's generated ID incremented
+    // Verify the plant was saved by checking the ID was returned
+    assertNotNull(savedPlantId)
+    assertEquals("0", savedPlantId)
+
+    // Verify the repository's ID counter incremented
     val nextId = repository.getNewId()
     assertEquals("1", nextId) // Should be 1 since we used 0 for the save
   }
@@ -187,12 +192,18 @@ class PlantInfoViewModelTest {
     val plant2 = createTestPlant(name = "Plant 2")
     val plant3 = createTestPlant(name = "Plant 3")
 
-    viewModel.savePlant(plant1)
+    val savedIds = mutableListOf<String>()
+
+    viewModel.savePlant(plant1, onPlantSaved = { savedIds.add(it) })
     advanceUntilIdle()
-    viewModel.savePlant(plant2)
+    viewModel.savePlant(plant2, onPlantSaved = { savedIds.add(it) })
     advanceUntilIdle()
-    viewModel.savePlant(plant3)
+    viewModel.savePlant(plant3, onPlantSaved = { savedIds.add(it) })
     advanceUntilIdle()
+
+    // Verify all plants were saved with correct IDs
+    assertEquals(3, savedIds.size)
+    assertEquals(listOf("0", "1", "2"), savedIds)
 
     // Verify the counter incremented 3 times by checking next ID is "3"
     assertEquals("3", repository.getNewId())

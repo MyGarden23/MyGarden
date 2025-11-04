@@ -25,7 +25,7 @@ class PlantInfoScreenTests {
           wateringFrequency = 1,
       )
 
-  fun setContent(plant: Plant, onSavePlant: () -> Unit = {}, onBackPressed: () -> Unit = {}) {
+  fun setContent(plant: Plant, onSavePlant: (String) -> Unit = {}, onBackPressed: () -> Unit = {}) {
     composeTestRule.setContent {
       PlantInfosScreen(plant, onBackPressed = onBackPressed, onNextPlant = onSavePlant)
     }
