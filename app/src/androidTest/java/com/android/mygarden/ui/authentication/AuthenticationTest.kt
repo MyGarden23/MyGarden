@@ -12,10 +12,16 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.model.authentication.AuthRepositoryFirebase
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.theme.MyGardenTheme
@@ -23,10 +29,14 @@ import com.android.mygarden.utils.FakeCredentialManager
 import com.android.mygarden.utils.FakeJwtGenerator
 import com.android.mygarden.utils.FirebaseEmulator
 import com.google.firebase.auth.GoogleAuthProvider
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
@@ -61,7 +71,7 @@ class AuthenticationTest {
 
     FirebaseEmulator.auth.signOut()
     // Optional: clear emulator users between tests if your helper provides it:
-    // FirebaseEmulator.clearAuthEmulator()
+    FirebaseEmulator.clearAuthEmulator()
   }
 
   @After
@@ -199,5 +209,176 @@ class AuthenticationTest {
     compose.waitUntil(timeoutMs) {
       compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
     }
+  }
+
+  @Test
+  fun signIn_with_invalid_token_stays_on_auth_and_has_no_user() {
+    val ctx = ApplicationProvider.getApplicationContext<Context>()
+    // Use an obviously invalid token to make sign-in fail
+    val invalidToken = "not-a-valid-jwt-token"
+    val fakeCredMgr = FakeCredentialManager.create(invalidToken, ctx)
+
+    // Track which screen (route) we’re currently on
+    lateinit var currentRoute: MutableState<String?>
+
+    compose.setContent {
+      MyGardenTheme {
+        val nav = rememberNavController()
+        val backEntry by nav.currentBackStackEntryAsState()
+        currentRoute = remember { mutableStateOf<String?>(null) }
+        // Keep updating the current route when navigation changes
+        LaunchedEffect(backEntry) { currentRoute.value = backEntry?.destination?.route }
+
+        // Start the app at the Auth screen with the fake credential manager
+        AppNavHost(
+            navController = nav,
+            startDestination = Screen.Auth.route,
+            credentialManagerProvider = { fakeCredMgr })
+      }
+    }
+
+    // Click the Google sign-in button
+    compose
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+
+    // Wait for navigation (or not) — we expect to stay on Auth
+    compose.waitUntil(effectiveTimeout) {
+      currentRoute.value == Screen.Auth.route ||
+          currentRoute.value == Screen.NewProfile.route ||
+          currentRoute.value == Screen.Camera.route
+    }
+
+    // We should still be on the Auth screen and have no logged-in user
+    assertEquals(
+        "Should remain on Auth after failed sign-in", Screen.Auth.route, currentRoute.value)
+    Assert.assertNull("No user should be signed in on failure", FirebaseEmulator.auth.currentUser)
+  }
+
+  // Repo that purposely throws a GetCredentialCancellationException
+  private class CancellationRepo : com.android.mygarden.model.authentication.AuthRepository {
+    override suspend fun signInWithGoogle(
+        credential: androidx.credentials.Credential
+    ): Result<com.android.mygarden.model.authentication.AuthRepository.SignInResult> {
+      throw GetCredentialCancellationException("User cancelled sign-in")
+    }
+
+    override fun signOut(): Result<Unit> = Result.success(Unit)
+  }
+
+  @Test
+  fun signIn_handles_GetCredentialCancellationException_gracefully() =
+      kotlinx.coroutines.runBlocking {
+        val ctx = ApplicationProvider.getApplicationContext<Context>()
+        // Token doesn’t matter, repo will throw before using it
+        val token = FakeJwtGenerator.createFakeGoogleIdToken(email = "cancel@test.com")
+        val fakeMgr = FakeCredentialManager.create(token, ctx)
+
+        val vm = SignInViewModel(repository = CancellationRepo())
+        vm.signIn(ctx, fakeMgr)
+
+        // Wait for the ViewModel to update its state
+        compose.waitUntil(effectiveTimeout) { vm.uiState.value.errorMsg != null }
+
+        val s = vm.uiState.value
+        assertEquals("Sign-in cancelled", s.errorMsg)
+        assertTrue(s.signedOut)
+        assertNull(s.user)
+      }
+
+  // Repo that throws NoCredentialException
+  private class NoCredentialRepo : com.android.mygarden.model.authentication.AuthRepository {
+    override suspend fun signInWithGoogle(
+        credential: androidx.credentials.Credential
+    ): Result<com.android.mygarden.model.authentication.AuthRepository.SignInResult> {
+      throw NoCredentialException("No Google account found")
+    }
+
+    override fun signOut(): Result<Unit> = Result.success(Unit)
+  }
+
+  @Test
+  fun signIn_handles_NoCredentialException_gracefully() =
+      kotlinx.coroutines.runBlocking {
+        val ctx = ApplicationProvider.getApplicationContext<Context>()
+        val token = FakeJwtGenerator.createFakeGoogleIdToken(email = "nocred@test.com")
+        val fakeMgr = FakeCredentialManager.create(token, ctx)
+        val vm = SignInViewModel(repository = NoCredentialRepo())
+
+        vm.signIn(ctx, fakeMgr)
+        compose.waitUntil(effectiveTimeout) { vm.uiState.value.errorMsg != null }
+
+        val s = vm.uiState.value
+        assertEquals("No Google account found on device", s.errorMsg)
+        assertTrue(s.signedOut)
+        assertNull(s.user)
+      }
+
+  // Repo that throws a subclass of GetCredentialException
+  private class ProviderErrorRepo : com.android.mygarden.model.authentication.AuthRepository {
+    override suspend fun signInWithGoogle(
+        credential: androidx.credentials.Credential
+    ): Result<com.android.mygarden.model.authentication.AuthRepository.SignInResult> {
+      throw androidx.credentials.exceptions.GetCredentialProviderConfigurationException(
+          "Provider misconfigured")
+    }
+
+    override fun signOut(): Result<Unit> = Result.success(Unit)
+  }
+
+  @Test
+  fun signIn_handles_GetCredentialException_gracefully() = runBlocking {
+    val ctx = ApplicationProvider.getApplicationContext<Context>()
+    val token = FakeJwtGenerator.createFakeGoogleIdToken(email = "provider-error@test.com")
+    val fakeMgr = FakeCredentialManager.create(token, ctx)
+    val vm = SignInViewModel(repository = ProviderErrorRepo())
+
+    vm.signIn(ctx, fakeMgr)
+    compose.waitUntil(effectiveTimeout) { vm.uiState.value.errorMsg != null }
+
+    val s = vm.uiState.value
+    assertEquals("Failed to get credentials", s.errorMsg)
+    assertTrue(s.signedOut)
+    assertNull(s.user)
+  }
+
+  @Test
+  fun signIn_handles_Exception_gracefully() = runBlocking {
+    val ctx = ApplicationProvider.getApplicationContext<Context>()
+    val cm = mockk<CredentialManager>()
+    // Simulate a random unexpected crash path
+    coEvery { cm.getCredential(any(), any<GetCredentialRequest>()) } throws
+        GetCredentialProviderConfigurationException("Provider misconfigured")
+
+    val vm = SignInViewModel()
+    vm.signIn(ctx, cm)
+
+    compose.waitUntil(effectiveTimeout) { vm.uiState.value.errorMsg != null }
+
+    val s = vm.uiState.value
+    assertEquals("Unexpected error", s.errorMsg)
+    assertTrue(s.signedOut)
+    assertNull(s.user)
+  }
+
+  @Test
+  fun signOut_clears_current_user_and_returns_success() = runBlocking {
+    val auth = FirebaseEmulator.auth
+    FirebaseEmulator.clearAuthEmulator()
+
+    // Sign in a fake user on the emulator
+    val email = "signout@test.com"
+    val idToken = FakeJwtGenerator.createFakeGoogleIdToken(email = email)
+    val cred = GoogleAuthProvider.getCredential(idToken, null)
+    val user = auth.signInWithCredential(cred).await().user
+    assertNotNull("User should be signed in before signOut()", user)
+
+    val repo = AuthRepositoryFirebase()
+
+    // Sign out and check results
+    val result = repo.signOut()
+    assertTrue(result.isSuccess)
+    assertNull("User should be null after signOut()", auth.currentUser)
   }
 }
