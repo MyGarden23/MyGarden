@@ -1,10 +1,14 @@
 package com.android.mygarden.model.plant
 
+import android.net.Uri
 import com.android.mygarden.model.plant.FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant
 import com.android.mygarden.model.plant.FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import java.io.File
 import java.sql.Timestamp
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -69,6 +73,8 @@ class PlantsRepositoryFirestore(
   /** The list of plants owned by the user, in the repository of the user. */
   private fun userPlantsCollection() =
       firestore.collection(usersCollection).document(currentUserId()).collection(plantsCollection)
+
+  private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 
   /** The id of the current user. Throw IllegalStateException if the user is not authenticated. */
   private fun currentUserId(): String {
@@ -151,6 +157,20 @@ class PlantsRepositoryFirestore(
     val newOwnedPlant =
         ownedPlant.copy(previousLastWatered = ownedPlant.lastWatered, lastWatered = wateringTime)
     docRef.set(fromOwnedPlantToSerializedOwnedPlant(newOwnedPlant), SetOptions.merge()).await()
+  }
+
+  private suspend fun uploadLocalImageToCloudStorage(file: File, plantId: String): String {
+    // Create a reference in Cloud Storage
+    val storageRef: StorageReference =
+        storage.reference.child(
+            "$usersCollection/${currentUserId()}/$plantsCollection/$plantId.jpg")
+    val fileUri = Uri.fromFile(file)
+
+    // Upload the File
+    storageRef.putFile(fileUri).await()
+
+    // Get the URL
+    return storageRef.downloadUrl.await().toString()
   }
 
   /**
