@@ -94,7 +94,13 @@ class PopupBackendTests {
   /** Saves a plant in repo that is already in NEEDS_WATER status */
   private fun saveThirstyPlantInRepo() {
     runTest {
-      repo.saveToGarden(thirstyPlant, repo.getNewId(), Timestamp(1))
+      repo.saveToGarden(
+          thirstyPlant,
+          repo.getNewId(),
+          Timestamp(
+              System.currentTimeMillis() -
+                  TimeUnit.DAYS.toMillis(1) -
+                  TimeUnit.MINUTES.toMillis(1)))
       rule.waitForIdle()
     }
   }
@@ -170,8 +176,7 @@ class PopupBackendTests {
     rule.wholePopupIsNotDisplayed()
     saveAlmostThirstyPlantInRepo()
     Thread.sleep(7000)
-    // to trigger the status update
-    runTest { repo.getAllOwnedPlants() }
+    // no trigger needed here, the continuous update should display the pop-up
     rule.wholePopupIsDisplayed()
   }
 }
