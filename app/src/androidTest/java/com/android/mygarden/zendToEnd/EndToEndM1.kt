@@ -16,6 +16,7 @@ import com.android.mygarden.MainActivity
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.camera.RequiresCamera
+import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
@@ -180,9 +181,26 @@ class EndToEndM1 {
     }
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).assertIsDisplayed()
 
-    // === GARDEN SCREEN ===
-    // Save plant and navigate to garden
+    // === EDIT PLANT SCREEN (NEW FLOW) ===
+    // Click Next to save plant and navigate to EditPlant
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+
+    // Wait for EditPlant screen to load
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
+    }
+
+    // Verify we're on EditPlant screen
+    composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
+
+    // Click Save to navigate to Garden
+    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
+
+    // === GARDEN SCREEN ===
+    // Verify navigation to garden after saving from EditPlant
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+    }
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
 
     // Verify garden elements
