@@ -24,16 +24,6 @@ class PlantHealthCalculatorTest {
   // Tests WITHOUT previousLastWatered (standard behavior)
 
   @Test
-  fun calculateHealthStatus_0PercentOfCycle_returnsSeverelyOverwatered() {
-    val lastWatered = Timestamp(System.currentTimeMillis())
-    val wateringFrequency = 7
-
-    val status = calculator.calculateHealthStatus(lastWatered, wateringFrequency)
-
-    assertEquals(PlantHealthStatus.SEVERELY_OVERWATERED, status)
-  }
-
-  @Test
   fun calculateHealthStatus_15PercentOfCycle_returnsOverwatered() {
     val lastWatered = daysAgo(1.0) // 14% of 7-day cycle
     val wateringFrequency = 7
@@ -179,6 +169,56 @@ class PlantHealthCalculatorTest {
             previousLastWatered = previousWatering)
 
     assertEquals(PlantHealthStatus.HEALTHY, status)
+  }
+
+  // Tests for initial watering grace period (first time adding a plant)
+
+  @Test
+  fun calculateHealthStatus_firstWateringToday_returnsHealthy() {
+    // Plant added for the first time, watered today (no previousLastWatered)
+    val lastWatered = Timestamp(System.currentTimeMillis())
+    val wateringFrequency = 7
+
+    val status =
+        calculator.calculateHealthStatus(
+            lastWatered = lastWatered,
+            wateringFrequency = wateringFrequency,
+            previousLastWatered = null)
+
+    // Should be HEALTHY (initial watering grace period), not SEVERELY_OVERWATERED
+    assertEquals(PlantHealthStatus.HEALTHY, status)
+  }
+
+  @Test
+  fun calculateHealthStatus_firstWateringWithin12Hours_returnsHealthy() {
+    // Plant added recently, watered 6 hours ago (no previousLastWatered)
+    val lastWatered = daysAgo(0.25) // 6 hours ago
+    val wateringFrequency = 7
+
+    val status =
+        calculator.calculateHealthStatus(
+            lastWatered = lastWatered,
+            wateringFrequency = wateringFrequency,
+            previousLastWatered = null)
+
+    // Should be HEALTHY (initial watering grace period)
+    assertEquals(PlantHealthStatus.HEALTHY, status)
+  }
+
+  @Test
+  fun calculateHealthStatus_firstWateringAfter12Hours_notInGracePeriod() {
+    // Plant added, watered 1 day ago (no previousLastWatered, grace period expired)
+    val lastWatered = daysAgo(1.0) // 14% of 7-day cycle
+    val wateringFrequency = 7
+
+    val status =
+        calculator.calculateHealthStatus(
+            lastWatered = lastWatered,
+            wateringFrequency = wateringFrequency,
+            previousLastWatered = null)
+
+    // Grace period expired, should follow normal rules (OVERWATERED at 14%)
+    assertEquals(PlantHealthStatus.OVERWATERED, status)
   }
 
   // Different watering frequencies

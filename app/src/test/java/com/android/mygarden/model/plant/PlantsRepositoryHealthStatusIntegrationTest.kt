@@ -265,4 +265,45 @@ class PlantsRepositoryHealthStatusIntegrationTest {
     val retrieved2 = repository.getOwnedPlant("id-2")
     assertEquals(timestamp2, retrieved2.lastWatered)
   }
+
+  // Tests for initial watering grace period (first plant addition)
+
+  @Test
+  fun saveToGarden_firstTimeWateredToday_statusIsHealthy() = runTest {
+    // Plant saved for the first time with lastWatered = today
+    val plant = createTestPlant(wateringFrequency = 7)
+    val lastWatered = Timestamp(System.currentTimeMillis())
+
+    repository.saveToGarden(plant, "plant-1", lastWatered)
+    val retrieved = repository.getOwnedPlant("plant-1")
+
+    // Should be HEALTHY (initial watering grace period), not SEVERELY_OVERWATERED
+    assertEquals(PlantHealthStatus.HEALTHY, retrieved.plant.healthStatus)
+  }
+
+  @Test
+  fun saveToGarden_firstTimeWateredWithin12Hours_statusIsHealthy() = runTest {
+    // Plant saved for the first time, watered 6 hours ago
+    val plant = createTestPlant(wateringFrequency = 7)
+    val lastWatered = daysAgo(0.25) // 6 hours ago
+
+    repository.saveToGarden(plant, "plant-1", lastWatered)
+    val retrieved = repository.getOwnedPlant("plant-1")
+
+    // Should be HEALTHY (initial watering grace period)
+    assertEquals(PlantHealthStatus.HEALTHY, retrieved.plant.healthStatus)
+  }
+
+  @Test
+  fun saveToGarden_firstTimeWateredYesterday_followsNormalRules() = runTest {
+    // Plant saved for the first time, watered 1 day ago (grace period expired)
+    val plant = createTestPlant(wateringFrequency = 7)
+    val lastWatered = daysAgo(1.0) // 14% of 7-day cycle
+
+    repository.saveToGarden(plant, "plant-1", lastWatered)
+    val retrieved = repository.getOwnedPlant("plant-1")
+
+    // Grace period expired, should follow normal rules (OVERWATERED at 14%)
+    assertEquals(PlantHealthStatus.OVERWATERED, retrieved.plant.healthStatus)
+  }
 }
