@@ -13,12 +13,14 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
+import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -26,11 +28,12 @@ import org.junit.runner.RunWith
 
 // Constant string for the e2e test
 private const val LOADING_DESCRIPTION_MESSAGE = "Loading Plant Infos..."
+private const val ERROR_LATIN_NAME_DESCRIPTION = "There was an error getting the plant latin name."
 private const val NOT_IDENTIFY_PLANT_DESCRIPTION = "The AI was not able to identify the plant."
 private const val UNKNOWN_PLANT_NAME = "Unknown"
 private const val NO_HEALTH_DESCRIPTION = "No health status description available"
 private const val WATERING_FREQUENCY_0 = "Watering Frequency: Every 0 days"
-private const val UNKNOWN_STATUS_PLANT = "Status: Status unknown ❓"
+private val UNKNOWN_STATUS_PLANT = "Status: ${PlantHealthStatus.UNKNOWN.description}"
 /**
  * End-to-end test for MyGarden's core user flow. This test assume that we have an internet
  * connection
@@ -108,26 +111,43 @@ class EndToEndM1 {
 
     // Test description tab content
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TAB).assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-        .assertTextEquals(LOADING_DESCRIPTION_MESSAGE)
 
-    // Need to wait for Gemini description, assume that it takes < 10 seconds
-    composeTestRule.waitUntil(TIMEOUT) {
-      val currentText =
-          composeTestRule
-              .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-              .fetchSemanticsNode()
-              .config
-              .getOrNull(SemanticsProperties.Text)
-              ?.joinToString(separator = "") { it.text } ?: ""
+    // This handles the non-deterministic behavior of the AI (between 2 possible cases)
+    val text =
+        composeTestRule
+            .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
+            .fetchSemanticsNode()
+            .config
+            .getOrNull(SemanticsProperties.Text)
+            ?.joinToString()
+    assertTrue(
+        "Expected one of the possible texts, but was: $text",
+        text == LOADING_DESCRIPTION_MESSAGE || text == ERROR_LATIN_NAME_DESCRIPTION)
 
-      currentText.contains(NOT_IDENTIFY_PLANT_DESCRIPTION)
+    /**
+     * This is in the specific case where the AI does not return the [ERROR_LATIN_NAME_DESCRIPTION]
+     * description
+     *
+     * Need to wait for Gemini description, assume that it takes < 10 seconds. The pictures are
+     * taken from the emulator, hence the AI does not recognize plants
+     */
+    if (text == LOADING_DESCRIPTION_MESSAGE) {
+      composeTestRule.waitUntil(TIMEOUT) {
+        val currentText =
+            composeTestRule
+                .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
+                .fetchSemanticsNode()
+                .config
+                .getOrNull(SemanticsProperties.Text)
+                ?.joinToString(separator = "") { it.text } ?: ""
+
+        currentText.contains(NOT_IDENTIFY_PLANT_DESCRIPTION)
+      }
+      composeTestRule
+          .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
+          .assertTextEquals(NOT_IDENTIFY_PLANT_DESCRIPTION)
     }
 
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-        .assertTextEquals(NOT_IDENTIFY_PLANT_DESCRIPTION)
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME)
         .assertTextEquals(UNKNOWN_PLANT_NAME)

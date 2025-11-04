@@ -26,6 +26,11 @@ import com.android.mygarden.ui.profile.NewProfileScreen
 import com.android.mygarden.ui.profile.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+private const val CHOSEN_AVATAR_KEY = "chosen_avatar"
+private const val IMAGE_PATH_KEY = "imagePath"
+private const val FROM_KEY = "from"
+private const val OWNED_PLANT_ID_KEY = "ownedPlantId"
+
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -52,7 +57,7 @@ fun AppNavHost(
     composable(Screen.NewProfile.route) { backStackEntry ->
       val vm: ProfileViewModel = viewModel()
       val chosenName by
-          backStackEntry.savedStateHandle.getStateFlow("chosen_avatar", "").collectAsState()
+          backStackEntry.savedStateHandle.getStateFlow(CHOSEN_AVATAR_KEY, "").collectAsState()
 
       val chosenAvatar =
           chosenName
@@ -62,7 +67,7 @@ fun AppNavHost(
       LaunchedEffect(chosenAvatar) {
         if (chosenAvatar != null) {
           vm.setAvatar(chosenAvatar)
-          backStackEntry.savedStateHandle.set("chosen_avatar", "")
+          backStackEntry.savedStateHandle.set(CHOSEN_AVATAR_KEY, "")
         }
       }
 
@@ -76,7 +81,7 @@ fun AppNavHost(
     composable(Screen.EditProfile.route) { backStackEntry ->
       val vm: ProfileViewModel = viewModel()
       val chosenName by
-          backStackEntry.savedStateHandle.getStateFlow("chosen_avatar", "").collectAsState()
+          backStackEntry.savedStateHandle.getStateFlow(CHOSEN_AVATAR_KEY, "").collectAsState()
 
       val chosenAvatar =
           chosenName
@@ -86,7 +91,7 @@ fun AppNavHost(
       LaunchedEffect(chosenAvatar) {
         if (chosenAvatar != null) {
           vm.setAvatar(chosenAvatar)
-          backStackEntry.savedStateHandle.set("chosen_avatar", "")
+          backStackEntry.savedStateHandle.set(CHOSEN_AVATAR_KEY, "")
         }
       }
 
@@ -102,7 +107,7 @@ fun AppNavHost(
       CameraScreen(
           onPictureTaken = { imagePath ->
             // Store image path in saved state and navigate to PlantView
-            navController.currentBackStackEntry?.savedStateHandle?.set("imagePath", imagePath)
+            navController.currentBackStackEntry?.savedStateHandle?.set(IMAGE_PATH_KEY, imagePath)
             navigationActions.navTo(Screen.PlantInfo)
           })
     }
@@ -125,7 +130,7 @@ fun AppNavHost(
     composable(Screen.PlantInfo.route) { backStackEntry ->
       val plantInfoViewModel: PlantInfoViewModel = viewModel()
       val imagePath =
-          navController.previousBackStackEntry?.savedStateHandle?.get<String>("imagePath")
+          navController.previousBackStackEntry?.savedStateHandle?.get<String>(IMAGE_PATH_KEY)
       // Shows plant details after a photo is taken
       // Right now it just uses a mock Plant object for demo purposes
 
@@ -145,7 +150,7 @@ fun AppNavHost(
             // Return the selection to the previous screen (Profile/NewProfile)
             navController.previousBackStackEntry
                 ?.savedStateHandle
-                ?.set("chosen_avatar", avatar.name)
+                ?.set(CHOSEN_AVATAR_KEY, avatar.name)
             navigationActions.navBack()
           },
           onBack = { navigationActions.navBack() })
@@ -156,20 +161,20 @@ fun AppNavHost(
         route = Screen.EditPlant.route,
         arguments =
             listOf(
-                navArgument("ownedPlantId") { type = NavType.StringType },
-                navArgument("from") {
+                navArgument(OWNED_PLANT_ID_KEY) { type = NavType.StringType },
+                navArgument(FROM_KEY) {
                   type = NavType.StringType
                   nullable = true
                 })) { entry ->
           val vm: EditPlantViewModel = viewModel()
-          val ownedPlantId = entry.arguments?.getString("ownedPlantId") ?: return@composable
+          val ownedPlantId = entry.arguments?.getString(OWNED_PLANT_ID_KEY) ?: return@composable
           EditPlantScreen(
               ownedPlantId = ownedPlantId,
               editPlantViewModel = vm,
               onSaved = { navigationActions.navTo(Screen.Garden) },
               onDeleted = { navigationActions.navTo(Screen.Garden) },
               goBack = {
-                if (entry.arguments?.getString("from") == Screen.PlantInfo.route) {
+                if (entry.arguments?.getString(FROM_KEY) == Screen.PlantInfo.route) {
                   // Need to delete manually due to our implementation of Screen.PlantInfo.route (we
                   // add by default the plant to our garden but delete it if the user don't want to
                   // add the plant to the garden)
