@@ -60,6 +60,15 @@ class PlantHealthCalculator {
     val daysSinceWatered = calculateDaysDifference(lastWatered, currentTime)
     // Calculate percentage of watering cycle completed
     val percentageOfCycle = (daysSinceWatered / wateringFrequency) * PERCENTAGE_CALCULATION_UTILITY
+
+    // Special handling: Initial watering grace period
+    // If this is the first watering (no previous watering) and it's very recent, consider it
+    // healthy
+    if (daysSinceWatered <= JUST_WATERED_GRACE_PERIOD_DAYS && previousLastWatered == null) {
+      currentStatusPercentage = 0.0 // Full water bar (1.0f in calculateInStatusFloat)
+      return PlantHealthStatus.HEALTHY
+    }
+
     // Special handling: Grace period after appropriate watering
     if (daysSinceWatered <= JUST_WATERED_GRACE_PERIOD_DAYS && previousLastWatered != null) {
       val daysSincePreviousWatering = calculateDaysDifference(previousLastWatered, lastWatered)
