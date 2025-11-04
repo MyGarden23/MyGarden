@@ -35,9 +35,9 @@ class NavigationActions(private val controller: NavHostController) {
 
     controller.navigate(route) {
       launchSingleTop = true
-      // Typically we want to restore state when navigating within the main graph,
-      // but avoid restoring when going to the auth flow.
-      if (destination != Screen.Auth) {
+        // Don't restore state for PlantInfo as it's a temporary screen
+        // that should always be created fresh
+        if (destination != Screen.Auth && destination != Screen.PlantInfo) {
         restoreState = true
       }
     }

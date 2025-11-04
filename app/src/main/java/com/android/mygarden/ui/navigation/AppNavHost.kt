@@ -106,6 +106,8 @@ fun AppNavHost(
     composable(Screen.Camera.route) {
       CameraScreen(
           onPictureTaken = { imagePath ->
+              // Clean up any previous image path before storing the new one
+              navController.currentBackStackEntry?.savedStateHandle?.remove<String>(IMAGE_PATH_KEY)
             // Store image path in saved state and navigate to PlantView
             navController.currentBackStackEntry?.savedStateHandle?.set(IMAGE_PATH_KEY, imagePath)
             navigationActions.navTo(Screen.PlantInfo)
@@ -131,7 +133,8 @@ fun AppNavHost(
       val plantInfoViewModel: PlantInfoViewModel = viewModel()
       val imagePath =
           navController.previousBackStackEntry?.savedStateHandle?.get<String>(IMAGE_PATH_KEY)
-      // Shows plant details after a photo is taken
+
+        // Shows plant details after a photo is taken
       // Right now it just uses a mock Plant object for demo purposes
 
       val plant = Plant(image = imagePath)
@@ -140,7 +143,9 @@ fun AppNavHost(
           plant = plant,
           plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
-          onNextPlant = { navigationActions.navTo(Screen.Garden) })
+          onNextPlant = { plantId ->
+              navigationActions.navTo(Screen.EditPlant(plantId, Screen.PlantInfo.route))
+          })
     }
 
     // Choose Avatar
