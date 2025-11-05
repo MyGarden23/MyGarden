@@ -1,7 +1,6 @@
 package com.android.mygarden.model.plant
 
 import java.sql.Timestamp
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -22,12 +21,6 @@ class PlantsRepositoryHealthStatusIntegrationTest {
   @Before
   fun setup() {
     repository = PlantsRepositoryLocal()
-  }
-
-  // Helper to create timestamp X days ago
-  private fun daysAgo(days: Double): Timestamp {
-    val millisAgo = (days * TimeUnit.DAYS.toMillis(1)).toLong()
-    return Timestamp(System.currentTimeMillis() - millisAgo)
   }
 
   // Helper to create a test plant

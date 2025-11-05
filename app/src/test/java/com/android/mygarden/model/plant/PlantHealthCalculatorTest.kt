@@ -1,7 +1,6 @@
 package com.android.mygarden.model.plant
 
 import java.sql.Timestamp
-import java.util.concurrent.TimeUnit
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -13,12 +12,6 @@ class PlantHealthCalculatorTest {
   @Before
   fun setup() {
     calculator = PlantHealthCalculator()
-  }
-
-  // Helper function to create a timestamp X days ago
-  private fun daysAgo(days: Double): Timestamp {
-    val millisAgo = (days * TimeUnit.DAYS.toMillis(1)).toLong()
-    return Timestamp(System.currentTimeMillis() - millisAgo)
   }
 
   // Tests WITHOUT previousLastWatered (standard behavior)

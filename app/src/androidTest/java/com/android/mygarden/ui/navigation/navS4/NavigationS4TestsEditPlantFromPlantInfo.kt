@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.navigation
+package com.android.mygarden.ui.navigation.navS4
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -9,9 +9,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
+import com.android.mygarden.ui.navigation.AppNavHost
+import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
-import junit.framework.TestCase.assertTrue
+import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -113,7 +116,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
     val repo = PlantsRepositoryProvider.repository
     runTest {
       val allPlants = repo.getAllOwnedPlants()
-      assertTrue(
+      TestCase.assertTrue(
           "Plant should have been deleted when going back from EditPlant", allPlants.isEmpty())
     }
   }
@@ -140,7 +143,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
     val repo = PlantsRepositoryProvider.repository
     runTest {
       val allPlants = repo.getAllOwnedPlants()
-      assertTrue("Plant should have been deleted", allPlants.isEmpty())
+      TestCase.assertTrue("Plant should have been deleted", allPlants.isEmpty())
     }
   }
 }
