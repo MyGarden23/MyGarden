@@ -287,6 +287,7 @@ fun EditPlantScreen(
                 DeletePlantPopup(
                     onDelete = {
                       editPlantViewModel.deletePlant(ownedPlantId)
+                      showDeletePopup = false
                       onDeleted()
                     },
                     onCancel = { showDeletePopup = false })
