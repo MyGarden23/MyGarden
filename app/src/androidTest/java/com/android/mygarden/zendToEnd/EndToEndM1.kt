@@ -174,21 +174,19 @@ class EndToEndM1 {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).isDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).performClick()
 
+    // Wait for camera to be ready after navigation
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
+    }
+
     // === PLANT INFO AGAIN ===
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
-    }
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).assertIsDisplayed()
 
-    // === EDIT PLANT SCREEN (NEW FLOW) ===
+    // === EDIT PLANT SCREEN (NEW FLOW SINCE S4) ===
     // Click Next to save plant and navigate to EditPlant
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
-
-    // Wait for EditPlant screen to load
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
-    }
 
     // Verify we're on EditPlant screen
     composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
@@ -198,9 +196,6 @@ class EndToEndM1 {
 
     // === GARDEN SCREEN ===
     // Verify navigation to garden after saving from EditPlant
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
-    }
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
 
     // Verify garden elements
