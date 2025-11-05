@@ -80,9 +80,10 @@ fun EditPlantScreen(
     }
   }
 
+  // Mutable states needed for the UI
+  var showDeletePopup by remember { mutableStateOf(false) }
   var touchedDesc by remember { mutableStateOf(false) }
   var touchedLastWatered by remember { mutableStateOf(false) }
-
   var showDatePicker by remember { mutableStateOf(false) }
   val dateFmt = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
 
@@ -270,10 +271,7 @@ fun EditPlantScreen(
 
               // Delete
               TextButton(
-                  onClick = {
-                    editPlantViewModel.deletePlant(ownedPlantId)
-                    onDeleted()
-                  },
+                  onClick = { showDeletePopup = true },
                   modifier =
                       Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.PLANT_DELETE)) {
                     Icon(
@@ -283,6 +281,16 @@ fun EditPlantScreen(
                     Spacer(Modifier.width(8.dp))
                     Text("Delete", color = MaterialTheme.colorScheme.error)
                   }
+
+              // Show deletion popup when the according button is pressed
+              if (showDeletePopup) {
+                DeletePlantPopup(
+                    onDelete = {
+                      editPlantViewModel.deletePlant(ownedPlantId)
+                      onDeleted()
+                    },
+                    onCancel = { showDeletePopup = false })
+              }
             }
       }
 }
