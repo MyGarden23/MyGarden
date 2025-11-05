@@ -7,13 +7,12 @@ import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.mygarden.model.plant.Plant
-import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
-import kotlinx.coroutines.runBlocking
+import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -34,15 +33,6 @@ class NavigationS4TestsEditPlantFromPlantInfo {
 
   private lateinit var navController: NavHostController
 
-  private val testPlant =
-      Plant(
-          name = "Test Rose",
-          latinName = "Rosa testus",
-          description = "A beautiful test rose",
-          healthStatus = PlantHealthStatus.HEALTHY,
-          healthStatusDescription = "This plant is healthy",
-          wateringFrequency = 7)
-
   @Before
   fun setUp() {
     composeTestRule.setContent {
@@ -60,10 +50,23 @@ class NavigationS4TestsEditPlantFromPlantInfo {
   fun cleanUp() {
     // Clean up any plants that were saved during tests
     val repo = PlantsRepositoryProvider.repository
-    runBlocking {
+    runTest {
       val allPlants = repo.getAllOwnedPlants()
       allPlants.forEach { repo.deleteFromGarden(it.id) }
     }
+  }
+
+  /**
+   * Helper function to navigate from PlantInfo screen to EditPlant screen.
+   *
+   * This function performs the common steps shared across multiple tests: verifies PlantInfo screen
+   * is displayed, clicks the "Next" button, and verifies navigation to EditPlant screen.
+   */
+  private fun navigateFromPlantInfoToEditPlant() {
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
   }
 
   /**
@@ -77,14 +80,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
   fun navigateFromPlantInfoToEditPlantAndThenToGardenBySaving() {
     // Start on PlantInfo screen
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
-
-    composeTestRule.waitForIdle()
-
-    // Verify navigation to EditPlant screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
+    navigateFromPlantInfoToEditPlant()
 
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertIsDisplayed()
 
@@ -105,15 +101,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
   fun navigateFromPlantInfoToEditPlantAndBackToPlantInfoByPressingBack() {
     // Start on PlantInfo screen
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
-
-    // Click the "Next" button to save the plant
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
-
-    composeTestRule.waitForIdle()
-
-    // Verify navigation to EditPlant screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
+    navigateFromPlantInfoToEditPlant()
 
     // Click back button on EditPlant
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.GO_BACK_BUTTON).performClick()
@@ -123,11 +111,10 @@ class NavigationS4TestsEditPlantFromPlantInfo {
 
     // Verify the plant was deleted (check that no plant exists in repository)
     val repo = PlantsRepositoryProvider.repository
-    runBlocking {
+    runTest {
       val allPlants = repo.getAllOwnedPlants()
-      assert(allPlants.isEmpty()) {
-        "Plant should have been deleted when going back from EditPlant"
-      }
+      assertTrue(
+          "Plant should have been deleted when going back from EditPlant", allPlants.isEmpty())
     }
   }
 
@@ -141,15 +128,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
   fun navigateFromPlantInfoToEditPlantAndDeletePlant() {
     // Start on PlantInfo screen
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
-
-    // Click the "Next" button to save the plant
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
-
-    composeTestRule.waitForIdle()
-
-    // Verify navigation to EditPlant screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
+    navigateFromPlantInfoToEditPlant()
 
     // Click delete button on EditPlant
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
@@ -159,9 +138,9 @@ class NavigationS4TestsEditPlantFromPlantInfo {
 
     // Verify the plant was deleted
     val repo = PlantsRepositoryProvider.repository
-    runBlocking {
+    runTest {
       val allPlants = repo.getAllOwnedPlants()
-      assert(allPlants.isEmpty()) { "Plant should have been deleted" }
+      assertTrue("Plant should have been deleted", allPlants.isEmpty())
     }
   }
 }

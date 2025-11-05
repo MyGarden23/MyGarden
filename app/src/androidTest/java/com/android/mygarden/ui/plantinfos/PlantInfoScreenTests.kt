@@ -25,6 +25,13 @@ class PlantInfoScreenTests {
           wateringFrequency = 1,
       )
 
+  /**
+   * Sets up the PlantInfosScreen composable for testing.
+   *
+   * @param plant The Plant object to display
+   * @param onSavePlant Callback for the "Next" button (default: empty lambda)
+   * @param onBackPressed Callback for the back button (default: empty lambda)
+   */
   fun setContent(plant: Plant, onSavePlant: (String) -> Unit = {}, onBackPressed: () -> Unit = {}) {
     composeTestRule.setContent {
       PlantInfosScreen(plant, onBackPressed = onBackPressed, onNextPlant = onSavePlant)

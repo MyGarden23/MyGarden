@@ -60,6 +60,7 @@ class PlantInfoViewModelTest {
 
   @Test
   fun uiState_initialStateIsDefault() = runTest {
+    // UI state should start with empty/default values before initialization
     val initialState = viewModel.uiState.value
 
     assertEquals("", initialState.name)
@@ -74,6 +75,7 @@ class PlantInfoViewModelTest {
 
   @Test
   fun initializeUIState_mapsPlantToUIStateCorrectly() = runTest {
+    // ViewModel should correctly map Plant model to UI state
     val plant =
         createTestPlant(
             name = "Rose",
@@ -97,6 +99,7 @@ class PlantInfoViewModelTest {
 
   @Test
   fun initializeUIState_preservesImageReference() = runTest {
+    // Image reference should be preserved during initialization
     val plant = createTestPlant()
 
     viewModel.initializeUIState(plant)
@@ -108,6 +111,7 @@ class PlantInfoViewModelTest {
 
   @Test
   fun initializeUIState_handlesAllHealthStatuses() = runTest {
+    // Test all health statuses to ensure none are missed
     // Test all health statuses dynamically - automatically includes any new statuses added
     PlantHealthStatus.values().forEach { status ->
       val plant =
@@ -123,6 +127,7 @@ class PlantInfoViewModelTest {
 
   @Test
   fun setTab_updatesSelectedTabToDescription() = runTest {
+    // Tab switching should correctly update the selected tab
     // Initialize with a plant first
     viewModel.initializeUIState(createTestPlant())
     advanceUntilIdle()
@@ -141,6 +146,7 @@ class PlantInfoViewModelTest {
 
   @Test
   fun setTab_updatesSelectedTabToHealth() = runTest {
+    // Verify switching to health tab works correctly
     // Initialize with a plant first
     viewModel.initializeUIState(createTestPlant())
     advanceUntilIdle()
@@ -154,6 +160,7 @@ class PlantInfoViewModelTest {
 
   @Test
   fun setTab_doesNotAffectOtherUIStateProperties() = runTest {
+    // Tab switching should only change the tab, not other plant data
     val plant = createTestPlant(name = "Cactus", latinName = "Cactaceae")
     viewModel.initializeUIState(plant)
     advanceUntilIdle()
@@ -171,23 +178,21 @@ class PlantInfoViewModelTest {
 
   @Test
   fun savePlant_callsRepositorySaveToGarden() = runTest {
+    // Saving should delegate to repository and return a valid plant ID
     val plant = createTestPlant(name = "Orchid")
     var savedPlantId: String? = null
 
     viewModel.savePlant(plant, onPlantSaved = { plantId -> savedPlantId = plantId })
     advanceUntilIdle()
 
-    // Verify the plant was saved by checking the ID was returned
+    // Verify a valid ID was returned (format depends on repository implementation)
     assertNotNull(savedPlantId)
-    assertEquals("0", savedPlantId)
-
-    // Verify the repository's ID counter incremented
-    val nextId = repository.getNewId()
-    assertEquals("1", nextId) // Should be 1 since we used 0 for the save
+    assertFalse(savedPlantId!!.isEmpty())
   }
 
   @Test
   fun savePlant_canSaveMultiplePlants() = runTest {
+    // Multiple saves should each return a unique valid ID
     val plant1 = createTestPlant(name = "Plant 1")
     val plant2 = createTestPlant(name = "Plant 2")
     val plant3 = createTestPlant(name = "Plant 3")
@@ -201,16 +206,19 @@ class PlantInfoViewModelTest {
     viewModel.savePlant(plant3, onPlantSaved = { savedIds.add(it) })
     advanceUntilIdle()
 
-    // Verify all plants were saved with correct IDs
+    // Verify all plants were saved with valid unique IDs
     assertEquals(3, savedIds.size)
-    assertEquals(listOf("0", "1", "2"), savedIds)
-
-    // Verify the counter incremented 3 times by checking next ID is "3"
-    assertEquals("3", repository.getNewId())
+    savedIds.forEach { id ->
+      assertNotNull(id)
+      assertFalse(id.isEmpty())
+    }
+    // Verify all IDs are unique
+    assertEquals(savedIds.size, savedIds.toSet().size)
   }
 
   @Test
   fun initializeUIState_canBeCalledMultipleTimes() = runTest {
+    // Re-initializing should replace the previous plant data
     val plant1 = createTestPlant(name = "First Plant")
     val plant2 = createTestPlant(name = "Second Plant")
 

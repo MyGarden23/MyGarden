@@ -50,6 +50,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun getOwnedPlant_calculatesHealthyStatus_whenInOptimalRange() = runTest {
+    // Plant at 50% of watering cycle should be healthy
     val plant = createTestPlant(wateringFrequency = 7)
     val lastWatered = daysAgo(3.5) // 50% of 7-day cycle
 
@@ -61,6 +62,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun getOwnedPlant_calculatesOverwateredStatus_whenWateredRecently() = runTest {
+    // Plant watered too recently (15%) should be overwatered
     val plant = createTestPlant(wateringFrequency = 10)
     val lastWatered = daysAgo(1.5) // 15% of 10-day cycle
 
@@ -72,6 +74,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun getOwnedPlant_calculatesSlightlyDryStatus_whenApproachingWateringTime() = runTest {
+    // Plant at 79% should be slightly dry (approaching next watering)
     val plant = createTestPlant(wateringFrequency = 7)
     val lastWatered = daysAgo(5.5) // ~79% of 7-day cycle
 
@@ -83,6 +86,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun getOwnedPlant_calculatesNeedsWaterStatus_whenOverdue() = runTest {
+    // Plant past watering date (114%) should need water
     val plant = createTestPlant(wateringFrequency = 7)
     val lastWatered = daysAgo(8.0) // ~114% of 7-day cycle
 
@@ -94,6 +98,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun getOwnedPlant_calculatesSeverelyDryStatus_whenCritical() = runTest {
+    // Plant severely neglected (200%) should be critically dry
     val plant = createTestPlant(wateringFrequency = 5)
     val lastWatered = daysAgo(10.0) // 200% of 5-day cycle
 
@@ -103,10 +108,23 @@ class PlantsRepositoryHealthStatusIntegrationTest {
     assertEquals(PlantHealthStatus.SEVERELY_DRY, retrieved.plant.healthStatus)
   }
 
+  @Test
+  fun getOwnedPlant_calculatesUnknownStatus_whenWateringFrequencyIsZero() = runTest {
+    // Plant with watering frequency 0 should have UNKNOWN status
+    val plant = createTestPlant(wateringFrequency = 0)
+    val lastWatered = daysAgo(5.0)
+
+    repository.saveToGarden(plant, "plant-1", lastWatered)
+    val retrieved = repository.getOwnedPlant("plant-1")
+
+    assertEquals(PlantHealthStatus.UNKNOWN, retrieved.plant.healthStatus)
+  }
+
   // Tests for getAllOwnedPlants()
 
   @Test
   fun getAllOwnedPlants_calculatesStatusForAllPlants() = runTest {
+    // Multiple plants should each get their status calculated independently
     // Add 3 plants with different statuses
     val plant1 = createTestPlant(name = "Plant1", wateringFrequency = 7)
     val plant2 = createTestPlant(name = "Plant2", wateringFrequency = 7)
@@ -126,6 +144,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun getAllOwnedPlants_calculatesStatusForDifferentFrequencies() = runTest {
+    // Status calculation should respect each plant's individual watering frequency
     // Different plants with different watering frequencies
     val cactus = createTestPlant(name = "Cactus", wateringFrequency = 30)
     val tropical = createTestPlant(name = "Tropical", wateringFrequency = 2)
@@ -145,6 +164,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun waterPlant_updatesLastWateredTimestamp_checksHealthStatus() = runTest {
+    // Watering should update the lastWatered timestamp
     val plant = createTestPlant(wateringFrequency = 7)
     val initialWatering = daysAgo(8.0) // Old watering
 
@@ -160,6 +180,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun waterPlant_changesHealthStatusAfterWatering() = runTest {
+    // Watering a plant that needed it should activate grace period (HEALTHY)
     val plant = createTestPlant(wateringFrequency = 7)
     val oldWatering = daysAgo(8.0) // 114% - NEEDS_WATER
 
@@ -179,6 +200,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun waterPlant_severelyOverwatered_whenWateredTooEarly() = runTest {
+    // Watering too early should result in severely overwatered status
     val plant = createTestPlant(wateringFrequency = 7)
     val oldWatering = daysAgo(3.0) // 43% - HEALTHY (too early to water)
 
@@ -198,6 +220,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun waterPlant_throwsExceptionForNonExistentPlant() = runTest {
+    // Should throw exception when trying to water non-existent plant
     try {
       repository.waterPlant("non-existent-id")
       fail("Expected IllegalArgumentException")
@@ -208,6 +231,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun waterPlant_worksMultipleTimesOnSamePlant() = runTest {
+    // Should handle multiple waterings and update timestamp each time
     val plant = createTestPlant(wateringFrequency = 7)
     repository.saveToGarden(plant, "plant-1", daysAgo(10.0))
 
@@ -228,6 +252,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun getOwnedPlant_preservesOriginalPlantData() = runTest {
+    // Health calculation should not affect other plant properties
     val originalPlant = createTestPlant(name = "Rose", wateringFrequency = 5)
     val lastWatered = daysAgo(2.5) // 50% - HEALTHY
 
@@ -244,6 +269,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun waterPlant_doesNotAffectOtherPlants() = runTest {
+    // Watering one plant should not affect other plants in the garden
     val plant1 = createTestPlant(name = "Plant1", wateringFrequency = 7)
     val plant2 = createTestPlant(name = "Plant2", wateringFrequency = 7)
 
@@ -266,10 +292,11 @@ class PlantsRepositoryHealthStatusIntegrationTest {
     assertEquals(timestamp2, retrieved2.lastWatered)
   }
 
-  // Tests for initial watering grace period (first plant addition)
+  // Tests for initial watering grace period (first time adding a plant)
 
   @Test
   fun saveToGarden_firstTimeWateredToday_statusIsHealthy() = runTest {
+    // First watering gets grace period (prevents immediate overwatered status)
     // Plant saved for the first time with lastWatered = today
     val plant = createTestPlant(wateringFrequency = 7)
     val lastWatered = Timestamp(System.currentTimeMillis())
@@ -283,6 +310,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun saveToGarden_firstTimeWateredWithin12Hours_statusIsHealthy() = runTest {
+    // Initial grace period lasts 12 hours
     // Plant saved for the first time, watered 6 hours ago
     val plant = createTestPlant(wateringFrequency = 7)
     val lastWatered = daysAgo(0.25) // 6 hours ago
@@ -296,6 +324,7 @@ class PlantsRepositoryHealthStatusIntegrationTest {
 
   @Test
   fun saveToGarden_firstTimeWateredYesterday_followsNormalRules() = runTest {
+    // Grace period expired, plant follows normal health rules
     // Plant saved for the first time, watered 1 day ago (grace period expired)
     val plant = createTestPlant(wateringFrequency = 7)
     val lastWatered = daysAgo(1.0) // 14% of 7-day cycle
