@@ -35,11 +35,8 @@ class NavigationActions(private val controller: NavHostController) {
 
     controller.navigate(route) {
       launchSingleTop = true
-      // Don't restore state for PlantInfo as it's a temporary screen
-      // that should always be created fresh
-      if (destination != Screen.Auth && destination != Screen.PlantInfo) {
-        restoreState = true
-      }
+      // Non-top-level screens always load fresh data, so we don't restore their state
+      restoreState = false
     }
   }
 
