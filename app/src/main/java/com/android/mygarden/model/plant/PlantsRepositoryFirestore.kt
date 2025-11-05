@@ -6,20 +6,16 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import java.sql.Timestamp
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.tasks.await
 
 /** Constant value for the collection of users in firestore. */
@@ -44,20 +40,13 @@ class PlantsRepositoryFirestore(
 ) : PlantsRepository {
   private val healthCalculator = PlantHealthCalculator()
 
+  override val tickDelay: Duration = 30.minutes
+
   // This flow emit something (a boolean here) each time a list update could make the list contain a
   // thirsty plant
   private val _plantsUpdate = MutableSharedFlow<Boolean>()
 
   val scope = CoroutineScope(Job())
-
-  // This flow emit something (a boolean here) at a fixed period of time ; to be collected by the
-  // single flow below
-  private val ticks: Flow<Boolean> = flow {
-    while (currentCoroutineContext().isActive) {
-      emit(true)
-      delay(30.minutes)
-    }
-  }
 
   /**
    * This flow collects the user's plant list from Firebase with updated health status either when
@@ -72,7 +61,10 @@ class PlantsRepositoryFirestore(
             } else emptyList()
           }
           .distinctUntilChanged()
-          .stateIn(scope, SharingStarted.WhileSubscribed(5_000), emptyList())
+          .stateIn(
+              scope,
+              SharingStarted.WhileSubscribed(plantsFlowTimeoutWhenNoSubscribers),
+              emptyList())
 
   /** The list of plants owned by the user, in the repository of the user. */
   private fun userPlantsCollection() =

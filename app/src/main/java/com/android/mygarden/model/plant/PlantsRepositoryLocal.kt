@@ -1,21 +1,17 @@
 package com.android.mygarden.model.plant
 
 import java.sql.Timestamp
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 
 /** Represents a repository that manages Plant and OwnedPlant objects. */
 class PlantsRepositoryLocal : PlantsRepository {
@@ -23,18 +19,11 @@ class PlantsRepositoryLocal : PlantsRepository {
   private var counter = 0
   private val healthCalculator = PlantHealthCalculator()
 
+  override val tickDelay: Duration = 2.seconds
+
   private val _plants = MutableStateFlow<List<OwnedPlant>>(emptyList())
 
   val scope = CoroutineScope(Job())
-
-  // This flow emit something (a boolean here) at a fixed period of time ; to be collected by the
-  // single flow below
-  private val ticks: Flow<Boolean> = flow {
-    while (currentCoroutineContext().isActive) {
-      emit(true)
-      delay(2.seconds)
-    }
-  }
 
   /**
    * This flow updates the plant health status of each plant either when
@@ -44,7 +33,10 @@ class PlantsRepositoryLocal : PlantsRepository {
   override val plantsFlow: StateFlow<List<OwnedPlant>> =
       combine(_plants, ticks) { plants, time -> plants.map { updatePlantHealthStatus(it) } }
           .distinctUntilChanged()
-          .stateIn(scope, SharingStarted.WhileSubscribed(5_000), emptyList())
+          .stateIn(
+              scope,
+              SharingStarted.WhileSubscribed(plantsFlowTimeoutWhenNoSubscribers),
+              emptyList())
 
   override fun getNewId(): String {
     return counter++.toString()

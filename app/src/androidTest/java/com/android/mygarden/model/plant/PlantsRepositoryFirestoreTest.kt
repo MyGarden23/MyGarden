@@ -5,7 +5,6 @@ import app.cash.turbine.test
 import com.android.mygarden.utils.FirestoreProfileTest
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
@@ -25,7 +24,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
    * repository
    */
   @Before
-  fun setup() = runBlocking {
+  fun setup() = runTest {
     // Start up Firebase emulator, clear data, etc. (handled by FirestoreProfileTest)
     super.setUp()
 
@@ -138,7 +137,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   /*---------------------- REPOSITORY TESTS --------------------*/
 
   @Test
-  fun getNewId_GeneratesUniqueIds() = runBlocking {
+  fun getNewId_GeneratesUniqueIds() = runTest {
     val id1 = repository.getNewId()
     val id2 = repository.getNewId()
 
@@ -146,7 +145,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun saveToGarden_returnsOwnedPlantWithCorrectData() = runBlocking {
+  fun saveToGarden_returnsOwnedPlantWithCorrectData() = runTest {
     val id = "test-id-1"
     val timestamp = Timestamp(System.currentTimeMillis())
 
@@ -158,7 +157,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun getOwnedPlant_returnsTheSamePlantSavedToGarden1() = runBlocking {
+  fun getOwnedPlant_returnsTheSamePlantSavedToGarden1() = runTest {
     val id = "test getOwned id 1"
     val timestamp = Timestamp(System.currentTimeMillis())
 
@@ -170,7 +169,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun getOwnedPlant_returnsTheSamePlantSavedToGarden2() = runBlocking {
+  fun getOwnedPlant_returnsTheSamePlantSavedToGarden2() = runTest {
     val plant =
         createTestPlant(
             name = "test getOwned 2",
@@ -187,7 +186,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun getOwnedPlant_returnsTheSamePlantSavedToGarden3() = runBlocking {
+  fun getOwnedPlant_returnsTheSamePlantSavedToGarden3() = runTest {
     val plant =
         createTestPlant(
             name = "test getOwned 3",
@@ -204,7 +203,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun getAllOwnedPlant_returnsTheSamePlantsSavedToGarden1() = runBlocking {
+  fun getAllOwnedPlant_returnsTheSamePlantsSavedToGarden1() = runTest {
     val id1 = "test getAllOwned plant 1"
     val timestamp1 = Timestamp(System.currentTimeMillis())
     val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
@@ -233,7 +232,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun deleteFromGarden_works() = runBlocking {
+  fun deleteFromGarden_works() = runTest {
     val id1 = "test deleteFromGarden 1 plant 1"
     val timestamp1 = Timestamp(System.currentTimeMillis())
     val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
@@ -266,7 +265,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun deleteFromGarden_throwsExceptionWhenWrongId() = runBlocking {
+  fun deleteFromGarden_throwsExceptionWhenWrongId() = runTest {
     val idTest = "delete empty repo"
     try {
       repository.deleteFromGarden(idTest)
@@ -277,7 +276,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun editOwnedPlant_works() = runBlocking {
+  fun editOwnedPlant_works() = runTest {
     val id1 = "test editOwnedPlant 1 plant 1"
     val timestamp1 = Timestamp(System.currentTimeMillis())
     val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
@@ -299,7 +298,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun waterPlant_works() = runBlocking {
+  fun waterPlant_works() = runTest {
     val id1 = "test waterPlant_works plant 1"
     val timestamp1 = Timestamp(System.currentTimeMillis())
     val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)

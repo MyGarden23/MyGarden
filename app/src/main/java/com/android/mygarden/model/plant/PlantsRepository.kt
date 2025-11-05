@@ -8,9 +8,13 @@ import com.google.firebase.ai.type.GenerateContentResponse
 import com.google.firebase.ai.type.GenerativeBackend
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.doubleOrNull
@@ -19,6 +23,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Request
 
 /**
  * Repository interface for managing plants in the application.
@@ -28,10 +33,27 @@ import okhttp3.OkHttpClient
  */
 interface PlantsRepository {
 
+  // Fixed period of time at which we get the plants from the repository to recompute the health
+  // status
+  val tickDelay: Duration
+
   // This is defined here to let View Models that use the repository Provider to have access to the
   // plantsFlow
   val plantsFlow: StateFlow<List<OwnedPlant>>
     get() = MutableStateFlow(emptyList())
+
+  val plantsFlowTimeoutWhenNoSubscribers: Long
+    get() = 5_000
+
+  // This flow emits something at a fixed period of time ; to be collected by the
+  // single flow plantsFlow overridden in both repositories
+  val ticks: Flow<Unit>
+    get() = flow {
+      while (true) {
+        emit(Unit)
+        delay(tickDelay)
+      }
+    }
 
   companion object {
     /**
@@ -250,7 +272,7 @@ interface PlantsRepository {
    * @param request The configured HTTP request to execute
    * @return The response body as a string, or an empty string if the request fails
    */
-  suspend fun plantNetAPICall(client: okhttp3.OkHttpClient, request: okhttp3.Request): String {
+  suspend fun plantNetAPICall(client: OkHttpClient, request: Request): String {
     val response = client.newCall(request).execute()
     return response.body?.string() ?: ""
   }
