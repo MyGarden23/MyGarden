@@ -60,7 +60,7 @@ object PlantInfoScreenTestTags {
  * @param plant The plant to display information for
  * @param plantInfoViewModel ViewModel managing the UI state
  * @param onBackPressed Callback when the back button is pressed
- * @param onNextPlant Callback when the Save Plant button is clicked
+ * @param onNextPlant Callback when the Save Plant button is clicked, receives the plant ID
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +68,7 @@ fun PlantInfosScreen(
     plant: Plant,
     plantInfoViewModel: PlantInfoViewModel = viewModel(),
     onBackPressed: () -> Unit,
-    onNextPlant: () -> Unit = {}
+    onNextPlant: (String) -> Unit = {}
 ) {
   // Observe UI state from ViewModel
   val uiState by plantInfoViewModel.uiState.collectAsState()
@@ -92,9 +92,12 @@ fun PlantInfosScreen(
               Button(
                   onClick = {
                     val plantToSave = uiState.savePlant()
-                    plantInfoViewModel.savePlant(plantToSave)
-                    plantInfoViewModel.resetUIState()
-                    onNextPlant()
+                    plantInfoViewModel.savePlant(
+                        plantToSave,
+                        onPlantSaved = { plantId ->
+                          plantInfoViewModel.resetUIState()
+                          onNextPlant(plantId)
+                        })
                   },
                   modifier =
                       Modifier.fillMaxWidth()
