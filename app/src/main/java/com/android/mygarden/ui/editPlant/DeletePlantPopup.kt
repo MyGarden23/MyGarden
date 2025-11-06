@@ -28,8 +28,8 @@ import androidx.compose.ui.window.Dialog
 /** Test tags for [DeletePlantPopup]. */
 object DeletePlantPopupTestTags {
   const val POPUP = "DeletePlantPopup"
-  const val DELETE_QUESTION = "DeletePlantPopupQuestion"
-  const val DELETE_DESCRIPTION = "DeletePlantPopupDescription"
+  const val QUESTION = "DeletePlantPopupQuestion"
+  const val DESCRIPTION = "DeletePlantPopupDescription"
   const val CONFIRM_BUTTON = "PlantPopupConfirmButton"
   const val CANCEL_BUTTON = "PlantPopupDeleteQuestion"
 }
@@ -66,14 +66,14 @@ fun DeletePlantPopup(onDelete: () -> Unit, onCancel: () -> Unit, modifier: Modif
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
-                        modifier = modifier.testTag(DeletePlantPopupTestTags.DELETE_QUESTION))
+                        modifier = modifier.testTag(DeletePlantPopupTestTags.QUESTION))
                     Spacer(modifier = modifier.height(6.dp))
                     Text(
                         text = DELETE_PLANT_DESCRIPTION,
                         style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = modifier.testTag(DeletePlantPopupTestTags.DELETE_DESCRIPTION))
+                        modifier = modifier.testTag(DeletePlantPopupTestTags.DESCRIPTION))
                     Spacer(modifier = modifier.height(12.dp))
                     Row(
                         modifier = modifier.fillMaxWidth(),

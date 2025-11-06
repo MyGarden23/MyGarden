@@ -234,8 +234,8 @@ class EditPlantScreenTest {
 
     // Assert all nodes are correctly displayed
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertIsDisplayed()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DELETE_QUESTION).assertIsDisplayed()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DELETE_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertIsDisplayed()
 
     // For buttons also assert they are clickable
     composeRule
@@ -266,8 +266,8 @@ class EditPlantScreenTest {
 
     // Assert all nodes are correctly no more displayed
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DELETE_QUESTION).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DELETE_DESCRIPTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertDoesNotExist()
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON).assertDoesNotExist()
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
   }
@@ -290,8 +290,8 @@ class EditPlantScreenTest {
 
     // Assert all nodes are correctly no more displayed
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DELETE_QUESTION).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DELETE_DESCRIPTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertDoesNotExist()
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON).assertDoesNotExist()
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
   }
