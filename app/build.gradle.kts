@@ -204,6 +204,8 @@ dependencies {
         exclude(group = "org.junit") // safe extra guard
     }
     androidTestImplementation(libs.json)
+    // Kotlin Flows Test API
+    androidTestImplementation("app.cash.turbine:turbine:1.1.0")
 
     // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)

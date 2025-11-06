@@ -1,18 +1,42 @@
 package com.android.mygarden.model.plant
 
 import java.sql.Timestamp
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 /** Represents a repository that manages Plant and OwnedPlant objects. */
 class PlantsRepositoryLocal : PlantsRepository {
 
   private var counter = 0
-  private val ownedPlants: MutableList<OwnedPlant> = mutableListOf()
   private val healthCalculator = PlantHealthCalculator()
 
-  private val _plantsFlow = MutableStateFlow<List<OwnedPlant>>(emptyList())
-  override val plantsFlow: StateFlow<List<OwnedPlant>> = _plantsFlow
+  override val tickDelay: Duration = 2.seconds
+
+  private val _plants = MutableStateFlow<List<OwnedPlant>>(emptyList())
+
+  val scope = CoroutineScope(Job())
+
+  /**
+   * This flow updates the plant health status of each plant either when
+   * 1) the list of plants is updated
+   * 2) a tick is emitted then emit the updated list ; to be collected by the pop-up VM
+   */
+  override val plantsFlow: StateFlow<List<OwnedPlant>> =
+      combine(_plants, ticks) { plants, time -> plants.map { updatePlantHealthStatus(it) } }
+          .distinctUntilChanged()
+          .stateIn(
+              scope,
+              SharingStarted.WhileSubscribed(plantsFlowTimeoutWhenNoSubscribers),
+              emptyList())
 
   override fun getNewId(): String {
     return counter++.toString()
@@ -20,41 +44,29 @@ class PlantsRepositoryLocal : PlantsRepository {
 
   override suspend fun saveToGarden(plant: Plant, id: String, lastWatered: Timestamp): OwnedPlant {
     val ownedPlant = OwnedPlant(id, plant, lastWatered)
-    ownedPlants.add(ownedPlant)
-    // Update the flow value so that it emits the updated list
-    _plantsFlow.value = ownedPlants.toList()
+    _plants.update { prev -> prev + ownedPlant }
     return ownedPlant
   }
 
   override suspend fun getAllOwnedPlants(): List<OwnedPlant> {
-    ownedPlants.forEachIndexed { index, ownedPlant ->
-      ownedPlants[index] = updatePlantHealthStatus(ownedPlant)
-    }
-    // Update the flow value so that it emits the updated list
-    _plantsFlow.value = ownedPlants.toList()
-    return ownedPlants.toList()
+    // ensures flow emission when called
+    _plants.update { plants -> plants.map { updatePlantHealthStatus(it) } }
+    return _plants.value.toList()
   }
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
-    val index = ownedPlants.indexOfFirst { it.id == id }
-    if (index == -1) {
+    val ownedPlant = _plants.value.firstOrNull { it.id == id }
+    if (ownedPlant == null) {
       throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
+    } else {
+      return updatePlantHealthStatus(ownedPlant)
     }
-
-    val updatedPlant = updatePlantHealthStatus(ownedPlants[index])
-    ownedPlants[index] = updatedPlant
-    // Update the flow value so that it emits the updated list
-    _plantsFlow.value = ownedPlants.toList()
-    return updatedPlant
   }
 
   override suspend fun deleteFromGarden(id: String) {
-    val index = ownedPlants.indexOfFirst { it.id == id }
-    if (index != -1) {
-      ownedPlants.removeAt(index)
-      // Update the flow value so that it emits the updated list
-      _plantsFlow.value = ownedPlants.toList()
-    } else {
+    val previousListSize = _plants.value.size
+    _plants.update { plants -> plants.filterNot { it.id == id } }
+    if (previousListSize == _plants.value.size) {
       throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
     }
   }
@@ -64,28 +76,31 @@ class PlantsRepositoryLocal : PlantsRepository {
       throw IllegalArgumentException(
           "PlantsRepositoryLocal: ID mismatch - parameter id '$id' does not match newOwnedPlant.id '${newOwnedPlant.id}'")
     }
-    val index = ownedPlants.indexOfFirst { it.id == id }
-    if (index != -1) {
-      ownedPlants[index] = newOwnedPlant
-      // Update the flow value so that it emits the updated list
-      _plantsFlow.value = ownedPlants.toList()
-    } else {
+    var found = false
+
+    _plants.update { plants ->
+      plants.map {
+        if (it.id == id) {
+          found = true
+          newOwnedPlant
+        } else it
+      }
+    }
+
+    if (!found) {
       throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
     }
   }
 
   override suspend fun waterPlant(id: String, wateringTime: Timestamp) {
     val ownedPlant =
-        ownedPlants.find { it.id == id }
+        _plants.value.firstOrNull { it.id == id }
             ?: throw IllegalArgumentException(
                 "PlantsRepositoryLocal: OwnedPlant with id $id not found")
     val previousWatering = ownedPlant.lastWatered
     val updatedPlant =
         ownedPlant.copy(lastWatered = wateringTime, previousLastWatered = previousWatering)
-    val index = ownedPlants.indexOfFirst { it.id == id }
-    ownedPlants[index] = updatedPlant
-    // Update the flow value so that it emits the updated list
-    _plantsFlow.value = ownedPlants.toList()
+    _plants.update { plants -> plants.map { if (it.id == id) updatedPlant else it } }
   }
 
   /**

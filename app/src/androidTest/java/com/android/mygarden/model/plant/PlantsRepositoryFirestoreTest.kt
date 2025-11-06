@@ -1,9 +1,12 @@
 package com.android.mygarden.model.plant
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import com.android.mygarden.utils.FirestoreProfileTest
 import java.sql.Timestamp
-import kotlinx.coroutines.runBlocking
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -16,14 +19,26 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   private lateinit var repository: PlantsRepository
   private val healthCalculator = PlantHealthCalculator()
 
+  /**
+   * Starts up everything needed for Firestore (handled by FirestoreProfileTest) & sets up the
+   * repository
+   */
   @Before
-  fun setup() = runBlocking {
+  fun setup() = runTest {
     // Start up Firebase emulator, clear data, etc. (handled by FirestoreProfileTest)
     super.setUp()
 
     // Inject PlantsRepositoryFirestore
     repository = PlantsRepositoryFirestore(db, auth)
   }
+
+  /** Ensures to clear the repo at the end of each test for consistency */
+  @After
+  fun eraseFromRepo() {
+    runTest { repository.getAllOwnedPlants().forEach { p -> repository.deleteFromGarden(p.id) } }
+  }
+
+  /*------------------------ HELPER FUNCTIONS -------------------------*/
 
   // Helper function to create a test plant without needing a real Image
   private fun createTestPlant(
@@ -42,7 +57,42 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
         wateringFrequency = 7)
   }
 
-  /** Plants to use for the tests */
+  /**
+   * Saves a plant in the repo that will have its status become NEEDS_WATER if it's recalculated at
+   * least 5 seconds after the call to this function
+   */
+  private fun saveAlmostThirstyPlantInRepo() {
+    val justMoreThanADay =
+        Timestamp(
+            System.currentTimeMillis() - (TimeUnit.DAYS.toMillis(1) - TimeUnit.SECONDS.toMillis(5)))
+    runTest { repository.saveToGarden(almostThirstyPlant, repository.getNewId(), justMoreThanADay) }
+  }
+
+  /** Saves a HEALTHY plant in the repo and returns its id */
+  private fun saveHealthyPlantAndReturnId(): String {
+    val id = repository.getNewId()
+    runTest { repository.saveToGarden(healthyPlant, id, Timestamp(System.currentTimeMillis())) }
+    return id
+  }
+
+  /**
+   * Updates the health status of a plant based on current watering cycle.
+   *
+   * @param ownedPlant The plant to update
+   * @return A copy of the plant with updated health status
+   */
+  private fun updatePlantHealthStatus(ownedPlant: OwnedPlant): OwnedPlant {
+    val calculatedStatus =
+        healthCalculator.calculateHealthStatus(
+            lastWatered = ownedPlant.lastWatered,
+            wateringFrequency = ownedPlant.plant.wateringFrequency,
+            previousLastWatered = ownedPlant.previousLastWatered)
+    val updatedPlant = ownedPlant.plant.copy(healthStatus = calculatedStatus)
+    return ownedPlant.copy(plant = updatedPlant)
+  }
+
+  /*-------------------------- FICTIONAL PLANTS -------------------*/
+
   private val plant1 =
       createTestPlant(
           name = "test plant 1",
@@ -67,8 +117,27 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
           latinName = "test in latin plant 4",
           healthStatus = PlantHealthStatus.NEEDS_WATER)
 
+  private val healthyPlant =
+      Plant(
+          name = "I'm okay",
+          image = null,
+          latinName = "laurem ispum",
+          description = "all good for now",
+          healthStatus = PlantHealthStatus.HEALTHY,
+          wateringFrequency = 1)
+  private val almostThirstyPlant =
+      Plant(
+          name = "Water?",
+          image = null,
+          latinName = "laurem ipsum",
+          description = "edge plant that will soon be thirsty",
+          healthStatus = PlantHealthStatus.UNKNOWN,
+          wateringFrequency = 1)
+
+  /*---------------------- REPOSITORY TESTS --------------------*/
+
   @Test
-  fun getNewId_GeneratesUniqueIds() = runBlocking {
+  fun getNewId_GeneratesUniqueIds() = runTest {
     val id1 = repository.getNewId()
     val id2 = repository.getNewId()
 
@@ -76,7 +145,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun saveToGarden_returnsOwnedPlantWithCorrectData() = runBlocking {
+  fun saveToGarden_returnsOwnedPlantWithCorrectData() = runTest {
     val id = "test-id-1"
     val timestamp = Timestamp(System.currentTimeMillis())
 
@@ -88,7 +157,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun getOwnedPlant_returnsTheSamePlantSavedToGarden1() = runBlocking {
+  fun getOwnedPlant_returnsTheSamePlantSavedToGarden1() = runTest {
     val id = "test getOwned id 1"
     val timestamp = Timestamp(System.currentTimeMillis())
 
@@ -100,7 +169,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun getOwnedPlant_returnsTheSamePlantSavedToGarden2() = runBlocking {
+  fun getOwnedPlant_returnsTheSamePlantSavedToGarden2() = runTest {
     val plant =
         createTestPlant(
             name = "test getOwned 2",
@@ -117,7 +186,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun getOwnedPlant_returnsTheSamePlantSavedToGarden3() = runBlocking {
+  fun getOwnedPlant_returnsTheSamePlantSavedToGarden3() = runTest {
     val plant =
         createTestPlant(
             name = "test getOwned 3",
@@ -134,7 +203,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun getAllOwnedPlant_returnsTheSamePlantsSavedToGarden1() = runBlocking {
+  fun getAllOwnedPlant_returnsTheSamePlantsSavedToGarden1() = runTest {
     val id1 = "test getAllOwned plant 1"
     val timestamp1 = Timestamp(System.currentTimeMillis())
     val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
@@ -163,7 +232,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun deleteFromGarden_works() = runBlocking {
+  fun deleteFromGarden_works() = runTest {
     val id1 = "test deleteFromGarden 1 plant 1"
     val timestamp1 = Timestamp(System.currentTimeMillis())
     val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
@@ -196,7 +265,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun deleteFromGarden_throwsExceptionWhenWrongId() = runBlocking {
+  fun deleteFromGarden_throwsExceptionWhenWrongId() = runTest {
     val idTest = "delete empty repo"
     try {
       repository.deleteFromGarden(idTest)
@@ -207,7 +276,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun editOwnedPlant_works() = runBlocking {
+  fun editOwnedPlant_works() = runTest {
     val id1 = "test editOwnedPlant 1 plant 1"
     val timestamp1 = Timestamp(System.currentTimeMillis())
     val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
@@ -229,7 +298,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun waterPlant_works() = runBlocking {
+  fun waterPlant_works() = runTest {
     val id1 = "test waterPlant_works plant 1"
     val timestamp1 = Timestamp(System.currentTimeMillis())
     val ownedPlantBefore1 = repository.saveToGarden(plant1, id1, timestamp1)
@@ -246,19 +315,119 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     assertEquals(wateredOwnedPlant, wateredOwnedPlantFromRepo)
   }
 
+  /*--------------------- REPOSITORY FLOW TESTS -----------------*/
+
+  /** Tests that the repo's flow emits something when a plant is saved on the repo */
+  @Test
+  fun flowEmissionWhenSavingPlant() = runTest {
+    repository.plantsFlow.test {
+      // initial emission from stateIn
+      assertEquals(emptyList<OwnedPlant>(), awaitItem())
+
+      val id = saveHealthyPlantAndReturnId()
+
+      val list = awaitItem()
+      assertEquals(1, list.size)
+      assertEquals(id, list.first().id)
+
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  /** Tests that the flow emits when a plant is changed on the repo */
+  @Test
+  fun flowEmissionWhenChangingAPlant() = runTest {
+    val id = repository.getNewId()
+    val now = Timestamp(System.currentTimeMillis())
+    val yesterday =
+        Timestamp(
+            System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1) + TimeUnit.MINUTES.toMillis(3))
+    val newPlant = OwnedPlant(id, healthyPlant, lastWatered = yesterday)
+
+    repository.plantsFlow.test {
+      // initial emission from stateIn
+      assertEquals(emptyList<OwnedPlant>(), awaitItem())
+
+      repository.saveToGarden(healthyPlant, id, now)
+
+      val list = awaitItem()
+      assertEquals(1, list.size)
+      assertEquals(id, list.first().id)
+
+      repository.editOwnedPlant(id, newPlant)
+      val list2 = awaitItem()
+      assertNotEquals(list, list2)
+      assertEquals(1, list2.size)
+      assertEquals(list.first().id, list2.first().id)
+
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
   /**
-   * Updates the health status of a plant based on current watering cycle.
-   *
-   * @param ownedPlant The plant to update
-   * @return A copy of the plant with updated health status
+   * Tests that the flow doesn't emit when an update is made but this update doesn't change the list
    */
-  private fun updatePlantHealthStatus(ownedPlant: OwnedPlant): OwnedPlant {
-    val calculatedStatus =
-        healthCalculator.calculateHealthStatus(
-            lastWatered = ownedPlant.lastWatered,
-            wateringFrequency = ownedPlant.plant.wateringFrequency,
-            previousLastWatered = ownedPlant.previousLastWatered)
-    val updatedPlant = ownedPlant.plant.copy(healthStatus = calculatedStatus)
-    return ownedPlant.copy(plant = updatedPlant)
+  @Test
+  fun noFlowEmissionWhenEditPlantDoesntChangeIt() = runTest {
+    val id = repository.getNewId()
+    val randomDate = Timestamp(1737273600) // 19th of January 2025 at 9am
+    val newPlant = OwnedPlant(id, healthyPlant, lastWatered = randomDate)
+
+    repository.plantsFlow.test {
+      // initial emission from stateIn
+      assertEquals(emptyList<OwnedPlant>(), awaitItem())
+
+      repository.saveToGarden(healthyPlant, id, randomDate)
+      awaitItem()
+
+      // edit the owned plant with the same values should not emit
+      repository.editOwnedPlant(id, newPlant)
+      expectNoEvents()
+
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  /**
+   * Tests that the flow doesn't emit when a trigger is called but the list is unchanged compared to
+   * the previous emitted list
+   */
+  @Test
+  fun noFlowEmissionWhenNoChangeOnList() = runTest {
+    repository.plantsFlow.test {
+      // initial emission from stateIn
+      assertEquals(emptyList<OwnedPlant>(), awaitItem())
+
+      saveHealthyPlantAndReturnId()
+      awaitItem()
+
+      repository.getAllOwnedPlants()
+      expectNoEvents()
+
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  /** Tests that the flow emits when a plant status has changed between 2 trigger calls */
+  @Test
+  fun flowEmissionWhenRetrievingAPlantThatChangedStatus() = runTest {
+    repository.plantsFlow.test {
+      // initial emission from stateIn
+      assertEquals(emptyList<OwnedPlant>(), awaitItem())
+
+      saveAlmostThirstyPlantInRepo()
+      val stillHealthy = awaitItem()
+      assertEquals(PlantHealthStatus.SLIGHTLY_DRY, stillHealthy.first().plant.healthStatus)
+
+      // This should make the plant status change to NEEDS_WATER
+      Thread.sleep(7000)
+
+      repository.getAllOwnedPlants()
+      val nowThirsty = awaitItem()
+      assertNotEquals(stillHealthy, nowThirsty)
+      assertEquals(PlantHealthStatus.NEEDS_WATER, nowThirsty.first().plant.healthStatus)
+
+      cancelAndIgnoreRemainingEvents()
+    }
   }
 }
