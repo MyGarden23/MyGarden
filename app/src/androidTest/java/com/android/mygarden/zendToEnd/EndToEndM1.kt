@@ -14,6 +14,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.model.plant.PlantsRepositoryLocal
+import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
@@ -88,6 +90,7 @@ class EndToEndM1 {
    */
   @Test
   fun endToEndTest() {
+    PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
     // === CAMERA SCREEN ===
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
 
