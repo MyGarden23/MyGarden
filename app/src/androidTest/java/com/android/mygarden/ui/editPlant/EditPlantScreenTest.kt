@@ -147,6 +147,13 @@ class EditPlantScreenTest {
 
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
 
+    // Assert that the deletion popup displays and confirm deleting the plant
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertIsDisplayed()
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+
     composeRule.runOnIdle {}
     composeRule.waitForIdle()
 
@@ -212,6 +219,81 @@ class EditPlantScreenTest {
 
     // Now an error should be visible for the date field
     composeRule.onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_DATE).isDisplayed()
+  }
+
+  // Under this comment: plant deletion popup tests
+
+  /**
+   * Asserts that the popup is displayed when the delete button is pressed in the EditPlant screen
+   */
+  @Test
+  fun deletionPopup_isDisplayed_whenPressDelete() {
+    setContentWith()
+
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+
+    // Assert all nodes are correctly displayed
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertIsDisplayed()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertIsDisplayed()
+
+    // For buttons also assert they are clickable
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON)
+        .assertIsDisplayed()
+        .assertIsEnabled()
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
+        .assertIsDisplayed()
+        .assertIsEnabled()
+  }
+
+  /**
+   * Asserts that the popup is not displayed anymore when the delete button is pressed, then going
+   * back in the EditPlant screen by keeping the plant in the garden.
+   */
+  @Test
+  fun deletionPopup_isNoMoreDisplayed_whenGoingBackToEdit() {
+    setContentWith()
+
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+    // Keep plant in garden
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+    composeRule.waitForIdle()
+
+    // Assert all nodes are correctly no more displayed
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
+  }
+
+  /**
+   * Asserts that the popup is not displayed anymore when the de lete button is pressed, then going
+   * back in the Garden screen by deleting the plant.
+   */
+  @Test
+  fun deletionPopup_isNoMoreDisplayed_whenGoingBackToGarden() {
+    setContentWith()
+
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+    // Delete plant
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+    composeRule.waitForIdle()
+
+    // Assert all nodes are correctly no more displayed
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
   }
 }
 

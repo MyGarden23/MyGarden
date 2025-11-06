@@ -11,6 +11,7 @@ import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
@@ -119,6 +120,12 @@ class NavigationS3TestsGardenAndEditPlant {
         .assertIsDisplayed()
         .performClick()
 
+    composeTestRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+
+    composeTestRule.waitForIdle()
     // Verify we are back on the Garden screen
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
   }
@@ -143,5 +150,36 @@ class NavigationS3TestsGardenAndEditPlant {
 
     // Verify we are back on the Garden screen
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+  }
+
+  /**
+   * Tests navigation from the Garden to EditPlant then press the delete button but return to
+   * EditPlant by keeping the plan in the garden.
+   */
+  @Test
+  fun navigateFromGardenToEditScreenAndKeepInGarden() {
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+
+    val plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)
+
+    composeTestRule.onNodeWithTag(plantTag).assertIsDisplayed().performClick()
+
+    // Verify that navigation happened to the EditPlant screen
+    composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
+
+    // Keep the plant
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE)
+        .assertIsDisplayed()
+        .performClick()
+
+    composeTestRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+
+    composeTestRule.waitForIdle()
+    // Verify we are back on the Edit plant screen
+    composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
   }
 }

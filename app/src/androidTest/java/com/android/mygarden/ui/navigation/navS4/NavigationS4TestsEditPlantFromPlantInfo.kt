@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
@@ -133,8 +134,12 @@ class NavigationS4TestsEditPlantFromPlantInfo {
     composeTestRule.waitForIdle()
     navigateFromPlantInfoToEditPlant()
 
-    // Click delete button on EditPlant
+    // Click delete button on EditPlant and confirm
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+    composeTestRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
 
     // Verify navigation to Garden screen
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
