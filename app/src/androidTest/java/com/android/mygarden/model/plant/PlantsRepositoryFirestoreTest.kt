@@ -1,21 +1,37 @@
 package com.android.mygarden.model.plant
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
+import com.android.mygarden.R
+import com.android.mygarden.ui.camera.LocalImageDisplay
 import com.android.mygarden.utils.FirestoreProfileTest
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
+import java.io.File
+import java.io.FileOutputStream
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
+
+  @get:Rule val composeTestRule = createComposeRule()
   private lateinit var repository: PlantsRepository
   private val healthCalculator = PlantHealthCalculator()
 
@@ -313,6 +329,80 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
 
     val wateredOwnedPlantFromRepo = repository.getOwnedPlant(id1)
     assertEquals(wateredOwnedPlant, wateredOwnedPlantFromRepo)
+  }
+
+  /*--------------------- REPOSITORY CLOUD STORAGE TESTS -----------------*/
+  /**
+   * Tests that the image stored locally is stored in Cloud Storage when the plant is saved to
+   * garden and that the image can be retrieved from Cloud Storage.
+   */
+  @Test
+  fun loadLocalImage_andThenSaveToGardenWithLogoImageWorks() = runTest {
+    // Give the Android context
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    // Take the image app_loo for the test
+    val inputStream = context.resources.openRawResource(R.drawable.app_logo_for_test)
+    val bitmap = BitmapFactory.decodeStream(inputStream)
+    inputStream.close()
+
+    // Compress and save this image in context.filesDir
+    val file = File(context.filesDir, "test_app_logo.png")
+    FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
+
+    val id = "test-id-1"
+    val timestamp = Timestamp(System.currentTimeMillis())
+    val plantTestCloud = plant1.copy(image = file.absolutePath)
+
+    val ownedPlant = repository.saveToGarden(plantTestCloud, id, timestamp)
+    // Display the image with the AsyncImage version
+    composeTestRule.setContent {
+      LocalImageDisplay(
+          imagePath = ownedPlant.plant.image!!,
+          testVersionRemeberAsync = false,
+          contentDescription = "Plant image")
+    }
+
+    // Check that the image is displayed
+    composeTestRule.onNodeWithContentDescription("Plant image").assertExists()
+  }
+
+  /** Tests that the image stored in Cloud Storage can be deleted from it. */
+  @Test
+  fun loadLocalImage_andThenSaveToGardenWithLogoImageThenDeleteWorks() = runTest {
+    // Give the Android context
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    // Take the image app_loo for the test
+    val inputStream = context.resources.openRawResource(R.drawable.app_logo_for_test)
+    val bitmap = BitmapFactory.decodeStream(inputStream)
+    inputStream.close()
+
+    // Compress and save this image in context.filesDir
+    val file = File(context.filesDir, "test_app_logo.png")
+    FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
+
+    val id = "test-id-1"
+    val timestamp = Timestamp(System.currentTimeMillis())
+    val plantTestCloud = plant1.copy(image = file.absolutePath)
+
+    val ownedPlant = repository.saveToGarden(plantTestCloud, id, timestamp)
+    val storage = FirebaseStorage.getInstance()
+    val storageRef = storage.reference.child("users/${auth.currentUser!!.uid}/plants/$id.jpg")
+
+    val downloadUrl = storageRef.downloadUrl.await()
+    assertNotNull(downloadUrl)
+
+    // Delete the plant from the garden, it also deletes the image from Cloud Storage
+    repository.deleteFromGarden(id)
+
+    // Check that it works
+    try {
+      storageRef.downloadUrl.await()
+      fail("Expected StorageException for deleted image, but succeeded")
+    } catch (e: StorageException) {
+      assertEquals(StorageException.ERROR_OBJECT_NOT_FOUND, e.errorCode)
+    }
   }
 
   /*--------------------- REPOSITORY FLOW TESTS -----------------*/

@@ -220,6 +220,8 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
+    // Add the dependency for the Cloud Storage for Firestore
+    implementation(libs.firebase.storage)
 
 
     //Credential Manager
@@ -243,7 +245,7 @@ dependencies {
     implementation(libs.mockito.kotlin)
 
     // --------- Firebase AI Logic (Gemini/Imagen) ---------
-    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
     implementation("com.google.firebase:firebase-ai")
 
     implementation(libs.kotlinx.coroutines.play.services)
