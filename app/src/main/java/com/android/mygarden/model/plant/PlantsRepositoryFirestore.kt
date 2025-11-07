@@ -79,7 +79,7 @@ class PlantsRepositoryFirestore(
   private val storage: FirebaseStorage = FirebaseStorage.getInstance()
   /**
    * Gives the reference to the image associated to the id given in argument in the current user's
-   * plants collection in Cloud Storage.
+   * plants collection in Cloud Storage. All the images are stored in JPG format : plantId.jpg
    *
    * @param plantId the name of the plant associated to the image
    * @return the storage reference in Cloud Storage of the image
@@ -101,7 +101,7 @@ class PlantsRepositoryFirestore(
 
   override suspend fun saveToGarden(plant: Plant, id: String, lastWatered: Timestamp): OwnedPlant {
     // Upload the image to Cloud Storage
-    val imageUrl: String? = uploadLocalImageToCloudStorage(plant.image, id)
+    val imageUrl: String? = uploadLocalImageToCloudStorageAndDeleteImageLocally(plant.image, id)
 
     // Creates an OwnedPlant with the arguments and change the image field of the plant to store the
     // URL in Cloud Storage or null if there is no image.
@@ -148,7 +148,7 @@ class PlantsRepositoryFirestore(
     if (!document.exists()) throw IllegalArgumentException(plantNotFoundErrMsg(id))
     userPlantsCollection().document(id).delete().await()
     // Delete the image in Cloud Storage
-    deleteImageInCloudStorge(id)
+    deleteImageInCloudStorage(id)
   }
 
   override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
@@ -180,8 +180,9 @@ class PlantsRepositoryFirestore(
   }
 
   /**
-   * Uploads the image of the plant (stored locally) to Cloud Storage for Firestore and return the
-   * URL of where this image is stored or null if there was no image to store.
+   * Uploads the image of the plant (stored locally) to Cloud Storage for Firestore and delete the
+   * image stored locally. return the URL of where this image is stored or null if there was no
+   * image to store.
    *
    * @param imagePath the path of the image stored locally or null if there is no image to store
    * @param plantId the id of the plant associated to the image to know where to store the image in
@@ -189,7 +190,10 @@ class PlantsRepositoryFirestore(
    * @return the URL of where the image is stored in Cloud Storage or null if there was no image to
    *   store.
    */
-  private suspend fun uploadLocalImageToCloudStorage(imagePath: String?, plantId: String): String? {
+  private suspend fun uploadLocalImageToCloudStorageAndDeleteImageLocally(
+      imagePath: String?,
+      plantId: String
+  ): String? {
     if (imagePath == null) return null
     val imageFile = File(imagePath)
     // Create a reference in Cloud Storage
@@ -199,11 +203,11 @@ class PlantsRepositoryFirestore(
     // Upload the File
     storageReference.putFile(fileUri).await()
 
-    // Delete the the image locally
+    // Delete the image locally
     if (imageFile.exists()) {
       val deleted = imageFile.delete()
       if (!deleted) {
-        Log.w(
+        Log.e(
             "PlantsRepositoryFirestore",
             "Failed to delete the local file image: ${imageFile.path} ")
       }
@@ -218,12 +222,12 @@ class PlantsRepositoryFirestore(
    *
    * @param plantId the name of the image in Cloud Storage
    */
-  private suspend fun deleteImageInCloudStorge(plantId: String) {
+  private suspend fun deleteImageInCloudStorage(plantId: String) {
     val storageReference = storageRef(plantId)
     try {
       storageReference.delete().await()
     } catch (e: Exception) {
-      Log.w("Cloud Storage", "Image not found or already deleted: ${e.message}")
+      Log.e("Cloud Storage", "Image not found or already deleted: ${e.message}")
     }
   }
 

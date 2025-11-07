@@ -332,13 +332,17 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   }
 
   /*--------------------- REPOSITORY CLOUD STORAGE TESTS -----------------*/
+  /**
+   * Tests that the image stored locally is stored in Cloud Storage when the plant is saved to
+   * garden and that the image can be retrieved from Cloud Storage.
+   */
   @Test
   fun loadLocalImage_andThenSaveToGardenWithLogoImageWorks() = runTest {
     // Give the Android context
     val context = ApplicationProvider.getApplicationContext<Context>()
 
     // Take the image app_loo for the test
-    val inputStream = context.resources.openRawResource(R.drawable.app_logo)
+    val inputStream = context.resources.openRawResource(R.drawable.app_logo_for_test)
     val bitmap = BitmapFactory.decodeStream(inputStream)
     inputStream.close()
 
@@ -363,13 +367,14 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     composeTestRule.onNodeWithContentDescription("Plant image").assertExists()
   }
 
+  /** Tests that the image stored in Cloud Storage can be deleted from it. */
   @Test
   fun loadLocalImage_andThenSaveToGardenWithLogoImageThenDeleteWorks() = runTest {
     // Give the Android context
     val context = ApplicationProvider.getApplicationContext<Context>()
 
     // Take the image app_loo for the test
-    val inputStream = context.resources.openRawResource(R.drawable.app_logo)
+    val inputStream = context.resources.openRawResource(R.drawable.app_logo_for_test)
     val bitmap = BitmapFactory.decodeStream(inputStream)
     inputStream.close()
 
