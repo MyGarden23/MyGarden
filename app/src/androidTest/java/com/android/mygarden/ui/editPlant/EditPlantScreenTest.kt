@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.ui.navigation.Screen
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,7 @@ class EditPlantScreenTest {
    *
    * @param vm The [FakeEditPlantViewModel] to use for the screen. Defaults to a new instance.
    * @param ownedPlantId The ID of the plant being edited. Defaults to "owned-123".
+   * @param fromRoute The route from which the screen was launched. Defaults to "garden".
    * @param onSavedCalled A mutable list to track if the `onSaved` callback was invoked.
    * @param onDeletedCalled A mutable list to track if the `onDeleted` callback was invoked.
    * @param goBackCalled A mutable list to track if the `goBack` callback was invoked.
@@ -35,16 +37,28 @@ class EditPlantScreenTest {
   private fun setContentWith(
       vm: FakeEditPlantViewModel = FakeEditPlantViewModel(),
       ownedPlantId: String = "owned-123",
+      fromRoute: String? = Screen.Garden.route,
       onSavedCalled: MutableList<Boolean> = mutableListOf(),
       onDeletedCalled: MutableList<Boolean> = mutableListOf(),
       goBackCalled: MutableList<Boolean> = mutableListOf(),
   ) {
+
     composeRule.setContent {
+      // This is to manually modify the stack of the navHost so that I can choose the "from" Screen
+      val args = android.os.Bundle().apply { putString("from", fromRoute) }
+
+      val onDeletedCallback =
+          if (args.getString("from") != Screen.PlantInfo.route) {
+            { onDeletedCalled += true }
+          } else {
+            null
+          }
+
       EditPlantScreen(
           ownedPlantId = ownedPlantId,
           editPlantViewModel = vm,
           onSaved = { onSavedCalled += true },
-          onDeleted = { onDeletedCalled += true },
+          onDeleted = onDeletedCallback,
           goBack = { goBackCalled += true })
     }
   }
@@ -294,6 +308,20 @@ class EditPlantScreenTest {
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertDoesNotExist()
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON).assertDoesNotExist()
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
+  }
+
+  /** Test if the delete button does not exist if we come from the Plant Info Screen */
+  @Test
+  fun deleteButton_isHidden_whenFromPlantInfo() {
+    setContentWith(fromRoute = Screen.PlantInfo.route)
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertDoesNotExist()
+  }
+
+  /** Test if the delete button exists if we come from the Garden Screen */
+  @Test
+  fun deleteButton_isVisible_whenFromGarden() {
+    setContentWith(fromRoute = Screen.Garden.route)
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
   }
 }
 
