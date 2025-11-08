@@ -1,14 +1,23 @@
 package com.android.mygarden
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -22,6 +31,7 @@ import com.android.mygarden.ui.popup.PopupViewModel
 import com.android.mygarden.ui.popup.WaterPlantPopup
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.contracts.contract
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,6 +66,11 @@ fun MyGardenApp() {
     // Collect all the plants that became thirsty from the view model to display the popup
     popupVM.thirstyPlants.collect { ownedPlant -> currentThirstyPlant = ownedPlant }
   }
+
+  // Ask for notification permission
+  /* For Sprint 5, assume that the user will accept to receive notifications.
+  Permission handling will be done in a separate task in Sprint 6 */
+  AskForNotificationsPermission()
 
   // Determine where to start: if the user is logged in, skip Sign-In
   // For end-to-end tests, we can force starting on camera
@@ -152,3 +167,41 @@ private fun routeToPage(route: String): Page? =
       Screen.Garden.route -> Page.Garden
       else -> null
     }
+
+/**
+ * Ask the user for notification permission if the API is greater of equal to 33.
+ *
+ * Note: this function is really basic and assumes that the user allows the app to send
+ * notifications. The complete permission workflow will be implemented in the future.
+ */
+@Composable
+private fun AskForNotificationsPermission() {
+  // Notification permission request if API is >= 33
+  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+  val context = LocalContext.current
+  val notificationPermission = remember { mutableStateOf(hasNotificationsPermission(context)) }
+
+  val notificationLaucher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.RequestPermission(),
+          onResult = { notificationPermission.value = it })
+
+  // Side-effect: only trigger once, not on every recomposition
+  LaunchedEffect(Unit) {
+    if (!hasNotificationsPermission(context)) {
+      notificationLaucher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+  }
+}
+
+/**
+ * Returns true or false depending on whether the user has granted notifications permission
+ *
+ * @param context the context used to access permission state
+ * @return true if the user has granted the app notifications permission, false otherwise
+ */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private fun hasNotificationsPermission(context: Context): Boolean {
+  return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+      PackageManager.PERMISSION_GRANTED
+}

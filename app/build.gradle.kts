@@ -220,8 +220,8 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
-    // Add the dependency for the Cloud Storage for Firestore
     implementation(libs.firebase.storage)
+    implementation(libs.firebase.messaging)
 
 
     //Credential Manager
@@ -247,6 +247,10 @@ dependencies {
     // --------- Firebase AI Logic (Gemini/Imagen) ---------
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
     implementation("com.google.firebase:firebase-ai")
+
+    // --------- Push Notifications ---------
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
 
     implementation(libs.kotlinx.coroutines.play.services)
 }
