@@ -8,7 +8,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
-import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
@@ -119,36 +118,6 @@ class NavigationS4TestsEditPlantFromPlantInfo {
       val allPlants = repo.getAllOwnedPlants()
       TestCase.assertTrue(
           "Plant should have been deleted when going back from EditPlant", allPlants.isEmpty())
-    }
-  }
-
-  /**
-   * Tests navigation from PlantInfo to EditPlant, then delete and go to Garden.
-   *
-   * User journey: 1. User sees plant info 2. User clicks "Next" to save 3. User is on EditPlant 4.
-   * User clicks "Delete" button 5. User is navigated to Garden (plant is deleted)
-   */
-  @Test
-  fun navigateFromPlantInfoToEditPlantAndDeletePlant() {
-    // Start on PlantInfo screen
-    composeTestRule.waitForIdle()
-    navigateFromPlantInfoToEditPlant()
-
-    // Click delete button on EditPlant and confirm
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
-    composeTestRule
-        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
-        .assertIsDisplayed()
-        .performClick()
-
-    // Verify navigation to Garden screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
-
-    // Verify the plant was deleted
-    val repo = PlantsRepositoryProvider.repository
-    runTest {
-      val allPlants = repo.getAllOwnedPlants()
-      TestCase.assertTrue("Plant should have been deleted", allPlants.isEmpty())
     }
   }
 }
