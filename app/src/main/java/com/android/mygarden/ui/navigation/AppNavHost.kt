@@ -177,7 +177,12 @@ fun AppNavHost(
               ownedPlantId = ownedPlantId,
               editPlantViewModel = vm,
               onSaved = { navigationActions.navTo(Screen.Garden) },
-              onDeleted = { navigationActions.navTo(Screen.Garden) },
+              onDeleted =
+                  if (entry.arguments?.getString(FROM_KEY) != Screen.PlantInfo.route) {
+                    { navigationActions.navTo(Screen.Garden) }
+                  } else {
+                    null
+                  },
               goBack = {
                 if (entry.arguments?.getString(FROM_KEY) == Screen.PlantInfo.route) {
                   // Need to delete manually due to our implementation of Screen.PlantInfo.route (we
