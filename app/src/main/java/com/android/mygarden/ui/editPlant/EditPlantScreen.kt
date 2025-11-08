@@ -53,7 +53,8 @@ object EditPlantScreenTestTags {
  * @param ownedPlantId ID of the plant to edit.
  * @param editPlantViewModel ViewModel managing UI state and actions.
  * @param onSaved Called after saving the plant.
- * @param onDeleted Called after deleting the plant.
+ * @param onDeleted Called after deleting the plant. Null if the button does nothing and does not
+ *   appreas
  * @param goBack Called when navigating back.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,7 +63,7 @@ fun EditPlantScreen(
     ownedPlantId: String,
     editPlantViewModel: EditPlantViewModelInterface = viewModel<EditPlantViewModel>(),
     onSaved: () -> Unit = {},
-    onDeleted: () -> Unit = {},
+    onDeleted: (() -> Unit)? = null,
     goBack: () -> Unit = {},
 ) {
   // Load the plant when the id changes
@@ -270,27 +271,29 @@ fun EditPlantScreen(
                   }
 
               // Delete
-              TextButton(
-                  onClick = { showDeletePopup = true },
-                  modifier =
-                      Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.PLANT_DELETE)) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
-                  }
+              if (onDeleted != null) {
+                TextButton(
+                    onClick = { showDeletePopup = true },
+                    modifier =
+                        Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.PLANT_DELETE)) {
+                      Icon(
+                          Icons.Filled.Delete,
+                          contentDescription = null,
+                          tint = MaterialTheme.colorScheme.error)
+                      Spacer(Modifier.width(8.dp))
+                      Text("Delete", color = MaterialTheme.colorScheme.error)
+                    }
 
-              // Show deletion popup when the according button is pressed
-              if (showDeletePopup) {
-                DeletePlantPopup(
-                    onDelete = {
-                      editPlantViewModel.deletePlant(ownedPlantId)
-                      showDeletePopup = false
-                      onDeleted()
-                    },
-                    onCancel = { showDeletePopup = false })
+                // Show deletion popup when the according button is pressed
+                if (showDeletePopup) {
+                  DeletePlantPopup(
+                      onDelete = {
+                        editPlantViewModel.deletePlant(ownedPlantId)
+                        showDeletePopup = false
+                        onDeleted.invoke()
+                      },
+                      onCancel = { showDeletePopup = false })
+                }
               }
             }
       }
