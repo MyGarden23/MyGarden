@@ -54,7 +54,7 @@ object EditPlantScreenTestTags {
  * @param editPlantViewModel ViewModel managing UI state and actions.
  * @param onSaved Called after saving the plant.
  * @param onDeleted Called after deleting the plant. Null if the button does nothing and does not
- *   appreas
+ *   appears
  * @param goBack Called when navigating back.
  */
 @OptIn(ExperimentalMaterial3Api::class)
