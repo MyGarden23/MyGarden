@@ -110,6 +110,7 @@ private val PROFILE_ROW_HORIZONTAL_PADDING = 30.dp
 private val EMPTY_LIST_MESSAGE_PADDING = 40.dp
 private val PLANT_CHARACTERISTICS_COL_HORIZONTAL_PADDING = 10.dp
 private val PLANT_CARD_INNER_ROW_PADDING = 12.dp
+private val LOGOUT_BUTTON_PADDING = 10.dp
 
 // Other used dimensions
 private val PLANT_LIST_ITEM_SPACING = 10.dp

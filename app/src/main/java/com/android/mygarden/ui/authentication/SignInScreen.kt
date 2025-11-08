@@ -1,10 +1,8 @@
 package com.android.mygarden.ui.authentication
 
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
@@ -99,16 +97,17 @@ fun SignInScreen(
               .background(MaterialTheme.colorScheme.background)
               .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_BACKGROUND)) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(top = 120.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
           Image(
               painter = painterResource(id = logoRes),
               contentDescription = context.getString(R.string.description_logo),
-              contentScale = ContentScale.Crop,
+              contentScale = ContentScale.Fit,
               modifier =
-                  Modifier.fillMaxWidth(0.9f)
+                  Modifier.fillMaxWidth(0.6f)
                       .aspectRatio(1f)
+                      .heightIn(max = 180.dp)
                       .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
                       .semantics { this.logoRes = resName })
 
@@ -123,7 +122,6 @@ fun SignInScreen(
                 modifier =
                     Modifier.height(60.dp)
                         .fillMaxWidth(0.75f)
-                        .border(BorderStroke(2.dp, Color.Gray), RoundedCornerShape(50))
                         .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON),
                 shape = RoundedCornerShape(50),
                 colors =
