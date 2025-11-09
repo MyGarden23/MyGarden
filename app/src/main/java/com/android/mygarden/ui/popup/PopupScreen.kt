@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,11 +35,6 @@ object PopupScreenTestTags {
   const val CONFIRM_BUTTON = "ConfirmButton"
 }
 
-const val POPUP_DISMISS_BUTTON_CONTENT_DESCRIPTION = "Quit the popup"
-const val POPUP_CONFIRM_BUTTON_TEXT = "Go to Garden"
-
-fun getPopupTitle(plantName: String): String = "Your $plantName is thirsty!"
-
 /**
  * Popup that is on screen whenever a plant passes in state NEED_WATER
  *
@@ -48,6 +44,8 @@ fun getPopupTitle(plantName: String): String = "Your $plantName is thirsty!"
  */
 @Composable
 fun WaterPlantPopup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+  val context = LocalContext.current
+
   Dialog(
       onDismissRequest = onDismiss,
   ) {
@@ -64,10 +62,11 @@ fun WaterPlantPopup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> U
           modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             // A row to have the red cross button only on top and the rest below
             Row(modifier = Modifier.fillMaxWidth().padding(6.dp)) { QuitPopup(onClick = onDismiss) }
-            PopupTitle(text = getPopupTitle(plantName))
+            PopupTitle(text = context.getString(R.string.pop_up_title, plantName))
             // Spacer puts the confirm button at the end of the popup
             Spacer(Modifier.weight(1f))
-            PopupButton(onClick = onConfirm, text = POPUP_CONFIRM_BUTTON_TEXT)
+            PopupButton(
+                onClick = onConfirm, text = context.getString(R.string.popup_confirm_button_text))
           }
     }
   }
@@ -114,10 +113,11 @@ fun PopupButton(onClick: () -> Unit, text: String) {
  */
 @Composable
 fun QuitPopup(onClick: () -> Unit) {
+  val context = LocalContext.current
   IconButton(modifier = Modifier.testTag(PopupScreenTestTags.DISMISS_BUTTON), onClick = onClick) {
     Icon(
         painter = painterResource(R.drawable.x_circle),
-        contentDescription = POPUP_DISMISS_BUTTON_CONTENT_DESCRIPTION,
+        contentDescription = context.getString(R.string.popup_dismiss_button_content_description),
         tint = MaterialTheme.colorScheme.error)
   }
 }

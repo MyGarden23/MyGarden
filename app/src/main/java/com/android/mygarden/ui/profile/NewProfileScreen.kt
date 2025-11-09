@@ -1,7 +1,9 @@
 package com.android.mygarden.ui.profile
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.mygarden.R
 
 /**
  * Screen for editing an existing user profile.
@@ -20,9 +22,10 @@ fun NewProfileScreen(
     onSavePressed: () -> Unit = {},
     onAvatarClick: () -> Unit = {},
 ) {
+  val context = LocalContext.current
   ProfileScreenBase(
       profileViewModel = profileViewModel,
       onSavePressed = onSavePressed,
       onAvatarClick = onAvatarClick,
-      title = "New Profile")
+      title = context.getString(R.string.new_profile_screen_title))
 }

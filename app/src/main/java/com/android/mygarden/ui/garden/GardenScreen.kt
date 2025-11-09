@@ -127,9 +127,6 @@ private val AVATAR_SIZE = 40.dp
 private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
 
-private fun getOwnedPlantImageDescription(ownedPlant: OwnedPlant): String =
-    "Image of a ${ownedPlant.plant.name}"
-
 /**
  * The screen of the garden with some user profile infos and the list of plants owned by the user.
  *
@@ -217,6 +214,7 @@ fun GardenScreen(
  */
 @Composable
 fun ProfileRow(onEditProfile: () -> Unit, modifier: Modifier = Modifier, uiState: GardenUIState) {
+  val context = LocalContext.current
   Row(
       modifier = modifier.fillMaxWidth().padding(horizontal = PROFILE_ROW_HORIZONTAL_PADDING),
       verticalAlignment = Alignment.CenterVertically) {
@@ -229,7 +227,8 @@ fun ProfileRow(onEditProfile: () -> Unit, modifier: Modifier = Modifier, uiState
                     .testTag(GardenScreenTestTags.USER_PROFILE_PICTURE)) {
               Image(
                   painter = painterResource(uiState.userAvatar.resId),
-                  contentDescription = "Avatar ${uiState.userAvatar.name}",
+                  contentDescription =
+                      context.getString(R.string.avatar_description, uiState.userAvatar.name),
                   modifier = modifier.fillMaxSize())
             }
         Spacer(modifier = modifier.weight(1f))
@@ -263,6 +262,7 @@ fun ProfileRow(onEditProfile: () -> Unit, modifier: Modifier = Modifier, uiState
  */
 @Composable
 fun AddPlantFloatingButton(onAddPlant: () -> Unit, modifier: Modifier = Modifier) {
+  val context = LocalContext.current
   ExtendedFloatingActionButton(
       modifier = modifier.testTag(GardenScreenTestTags.ADD_PLANT_FAB), onClick = onAddPlant) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -270,7 +270,7 @@ fun AddPlantFloatingButton(onAddPlant: () -> Unit, modifier: Modifier = Modifier
               painter = painterResource(R.drawable.tree_icon),
               contentDescription = null,
               tint = MaterialTheme.colorScheme.primary)
-          Text(text = stringResource(R.string.add_plant_fab_text))
+          Text(text = context.getString(R.string.add_plant_fab_text))
         }
       }
 }
@@ -290,6 +290,7 @@ fun PlantCard(
     onClick: () -> Unit,
     viewModel: GardenViewModel
 ) {
+  val context = LocalContext.current
   // The color palette of the card depending on the health status of the plant
   val colorPalette =
       colorsFromHealthStatus(
@@ -329,10 +330,10 @@ fun PlantCard(
               Box {
                 AsyncImage(
                     model =
-                        ImageRequest.Builder(LocalContext.current)
-                            .data(ownedPlant.plant.image ?: "")
-                            .build(),
-                    contentDescription = getOwnedPlantImageDescription(ownedPlant),
+                        ImageRequest.Builder(context).data(ownedPlant.plant.image ?: "").build(),
+                    contentDescription =
+                        context.getString(
+                            R.string.owned_plant_image_description, ownedPlant.plant.name),
                     modifier =
                         modifier
                             .fillMaxHeight()
@@ -418,6 +419,7 @@ fun PlantCard(
  */
 @Composable
 fun WaterButton(modifier: Modifier = Modifier, color: Color, onButtonPressed: () -> Unit) {
+  val context = LocalContext.current
   Box(
       modifier =
           modifier
@@ -429,7 +431,7 @@ fun WaterButton(modifier: Modifier = Modifier, color: Color, onButtonPressed: ()
       contentAlignment = Alignment.Center) {
         Icon(
             Icons.Default.WaterDrop,
-            contentDescription = stringResource(R.string.water_button_icon_description),
+            contentDescription = context.getString(R.string.water_button_icon_description),
             tint = color,
             modifier = Modifier.size(WATER_BUTTON_DROP_ICON_SIZE))
       }

@@ -2,7 +2,9 @@ package com.android.mygarden.ui.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.mygarden.R
 
 /**
  * Screen for editing an existing user profile.
@@ -23,11 +25,12 @@ fun EditProfileScreen(
     onSavePressed: () -> Unit = {},
     onAvatarClick: () -> Unit = {},
 ) {
+  val context = LocalContext.current
   LaunchedEffect(Unit) { profileViewModel.initialize() }
   ProfileScreenBase(
       profileViewModel = profileViewModel,
       onSavePressed = onSavePressed,
       onAvatarClick = onAvatarClick,
       onNavBackIconClick = onBackPressed,
-      title = "Edit Profile")
+      title = context.getString(R.string.edit_profile_screen_title))
 }
