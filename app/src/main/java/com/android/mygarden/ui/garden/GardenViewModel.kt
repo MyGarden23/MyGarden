@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.garden
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.plant.OwnedPlant
@@ -44,13 +43,19 @@ class GardenViewModel(
   private val _uiState = MutableStateFlow(GardenUIState())
   val uiState: StateFlow<GardenUIState> = _uiState.asStateFlow()
 
+  /**
+   * The value of the list now changes everytime it receives an update from the plants repository in
+   * order to display the correct list of owned plants of the user
+   */
   init {
     refreshUIState()
+    viewModelScope.launch {
+      plantsRepo.plantsFlow.collect { newList -> _uiState.value = _uiState.value.copy(newList) }
+    }
   }
 
   /** Refresh the UI state by fetching all the owned plants and user information. */
   fun refreshUIState() {
-    getAllPlants()
     fetchProfileInfos()
   }
 
@@ -77,22 +82,6 @@ class GardenViewModel(
   fun waterPlant(ownedPlant: OwnedPlant) {
     viewModelScope.launch {
       plantsRepo.waterPlant(ownedPlant.id, Timestamp(System.currentTimeMillis()))
-      // Refresh UI state
-      // TODO: update when the health status update is implemented
-      getAllPlants()
-    }
-  }
-
-  /** Fetches all the plants from the [plantsRepo] or set an error message if the fetch failed. */
-  private fun getAllPlants() {
-    viewModelScope.launch {
-      try {
-        val plants = plantsRepo.getAllOwnedPlants()
-        _uiState.value = _uiState.value.copy(plants = plants)
-      } catch (e: Exception) {
-        Log.e("GardenViewModel", "Owned plants couldn't be retrieved from repository", e)
-        setErrorMsg("getAllPlants failed : Owned plants couldn't be retrieved from repository")
-      }
     }
   }
 
