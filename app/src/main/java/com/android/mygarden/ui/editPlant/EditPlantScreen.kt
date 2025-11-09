@@ -286,7 +286,9 @@ fun EditPlantScreen(
                           contentDescription = null,
                           tint = MaterialTheme.colorScheme.error)
                       Spacer(Modifier.width(8.dp))
-                      Text(context.getString(R.string.delete), color = MaterialTheme.colorScheme.error)
+                      Text(
+                          context.getString(R.string.delete),
+                          color = MaterialTheme.colorScheme.error)
                     }
 
                 // Show deletion popup when the according button is pressed
