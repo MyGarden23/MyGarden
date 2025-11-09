@@ -162,15 +162,10 @@ class GardenViewModelTests {
     val plantB = Plant("Banana", null, "Musa", "A fruit", PlantHealthStatus.HEALTHY, "Good", 3)
 
     // Add plants in non-alphabetical order
-    val ownedA =
-        plantsRepo.saveToGarden(
-            plantA, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
-    val ownedC =
-        plantsRepo.saveToGarden(
-            plantC, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
-    val ownedB =
-        plantsRepo.saveToGarden(
-            plantB, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+
+    plantsRepo.saveToGarden(plantA, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+    plantsRepo.saveToGarden(plantC, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+    plantsRepo.saveToGarden(plantB, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
     advanceUntilIdle()
 
     vm.refreshUIState()
