@@ -3,6 +3,7 @@ package com.android.mygarden.ui.garden
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.plant.OwnedPlant
+import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.ProfileRepository
@@ -18,6 +19,9 @@ import kotlinx.coroutines.launch
  * Represents the UI state of the garden screen.
  *
  * @property plants the list of plants owned by the current user : empty by default
+ * @property filteredAndSortedPlants the list of plants after applying filters and sorting
+ * @property currentSortOption the currently selected sorting option
+ * @property currentFilterOption the currently selected filtering option
  * @property errorMsg a potential error message to be displayed if one of the actions of the view
  *   model with the repository doesn't work
  * @property userName the name of the user of the app that is displayed
@@ -25,6 +29,9 @@ import kotlinx.coroutines.launch
  */
 data class GardenUIState(
     val plants: List<OwnedPlant> = emptyList(),
+    val filteredAndSortedPlants: List<OwnedPlant> = emptyList(),
+    val currentSortOption: SortOption = SortOption.PLANT_NAME,
+    val currentFilterOption: FilterOption = FilterOption.ALL,
     val errorMsg: String? = null,
     val userName: String = "",
     val userAvatar: Avatar = Avatar.A1
@@ -38,7 +45,7 @@ data class GardenUIState(
  */
 class GardenViewModel(
     private val plantsRepo: PlantsRepository = PlantsRepositoryProvider.repository,
-    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository
+    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(GardenUIState())
   val uiState: StateFlow<GardenUIState> = _uiState.asStateFlow()
@@ -82,8 +89,95 @@ class GardenViewModel(
   fun waterPlant(ownedPlant: OwnedPlant) {
     viewModelScope.launch {
       plantsRepo.waterPlant(ownedPlant.id, Timestamp(System.currentTimeMillis()))
+
     }
   }
+
+  /**
+   * Sets the current sort option and re-applies filters and sorting.
+   *
+   * @param option the new sorting option to apply
+   */
+  fun setSortOption(option: SortOption) {
+    _uiState.value = _uiState.value.copy(currentSortOption = option)
+    applyFiltersAndSorting()
+  }
+
+  /**
+   * Sets the current filter option and re-applies filters and sorting.
+   *
+   * @param option the new filtering option to apply
+   */
+  fun setFilterOption(option: FilterOption) {
+    _uiState.value = _uiState.value.copy(currentFilterOption = option)
+    applyFiltersAndSorting()
+  }
+
+  /**
+   * Applies the current filter and sort options to the plants list.
+   *
+   * This function chains filtering and sorting operations to produce the final list that should be
+   * displayed in the UI.
+   */
+  private fun applyFiltersAndSorting() {
+    val currentState = _uiState.value
+    val filtered = filterPlants(currentState.plants, currentState.currentFilterOption)
+    val sorted = sortPlants(filtered, currentState.currentSortOption)
+    _uiState.value = _uiState.value.copy(filteredAndSortedPlants = sorted)
+  }
+
+  /**
+   * Sorts a list of plants according to the specified sorting option.
+   *
+   * @param plants the list of plants to sort
+   * @param option the sorting option to apply
+   * @return the sorted list of plants
+   */
+  private fun sortPlants(plants: List<OwnedPlant>, option: SortOption): List<OwnedPlant> {
+    return when (option) {
+      SortOption.PLANT_NAME -> plants.sortedBy { it.plant.name.lowercase() }
+      SortOption.LATIN_NAME -> plants.sortedBy { it.plant.latinName.lowercase() }
+      SortOption.LAST_WATERED_ASC -> plants.sortedBy { it.lastWatered.time }
+      SortOption.LAST_WATERED_DESC -> plants.sortedByDescending { it.lastWatered.time }
+    }
+  }
+
+  /**
+   * Filters a list of plants according to the specified filtering option.
+   *
+   * @param plants the list of plants to filter
+   * @param option the filtering option to apply
+   * @return the filtered list of plants
+   */
+  private fun filterPlants(plants: List<OwnedPlant>, option: FilterOption): List<OwnedPlant> {
+    return when (option) {
+      // No filtering - return all plants
+      FilterOption.ALL -> plants
+      // Keep only overwatered plants
+      FilterOption.OVERWATERED_ONLY ->
+          plants.filter {
+            it.plant.healthStatus == PlantHealthStatus.OVERWATERED ||
+                it.plant.healthStatus == PlantHealthStatus.SEVERELY_OVERWATERED
+          }
+      // Keep only dry plants that need water
+      FilterOption.DRY_PLANTS ->
+          plants.filter {
+            it.plant.healthStatus == PlantHealthStatus.NEEDS_WATER ||
+                it.plant.healthStatus == PlantHealthStatus.SLIGHTLY_DRY ||
+                it.plant.healthStatus == PlantHealthStatus.SEVERELY_DRY
+          }
+      // Keep only critically unhealthy plants (severely dry or severely overwatered)
+      FilterOption.CRITICAL_ONLY ->
+          plants.filter {
+            it.plant.healthStatus == PlantHealthStatus.SEVERELY_DRY ||
+                it.plant.healthStatus == PlantHealthStatus.SEVERELY_OVERWATERED
+          }
+      // Keep only healthy plants
+      FilterOption.HEALTHY_ONLY ->
+          plants.filter { it.plant.healthStatus == PlantHealthStatus.HEALTHY }
+    }
+  }
+
 
   /**
    * Fetches all needed user information from the [profileRepo] or set an error message if the fetch

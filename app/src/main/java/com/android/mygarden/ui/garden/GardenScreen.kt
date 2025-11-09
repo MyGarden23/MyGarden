@@ -75,6 +75,7 @@ object GardenScreenTestTags {
   const val EDIT_PROFILE_BUTTON = "EditProfileButton"
   const val GARDEN_LIST = "GardenList"
   const val EMPTY_GARDEN_MSG = "EmptyGardenMsg"
+  const val EMPTY_FILTER_MSG = "EmptyFilterMsg"
   const val ADD_PLANT_FAB = "AddPlantFAB"
 
   // Test tags that are Plant Card specific
@@ -165,6 +166,7 @@ fun GardenScreen(
   val context = LocalContext.current
   val uiState by gardenViewModel.uiState.collectAsState()
   val plants = uiState.plants
+  val filteredAndSortedPlants = uiState.filteredAndSortedPlants
 
   // Fetch correct owned plants list at each recomposition of the screen
   LaunchedEffect(Unit) { gardenViewModel.refreshUIState() }
@@ -210,7 +212,19 @@ fun GardenScreen(
           // Profile row with user profile picture, username and a button to edit the profile
           ProfileRow(onEditProfile, modifier, uiState)
           Spacer(modifier = modifier.height(16.dp))
+
+          // Sort and filter bar - only show if there are plants in the garden
           if (plants.isNotEmpty()) {
+            SortFilterBar(
+                currentSort = uiState.currentSortOption,
+                currentFilter = uiState.currentFilterOption,
+                onSortChange = { gardenViewModel.setSortOption(it) },
+                onFilterChange = { gardenViewModel.setFilterOption(it) },
+                modifier = modifier)
+            Spacer(modifier = modifier.height(12.dp))
+          }
+
+          if (filteredAndSortedPlants.isNotEmpty()) {
             // The full list of owned plant
             LazyColumn(
                 modifier =
@@ -219,9 +233,12 @@ fun GardenScreen(
                         .padding(horizontal = PLANT_ITEM_HORIZONTAL_PADDING)
                         .testTag(GardenScreenTestTags.GARDEN_LIST),
                 verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING)) {
-                  items(plants.size) { index ->
+                  items(filteredAndSortedPlants.size) { index ->
                     PlantCard(
-                        plants[index], modifier, { onPlantClick(plants[index]) }, gardenViewModel)
+                        filteredAndSortedPlants[index],
+                        modifier,
+                        { onPlantClick(filteredAndSortedPlants[index]) },
+                        gardenViewModel)
                   }
                 }
           } else {
@@ -231,9 +248,14 @@ fun GardenScreen(
                     modifier
                         .fillMaxSize()
                         .padding(EMPTY_LIST_MESSAGE_PADDING)
-                        .testTag(GardenScreenTestTags.EMPTY_GARDEN_MSG),
+                        .testTag(
+                            if (plants.isEmpty()) GardenScreenTestTags.EMPTY_GARDEN_MSG
+                            else GardenScreenTestTags.EMPTY_FILTER_MSG),
                 contentAlignment = Alignment.Center) {
-                  Text(text = EMPTY_GARDEN_MESSAGE_TEXT)
+                  Text(
+                      text =
+                          if (plants.isEmpty()) stringResource(R.string.empty_garden_message)
+                          else stringResource(R.string.empty_filter_message))
                 }
           }
         }
