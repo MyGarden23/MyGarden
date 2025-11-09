@@ -152,4 +152,242 @@ class GardenViewModelTests {
 
     repositoryScope.cancel()
   }
+
+  /** Tests that sorting by plant name works correctly */
+  @Test
+  fun sortingByPlantNameWorks() = runTest {
+    // Create plants with different names
+    val plantA = Plant("Apple", null, "Malus", "A fruit", PlantHealthStatus.HEALTHY, "Good", 3)
+    val plantC = Plant("Cherry", null, "Prunus", "A fruit", PlantHealthStatus.HEALTHY, "Good", 3)
+    val plantB = Plant("Banana", null, "Musa", "A fruit", PlantHealthStatus.HEALTHY, "Good", 3)
+
+    // Add plants in non-alphabetical order
+    val ownedA =
+        plantsRepo.saveToGarden(
+            plantA, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+    val ownedC =
+        plantsRepo.saveToGarden(
+            plantC, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+    val ownedB =
+        plantsRepo.saveToGarden(
+            plantB, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+    advanceUntilIdle()
+
+    vm.refreshUIState()
+    advanceUntilIdle()
+
+    // Set sort option to plant name (default)
+    vm.setSortOption(SortOption.PLANT_NAME)
+    advanceUntilIdle()
+
+    // Verify plants are sorted alphabetically by name
+    val sortedPlants = vm.uiState.value.filteredAndSortedPlants
+    assertEquals(3, sortedPlants.size)
+    assertEquals("Apple", sortedPlants[0].plant.name)
+    assertEquals("Banana", sortedPlants[1].plant.name)
+    assertEquals("Cherry", sortedPlants[2].plant.name)
+  }
+
+  /** Tests that filtering by dry plants works correctly */
+  @Test
+  fun filteringByDryPlantsWorks() = runTest {
+    // Create plants with different health statuses
+    val healthyPlant = Plant("Healthy", null, "H", "Healthy", PlantHealthStatus.HEALTHY, "Good", 2)
+    val dryPlant =
+        Plant("Dry", null, "D", "Needs water", PlantHealthStatus.NEEDS_WATER, "Thirsty", 2)
+    val severelyDryPlant =
+        Plant("VeryDry", null, "VD", "Very dry", PlantHealthStatus.SEVERELY_DRY, "Very thirsty", 2)
+    val overwateredPlant =
+        Plant("Wet", null, "W", "Too much", PlantHealthStatus.OVERWATERED, "Wet", 7)
+
+    // Add plants
+    plantsRepo.saveToGarden(
+        healthyPlant, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+    plantsRepo.saveToGarden(
+        dryPlant,
+        plantsRepo.getNewId(),
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)))
+    plantsRepo.saveToGarden(
+        severelyDryPlant,
+        plantsRepo.getNewId(),
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(5)))
+    plantsRepo.saveToGarden(
+        overwateredPlant,
+        plantsRepo.getNewId(),
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)))
+    advanceUntilIdle()
+
+    vm.refreshUIState()
+    advanceUntilIdle()
+
+    // Apply dry plants filter
+    vm.setFilterOption(FilterOption.DRY_PLANTS)
+    advanceUntilIdle()
+
+    // Verify only dry plants are shown
+    val filteredPlants = vm.uiState.value.filteredAndSortedPlants
+    assertEquals(2, filteredPlants.size)
+    assertTrue(filteredPlants.any { it.plant.name == "Dry" })
+    assertTrue(filteredPlants.any { it.plant.name == "VeryDry" })
+  }
+
+  /** Tests that filtering by healthy plants works correctly */
+  @Test
+  fun filteringByHealthyPlantsWorks() = runTest {
+    // Create plants with different health statuses
+    val healthyPlant1 =
+        Plant("Healthy1", null, "H1", "Healthy", PlantHealthStatus.HEALTHY, "Good", 5)
+    val healthyPlant2 =
+        Plant("Healthy2", null, "H2", "Healthy", PlantHealthStatus.HEALTHY, "Good", 5)
+    val dryPlant =
+        Plant("Dry", null, "D", "Needs water", PlantHealthStatus.NEEDS_WATER, "Thirsty", 2)
+
+    // Add plants
+    plantsRepo.saveToGarden(
+        healthyPlant1, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+    plantsRepo.saveToGarden(
+        healthyPlant2, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+    plantsRepo.saveToGarden(
+        dryPlant,
+        plantsRepo.getNewId(),
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)))
+    advanceUntilIdle()
+
+    vm.refreshUIState()
+    advanceUntilIdle()
+
+    // Apply healthy plants filter
+    vm.setFilterOption(FilterOption.HEALTHY_ONLY)
+    advanceUntilIdle()
+
+    // Verify only healthy plants are shown
+    val filteredPlants = vm.uiState.value.filteredAndSortedPlants
+    assertEquals(2, filteredPlants.size)
+    assertTrue(filteredPlants.all { it.plant.healthStatus == PlantHealthStatus.HEALTHY })
+  }
+
+  @Test
+  fun sortByLatinNameWorks() = runTest {
+    // Sort alphabetically by latin name
+    plantsRepo.saveToGarden(
+        Plant("A", null, "Zebra", "", PlantHealthStatus.HEALTHY, "", 2), "1", Timestamp(0))
+    plantsRepo.saveToGarden(
+        Plant("B", null, "Alpha", "", PlantHealthStatus.HEALTHY, "", 2), "2", Timestamp(0))
+    advanceUntilIdle()
+    vm.refreshUIState()
+    vm.setSortOption(SortOption.LATIN_NAME)
+    advanceUntilIdle()
+
+    val sorted = vm.uiState.value.filteredAndSortedPlants
+    assertEquals("Alpha", sorted[0].plant.latinName)
+    assertEquals("Zebra", sorted[1].plant.latinName)
+  }
+
+  @Test
+  fun sortByLastWateredAscWorks() = runTest {
+    // Oldest watered first
+    plantsRepo.saveToGarden(
+        Plant("New", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "1", Timestamp(100))
+    plantsRepo.saveToGarden(
+        Plant("Old", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "2", Timestamp(50))
+    advanceUntilIdle()
+    vm.refreshUIState()
+    vm.setSortOption(SortOption.LAST_WATERED_ASC)
+    advanceUntilIdle()
+
+    val sorted = vm.uiState.value.filteredAndSortedPlants
+    assertEquals("Old", sorted[0].plant.name)
+    assertEquals("New", sorted[1].plant.name)
+  }
+
+  @Test
+  fun sortByLastWateredDescWorks() = runTest {
+    // Most recent watered first
+    plantsRepo.saveToGarden(
+        Plant("New", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "1", Timestamp(100))
+    plantsRepo.saveToGarden(
+        Plant("Old", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "2", Timestamp(50))
+    advanceUntilIdle()
+    vm.refreshUIState()
+    vm.setSortOption(SortOption.LAST_WATERED_DESC)
+    advanceUntilIdle()
+
+    val sorted = vm.uiState.value.filteredAndSortedPlants
+    assertEquals("New", sorted[0].plant.name)
+    assertEquals("Old", sorted[1].plant.name)
+  }
+
+  @Test
+  fun filterOverwateredWorks() = runTest {
+    // Show only overwatered plants - use 7 day frequency for more reliable timing
+    plantsRepo.saveToGarden(
+        Plant("Wet", null, "", "", PlantHealthStatus.OVERWATERED, "", 7),
+        "1",
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)))
+    plantsRepo.saveToGarden(
+        Plant("VeryWet", null, "", "", PlantHealthStatus.SEVERELY_OVERWATERED, "", 15),
+        "2",
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)))
+
+    plantsRepo.saveToGarden(
+        Plant("Ok", null, "", "", PlantHealthStatus.HEALTHY, "", 2),
+        "3",
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)))
+
+    advanceUntilIdle()
+    vm.refreshUIState()
+    advanceUntilIdle()
+
+    vm.setFilterOption(FilterOption.OVERWATERED_ONLY)
+    advanceUntilIdle()
+
+    assertEquals(2, vm.uiState.value.filteredAndSortedPlants.size)
+  }
+
+  @Test
+  fun filterCriticalWorks() = runTest {
+    // Show only severely dry or overwatered
+    plantsRepo.saveToGarden(
+        Plant("Critical1", null, "", "", PlantHealthStatus.SEVERELY_DRY, "", 2), "1", Timestamp(0))
+    plantsRepo.saveToGarden(
+        Plant("Critical2", null, "", "", PlantHealthStatus.SEVERELY_OVERWATERED, "", 15),
+        "2",
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)))
+    plantsRepo.saveToGarden(
+        Plant("Ok", null, "", "", PlantHealthStatus.HEALTHY, "", 2),
+        "3",
+        Timestamp(System.currentTimeMillis()))
+    advanceUntilIdle()
+    vm.refreshUIState()
+    vm.setFilterOption(FilterOption.CRITICAL_ONLY)
+    advanceUntilIdle()
+
+    assertEquals(2, vm.uiState.value.filteredAndSortedPlants.size)
+  }
+
+  @Test
+  fun sortAndFilterCombinedWorks() = runTest {
+    // Filter dry plants AND sort by name
+    plantsRepo.saveToGarden(
+        Plant("Z-Dry", null, "", "", PlantHealthStatus.SLIGHTLY_DRY, "", 7),
+        "1",
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(5)))
+    plantsRepo.saveToGarden(
+        Plant("A-Dry", null, "", "", PlantHealthStatus.SEVERELY_DRY, "", 2), "2", Timestamp(0))
+    plantsRepo.saveToGarden(
+        Plant("Healthy", null, "", "", PlantHealthStatus.HEALTHY, "", 7),
+        "3",
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3)))
+    advanceUntilIdle()
+    vm.refreshUIState()
+    advanceUntilIdle()
+    vm.setFilterOption(FilterOption.DRY_PLANTS)
+    vm.setSortOption(SortOption.PLANT_NAME)
+    advanceUntilIdle()
+
+    val result = vm.uiState.value.filteredAndSortedPlants
+    assertEquals(2, result.size)
+    assertEquals("A-Dry", result[0].plant.name)
+    assertEquals("Z-Dry", result[1].plant.name)
+  }
 }
