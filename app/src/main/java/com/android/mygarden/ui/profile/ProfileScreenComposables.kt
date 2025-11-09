@@ -35,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -52,7 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.mygarden.model.profile.Countries
+import com.android.mygarden.R
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.ui.navigation.TopBar
 
@@ -147,7 +149,7 @@ private fun ProfileForm(
         label = { Text("First Name *") },
         placeholder = { Text("Enter your first name") },
         modifier = Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.FIRST_NAME_FIELD),
-        isError = uiState.firstNameIsError(),
+        isError = profileViewModel.firstNameIsError(),
         singleLine = true)
 
     OutlinedTextField(
@@ -156,7 +158,7 @@ private fun ProfileForm(
         label = { Text("Last Name *") },
         placeholder = { Text("Enter your last name") },
         modifier = Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.LAST_NAME_FIELD),
-        isError = uiState.lastNameIsError(),
+        isError = profileViewModel.lastNameIsError(),
         singleLine = true)
 
     ExperienceDropdown(
@@ -249,11 +251,14 @@ private fun CountryDropdown(
     onExpandedChange: (Boolean) -> Unit,
     countryFocusRequester: FocusRequester
 ) {
+  val context = LocalContext.current
   val filteredCountries =
       if (uiState.country.isBlank()) {
-        Countries.ALL
+        context.resources.getStringArray(R.array.countries).toList()
       } else {
-        Countries.ALL.filter { it.contains(uiState.country, ignoreCase = true) }
+        context.resources.getStringArray(R.array.countries).toList().filter {
+          it.contains(uiState.country, ignoreCase = true)
+        }
       }
 
   Box(modifier = Modifier.fillMaxWidth()) {
@@ -269,7 +274,7 @@ private fun CountryDropdown(
             Modifier.fillMaxWidth()
                 .focusRequester(countryFocusRequester)
                 .testTag(ProfileScreenTestTags.COUNTRY_FIELD),
-        isError = uiState.countryIsError(),
+        isError = profileViewModel.countryIsError(),
         singleLine = true,
         trailingIcon = {
           Icon(
@@ -382,7 +387,7 @@ private fun SaveButton(
   Button(
       onClick = {
         profileViewModel.setRegisterPressed(true)
-        if (uiState.canRegister()) {
+        if (profileViewModel.canRegister()) {
           profileViewModel.submit { success ->
             if (success) {
               onRegisterPressed()
@@ -430,6 +435,10 @@ fun ProfileScreenBase(
     onNavBackIconClick: (() -> Unit)? = null,
     title: String = "New Profile",
 ) {
+  val context = LocalContext.current
+  val countries = remember { context.resources.getStringArray(R.array.countries).toList() }
+
+  LaunchedEffect(Unit) { profileViewModel.setCountries(countries) }
   val uiState by profileViewModel.uiState.collectAsState()
 
   Scaffold(

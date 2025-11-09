@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.profile
 
-import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
@@ -40,11 +39,16 @@ class ProfileViewModelTest {
 
   private lateinit var viewModel: ProfileViewModel
   private val testDispatcher = StandardTestDispatcher()
+  private lateinit var fakeCountries: List<String>
 
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
     viewModel = ProfileViewModel(repo = FakeProfileRepository())
+
+    fakeCountries =
+        listOf("Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda")
+    viewModel.setCountries(fakeCountries)
   }
 
   @After
@@ -205,8 +209,7 @@ class ProfileViewModelTest {
     viewModel.setFirstName("")
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.firstNameIsError())
+    assertFalse(viewModel.firstNameIsError())
   }
 
   @Test
@@ -215,8 +218,7 @@ class ProfileViewModelTest {
     viewModel.setRegisterPressed(true)
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertTrue(uiState.firstNameIsError())
+    assertTrue(viewModel.firstNameIsError())
   }
 
   @Test
@@ -225,8 +227,7 @@ class ProfileViewModelTest {
     viewModel.setRegisterPressed(true)
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.firstNameIsError())
+    assertFalse(viewModel.firstNameIsError())
   }
 
   @Test
@@ -234,8 +235,7 @@ class ProfileViewModelTest {
     viewModel.setLastName("")
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.lastNameIsError())
+    assertFalse(viewModel.lastNameIsError())
   }
 
   @Test
@@ -244,8 +244,7 @@ class ProfileViewModelTest {
     viewModel.setRegisterPressed(true)
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertTrue(uiState.lastNameIsError())
+    assertTrue(viewModel.lastNameIsError())
   }
 
   @Test
@@ -254,8 +253,7 @@ class ProfileViewModelTest {
     viewModel.setRegisterPressed(true)
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.lastNameIsError())
+    assertFalse(viewModel.lastNameIsError())
   }
 
   @Test
@@ -263,8 +261,7 @@ class ProfileViewModelTest {
     viewModel.setCountry("InvalidCountry")
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.countryIsError())
+    assertFalse(viewModel.countryIsError())
   }
 
   @Test
@@ -273,18 +270,16 @@ class ProfileViewModelTest {
     viewModel.setRegisterPressed(true)
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertTrue(uiState.countryIsError())
+    assertTrue(viewModel.countryIsError())
   }
 
   @Test
   fun countryIsError_returnsFalseWhenRegisterPressedAndCountryValid() = runTest {
-    viewModel.setCountry("France")
+    viewModel.setCountry(fakeCountries.first())
     viewModel.setRegisterPressed(true)
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.countryIsError())
+    assertFalse(viewModel.countryIsError())
   }
 
   @Test
@@ -294,8 +289,7 @@ class ProfileViewModelTest {
     viewModel.setCountry("")
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.canRegister())
+    assertFalse(viewModel.canRegister())
   }
 
   @Test
@@ -305,8 +299,7 @@ class ProfileViewModelTest {
     viewModel.setCountry("France")
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.canRegister())
+    assertFalse(viewModel.canRegister())
   }
 
   @Test
@@ -316,8 +309,7 @@ class ProfileViewModelTest {
     viewModel.setCountry("France")
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.canRegister())
+    assertFalse(viewModel.canRegister())
   }
 
   @Test
@@ -327,32 +319,29 @@ class ProfileViewModelTest {
     viewModel.setCountry("InvalidCountry")
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertFalse(uiState.canRegister())
+    assertFalse(viewModel.canRegister())
   }
 
   @Test
   fun canRegister_returnsTrueWhenAllRequiredFieldsValid() = runTest {
     viewModel.setFirstName("John")
     viewModel.setLastName("Doe")
-    viewModel.setCountry("France")
+    viewModel.setCountry(fakeCountries.last())
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertTrue(uiState.canRegister())
+    assertTrue(viewModel.canRegister())
   }
 
   @Test
   fun canRegister_returnsTrueEvenWhenOptionalFieldsEmpty() = runTest {
     viewModel.setFirstName("John")
     viewModel.setLastName("Doe")
-    viewModel.setCountry("France")
+    viewModel.setCountry(fakeCountries.first())
     // gardeningSkill is optional and starts as null by default
     viewModel.setFavoritePlant("")
     advanceUntilIdle()
 
-    val uiState = viewModel.uiState.value
-    assertTrue(uiState.canRegister())
+    assertTrue(viewModel.canRegister())
   }
 
   @Test
@@ -361,7 +350,7 @@ class ProfileViewModelTest {
     viewModel.setLastName("Doe")
     viewModel.setGardeningSkill(GardeningSkill.BEGINNER)
     viewModel.setFavoritePlant("Rose")
-    viewModel.setCountry("France")
+    viewModel.setCountry(fakeCountries.first())
     advanceUntilIdle()
 
     // Update one field and verify others remain unchanged
@@ -373,23 +362,19 @@ class ProfileViewModelTest {
     assertEquals("Doe", uiState.lastName)
     assertEquals(GardeningSkill.BEGINNER, uiState.gardeningSkill)
     assertEquals("Rose", uiState.favoritePlant)
-    assertEquals("France", uiState.country)
+    assertEquals(fakeCountries.first(), uiState.country)
   }
 
   @Test
   fun validCountriesFromCountriesList_canRegister() = runTest {
-    // Test a few random countries from the actual Countries.ALL list
-    val testCountries = Countries.ALL.take(5) // Take first 5 countries from the real list
-
-    testCountries.forEach { country ->
+    fakeCountries.forEach { country ->
       viewModel.setFirstName("John")
       viewModel.setLastName("Doe")
       viewModel.setCountry(country)
       advanceUntilIdle()
 
-      val uiState = viewModel.uiState.value
-      assertTrue("Should be able to register with country: $country", uiState.canRegister())
-      assertFalse("Country should not be an error: $country", uiState.countryIsError())
+      assertTrue("Should be able to register with country: $country", viewModel.canRegister())
+      assertFalse("Country should not be an error: $country", viewModel.countryIsError())
     }
   }
 
@@ -417,7 +402,7 @@ class ProfileViewModelTest {
         Profile(
             firstName = "Ada",
             lastName = "Lovelace",
-            country = "UK",
+            country = fakeCountries.last(),
             gardeningSkill = GardeningSkill.BEGINNER,
             avatar = Avatar.A1,
             favoritePlant = "Rose")
@@ -431,7 +416,7 @@ class ProfileViewModelTest {
     val state = viewModel.uiState.value
     assertEquals("Ada", state.firstName)
     assertEquals("Lovelace", state.lastName)
-    assertEquals("UK", state.country)
+    assertEquals(fakeCountries.last(), state.country)
     assertEquals(GardeningSkill.BEGINNER, state.gardeningSkill)
     assertEquals(Avatar.A1, state.avatar)
     assertEquals("Rose", state.favoritePlant)
