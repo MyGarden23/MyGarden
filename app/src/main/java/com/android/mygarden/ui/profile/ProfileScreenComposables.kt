@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.profile
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -427,6 +428,7 @@ private fun SaveButton(
  * @param title The title to display in the header (defaults to "New Profile")
  */
 @Composable
+@SuppressLint("RememberReturnType")
 @OptIn(ExperimentalMaterial3Api::class)
 fun ProfileScreenBase(
     profileViewModel: ProfileViewModel = viewModel(),
@@ -436,7 +438,7 @@ fun ProfileScreenBase(
     title: String = "New Profile",
 ) {
   val context = LocalContext.current
-  val countries = remember { context.resources.getStringArray(R.array.countries).toList() }
+  val countries = remember(context) { context.resources.getStringArray(R.array.countries).toList() }
 
   LaunchedEffect(Unit) { profileViewModel.setCountries(countries) }
   val uiState by profileViewModel.uiState.collectAsState()
