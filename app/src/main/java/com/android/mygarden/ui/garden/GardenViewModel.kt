@@ -57,7 +57,8 @@ class GardenViewModel(
   init {
     refreshUIState()
     viewModelScope.launch {
-      plantsRepo.plantsFlow.collect { newList -> _uiState.value = _uiState.value.copy(newList) }
+      plantsRepo.plantsFlow.collect { newList -> _uiState.value = _uiState.value.copy(newList)
+          applyFiltersAndSorting()}
     }
   }
 

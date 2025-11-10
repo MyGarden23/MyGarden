@@ -166,14 +166,14 @@ class GardenViewModelTests {
     plantsRepo.saveToGarden(plantA, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
     plantsRepo.saveToGarden(plantC, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
     plantsRepo.saveToGarden(plantB, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
-    advanceUntilIdle()
+    runCurrent()
 
     vm.refreshUIState()
-    advanceUntilIdle()
+    runCurrent()
 
     // Set sort option to plant name (default)
     vm.setSortOption(SortOption.PLANT_NAME)
-    advanceUntilIdle()
+    runCurrent()
 
     // Verify plants are sorted alphabetically by name
     val sortedPlants = vm.uiState.value.filteredAndSortedPlants
@@ -181,6 +181,7 @@ class GardenViewModelTests {
     assertEquals("Apple", sortedPlants[0].plant.name)
     assertEquals("Banana", sortedPlants[1].plant.name)
     assertEquals("Cherry", sortedPlants[2].plant.name)
+      repositoryScope.cancel()
   }
 
   /** Tests that filtering by dry plants works correctly */
@@ -210,20 +211,21 @@ class GardenViewModelTests {
         overwateredPlant,
         plantsRepo.getNewId(),
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)))
-    advanceUntilIdle()
+    runCurrent()
 
     vm.refreshUIState()
-    advanceUntilIdle()
+    runCurrent()
 
     // Apply dry plants filter
     vm.setFilterOption(FilterOption.DRY_PLANTS)
-    advanceUntilIdle()
+    runCurrent()
 
     // Verify only dry plants are shown
     val filteredPlants = vm.uiState.value.filteredAndSortedPlants
     assertEquals(2, filteredPlants.size)
     assertTrue(filteredPlants.any { it.plant.name == "Dry" })
     assertTrue(filteredPlants.any { it.plant.name == "VeryDry" })
+      repositoryScope.cancel()
   }
 
   /** Tests that filtering by healthy plants works correctly */
@@ -246,19 +248,20 @@ class GardenViewModelTests {
         dryPlant,
         plantsRepo.getNewId(),
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)))
-    advanceUntilIdle()
+    runCurrent()
 
     vm.refreshUIState()
-    advanceUntilIdle()
+    runCurrent()
 
     // Apply healthy plants filter
     vm.setFilterOption(FilterOption.HEALTHY_ONLY)
-    advanceUntilIdle()
+    runCurrent()
 
     // Verify only healthy plants are shown
     val filteredPlants = vm.uiState.value.filteredAndSortedPlants
     assertEquals(2, filteredPlants.size)
     assertTrue(filteredPlants.all { it.plant.healthStatus == PlantHealthStatus.HEALTHY })
+      repositoryScope.cancel()
   }
 
   @Test
@@ -268,14 +271,15 @@ class GardenViewModelTests {
         Plant("A", null, "Zebra", "", PlantHealthStatus.HEALTHY, "", 2), "1", Timestamp(0))
     plantsRepo.saveToGarden(
         Plant("B", null, "Alpha", "", PlantHealthStatus.HEALTHY, "", 2), "2", Timestamp(0))
-    advanceUntilIdle()
+    runCurrent()
     vm.refreshUIState()
     vm.setSortOption(SortOption.LATIN_NAME)
-    advanceUntilIdle()
+    runCurrent()
 
     val sorted = vm.uiState.value.filteredAndSortedPlants
     assertEquals("Alpha", sorted[0].plant.latinName)
     assertEquals("Zebra", sorted[1].plant.latinName)
+      repositoryScope.cancel()
   }
 
   @Test
@@ -285,14 +289,15 @@ class GardenViewModelTests {
         Plant("New", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "1", Timestamp(100))
     plantsRepo.saveToGarden(
         Plant("Old", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "2", Timestamp(50))
-    advanceUntilIdle()
+    runCurrent()
     vm.refreshUIState()
     vm.setSortOption(SortOption.LAST_WATERED_ASC)
-    advanceUntilIdle()
+    runCurrent()
 
     val sorted = vm.uiState.value.filteredAndSortedPlants
     assertEquals("Old", sorted[0].plant.name)
     assertEquals("New", sorted[1].plant.name)
+      repositoryScope.cancel()
   }
 
   @Test
@@ -302,14 +307,15 @@ class GardenViewModelTests {
         Plant("New", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "1", Timestamp(100))
     plantsRepo.saveToGarden(
         Plant("Old", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "2", Timestamp(50))
-    advanceUntilIdle()
+    runCurrent()
     vm.refreshUIState()
     vm.setSortOption(SortOption.LAST_WATERED_DESC)
-    advanceUntilIdle()
+    runCurrent()
 
     val sorted = vm.uiState.value.filteredAndSortedPlants
     assertEquals("New", sorted[0].plant.name)
     assertEquals("Old", sorted[1].plant.name)
+      repositoryScope.cancel()
   }
 
   @Test
@@ -329,14 +335,15 @@ class GardenViewModelTests {
         "3",
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)))
 
-    advanceUntilIdle()
+    runCurrent()
     vm.refreshUIState()
-    advanceUntilIdle()
+    runCurrent()
 
     vm.setFilterOption(FilterOption.OVERWATERED_ONLY)
-    advanceUntilIdle()
+    runCurrent()
 
     assertEquals(2, vm.uiState.value.filteredAndSortedPlants.size)
+      repositoryScope.cancel()
   }
 
   @Test
@@ -352,12 +359,13 @@ class GardenViewModelTests {
         Plant("Ok", null, "", "", PlantHealthStatus.HEALTHY, "", 2),
         "3",
         Timestamp(System.currentTimeMillis()))
-    advanceUntilIdle()
+    runCurrent()
     vm.refreshUIState()
     vm.setFilterOption(FilterOption.CRITICAL_ONLY)
-    advanceUntilIdle()
+    runCurrent()
 
     assertEquals(2, vm.uiState.value.filteredAndSortedPlants.size)
+      repositoryScope.cancel()
   }
 
   @Test
@@ -373,16 +381,17 @@ class GardenViewModelTests {
         Plant("Healthy", null, "", "", PlantHealthStatus.HEALTHY, "", 7),
         "3",
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3)))
-    advanceUntilIdle()
+    runCurrent()
     vm.refreshUIState()
-    advanceUntilIdle()
+    runCurrent()
     vm.setFilterOption(FilterOption.DRY_PLANTS)
     vm.setSortOption(SortOption.PLANT_NAME)
-    advanceUntilIdle()
+    runCurrent()
 
     val result = vm.uiState.value.filteredAndSortedPlants
     assertEquals(2, result.size)
     assertEquals("A-Dry", result[0].plant.name)
     assertEquals("Z-Dry", result[1].plant.name)
+      repositoryScope.cancel()
   }
 }
