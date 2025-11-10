@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.util.Log
-import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -46,11 +45,13 @@ class CameraViewModel : ViewModel() {
    * @param context the context used to obtain executor
    * @param controller the controller that manages the camera lifecycle, image preview and capture
    * @param onPictureTaken the lambda called on the Bitmap resulting from the capture
+   * @param onError the lambda called if the picture capture fails
    */
   fun takePicture(
       context: Context,
       controller: LifecycleCameraController,
-      onPictureTaken: (String) -> Unit
+      onPictureTaken: (String) -> Unit,
+      onError: () -> Unit
   ) {
     controller.takePicture(
         ContextCompat.getMainExecutor(context),
@@ -81,7 +82,7 @@ class CameraViewModel : ViewModel() {
                * */
               onPictureTaken(file.absolutePath)
             } catch (e: Exception) {
-              toastPictureFail(context)
+              onError()
               Log.e(CAMERA_ERROR_TAG, "ImageProxy could not be converted to a Bitmap", e)
             }
           }
@@ -89,19 +90,10 @@ class CameraViewModel : ViewModel() {
           override fun onError(exception: ImageCaptureException) {
             // If the picture fails, log the exception and keep the stack trace
             super.onError(exception)
-            toastPictureFail(context)
+            onError()
             Log.e(CAMERA_ERROR_TAG, "Picture could not been taken", exception)
           }
         })
-  }
-
-  /**
-   * Display a Toast saying "Failed to take picture." on a fail to take a picture.
-   *
-   * @param context the context of the application used to display the Toast
-   */
-  private fun toastPictureFail(context: Context) {
-    Toast.makeText(context, "Failed to take picture.", Toast.LENGTH_SHORT).show()
   }
 
   /* Camera permission handling */

@@ -186,7 +186,17 @@ fun CameraScreen(
                             .size(70.dp)
                             .testTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON),
                     onClick = {
-                      cameraViewModel.takePicture(context, controller, onPictureTaken)
+                      cameraViewModel.takePicture(
+                          context = context,
+                          controller = controller,
+                          onPictureTaken = onPictureTaken,
+                          onError = {
+                            Toast.makeText(
+                                    context,
+                                    context.getString(R.string.error_fail_take_picture),
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                          })
                     }) {
                       Icon(
                           painter = painterResource(R.drawable.ic_photo_button_mygarden),

@@ -64,11 +64,13 @@ class ImageHandlingTest {
       LocalImageDisplay(
           imagePath = file.absolutePath,
           testVersionRemeberAsync = false,
-          contentDescription = "Plant image")
+          contentDescription = context.getString(R.string.plant_image_description))
     }
 
     // Check that the image is displayed
-    composeTestRule.onNodeWithContentDescription("Plant image").assertExists()
+    composeTestRule
+        .onNodeWithContentDescription(context.getString(R.string.plant_image_description))
+        .assertExists()
   }
 
   @Test
@@ -90,10 +92,12 @@ class ImageHandlingTest {
       LocalImageDisplay(
           imagePath = file.absolutePath,
           testVersionRemeberAsync = true,
-          contentDescription = "Plant image")
+          contentDescription = context.getString(R.string.plant_image_description))
     }
 
     // Check that the image is displayed
-    composeTestRule.onNodeWithContentDescription("Plant image").assertExists()
+    composeTestRule
+        .onNodeWithContentDescription(context.getString(R.string.plant_image_description))
+        .assertExists()
   }
 }
