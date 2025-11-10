@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.editPlant
 
+import com.android.mygarden.R
 import com.android.mygarden.model.plant.*
 import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
@@ -55,8 +56,8 @@ class EditPlantViewModelTest {
   /** Test clearing and setting error messages. */
   @Test
   fun clearErrorMsg_and_setErrorMsg_update_state() {
-    viewModel.setErrorMsg("boom")
-    assertEquals("boom", viewModel.uiState.value.errorMsg)
+    viewModel.setErrorMsg(R.string.error_failed_load_plant_edit)
+    assertEquals(R.string.error_failed_load_plant_edit, viewModel.uiState.value.errorMsg)
 
     viewModel.clearErrorMsg()
     assertNull(viewModel.uiState.value.errorMsg)
@@ -82,7 +83,7 @@ class EditPlantViewModelTest {
   fun loadPlant_failure_sets_error_message() = runTest {
     viewModel.loadPlant("does-not-exist")
     advanceUntilIdle()
-    assertEquals("Failed to load plant", viewModel.uiState.value.errorMsg)
+    assertEquals(R.string.error_failed_load_plant_edit, viewModel.uiState.value.errorMsg)
   }
 
   /** Test setting the last watered date. */
@@ -117,14 +118,14 @@ class EditPlantViewModelTest {
   fun deletePlant_failure_sets_error_message() = runTest {
     viewModel.deletePlant("unknown-id")
     advanceUntilIdle()
-    assertEquals("Failed to delete plant", viewModel.uiState.value.errorMsg)
+    assertEquals(R.string.error_failed_delete_plant_edit, viewModel.uiState.value.errorMsg)
   }
 
   /** Test editing a plant in the repository without loading it first. */
   @Test
   fun editPlant_without_load_sets_error_about_plant_not_loaded() {
     viewModel.editPlant(plantId)
-    assertEquals("Plant not loaded yet", viewModel.uiState.value.errorMsg)
+    assertEquals(R.string.error_plant_not_loaded, viewModel.uiState.value.errorMsg)
   }
 
   /** Test editing a plant in the repository. */
@@ -162,7 +163,7 @@ class EditPlantViewModelTest {
 
     val err = viewModel.uiState.value.errorMsg
     assertNotNull(err)
-    assertTrue(err!!.contains("Plant not loaded yet"))
+    assertEquals(err, R.string.error_plant_not_loaded)
   }
 
   /** Test editing a plant in the repository with a blank description. */
@@ -178,7 +179,7 @@ class EditPlantViewModelTest {
     viewModel.editPlant(plantId)
     advanceUntilIdle()
 
-    assertEquals("Please put a description", viewModel.uiState.value.errorMsg)
+    assertEquals(R.string.error_description_blank, viewModel.uiState.value.errorMsg)
 
     val after = repository.getOwnedPlant(plantId)
     assertEquals(before.lastWatered, after.lastWatered)

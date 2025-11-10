@@ -3,6 +3,7 @@ package com.android.mygarden.ui.editPlant
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
@@ -16,7 +17,7 @@ data class EditPlantUIState(
     val name: String = "",
     val latinName: String = "",
     val description: String = "",
-    val errorMsg: String? = null,
+    val errorMsg: Int? = null,
     val lastWatered: Timestamp? = null,
     val image: String? = null
 )
@@ -33,8 +34,8 @@ class EditPlantViewModel(
     _uiState.value = _uiState.value.copy(errorMsg = null)
   }
 
-  override fun setErrorMsg(e: String) {
-    _uiState.value = _uiState.value.copy(errorMsg = e)
+  override fun setErrorMsg(resId: Int) {
+    _uiState.value = _uiState.value.copy(errorMsg = resId)
   }
 
   override fun loadPlant(ownedPlantId: String) {
@@ -52,7 +53,7 @@ class EditPlantViewModel(
                 image = plant.image)
       } catch (e: Exception) {
         Log.e("EditPlantViewModel", "Error loading Plant by ID. $ownedPlantId", e)
-        setErrorMsg("Failed to load plant")
+        setErrorMsg(R.string.error_failed_load_plant_edit)
       }
     }
   }
@@ -72,7 +73,7 @@ class EditPlantViewModel(
         repository.deleteFromGarden(ownedPlantId)
       } catch (e: Exception) {
         Log.e("EditPlantViewModel", "Failed to delete plant.", e)
-        setErrorMsg("Failed to delete plant")
+        setErrorMsg(R.string.error_failed_delete_plant_edit)
       }
     }
   }
@@ -84,20 +85,20 @@ class EditPlantViewModel(
 
     if (newPlant == null) {
       Log.e("EditPlantViewModel", "Failed to edit plant (Plant not loaded).")
-      setErrorMsg("Plant not loaded yet")
+      setErrorMsg(R.string.error_plant_not_loaded)
       return
     }
 
     if (description.isBlank()) {
       Log.e("EditPlantViewModel", "Failed to edit plant. (no description selected).")
-      setErrorMsg("Please put a description")
+      setErrorMsg(R.string.error_description_blank)
       return
     }
 
     // Not suppose to occur with the workflow of the app.
     if (watered == null) {
       Log.e("EditPlantViewModel", "Failed to edit plant. (no last time watered selected).")
-      setErrorMsg("Please select the last time watered")
+      setErrorMsg(R.string.error_last_watered_missing)
       return
     }
 
@@ -110,7 +111,8 @@ class EditPlantViewModel(
       try {
         repository.editOwnedPlant(ownedPlantId, updated)
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(errorMsg = e.message ?: "Failed to save changes")
+        Log.e("EditPlantViewModel", "Failed to save changes", e)
+        _uiState.value = _uiState.value.copy(errorMsg = R.string.error_failed_save_changes_edit)
       }
     }
   }

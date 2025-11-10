@@ -75,9 +75,11 @@ fun EditPlantScreen(
   val snackbarHostState = remember { SnackbarHostState() }
 
   LaunchedEffect(plantUIState.errorMsg) {
-    plantUIState.errorMsg?.let { msg ->
+    plantUIState.errorMsg?.let { resId ->
       snackbarHostState.showSnackbar(
-          message = msg, withDismissAction = true, duration = SnackbarDuration.Short)
+          message = context.getString(resId),
+          withDismissAction = true,
+          duration = SnackbarDuration.Short)
       editPlantViewModel.clearErrorMsg()
     }
   }

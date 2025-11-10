@@ -16,9 +16,9 @@ interface EditPlantViewModelInterface {
   /**
    * Sets an error message in the UI state.
    *
-   * @param e The error message to be displayed.
+   * @param resId The resource ID of the error message to be set.
    */
-  fun setErrorMsg(e: String)
+  fun setErrorMsg(resId: Int)
 
   /**
    * Loads a plant by its ID and updates the UI state accordingly.

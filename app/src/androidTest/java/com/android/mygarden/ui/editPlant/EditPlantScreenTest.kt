@@ -342,7 +342,7 @@ private class FakeEditPlantViewModel : EditPlantViewModelInterface {
   val loadCalls = mutableListOf<String>()
   val editCalls = mutableListOf<String>()
   val deleteCalls = mutableListOf<String>()
-  val errorMsgs = mutableListOf<String>()
+  val errorMsgs = mutableListOf<Int>()
 
   override fun loadPlant(ownedPlantId: String) {
     loadCalls += ownedPlantId
@@ -364,9 +364,9 @@ private class FakeEditPlantViewModel : EditPlantViewModelInterface {
     _ui.value = _ui.value.copy(lastWatered = timestamp)
   }
 
-  override fun setErrorMsg(e: String) {
-    errorMsgs += e
-    _ui.value = _ui.value.copy(errorMsg = e)
+  override fun setErrorMsg(resId: Int) {
+    errorMsgs += resId
+    _ui.value = _ui.value.copy(errorMsg = resId)
   }
 
   override fun clearErrorMsg() {
