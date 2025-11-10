@@ -10,6 +10,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
@@ -304,5 +305,53 @@ class GardenScreenTests {
           colorsFromHealthStatus(PlantHealthStatus.SEVERELY_DRY, colorScheme, customColors),
           PlantCardColorPalette(customColors.redPlantCardBackground, colorScheme.error))
     }
+  }
+
+  /** Checks that the plant's card is displayed when a plant is saved to garden afterwards. */
+  @Test
+  fun listIsUpdatedWhenNewPlantAddedToGarden() {
+    // empty garden for now
+    setContent()
+    composeTestRule.userRowIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsDisplayed()
+
+    // add a plant to repo
+    runTest {
+      plantsRepo.saveToGarden(plant1, plantsRepo.getNewId(), Timestamp(System.currentTimeMillis()))
+    }
+
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsNotDisplayed()
+    composeTestRule.allPlantsAreDisplayed()
+  }
+
+  /**
+   * Checks that the plant's health status correctly changes when clicked on the button to water the
+   * plant
+   */
+  @Test
+  fun wateringAPlantWorks() = runTest {
+    setContent()
+    val id = plantsRepo.getNewId()
+
+    plantsRepo.saveToGarden(
+        plant1,
+        id,
+        // Timestamp to make the plant thirsty (watering frequency = 10 days)
+        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(12)))
+
+    // the plant is currently thirsty
+    val plantFromRepo = plantsRepo.getOwnedPlant(id)
+    val currentStatus = plantFromRepo.plant.healthStatus
+    assertEquals(PlantHealthStatus.NEEDS_WATER, currentStatus)
+
+    // water the plant
+    composeTestRule
+        .onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(plantFromRepo))
+        .performClick()
+
+    // the plant's health status has been correctly updated
+    val plantFromRepoAfterWatering = plantsRepo.getOwnedPlant(id)
+    val statusAfterWatering = plantFromRepoAfterWatering.plant.healthStatus
+    assertEquals(PlantHealthStatus.HEALTHY, statusAfterWatering)
   }
 }

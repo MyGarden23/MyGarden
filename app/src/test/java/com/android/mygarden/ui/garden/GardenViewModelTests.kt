@@ -13,11 +13,14 @@ import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -67,11 +70,13 @@ class GardenViewModelTests {
     }
   }
 
+  private lateinit var repositoryScope: TestScope
   /** Sets up the repository and the view model and the test dispatcher to simulate the app */
   @Before
   fun setUp() {
     Dispatchers.setMain(testDispatcher)
-    plantsRepo = PlantsRepositoryLocal()
+    repositoryScope = TestScope(SupervisorJob() + testDispatcher)
+    plantsRepo = PlantsRepositoryLocal(repositoryScope)
     profileRepo = FakeProfileRepository()
     vm = GardenViewModel(plantsRepo = plantsRepo, profileRepo = profileRepo)
   }
@@ -100,27 +105,6 @@ class GardenViewModelTests {
     assertNull(vm.uiState.value.errorMsg)
   }
 
-  /**
-   * Tests that the getAllPlants function retrieves correctly the list of owned plants and updated
-   * the vm
-   */
-  @Test
-  fun getAllPlantsWorksCorrectly() = runTest {
-    assertEquals(emptyList<OwnedPlant>(), vm.uiState.value.plants)
-    vm.refreshUIState()
-    advanceUntilIdle()
-    assertEquals(emptyList<OwnedPlant>(), vm.uiState.value.plants)
-    ownedPlant =
-        plantsRepo.saveToGarden(
-            plant1,
-            plantsRepo.getNewId(),
-            Timestamp(System.currentTimeMillis() - (1L * 24 * 60 * 60 * 1000)))
-    advanceUntilIdle()
-    vm.refreshUIState()
-    advanceUntilIdle()
-    assertEquals(listOf(ownedPlant), vm.uiState.value.plants)
-  }
-
   /** Tests that fetchProfileInfos works correctly with a fake profile repository */
   @Test
   fun fetchProfileInfoWorksCorrectly() = runTest {
@@ -135,10 +119,11 @@ class GardenViewModelTests {
             avatar = Avatar.A1)
 
     vm.refreshUIState()
-    advanceUntilIdle()
+    runCurrent()
 
     assertEquals(expected.firstName, vm.uiState.value.userName)
     assertEquals(expected.avatar, vm.uiState.value.userAvatar)
+    repositoryScope.cancel()
   }
 
   @Test
@@ -147,9 +132,9 @@ class GardenViewModelTests {
     val initialLastWatered = Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(4))
     val saved = plantsRepo.saveToGarden(plant1, plantsRepo.getNewId(), initialLastWatered)
 
-    advanceUntilIdle()
+    runCurrent()
     vm.refreshUIState()
-    advanceUntilIdle()
+    runCurrent()
 
     val before = vm.uiState.value.plants.single()
     assertEquals(saved.id, before.id)
@@ -158,11 +143,13 @@ class GardenViewModelTests {
 
     vm.waterPlant(before)
     vm.refreshUIState()
-    advanceUntilIdle()
+    runCurrent()
 
     val after = vm.uiState.value.plants.single()
     assertEquals(before.id, after.id)
     assertEquals(after.plant.healthStatus, PlantHealthStatus.HEALTHY)
     assertTrue(after.lastWatered.time >= before.lastWatered.time)
+
+    repositoryScope.cancel()
   }
 }
