@@ -2,6 +2,7 @@ package com.android.mygarden.ui.garden
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
@@ -32,7 +33,7 @@ data class GardenUIState(
     val filteredAndSortedPlants: List<OwnedPlant> = emptyList(),
     val currentSortOption: SortOption = SortOption.PLANT_NAME,
     val currentFilterOption: FilterOption = FilterOption.ALL,
-    val errorMsg: String? = null,
+    val errorMsg: Int? = null,
     val userName: String = "",
     val userAvatar: Avatar = Avatar.A1
 )
@@ -86,8 +87,8 @@ class GardenViewModel(
    *
    * @param msg the error message
    */
-  fun setErrorMsg(msg: String) {
-    _uiState.value = _uiState.value.copy(errorMsg = msg)
+  fun setErrorMsg(resId: Int) {
+    _uiState.value = _uiState.value.copy(errorMsg = resId)
   }
 
   /**
@@ -207,11 +208,11 @@ class GardenViewModel(
             _uiState.value =
                 _uiState.value.copy(userName = profile.firstName, userAvatar = profile.avatar)
           } else {
-            setErrorMsg("Failed to get user profile")
+            setErrorMsg(R.string.error_failed_get_profile_garden)
           }
         }
       } catch (_: Exception) {
-        setErrorMsg("Failed to get user profile")
+        setErrorMsg(R.string.error_failed_get_profile_garden)
       }
     }
   }

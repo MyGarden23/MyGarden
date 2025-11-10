@@ -159,8 +159,8 @@ fun GardenScreen(
 
   // Display the error message if the list fetch fails
   LaunchedEffect(uiState.errorMsg) {
-    uiState.errorMsg?.let { message ->
-      Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    uiState.errorMsg?.let { resId ->
+      Toast.makeText(context, context.getString(resId), Toast.LENGTH_SHORT).show()
       gardenViewModel.clearErrorMsg()
     }
   }
