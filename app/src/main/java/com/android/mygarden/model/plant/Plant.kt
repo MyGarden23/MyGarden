@@ -8,12 +8,15 @@ import java.sql.Timestamp
  * Represents a plant in the garden management system.
  *
  * This data class encapsulates all essential information about a plant, including its
- * identification, visual representation, health status, and care requirements.
+ * identification, visual representation, health status, best conditions to grow and care
+ * requirements.
  *
  * @property name The common name of the plant (e.g., "Rose", "Tomato")
  * @property image The visual representation of the plant
  * @property latinName The scientific/botanical name of the plant (e.g., "Rosa rubiginosa")
  * @property description A detailed text description of the plant, including care instructions
+ * @property location The best location for the plant to grow, indoor or outdoor
+ * @property lightExposure A description of the ideal light exposure for this plant
  * @property healthStatus The current health condition of the plant
  * @property healthStatusDescription A detailed description of the plant's health status
  * @property wateringFrequency How often the plant should be watered, measured in days
@@ -23,6 +26,8 @@ data class Plant(
     val image: String? = null,
     val latinName: String = "Unknown",
     val description: String = "No description available",
+    val location: PlantLocation = PlantLocation.UNKNOWN,
+    val lightExposure: String = "Unknown",
     val healthStatus: PlantHealthStatus = PlantHealthStatus.UNKNOWN,
     val healthStatusDescription: String = "No health status description available",
     val wateringFrequency: Int = 0, // in days
@@ -74,4 +79,10 @@ enum class PlantHealthStatus(@StringRes val descriptionRes: Int) {
           SEVERELY_DRY -> "Critically dry 🥀"
           UNKNOWN -> "Status unknown ❓"
         }
+}
+
+enum class PlantLocation() {
+  INDOOR,
+  OUTDOOR,
+  UNKNOWN
 }
