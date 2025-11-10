@@ -14,7 +14,7 @@ import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
-import com.android.mygarden.ui.garden.GardenScreenTestTags
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
@@ -163,8 +163,8 @@ class PopupBackendTests {
     rule.wholePopupIsDisplayed()
     rule.onNodeWithTag(PopupScreenTestTags.CONFIRM_BUTTON).performClick()
     rule.wholePopupIsNotDisplayed()
-    rule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
-    rule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
+    rule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
+    rule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertIsDisplayed()
   }
 
   /**

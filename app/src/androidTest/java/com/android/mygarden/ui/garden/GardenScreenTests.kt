@@ -21,6 +21,7 @@ import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
@@ -183,9 +184,9 @@ class GardenScreenTests {
   @Test
   fun correctDisplayWhenEmptyGarden() {
     setContent()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertHasClickAction()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertHasClickAction()
     composeTestRule.userRowIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsNotDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsDisplayed()
@@ -199,9 +200,9 @@ class GardenScreenTests {
   fun correctDisplayWhenNonEmptyGarden() {
     val plants = listOf(plant1, plant2, plant3, plant4)
     setContent(plants)
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.TITLE).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.SIGN_OUT_BUTTON).assertHasClickAction()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertHasClickAction()
     composeTestRule.userRowIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsDisplayed()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG).assertIsNotDisplayed()

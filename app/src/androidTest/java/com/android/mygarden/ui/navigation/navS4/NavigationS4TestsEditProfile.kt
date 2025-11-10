@@ -12,6 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
@@ -62,7 +63,7 @@ class NavigationS4TestsEditProfile {
         .onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)
         .assertIsDisplayed()
         .performClick()
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.BACK_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsDisplayed()
   }
 }
