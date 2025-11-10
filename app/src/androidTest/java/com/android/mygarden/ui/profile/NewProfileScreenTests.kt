@@ -1,6 +1,9 @@
 package com.android.mygarden.ui.profile
 
+import android.content.Context
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.platform.app.InstrumentationRegistry
+import com.android.mygarden.R
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeProfileRepository
 import org.junit.Rule
@@ -15,8 +18,10 @@ class NewProfileScreenTests : ProfileScreenTestBase() {
 
   @get:Rule override val composeTestRule = createComposeRule()
 
-  override val expectedTitle = "New Profile"
-  override val expectedButtonText = "Save Profile"
+  override val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
+
+  override val expectedTitle = context.getString(R.string.new_profile_screen_title)
+  override val expectedButtonText = context.getString(R.string.save_profile_button_text)
 
   /** Helper function to set up the composable content for testing. */
   override fun setContent() {

@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.profile
 
+import android.content.Context
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import com.android.mygarden.R
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import org.junit.Assert.assertEquals
@@ -33,6 +35,8 @@ abstract class ProfileScreenTestBase {
   /** Flag to track whether the onSavePressed or onBackCalled callbacks have been invoked. */
   protected var onSavePressedCalled: Boolean = false
   protected var onBackPressedCalled: Boolean = false
+
+  abstract val context: Context
 
   /**
    * Subclasses must implement this to set up the content for testing. Should reset
@@ -191,7 +195,7 @@ abstract class ProfileScreenTestBase {
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.COUNTRY_NO_RESULTS)
         .assertIsDisplayed()
-        .assertTextEquals("No countries found")
+        .assertTextEquals(context.getString(R.string.no_country_found))
   }
 
   @org.junit.Test
