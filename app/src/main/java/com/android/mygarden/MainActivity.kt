@@ -119,7 +119,7 @@ fun MyGardenApp(intent: Intent? = null) {
 
     if (isEndToEndTest) {
       // In end-to-end test mode, always start on camera screen
-      Screen.Camera.route
+      Screen.NewProfile.route
     } else {
       // In normal app mode, check authentication
       val user =
