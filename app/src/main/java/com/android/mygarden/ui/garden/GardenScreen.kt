@@ -22,11 +22,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -35,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,13 +60,13 @@ import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthCalculator
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.navigation.Screen
+import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 
 /** Test tags to test the screen displays */
 object GardenScreenTestTags {
-  const val TITLE = "MyGardenTitle"
-  const val SIGN_OUT_BUTTON = "SignOutButton"
   const val USER_PROFILE_PICTURE = "UserProfilePicture"
   const val USERNAME = "Username"
   const val EDIT_PROFILE_BUTTON = "EditProfileButton"
@@ -175,26 +172,10 @@ fun GardenScreen(
       modifier = modifier.testTag(NavigationTestTags.GARDEN_SCREEN),
       // The top bar is only used to display the title of the screen
       topBar = {
-        CenterAlignedTopAppBar(
-            title = {
-              Text(
-                  fontWeight = FontWeight.ExtraBold,
-                  style = MaterialTheme.typography.titleLarge,
-                  text = stringResource(R.string.my_garden_title))
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background),
-            modifier = modifier.testTag(GardenScreenTestTags.TITLE),
-            navigationIcon = {
-              Icon(
-                  imageVector = Icons.AutoMirrored.Filled.Logout,
-                  contentDescription = stringResource(R.string.sign_out_button_description),
-                  modifier =
-                      modifier
-                          .clickable(onClick = onSignOut)
-                          .testTag(GardenScreenTestTags.SIGN_OUT_BUTTON))
-            })
+        TopBar(
+            title = context.getString(Screen.Garden.nameResId),
+            hasSignOutButton = true,
+            onSignOut = onSignOut)
       },
       // The button to add a new plant to the collection
       floatingActionButton = { AddPlantFloatingButton(onAddPlant, modifier) },
