@@ -1,5 +1,6 @@
 package com.android.mygarden.model.plant
 
+import java.sql.Timestamp
 import kotlin.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -128,7 +129,7 @@ interface PlantsRepository {
    * @param lastWatered The timestamp of the last watering event
    * @return The newly created OwnedPlant with initialized tracking data
    */
-  suspend fun saveToGarden(plant: Plant, id: String, lastWatered: java.sql.Timestamp): OwnedPlant
+  suspend fun saveToGarden(plant: Plant, id: String, lastWatered: Timestamp): OwnedPlant
 
   /**
    * Retrieves all ownedplants currently in the user's virtual garden.
@@ -175,6 +176,6 @@ interface PlantsRepository {
    */
   suspend fun waterPlant(
       id: String,
-      wateringTime: java.sql.Timestamp = java.sql.Timestamp(System.currentTimeMillis())
+      wateringTime: Timestamp = Timestamp(System.currentTimeMillis())
   )
 }
