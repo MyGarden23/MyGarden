@@ -144,7 +144,7 @@ class NavigationS3TestsGardenAndEditPlant {
 
     // Go back to garden
     composeTestRule
-        .onNodeWithTag(EditPlantScreenTestTags.GO_BACK_BUTTON)
+        .onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON)
         .assertIsDisplayed()
         .performClick()
 

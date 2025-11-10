@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -62,14 +63,19 @@ class NavigationS1Tests {
   fun FictionalApp() {
     val navController = rememberNavController()
     val navActions = NavigationActions(navController)
-    val startDest = Screen.Camera.name
+    val context = LocalContext.current
+    val startDest = context.getString(Screen.Camera.nameResId)
     NavHost(navController = navController, startDestination = startDest) {
-      navigation(startDestination = Screen.Camera.route, route = Screen.Camera.name) {
-        composable(route = Screen.Camera.route) { FictionalCameraScreen(navActions) }
-      }
-      navigation(startDestination = Screen.Garden.route, route = Screen.Garden.name) {
-        composable(route = Screen.Garden.route) { FictionalGardenScreen(navActions) }
-      }
+      navigation(
+          startDestination = Screen.Camera.route,
+          route = context.getString(Screen.Camera.nameResId)) {
+            composable(route = Screen.Camera.route) { FictionalCameraScreen(navActions) }
+          }
+      navigation(
+          startDestination = Screen.Garden.route,
+          route = context.getString(Screen.Garden.nameResId)) {
+            composable(route = Screen.Garden.route) { FictionalGardenScreen(navActions) }
+          }
     }
   }
 
