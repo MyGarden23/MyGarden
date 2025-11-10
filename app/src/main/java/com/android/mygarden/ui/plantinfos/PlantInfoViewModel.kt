@@ -2,6 +2,7 @@ package com.android.mygarden.ui.plantinfos
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
@@ -13,9 +14,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /** Enum representing which tab is currently selected in the plant info screen. */
-enum class SelectedPlantInfoTab(val text: String) {
-  DESCRIPTION("Description"),
-  HEALTH_STATUS("Health"),
+enum class SelectedPlantInfoTab(val textRes: Int) {
+  DESCRIPTION(R.string.description),
+  HEALTH_STATUS(R.string.tab_health),
 }
 
 /** UI state for the plant info screen. Contains all the plant information to be displayed. */
@@ -52,10 +53,9 @@ class PlantInfoViewModel(
   val uiState: StateFlow<PlantInfoUIState> = _uiState.asStateFlow()
 
   /** Initialize the UI state with plant data. Called when the screen is first displayed. */
-  fun initializeUIState(plant: Plant) {
+  fun initializeUIState(plant: Plant, loadingText: String) {
     viewModelScope.launch {
-      _uiState.value =
-          _uiState.value.copy(description = "Loading Plant Infos...", image = plant.image)
+      _uiState.value = _uiState.value.copy(description = loadingText, image = plant.image)
       // firewall to not regenerate is no picture taken
       val generatedPlant =
           if (!plant.image.isNullOrEmpty()) {

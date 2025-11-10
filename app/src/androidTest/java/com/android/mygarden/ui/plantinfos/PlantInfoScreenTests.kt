@@ -1,11 +1,14 @@
 package com.android.mygarden.ui.plantinfos
 
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import org.junit.Rule
@@ -13,6 +16,8 @@ import org.junit.Test
 
 class PlantInfoScreenTests {
   @get:Rule val composeTestRule = createComposeRule()
+
+  private lateinit var context: Context
 
   val plant: Plant =
       Plant(
@@ -34,6 +39,7 @@ class PlantInfoScreenTests {
    */
   fun setContent(plant: Plant, onSavePlant: (String) -> Unit = {}, onBackPressed: () -> Unit = {}) {
     composeTestRule.setContent {
+      context = LocalContext.current
       PlantInfosScreen(plant, onBackPressed = onBackPressed, onNextPlant = onSavePlant)
     }
     composeTestRule.waitForIdle()
@@ -139,7 +145,7 @@ class PlantInfoScreenTests {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals("Status: ${plant.healthStatus.description}")
+        .assertTextEquals(context.getString(R.string.status_label, plant.healthStatus.description))
   }
 
   @Test
@@ -148,7 +154,7 @@ class PlantInfoScreenTests {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
-        .assertTextEquals("Watering Frequency: Every ${plant.wateringFrequency} days")
+        .assertTextEquals(context.getString(R.string.watering_frequency, plant.wateringFrequency))
   }
 
   @Test
@@ -161,7 +167,8 @@ class PlantInfoScreenTests {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals("Status: ${PlantHealthStatus.NEEDS_WATER.description}")
+        .assertTextEquals(
+            context.getString(R.string.status_label, PlantHealthStatus.NEEDS_WATER.description))
   }
 
   @Test
@@ -174,7 +181,8 @@ class PlantInfoScreenTests {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals("Status: ${PlantHealthStatus.OVERWATERED.description}")
+        .assertTextEquals(
+            context.getString(R.string.status_label, PlantHealthStatus.OVERWATERED.description))
   }
 
   @Test
@@ -187,7 +195,8 @@ class PlantInfoScreenTests {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals("Status: ${PlantHealthStatus.UNKNOWN.description}")
+        .assertTextEquals(
+            context.getString(R.string.status_label, PlantHealthStatus.UNKNOWN.description))
   }
 
   @Test
@@ -208,7 +217,7 @@ class PlantInfoScreenTests {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
-        .assertTextEquals("Watering Frequency: Every 7 days")
+        .assertTextEquals(context.getString(R.string.watering_frequency, 7))
   }
 
   @Test

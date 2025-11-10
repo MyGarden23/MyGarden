@@ -77,7 +77,10 @@ fun PlantInfosScreen(
   val healthScrollState = rememberScrollState()
 
   // Initialize UI state when plant changes
-  LaunchedEffect(plant) { plantInfoViewModel.initializeUIState(plant) }
+  LaunchedEffect(plant) {
+    val loadingText = context.getString(R.string.loading_plant_infos)
+    plantInfoViewModel.initializeUIState(plant, loadingText)
+  }
 
   Scaffold(
       modifier = Modifier.testTag(PlantInfoScreenTestTags.SCREEN),
@@ -267,7 +270,7 @@ fun ModulableTabRow(
               modifier = tabModifier,
               text = {
                 Text(
-                    text = tab.text,
+                    text = stringResource(id = tab.textRes),
                     fontWeight =
                         if (uiState.selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
                     fontSize = 16.sp)
