@@ -19,11 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.android.mygarden.R
 
 /** Test tags for [DeletePlantPopup]. */
 object DeletePlantPopupTestTags {
@@ -34,11 +36,6 @@ object DeletePlantPopupTestTags {
   const val CANCEL_BUTTON = "PlantPopupDeleteQuestion"
 }
 
-const val DELETE_PLANT_QUESTION = "Delete this plant?"
-const val DELETE_PLANT_DESCRIPTION = "This action can’t be undone."
-const val KEEP_BUTTON_TEXT = "Keep in my garden"
-const val DELETE_BUTTON_TEXT = "Delete"
-
 /**
  * Popup that asks users to confirm they want to delete a selected plant.
  *
@@ -48,6 +45,7 @@ const val DELETE_BUTTON_TEXT = "Delete"
  */
 @Composable
 fun DeletePlantPopup(onDelete: () -> Unit, onCancel: () -> Unit, modifier: Modifier = Modifier) {
+  val context = LocalContext.current
   Dialog(
       onDismissRequest = onCancel,
       content = {
@@ -62,14 +60,14 @@ fun DeletePlantPopup(onDelete: () -> Unit, onCancel: () -> Unit, modifier: Modif
                   modifier = modifier.fillMaxSize().padding(16.dp),
                   horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = DELETE_PLANT_QUESTION,
+                        text = context.getString(R.string.delete_plant_question),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                         modifier = modifier.testTag(DeletePlantPopupTestTags.QUESTION))
                     Spacer(modifier = modifier.height(6.dp))
                     Text(
-                        text = DELETE_PLANT_DESCRIPTION,
+                        text = context.getString(R.string.delete_plant_description),
                         style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -83,14 +81,14 @@ fun DeletePlantPopup(onDelete: () -> Unit, onCancel: () -> Unit, modifier: Modif
                               ButtonDefaults.buttonColors(
                                   containerColor = MaterialTheme.colorScheme.outline,
                                   contentColor = MaterialTheme.colorScheme.onError),
-                              KEEP_BUTTON_TEXT,
+                              context.getString(R.string.keep_button_text),
                               modifier.testTag(DeletePlantPopupTestTags.CANCEL_BUTTON))
                           DeletePlantPopupButton(
                               onDelete,
                               ButtonDefaults.buttonColors(
                                   containerColor = MaterialTheme.colorScheme.error,
                                   contentColor = MaterialTheme.colorScheme.onError),
-                              DELETE_BUTTON_TEXT,
+                              context.getString(R.string.delete),
                               modifier.testTag(DeletePlantPopupTestTags.CONFIRM_BUTTON))
                         }
                   }
