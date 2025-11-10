@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.update
 /** Represents a repository that manages Plant and OwnedPlant objects. */
 class PlantsRepositoryLocal(
     scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-) : PlantsRepository {
+)  : PlantsRepositoryBase() {
 
   private var counter = 0
   private val healthCalculator = PlantHealthCalculator()

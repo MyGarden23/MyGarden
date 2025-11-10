@@ -42,7 +42,7 @@ private fun differentIdsErrMsg(id1: String, id2: String) =
 class PlantsRepositoryFirestore(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-) : PlantsRepository {
+) : PlantsRepositoryBase() {
   private val healthCalculator = PlantHealthCalculator()
 
   override val tickDelay: Duration = 30.minutes
@@ -146,6 +146,7 @@ class PlantsRepositoryFirestore(
     // Delete the data in Firestore
     val document = userPlantsCollection().document(id).get().await()
     if (!document.exists()) throw IllegalArgumentException(plantNotFoundErrMsg(id))
+
     userPlantsCollection().document(id).delete().await()
     // Delete the image in Cloud Storage
     deleteImageInCloudStorage(id)
