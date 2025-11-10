@@ -21,6 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.R
 import com.android.mygarden.model.authentication.AuthRepositoryFirebase
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.Screen
@@ -282,7 +283,7 @@ class AuthenticationTest {
         compose.waitUntil(effectiveTimeout) { vm.uiState.value.errorMsg != null }
 
         val s = vm.uiState.value
-        assertEquals("Sign-in cancelled", s.errorMsg)
+        assertEquals(compose.activity.getString(R.string.error_sign_in_cancelled), s.errorMsg)
         assertTrue(s.signedOut)
         assertNull(s.user)
       }
@@ -310,7 +311,7 @@ class AuthenticationTest {
         compose.waitUntil(effectiveTimeout) { vm.uiState.value.errorMsg != null }
 
         val s = vm.uiState.value
-        assertEquals("No Google account found on device", s.errorMsg)
+        assertEquals(compose.activity.getString(R.string.error_no_google_account), s.errorMsg)
         assertTrue(s.signedOut)
         assertNull(s.user)
       }
@@ -338,7 +339,7 @@ class AuthenticationTest {
     compose.waitUntil(effectiveTimeout) { vm.uiState.value.errorMsg != null }
 
     val s = vm.uiState.value
-    assertEquals("Failed to get credentials", s.errorMsg)
+    assertEquals(compose.activity.getString(R.string.error_failed_credentials), s.errorMsg)
     assertTrue(s.signedOut)
     assertNull(s.user)
   }
@@ -357,7 +358,7 @@ class AuthenticationTest {
     compose.waitUntil(effectiveTimeout) { vm.uiState.value.errorMsg != null }
 
     val s = vm.uiState.value
-    assertEquals("Unexpected error", s.errorMsg)
+    assertEquals(compose.activity.getString(R.string.error_unexpected), s.errorMsg)
     assertTrue(s.signedOut)
     assertNull(s.user)
   }

@@ -101,14 +101,18 @@ class SignInViewModel(private val repository: AuthRepository = AuthRepositoryFir
       } catch (e: GetCredentialCancellationException) {
         Log.w(TAG, "User cancelled sheet", e)
         _uiState.update {
-          it.copy(isLoading = false, errorMsg = "Sign-in cancelled", signedOut = true, user = null)
+          it.copy(
+              isLoading = false,
+              errorMsg = context.getString(R.string.error_sign_in_cancelled),
+              signedOut = true,
+              user = null)
         }
       } catch (e: NoCredentialException) {
         Log.w(TAG, "No credentials available (no Google account / provider not ready)", e)
         _uiState.update {
           it.copy(
               isLoading = false,
-              errorMsg = "No Google account found on device",
+              errorMsg = context.getString(R.string.error_no_google_account),
               signedOut = true,
               user = null)
         }
@@ -117,14 +121,18 @@ class SignInViewModel(private val repository: AuthRepository = AuthRepositoryFir
         _uiState.update {
           it.copy(
               isLoading = false,
-              errorMsg = "Failed to get credentials",
+              errorMsg = context.getString(R.string.error_failed_credentials),
               signedOut = true,
               user = null)
         }
       } catch (e: Exception) {
         Log.e(TAG, "Unexpected error: ${e.message}", e)
         _uiState.update {
-          it.copy(isLoading = false, errorMsg = "Unexpected error", signedOut = true, user = null)
+          it.copy(
+              isLoading = false,
+              errorMsg = context.getString(R.string.error_unexpected),
+              signedOut = true,
+              user = null)
         }
       }
     }
