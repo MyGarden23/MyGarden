@@ -45,7 +45,7 @@ abstract class FirestoreProfileTest {
   }
 
   @After
-  fun tearDown() {
+  open fun tearDown() {
     auth.signOut()
   }
 }
