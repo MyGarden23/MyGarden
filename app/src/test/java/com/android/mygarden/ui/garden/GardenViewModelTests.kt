@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.garden
 
-import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
@@ -34,7 +33,6 @@ class GardenViewModelTests {
   private lateinit var plantsRepo: PlantsRepository
   private lateinit var profileRepo: ProfileRepository
   private lateinit var vm: GardenViewModel
-  private lateinit var ownedPlant: OwnedPlant
   val plant1 =
       Plant(
           "hello",
@@ -181,7 +179,7 @@ class GardenViewModelTests {
     assertEquals("Apple", sortedPlants[0].plant.name)
     assertEquals("Banana", sortedPlants[1].plant.name)
     assertEquals("Cherry", sortedPlants[2].plant.name)
-      repositoryScope.cancel()
+    repositoryScope.cancel()
   }
 
   /** Tests that filtering by dry plants works correctly */
@@ -225,7 +223,7 @@ class GardenViewModelTests {
     assertEquals(2, filteredPlants.size)
     assertTrue(filteredPlants.any { it.plant.name == "Dry" })
     assertTrue(filteredPlants.any { it.plant.name == "VeryDry" })
-      repositoryScope.cancel()
+    repositoryScope.cancel()
   }
 
   /** Tests that filtering by healthy plants works correctly */
@@ -261,7 +259,7 @@ class GardenViewModelTests {
     val filteredPlants = vm.uiState.value.filteredAndSortedPlants
     assertEquals(2, filteredPlants.size)
     assertTrue(filteredPlants.all { it.plant.healthStatus == PlantHealthStatus.HEALTHY })
-      repositoryScope.cancel()
+    repositoryScope.cancel()
   }
 
   @Test
@@ -279,7 +277,7 @@ class GardenViewModelTests {
     val sorted = vm.uiState.value.filteredAndSortedPlants
     assertEquals("Alpha", sorted[0].plant.latinName)
     assertEquals("Zebra", sorted[1].plant.latinName)
-      repositoryScope.cancel()
+    repositoryScope.cancel()
   }
 
   @Test
@@ -297,7 +295,7 @@ class GardenViewModelTests {
     val sorted = vm.uiState.value.filteredAndSortedPlants
     assertEquals("Old", sorted[0].plant.name)
     assertEquals("New", sorted[1].plant.name)
-      repositoryScope.cancel()
+    repositoryScope.cancel()
   }
 
   @Test
@@ -315,7 +313,7 @@ class GardenViewModelTests {
     val sorted = vm.uiState.value.filteredAndSortedPlants
     assertEquals("New", sorted[0].plant.name)
     assertEquals("Old", sorted[1].plant.name)
-      repositoryScope.cancel()
+    repositoryScope.cancel()
   }
 
   @Test
@@ -343,7 +341,7 @@ class GardenViewModelTests {
     runCurrent()
 
     assertEquals(2, vm.uiState.value.filteredAndSortedPlants.size)
-      repositoryScope.cancel()
+    repositoryScope.cancel()
   }
 
   @Test
@@ -365,7 +363,7 @@ class GardenViewModelTests {
     runCurrent()
 
     assertEquals(2, vm.uiState.value.filteredAndSortedPlants.size)
-      repositoryScope.cancel()
+    repositoryScope.cancel()
   }
 
   @Test
@@ -392,6 +390,6 @@ class GardenViewModelTests {
     assertEquals(2, result.size)
     assertEquals("A-Dry", result[0].plant.name)
     assertEquals("Z-Dry", result[1].plant.name)
-      repositoryScope.cancel()
+    repositoryScope.cancel()
   }
 }

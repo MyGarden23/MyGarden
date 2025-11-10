@@ -57,8 +57,10 @@ class GardenViewModel(
   init {
     refreshUIState()
     viewModelScope.launch {
-      plantsRepo.plantsFlow.collect { newList -> _uiState.value = _uiState.value.copy(newList)
-          applyFiltersAndSorting()}
+      plantsRepo.plantsFlow.collect { newList ->
+        _uiState.value = _uiState.value.copy(newList)
+        applyFiltersAndSorting()
+      }
     }
   }
 
@@ -90,7 +92,6 @@ class GardenViewModel(
   fun waterPlant(ownedPlant: OwnedPlant) {
     viewModelScope.launch {
       plantsRepo.waterPlant(ownedPlant.id, Timestamp(System.currentTimeMillis()))
-
     }
   }
 
@@ -178,7 +179,6 @@ class GardenViewModel(
           plants.filter { it.plant.healthStatus == PlantHealthStatus.HEALTHY }
     }
   }
-
 
   /**
    * Fetches all needed user information from the [profileRepo] or set an error message if the fetch
