@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -23,6 +22,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.navigation.TopBar
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.ZoneId
@@ -41,7 +41,6 @@ object EditPlantScreenTestTags {
   const val PLANT_SAVE = "plantSave"
   const val PLANT_DELETE = "plantDelete"
   const val DATE_PICKER_BUTTON = "datePicker"
-  const val GO_BACK_BUTTON = "goBack"
 }
 
 /**
@@ -66,6 +65,8 @@ fun EditPlantScreen(
     onDeleted: (() -> Unit)? = null,
     goBack: () -> Unit = {},
 ) {
+  val context = LocalContext.current
+
   // Load the plant when the id changes
   LaunchedEffect(ownedPlantId) { editPlantViewModel.loadPlant(ownedPlantId) }
 
@@ -115,15 +116,10 @@ fun EditPlantScreen(
   Scaffold(
       modifier = Modifier.testTag(NavigationTestTags.EDIT_PLANT_SCREEN),
       topBar = {
-        TopAppBar(
-            title = { Text("Edit plant") },
-            navigationIcon = {
-              IconButton(
-                  onClick = { goBack() },
-                  modifier = Modifier.testTag(EditPlantScreenTestTags.GO_BACK_BUTTON)) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                  }
-            })
+        TopBar(
+            title = context.getString(R.string.edit_plant_screen_title),
+            hasGoBackButton = true,
+            onGoBack = goBack)
       },
       snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
         Column(

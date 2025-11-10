@@ -22,11 +22,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -35,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,13 +60,13 @@ import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthCalculator
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.navigation.Screen
+import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 
 /** Test tags to test the screen displays */
 object GardenScreenTestTags {
-  const val TITLE = "MyGardenTitle"
-  const val SIGN_OUT_BUTTON = "SignOutButton"
   const val USER_PROFILE_PICTURE = "UserProfilePicture"
   const val USERNAME = "Username"
   const val EDIT_PROFILE_BUTTON = "EditProfileButton"
@@ -130,12 +127,10 @@ private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
 
 // Text values
-private const val MY_GARDEN_TITLE_TEXT = "My Garden"
 private const val EMPTY_GARDEN_MESSAGE_TEXT =
     "You don't have a plant yet ! Use the button below to add a plant."
 private const val ADD_PLANT_FAB_TEXT = "Add a plant"
 private const val WATER_BUTTON_ICON_DESCRIPTION = "Water plant button"
-private const val SIGN_OUT_BUTTON_DESCRIPTION = "Sign out button"
 
 private fun getOwnedPlantImageDescription(ownedPlant: OwnedPlant): String =
     "Image of a ${ownedPlant.plant.name}"
@@ -181,26 +176,10 @@ fun GardenScreen(
       modifier = modifier.testTag(NavigationTestTags.GARDEN_SCREEN),
       // The top bar is only used to display the title of the screen
       topBar = {
-        CenterAlignedTopAppBar(
-            title = {
-              Text(
-                  fontWeight = FontWeight.ExtraBold,
-                  style = MaterialTheme.typography.titleLarge,
-                  text = MY_GARDEN_TITLE_TEXT)
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background),
-            modifier = modifier.testTag(GardenScreenTestTags.TITLE),
-            navigationIcon = {
-              Icon(
-                  imageVector = Icons.AutoMirrored.Filled.Logout,
-                  contentDescription = SIGN_OUT_BUTTON_DESCRIPTION,
-                  modifier =
-                      modifier
-                          .clickable(onClick = onSignOut)
-                          .testTag(GardenScreenTestTags.SIGN_OUT_BUTTON))
-            })
+        TopBar(
+            title = context.getString(Screen.Garden.nameResId),
+            hasSignOutButton = true,
+            onSignOut = onSignOut)
       },
       // The button to add a new plant to the collection
       floatingActionButton = { AddPlantFloatingButton(onAddPlant, modifier) },
