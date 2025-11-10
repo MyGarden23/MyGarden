@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.net.Uri
 import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -13,6 +15,7 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.view.LifecycleCameraController
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.ViewModel
 import java.io.File
 import java.io.FileOutputStream
@@ -94,6 +97,61 @@ class CameraViewModel : ViewModel() {
             Log.e(CAMERA_ERROR_TAG, "Picture could not been taken", exception)
           }
         })
+  }
+
+  /** Traite une image venant de la galerie pour suivre le même flux que la caméra. */
+  fun onImagePickedFromGallery(context: Context, uri: Uri, onPictureTaken: (String) -> Unit) {
+    try {
+      // 1) Decode le bitmap depuis l'URI
+      val input =
+          context.contentResolver.openInputStream(uri)
+              ?: throw IllegalStateException("Cannot open input stream for gallery image")
+      var bitmap = input.use { BitmapFactory.decodeStream(it) }
+
+      // 2) Corrige l'orientation via EXIF si dispo
+      val orientation =
+          runCatching {
+                context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                  ExifInterface(pfd.fileDescriptor)
+                      .getAttributeInt(
+                          ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+                } ?: ExifInterface.ORIENTATION_NORMAL
+              }
+              .getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+
+      bitmap = rotateBitmapIfNeeded(bitmap, orientation)
+
+      // 3) Sauvegarde localement exactement comme pour la caméra
+      val file = saveBitmapToFile(context, bitmap, "plant_${System.currentTimeMillis()}")
+
+      // 4) Renvoie le path au même callback (même flow que caméra)
+      onPictureTaken(file.absolutePath)
+    } catch (e: Exception) {
+      toastPictureFail(context)
+      Log.e(CAMERA_ERROR_TAG, "Failed to import gallery image", e)
+    }
+  }
+
+  private fun rotateBitmapIfNeeded(src: Bitmap, exifOrientation: Int): Bitmap {
+    val degrees =
+        when (exifOrientation) {
+          ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+          ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+          ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+          else -> 0f
+        }
+    if (degrees == 0f) return src
+    val m = Matrix().apply { postRotate(degrees) }
+    return Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
+  }
+
+  /**
+   * Display a Toast saying "Failed to take picture." on a fail to take a picture.
+   *
+   * @param context the context of the application used to display the Toast
+   */
+  private fun toastPictureFail(context: Context) {
+    Toast.makeText(context, "Failed to take picture.", Toast.LENGTH_SHORT).show()
   }
 
   /* Camera permission handling */

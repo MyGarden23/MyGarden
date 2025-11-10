@@ -103,13 +103,16 @@ fun CameraScreen(
           contract = ActivityResultContracts.RequestPermission(),
           onResult = { cameraPermission.value = it })
   val photoPickerLauncher =
-      rememberLauncherForActivityResult(
-          contract = ActivityResultContracts.PickVisualMedia(),
-          onResult = { uri ->
-            if (uri != null) {
-              onPictureTaken(uri.toString())
-            }
-          })
+      rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) { uri
+        ->
+        uri?.let {
+          cameraViewModel.onImagePickedFromGallery(
+              context = context,
+              uri = it,
+              onPictureTaken = onPictureTaken // same callback as the camera button
+              )
+        }
+      }
 
   LaunchedEffect(Unit) {
     // Refresh the camera permission when the screen is created
