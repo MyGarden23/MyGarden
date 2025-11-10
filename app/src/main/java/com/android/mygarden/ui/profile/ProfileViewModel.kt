@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.profile
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.profile.GardeningSkill
@@ -145,8 +146,15 @@ class ProfileViewModel(
     _uiState.value = _uiState.value.copy(registerPressed = registerPressed)
   }
 
-  /** validate and save the profile in firestore through the repository. return true on success */
-  fun submit(onResult: (Boolean) -> Unit) {
+  /**
+   * Validate and save the profile in firestore through the repository.
+   *
+   * @param onResult the callback called with as argument the success (true) or fail (false) of the
+   *   saving operation on the Profile repo
+   * @param context the context used to access Shared Preferences to try and send the potential
+   *   local FCM token
+   */
+  fun submit(onResult: (Boolean) -> Unit, context: Context) {
     // show errors if needed
     setRegisterPressed(true)
     val state = _uiState.value
@@ -176,7 +184,7 @@ class ProfileViewModel(
       try {
         repo.saveProfile(profile)
         onResult(true)
-      } catch (e: Exception) {
+      } catch (_: Exception) {
         // log if needed
         onResult(false)
       }

@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
 import com.android.mygarden.model.authentication.AuthRepository
 import com.android.mygarden.model.authentication.AuthRepositoryFirebase
+import com.android.mygarden.model.notifications.FCMTokenSyncer
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,6 +81,9 @@ class SignInViewModel(private val repository: AuthRepository = AuthRepositoryFir
         repository.signInWithGoogle(credential).fold({ result ->
           val user = result.user
           val isNewUser = result.isNewUser
+
+          // Try to sync the FCM token
+          FCMTokenSyncer.trySync(context)
 
           _uiState.update {
             it.copy(

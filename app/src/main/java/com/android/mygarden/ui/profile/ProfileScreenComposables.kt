@@ -398,16 +398,17 @@ private fun SaveButton(
     onRegisterPressed: () -> Unit
 ) {
   val context = LocalContext.current
-
   Button(
       onClick = {
         profileViewModel.setRegisterPressed(true)
         if (profileViewModel.canRegister()) {
-          profileViewModel.submit { success ->
-            if (success) {
-              onRegisterPressed()
-            }
-          }
+          profileViewModel.submit(
+              { success ->
+                if (success) {
+                  onRegisterPressed()
+                }
+              },
+              context)
         }
       },
       modifier =
