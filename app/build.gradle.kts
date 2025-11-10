@@ -249,6 +249,9 @@ dependencies {
     implementation("com.google.firebase:firebase-ai")
 
     implementation(libs.kotlinx.coroutines.play.services)
+
+    // Used to read and correct image EXIF metadata (e.g., rotation) for photos from camera/gallery
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
 }
 
 
