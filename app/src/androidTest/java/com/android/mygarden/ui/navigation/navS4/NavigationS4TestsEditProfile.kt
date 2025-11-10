@@ -1,5 +1,7 @@
 package com.android.mygarden.ui.navigation.navS4
 
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -9,6 +11,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.R
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
@@ -27,10 +30,12 @@ class NavigationS4TestsEditProfile {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navController: NavHostController
+  private lateinit var context: Context
 
   @Before
   fun setUp() {
     composeTestRule.setContent {
+      context = LocalContext.current
       val controller = rememberNavController()
       navController = controller
       MyGardenTheme {
@@ -49,7 +54,7 @@ class NavigationS4TestsEditProfile {
         .performClick()
     composeTestRule
         .onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE)
-        .assertTextContains("Edit Profile")
+        .assertTextContains(context.getString(R.string.edit_profile_screen_title))
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
     composeTestRule
