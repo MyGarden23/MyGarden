@@ -58,7 +58,7 @@ class GardenViewModel(
     refreshUIState()
     viewModelScope.launch {
       plantsRepo.plantsFlow.collect { newList ->
-        _uiState.value = _uiState.value.copy(newList)
+        _uiState.value = _uiState.value.copy(plants = newList)
         applyFiltersAndSorting()
       }
     }
@@ -67,6 +67,13 @@ class GardenViewModel(
   /** Refresh the UI state by fetching all the owned plants and user information. */
   fun refreshUIState() {
     fetchProfileInfos()
+    viewModelScope.launch {
+      try {
+        plantsRepo.getAllOwnedPlants()
+      } catch (e: Exception) {
+        setErrorMsg("Failed to load plants")
+      }
+    }
   }
 
   /** Clears the error message of the UI state. */
