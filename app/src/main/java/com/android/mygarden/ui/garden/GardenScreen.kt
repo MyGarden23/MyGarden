@@ -130,14 +130,6 @@ private val AVATAR_SIZE = 40.dp
 private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
 
-// Text values
-private const val MY_GARDEN_TITLE_TEXT = "My Garden"
-private const val EMPTY_GARDEN_MESSAGE_TEXT =
-    "You don't have a plant yet ! Use the button below to add a plant."
-private const val ADD_PLANT_FAB_TEXT = "Add a plant"
-private const val WATER_BUTTON_ICON_DESCRIPTION = "Water plant button"
-private const val SIGN_OUT_BUTTON_DESCRIPTION = "Sign out button"
-
 private fun getOwnedPlantImageDescription(ownedPlant: OwnedPlant): String =
     "Image of a ${ownedPlant.plant.name}"
 
@@ -188,7 +180,7 @@ fun GardenScreen(
               Text(
                   fontWeight = FontWeight.ExtraBold,
                   style = MaterialTheme.typography.titleLarge,
-                  text = MY_GARDEN_TITLE_TEXT)
+                  text = stringResource(R.string.my_garden_title))
             },
             colors =
                 TopAppBarDefaults.topAppBarColors(
@@ -197,7 +189,7 @@ fun GardenScreen(
             navigationIcon = {
               Icon(
                   imageVector = Icons.AutoMirrored.Filled.Logout,
-                  contentDescription = SIGN_OUT_BUTTON_DESCRIPTION,
+                  contentDescription = stringResource(R.string.sign_out_button_description),
                   modifier =
                       modifier
                           .clickable(onClick = onSignOut)
@@ -297,7 +289,7 @@ fun AddPlantFloatingButton(onAddPlant: () -> Unit, modifier: Modifier = Modifier
               painter = painterResource(R.drawable.tree_icon),
               contentDescription = null,
               tint = MaterialTheme.colorScheme.primary)
-          Text(text = ADD_PLANT_FAB_TEXT)
+          Text(text = stringResource(R.string.add_plant_fab_text))
         }
       }
 }
@@ -456,7 +448,7 @@ fun WaterButton(modifier: Modifier = Modifier, color: Color, onButtonPressed: ()
       contentAlignment = Alignment.Center) {
         Icon(
             Icons.Default.WaterDrop,
-            contentDescription = WATER_BUTTON_ICON_DESCRIPTION,
+            contentDescription = stringResource(R.string.water_button_icon_description),
             tint = color,
             modifier = Modifier.size(WATER_BUTTON_DROP_ICON_SIZE))
       }
