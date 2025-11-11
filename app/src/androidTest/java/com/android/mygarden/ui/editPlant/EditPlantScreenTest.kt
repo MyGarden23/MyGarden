@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -181,7 +182,7 @@ class EditPlantScreenTest {
     val goBack = mutableListOf<Boolean>()
     setContentWith(goBackCalled = goBack)
 
-    composeRule.onNodeWithContentDescription("Back").performClick()
+    composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
     assertTrue(goBack.isNotEmpty())
   }
 
