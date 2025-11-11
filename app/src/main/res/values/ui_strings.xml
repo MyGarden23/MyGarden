@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen Names -->
+    <string name="edit_plant_screen_title">Edit Plant</string>
+    <string name="edit_profile_screen_title">Edit Profile</string>
+    <string name="new_profile_screen_title">New Profile</string>
+    <string name="plant_info_screen_title">Plant Info</string>
+    <string name="authentication_screen_title">Authentication</string>
+    <string name="camera_screen_title">Camera</string>
+    <string name="garden_screen_title">Garden</string>
+    <string name="choose_avatar_screen_title">Choose Avatar</string>
+
+
+    <!-- Sign In Screen -->
+    <string name="login_successful">Login successful!</string>
+    <string name="description_logo">My Garden logo</string>
+    <string name="description_google_icon">Google Icon</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="error_sign_in_cancelled">Sign-in cancelled</string>
+    <string name="error_no_google_account">No Google account found on device</string>
+    <string name="error_failed_credentials">Failed to get credentials</string>
+    <string name="error_unexpected">Unexpected error</string>
+
+
+    <!-- Camera Screen -->
+    <string name="flip_camera_icon_description">Flip Camera Icon</string>
+    <string name="take_picture_icon_description">Take picture Icon</string>
+    <string name="open_gallery_icon_description">Open Gallery Icon</string>
+    <string name="upload_picture_gallery_text">Upload Plant from Gallery</string>
+    <string name="give_camera_access_text">Give camera access</string>
+    <string name="error_accessing_settings_log_e">Error accessing the settings app.</string>
+    <string name="error_accessing_settings_user">"Error accessing the settings app :("</string>
+    <string name="error_fail_take_picture">"Failed to take picture."</string>
+
+
+    <!-- Edit Plant Screen -->
+    <string name="plant_image_description">Plant Image</string>
+    <string name="plant_image_no_image_available">No image available</string>
+    <string name="pick_date_icon_description">Pick date</string>
+    <string name="error_failed_load_plant_edit">Failed to load plant</string>
+    <string name="error_failed_delete_plant_edit">Failed to delete plant</string>
+    <string name="error_plant_not_loaded">Plant not loaded yet</string>
+    <string name="error_description_blank">Please put a description</string>
+    <string name="error_last_watered_missing">Please select the last time watered</string>
+    <string name="error_failed_save_changes_edit">Failed to save changes</string>
+
+
+    <!-- Garden Screen -->
+    <string name="empty_garden_message_text">You don\'t have a plant yet ! Use the button below to add a plant.</string>
+    <string name="add_plant_fab_text">Add a plant</string>
+    <string name="water_button_icon_description">Water plant button</string>
+    <string name="sign_out_button_description">Sign out button</string>
+    <string name="owned_plant_image_description">Image of a %1$s</string>
+    <string name="avatar_description">Avatar %1$s</string>
+    <string name="error_fetch_all_plants_garden">getAllPlants failed : Owned plants couldn\'t be retrieved from repository</string>
+    <string name="error_failed_get_profile_garden">Failed to get user profile</string>
+
+
+    <!-- Plant Info Screen -->
+    <string name="image_plant_description">Image of the plant</string>
+    <string name="watering_frequency">Watering Frequency: Every %1$d days</string>
+    <string name="status_label">Status: %1$s</string>
+    <string name="tab_health">Health</string>
+    <string name="loading_plant_infos">Loading Plant Infos…</string>
+
+
+    <!-- Pop Up Screen -->
+    <string name="popup_dismiss_button_content_description">Quit the popup</string>
+    <string name="popup_confirm_button_text">Go to Garden</string>
+    <string name="pop_up_title">Your %1$s is thirsty!</string>
+
+
+    <!-- Delete Plant Pop Up -->
+    <string name="delete_plant_question">Delete this plant?</string>
+    <string name="delete_plant_description">This action can’t be undone.</string>
+    <string name="keep_button_text">Keep in my garden</string>
+
+
+
+    <!-- Profile Screen Base -->
+    <string name="avatar_picture_description">Profile Avatar</string>
+    <string name="mandatory_first_name_label">First Name *</string>
+    <string name="mandatory_first_name_placeholder">Enter your first name</string>
+    <string name="mandatory_last_name_label">Last Name *</string>
+    <string name="mandatory_last_name_placeholder">Enter your last name</string>
+    <string name="favorite_plant_label">Favorite Plant</string>
+    <string name="favorite_plant_placeholder">Enter your favorite plant</string>
+    <string name="experience_label">Experience with Plants</string>
+    <string name="experience_placeholder">Select your experience level</string>
+    <string name="mandatory_country_label">Country *</string>
+    <string name="mandatory_country_placeholder">Search for your country</string>
+    <string name="mandatory_country_dropdown_description">Country dropdown</string>
+    <string name="number_countries_found">%1$d countries found</string>
+    <string name="more_countries_found">… and %1$d more countries</string>
+    <string name="no_country_found">No countries found</string>
+    <string name="save_profile_button_text">Save Profile</string>
+
+
+
+    <!-- Button text -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="back_description">Back button</string>
+    <string name="save">Save</string>
+    <string name="next">Next</string>
+
+
+    <!-- Form labels and placeholders-->
+    <string name="name">Name</string>
+    <string name="latin_name">Latin name</string>
+    <string name="description">Description</string>
+    <string name="description_error">Description cannot be empty</string>
+    <string name="last_time_watered">Last time watered</string>
+    <string name="last_time_watered_error">Last time watered is required</string>
+    <string name="select_date">Select a date</string>
+
+</resources>
