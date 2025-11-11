@@ -108,8 +108,7 @@ class GardenViewModel(
    * @param option the new sorting option to apply
    */
   fun setSortOption(option: SortOption) {
-    _uiState.value = _uiState.value.copy(currentSortOption = option)
-    applyFiltersAndSorting()
+      applyFiltersAndSorting(sortOption = option)
   }
 
   /**
@@ -118,8 +117,7 @@ class GardenViewModel(
    * @param option the new filtering option to apply
    */
   fun setFilterOption(option: FilterOption) {
-    _uiState.value = _uiState.value.copy(currentFilterOption = option)
-    applyFiltersAndSorting()
+      applyFiltersAndSorting(filterOption = option)
   }
 
   /**
@@ -127,12 +125,23 @@ class GardenViewModel(
    *
    * This function chains filtering and sorting operations to produce the final list that should be
    * displayed in the UI.
+   *
+   * @param sortOption the sorting option to apply (defaults to current option in UI state)
+   * @param filterOption the filtering option to apply (defaults to current option in UI state)
    */
-  private fun applyFiltersAndSorting() {
+  private fun applyFiltersAndSorting(
+      sortOption: SortOption = _uiState.value.currentSortOption,
+      filterOption: FilterOption = _uiState.value.currentFilterOption
+  ) {
     val currentState = _uiState.value
-    val filtered = filterPlants(currentState.plants, currentState.currentFilterOption)
-    val sorted = sortPlants(filtered, currentState.currentSortOption)
-    _uiState.value = _uiState.value.copy(filteredAndSortedPlants = sorted)
+      val filtered = filterPlants(currentState.plants, filterOption)
+      val sorted = sortPlants(filtered, sortOption)
+      _uiState.value =
+          _uiState.value.copy(
+              filteredAndSortedPlants = sorted,
+              currentSortOption = sortOption,
+              currentFilterOption = filterOption
+          )
   }
 
   /**
