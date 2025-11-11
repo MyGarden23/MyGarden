@@ -60,7 +60,8 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   private fun createTestPlant(
       name: String = "Test Plant",
       latinName: String = "Testus Plantus",
-      healthStatus: PlantHealthStatus = PlantHealthStatus.HEALTHY
+      healthStatus: PlantHealthStatus = PlantHealthStatus.HEALTHY,
+      location: PlantLocation = PlantLocation.UNKNOWN
   ): Plant {
 
     return Plant(
@@ -68,6 +69,8 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
         image = null,
         latinName = latinName,
         description = "A test plant description",
+        location = location,
+        lightExposure = "A light exposure description",
         healthStatus = healthStatus,
         healthStatusDescription = healthStatus.description,
         wateringFrequency = 7)
@@ -113,13 +116,15 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
       createTestPlant(
           name = "test plant 1",
           latinName = "test in latin plant 1",
-          healthStatus = PlantHealthStatus.SEVERELY_OVERWATERED)
+          healthStatus = PlantHealthStatus.SEVERELY_OVERWATERED,
+          location = PlantLocation.OUTDOOR)
 
   private val plant2 =
       createTestPlant(
           name = "test plant 2",
           latinName = "test in latin plant 2",
-          healthStatus = PlantHealthStatus.SEVERELY_DRY)
+          healthStatus = PlantHealthStatus.SEVERELY_DRY,
+          location = PlantLocation.INDOOR)
 
   private val plant3 =
       createTestPlant(
