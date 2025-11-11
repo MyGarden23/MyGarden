@@ -47,7 +47,9 @@ class NavigationS4TestsEditProfile {
         .onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)
         .assertIsDisplayed()
         .performClick()
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.TITLE).assertTextContains("Edit Profile")
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE)
+        .assertTextContains("Edit Profile")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
     composeTestRule

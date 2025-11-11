@@ -96,20 +96,12 @@ private fun ProfileHeader(
     modifier: Modifier = Modifier,
     uiState: ProfileUIState,
     onAvatarClick: () -> Unit,
-    title: String = "New Profile",
 ) {
   Row(modifier = modifier) {
     Column(
         modifier = Modifier.weight(CONTENT_SECTION_WEIGHT).fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly) {
-          Text(
-              text = title,
-              fontSize = TITLE_FONT_SIZE,
-              fontWeight = FontWeight.Medium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.testTag(ProfileScreenTestTags.TITLE))
-
           // Avatar placeholder with person icon
           Box(
               modifier =
@@ -443,9 +435,16 @@ fun ProfileScreenBase(
   Scaffold(
       modifier = Modifier.testTag(ProfileScreenTestTags.SCREEN),
       topBar = {
-        if (onNavBackIconClick != null) {
-          TopBar(title = title, hasGoBackButton = true, onGoBack = onNavBackIconClick)
-        }
+        // Back button displayed only when Edit Profile, not New Profile
+        TopBar(
+            title = title,
+            hasGoBackButton = onNavBackIconClick != null,
+            onGoBack =
+                if (onNavBackIconClick != null) {
+                  onNavBackIconClick
+                } else {
+                  {}
+                })
       },
       bottomBar = {
         SaveButton(
@@ -462,7 +461,6 @@ fun ProfileScreenBase(
               ProfileHeader(
                   uiState = uiState,
                   onAvatarClick = onAvatarClick,
-                  title = title,
                   modifier = Modifier.weight(HEADER_SECTION_WEIGHT),
               )
 

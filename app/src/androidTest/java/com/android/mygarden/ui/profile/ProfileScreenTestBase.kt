@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 
@@ -61,7 +62,7 @@ abstract class ProfileScreenTestBase {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
 
     // Verify header components
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.AVATAR).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.AVATAR).assertHasClickAction()
 
@@ -80,7 +81,7 @@ abstract class ProfileScreenTestBase {
   @org.junit.Test
   fun titleDisplaysCorrectText() {
     setContent()
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.TITLE).assertTextEquals(expectedTitle)
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertTextEquals(expectedTitle)
   }
 
   @org.junit.Test

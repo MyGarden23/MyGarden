@@ -5,7 +5,6 @@ import com.android.mygarden.model.profile.GardeningSkill
 /** Test tags for ProfileScreen components to enable UI testing */
 object ProfileScreenTestTags {
   const val SCREEN = "new_profile_screen"
-  const val TITLE = "profile_title"
   const val AVATAR = "profile_avatar"
   const val FIRST_NAME_FIELD = "first_name_field"
   const val LAST_NAME_FIELD = "last_name_field"
