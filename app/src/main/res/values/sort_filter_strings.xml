@@ -22,7 +22,4 @@
     <!-- Empty State Messages -->
     <string name="empty_garden_message">You don\'t have a plant yet ! Use the button below to add a plant.</string>
     <string name="empty_filter_message">No plants match the current filters.</string>
-
-    <!-- Water Button -->
-    <string name="water_button_icon_description">Water plant button</string>
 </resources>

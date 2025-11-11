@@ -46,6 +46,7 @@
 
 
     <!-- Garden Screen -->
+    <string name="my_garden_title">My Garden</string>
     <string name="empty_garden_message_text">You don\'t have a plant yet ! Use the button below to add a plant.</string>
     <string name="add_plant_fab_text">Add a plant</string>
     <string name="water_button_icon_description">Water plant button</string>
