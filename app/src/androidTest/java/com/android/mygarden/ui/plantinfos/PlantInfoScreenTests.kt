@@ -12,10 +12,11 @@ import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
+import com.android.mygarden.utils.FirestoreProfileTest
 import org.junit.Rule
 import org.junit.Test
 
-class PlantInfoScreenTests {
+class PlantInfoScreenTests : FirestoreProfileTest() {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var context: Context
