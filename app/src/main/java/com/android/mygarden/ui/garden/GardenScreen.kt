@@ -75,6 +75,7 @@ object GardenScreenTestTags {
   const val EDIT_PROFILE_BUTTON = "EditProfileButton"
   const val GARDEN_LIST = "GardenList"
   const val EMPTY_GARDEN_MSG = "EmptyGardenMsg"
+  const val EMPTY_FILTER_MSG = "EmptyFilterMsg"
   const val ADD_PLANT_FAB = "AddPlantFAB"
 
   // Test tags that are Plant Card specific
@@ -165,6 +166,7 @@ fun GardenScreen(
   val context = LocalContext.current
   val uiState by gardenViewModel.uiState.collectAsState()
   val plants = uiState.plants
+  val filteredAndSortedPlants = uiState.filteredAndSortedPlants
 
   // Fetch correct owned plants list at each recomposition of the screen
   LaunchedEffect(Unit) { gardenViewModel.refreshUIState() }
@@ -210,32 +212,25 @@ fun GardenScreen(
           // Profile row with user profile picture, username and a button to edit the profile
           ProfileRow(onEditProfile, modifier, uiState)
           Spacer(modifier = modifier.height(16.dp))
+
+          // Sort and filter bar - only show if there are plants in the garden
           if (plants.isNotEmpty()) {
-            // The full list of owned plant
-            LazyColumn(
-                modifier =
-                    modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = PLANT_ITEM_HORIZONTAL_PADDING)
-                        .testTag(GardenScreenTestTags.GARDEN_LIST),
-                verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING)) {
-                  items(plants.size) { index ->
-                    PlantCard(
-                        plants[index], modifier, { onPlantClick(plants[index]) }, gardenViewModel)
-                  }
-                }
-          } else {
-            // The list of plant is empty : display a simple message instead
-            Box(
-                modifier =
-                    modifier
-                        .fillMaxSize()
-                        .padding(EMPTY_LIST_MESSAGE_PADDING)
-                        .testTag(GardenScreenTestTags.EMPTY_GARDEN_MSG),
-                contentAlignment = Alignment.Center) {
-                  Text(text = EMPTY_GARDEN_MESSAGE_TEXT)
-                }
+            SortFilterBar(
+                currentSort = uiState.currentSortOption,
+                currentFilter = uiState.currentFilterOption,
+                onSortChange = { gardenViewModel.setSortOption(it) },
+                onFilterChange = { gardenViewModel.setFilterOption(it) },
+                modifier = modifier)
+            Spacer(modifier = modifier.height(12.dp))
           }
+
+          // Display the garden content (list or empty message)
+          GardenContent(
+              plants = plants,
+              filteredAndSortedPlants = filteredAndSortedPlants,
+              onPlantClick = onPlantClick,
+              gardenViewModel = gardenViewModel,
+              modifier = modifier)
         }
       })
 }
@@ -529,4 +524,68 @@ fun colorsFromHealthStatus(
     PlantHealthStatus.SEVERELY_OVERWATERED ->
         PlantCardColorPalette(customColors.redPlantCardBackground, colorScheme.error)
   }
+}
+
+/**
+ * Displays the garden content: either the list of plants or an empty message.
+ *
+ * @param plants The full list of plants (used to determine if garden is empty)
+ * @param filteredAndSortedPlants The filtered and sorted list to display
+ * @param onPlantClick Callback when a plant card is clicked
+ * @param gardenViewModel The view model for plant actions
+ * @param modifier Optional modifier for the composable
+ */
+@Composable
+fun GardenContent(
+    plants: List<OwnedPlant>,
+    filteredAndSortedPlants: List<OwnedPlant>,
+    onPlantClick: (OwnedPlant) -> Unit,
+    gardenViewModel: GardenViewModel,
+    modifier: Modifier = Modifier
+) {
+  if (filteredAndSortedPlants.isNotEmpty()) {
+    // The full list of owned plants
+    LazyColumn(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = PLANT_ITEM_HORIZONTAL_PADDING)
+                .testTag(GardenScreenTestTags.GARDEN_LIST),
+        verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING)) {
+          items(filteredAndSortedPlants.size) { index ->
+            PlantCard(
+                filteredAndSortedPlants[index],
+                modifier,
+                { onPlantClick(filteredAndSortedPlants[index]) },
+                gardenViewModel)
+          }
+        }
+  } else {
+    // The list of plants is empty: display a message
+    EmptyGardenMessage(plants = plants, modifier = modifier)
+  }
+}
+
+/**
+ * Displays an appropriate message when no plants are shown.
+ *
+ * Shows different messages depending on whether the garden is truly empty or just filtered out.
+ *
+ * @param plants The full list of plants (used to determine the correct message)
+ * @param modifier Optional modifier for the composable
+ */
+@Composable
+fun EmptyGardenMessage(plants: List<OwnedPlant>, modifier: Modifier = Modifier) {
+  val isEmpty = plants.isEmpty()
+  val testTag =
+      if (isEmpty) GardenScreenTestTags.EMPTY_GARDEN_MSG else GardenScreenTestTags.EMPTY_FILTER_MSG
+  val message =
+      if (isEmpty) stringResource(R.string.empty_garden_message)
+      else stringResource(R.string.empty_filter_message)
+
+  Box(
+      modifier = modifier.fillMaxSize().padding(EMPTY_LIST_MESSAGE_PADDING).testTag(testTag),
+      contentAlignment = Alignment.Center) {
+        Text(text = message)
+      }
 }

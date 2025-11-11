@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sort and Filter Labels -->
+    <string name="sort_label">Sort</string>
+    <string name="filter_label">Filter</string>
+    <string name="sort_icon_description">Sort icon</string>
+    <string name="filter_icon_description">Filter icon</string>
+
+    <!-- Sort Options -->
+    <string name="sort_plant_name">Plant Name</string>
+    <string name="sort_latin_name">Latin Name</string>
+    <string name="sort_last_watered_asc">Oldest Watered</string>
+    <string name="sort_last_watered_desc">Recent Watered</string>
+
+    <!-- Filter Options -->
+    <string name="filter_all">All Plants</string>
+    <string name="filter_overwatered_only">Overwatered</string>
+    <string name="filter_dry_plants">Dry Plants</string>
+    <string name="filter_critical_only">Critical</string>
+    <string name="filter_healthy_only">Healthy</string>
+
+    <!-- Empty State Messages -->
+    <string name="empty_garden_message">You don\'t have a plant yet ! Use the button below to add a plant.</string>
+    <string name="empty_filter_message">No plants match the current filters.</string>
+
+    <!-- Water Button -->
+    <string name="water_button_icon_description">Water plant button</string>
+</resources>
