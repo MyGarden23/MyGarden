@@ -39,8 +39,6 @@ fun TopBar(
     onSignOut: () -> Unit = {}
 ) {
 
-  val context = LocalContext.current
-
   CenterAlignedTopAppBar(
       title = {
         Text(
