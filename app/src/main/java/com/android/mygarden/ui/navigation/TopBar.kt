@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.navigation
 
-import android.content.Context
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -56,43 +55,32 @@ fun TopBar(
       navigationIcon = {
         Row {
           if (hasGoBackButton) {
-            NavBackIcon(onClick = onGoBack, context = context)
+            NavigationButton(onClick = onGoBack)
           }
           if (hasSignOutButton) {
-            SignOutButton(onClick = onSignOut, context = context)
+            NavigationButton(onClick = onSignOut, isSignOut = true)
           }
         }
       })
 }
 
 /**
- * Potential sign out button
+ * Navigation button of the top bar that can be either a back button or a sign out button. Defaults
+ * to back button
  *
- * @param context Context to be used to retrieve the icon content description from the xml files
- * @param onClick the callback that clicking on the button will trigger
+ * @param onClick the callback that will be triggered when clicking on the button
+ * @param isSignOut boolean that chooses whether the button is a back button or a sign out button.
+ *   Defaults to false
  */
 @Composable
-fun SignOutButton(context: Context, onClick: () -> Unit = {}) {
-  IconButton(
-      onClick = onClick, modifier = Modifier.testTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON)) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.Logout,
-            contentDescription = context.getString(R.string.sign_out_button_description))
-      }
-}
-
-/**
- * Potential back button
- *
- * @param context Context to be used to retrieve the icon content description from the xml files
- * @param onClick the callback that clicking on the button will trigger
- */
-@Composable
-fun NavBackIcon(context: Context, onClick: () -> Unit = {}) {
-  IconButton(
-      onClick = onClick, modifier = Modifier.testTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON)) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = context.getString(R.string.back_description))
-      }
+fun NavigationButton(onClick: () -> Unit = {}, isSignOut: Boolean = false) {
+  val testTag =
+      if (isSignOut) NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON
+      else NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON
+  val imageVector =
+      if (isSignOut) Icons.AutoMirrored.Filled.Logout else Icons.AutoMirrored.Filled.ArrowBack
+  val resId = if (isSignOut) R.string.sign_out_button_description else R.string.back_description
+  IconButton(onClick = onClick, modifier = Modifier.testTag(testTag)) {
+    Icon(imageVector = imageVector, contentDescription = LocalContext.current.getString(resId))
+  }
 }
