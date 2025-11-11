@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuBoxScope
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -117,28 +118,13 @@ fun SortDropdown(
       onExpandedChange = { expanded = it },
       modifier = modifier.testTag(SortFilterBarTestTags.SORT_DROPDOWN)) {
         // Display the currently selected sort option
-        OutlinedTextField(
-            value = getSortLabel(currentSort),
-            onValueChange = {},
-            readOnly = true,
-            singleLine = true, // Ensure text stays on one line
-            maxLines = 1,
-            label = {
-              Text(
-                  stringResource(R.string.sort_label),
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis)
-            },
-            leadingIcon = {
-              Icon(
-                  Icons.AutoMirrored.Filled.Sort,
-                  contentDescription = stringResource(R.string.sort_icon_description))
-            },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            textStyle = MaterialTheme.typography.bodySmall // Smaller text to fit longer labels
-            )
+      DropdownTextField(
+          value = getSortLabel(currentSort),
+          label = stringResource(R.string.sort_label),
+          icon = Icons.AutoMirrored.Filled.Sort,
+          iconDescription = stringResource(R.string.sort_icon_description),
+            expanded = expanded,
+            modifier = Modifier)
 
         // Dropdown menu with all sort options
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -185,28 +171,13 @@ fun FilterDropdown(
       onExpandedChange = { expanded = it },
       modifier = modifier.testTag(SortFilterBarTestTags.FILTER_DROPDOWN)) {
         // Display the currently selected filter option
-        OutlinedTextField(
-            value = getFilterLabel(currentFilter),
-            onValueChange = {},
-            readOnly = true,
-            singleLine = true, // Ensure text stays on one line
-            maxLines = 1,
-            label = {
-              Text(
-                  stringResource(R.string.filter_label),
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis)
-            },
-            leadingIcon = {
-              Icon(
-                  Icons.Default.FilterList,
-                  contentDescription = stringResource(R.string.filter_icon_description))
-            },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            textStyle = MaterialTheme.typography.bodySmall // Smaller text to fit longer labels
-            )
+      DropdownTextField(
+          value = getFilterLabel(currentFilter),
+          label = stringResource(R.string.filter_label),
+          icon = Icons.Default.FilterList,
+          iconDescription = stringResource(R.string.filter_icon_description),
+            expanded = expanded,
+            modifier = Modifier)
 
         // Dropdown menu with all filter options
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -266,4 +237,44 @@ fun getFilterLabel(option: FilterOption): String {
     FilterOption.CRITICAL_ONLY -> stringResource(R.string.filter_critical_only)
     FilterOption.HEALTHY_ONLY -> stringResource(R.string.filter_healthy_only)
   }
+}
+
+/**
+ * Reusable dropdown text field component for ExposedDropdownMenuBox.
+ *
+ * This composable provides a consistent styled OutlinedTextField for dropdown menus,
+ * reducing code duplication between sort and filter dropdowns.
+ *
+ * @param value The current selected value to display
+ * @param label The label text for the text field
+ * @param icon The leading icon to display
+ * @param iconDescription Content description for the icon (for accessibility)
+ * @param expanded Whether the dropdown menu is currently expanded
+ * @param modifier Optional modifier for the composable
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExposedDropdownMenuBoxScope.DropdownTextField(
+    value: String,
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconDescription: String,
+    expanded: Boolean,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = {},
+        readOnly = true,
+        singleLine = true,
+        maxLines = 1,
+        label = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        leadingIcon = { Icon(icon, contentDescription = iconDescription) },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+        modifier = modifier
+            .menuAnchor()
+            .fillMaxWidth(),
+        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+        textStyle = MaterialTheme.typography.bodySmall
+    )
 }
