@@ -118,11 +118,11 @@ fun SortDropdown(
       onExpandedChange = { expanded = it },
       modifier = modifier.testTag(SortFilterBarTestTags.SORT_DROPDOWN)) {
         // Display the currently selected sort option
-      DropdownTextField(
-          value = getSortLabel(currentSort),
-          label = stringResource(R.string.sort_label),
-          icon = Icons.AutoMirrored.Filled.Sort,
-          iconDescription = stringResource(R.string.sort_icon_description),
+        DropdownTextField(
+            value = getSortLabel(currentSort),
+            label = stringResource(R.string.sort_label),
+            icon = Icons.AutoMirrored.Filled.Sort,
+            iconDescription = stringResource(R.string.sort_icon_description),
             expanded = expanded,
             modifier = Modifier)
 
@@ -171,11 +171,11 @@ fun FilterDropdown(
       onExpandedChange = { expanded = it },
       modifier = modifier.testTag(SortFilterBarTestTags.FILTER_DROPDOWN)) {
         // Display the currently selected filter option
-      DropdownTextField(
-          value = getFilterLabel(currentFilter),
-          label = stringResource(R.string.filter_label),
-          icon = Icons.Default.FilterList,
-          iconDescription = stringResource(R.string.filter_icon_description),
+        DropdownTextField(
+            value = getFilterLabel(currentFilter),
+            label = stringResource(R.string.filter_label),
+            icon = Icons.Default.FilterList,
+            iconDescription = stringResource(R.string.filter_icon_description),
             expanded = expanded,
             modifier = Modifier)
 
@@ -242,8 +242,8 @@ fun getFilterLabel(option: FilterOption): String {
 /**
  * Reusable dropdown text field component for ExposedDropdownMenuBox.
  *
- * This composable provides a consistent styled OutlinedTextField for dropdown menus,
- * reducing code duplication between sort and filter dropdowns.
+ * This composable provides a consistent styled OutlinedTextField for dropdown menus, reducing code
+ * duplication between sort and filter dropdowns.
  *
  * @param value The current selected value to display
  * @param label The label text for the text field
@@ -262,19 +262,16 @@ fun ExposedDropdownMenuBoxScope.DropdownTextField(
     expanded: Boolean,
     modifier: Modifier = Modifier
 ) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = {},
-        readOnly = true,
-        singleLine = true,
-        maxLines = 1,
-        label = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-        leadingIcon = { Icon(icon, contentDescription = iconDescription) },
-        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-        modifier = modifier
-            .menuAnchor()
-            .fillMaxWidth(),
-        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-        textStyle = MaterialTheme.typography.bodySmall
-    )
+  OutlinedTextField(
+      value = value,
+      onValueChange = {},
+      readOnly = true,
+      singleLine = true,
+      maxLines = 1,
+      label = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+      leadingIcon = { Icon(icon, contentDescription = iconDescription) },
+      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+      modifier = modifier.menuAnchor().fillMaxWidth(),
+      colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+      textStyle = MaterialTheme.typography.bodySmall)
 }

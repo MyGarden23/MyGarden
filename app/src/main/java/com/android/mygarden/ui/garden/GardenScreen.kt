@@ -224,11 +224,11 @@ fun GardenScreen(
             Spacer(modifier = modifier.height(12.dp))
           }
 
-            // Display the garden content (list or empty message)
-            GardenContent(
-                plants = plants,
-                filteredAndSortedPlants = filteredAndSortedPlants,
-                onPlantClick = onPlantClick,
+          // Display the garden content (list or empty message)
+          GardenContent(
+              plants = plants,
+              filteredAndSortedPlants = filteredAndSortedPlants,
+              onPlantClick = onPlantClick,
               gardenViewModel = gardenViewModel,
               modifier = modifier)
         }
@@ -543,29 +543,27 @@ fun GardenContent(
     gardenViewModel: GardenViewModel,
     modifier: Modifier = Modifier
 ) {
-    if (filteredAndSortedPlants.isNotEmpty()) {
-        // The full list of owned plants
-        LazyColumn(
-            modifier =
-                modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = PLANT_ITEM_HORIZONTAL_PADDING)
-                    .testTag(GardenScreenTestTags.GARDEN_LIST),
-            verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING)
-        ) {
-            items(filteredAndSortedPlants.size) { index ->
-                PlantCard(
-                    filteredAndSortedPlants[index],
-                    modifier,
-                    { onPlantClick(filteredAndSortedPlants[index]) },
-                    gardenViewModel
-                )
-            }
+  if (filteredAndSortedPlants.isNotEmpty()) {
+    // The full list of owned plants
+    LazyColumn(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = PLANT_ITEM_HORIZONTAL_PADDING)
+                .testTag(GardenScreenTestTags.GARDEN_LIST),
+        verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING)) {
+          items(filteredAndSortedPlants.size) { index ->
+            PlantCard(
+                filteredAndSortedPlants[index],
+                modifier,
+                { onPlantClick(filteredAndSortedPlants[index]) },
+                gardenViewModel)
+          }
         }
-    } else {
-        // The list of plants is empty: display a message
-        EmptyGardenMessage(plants = plants, modifier = modifier)
-    }
+  } else {
+    // The list of plants is empty: display a message
+    EmptyGardenMessage(plants = plants, modifier = modifier)
+  }
 }
 
 /**
@@ -578,21 +576,16 @@ fun GardenContent(
  */
 @Composable
 fun EmptyGardenMessage(plants: List<OwnedPlant>, modifier: Modifier = Modifier) {
-    val isEmpty = plants.isEmpty()
-    val testTag =
-        if (isEmpty) GardenScreenTestTags.EMPTY_GARDEN_MSG
-        else GardenScreenTestTags.EMPTY_FILTER_MSG
-    val message =
-        if (isEmpty) stringResource(R.string.empty_garden_message)
-        else stringResource(R.string.empty_filter_message)
+  val isEmpty = plants.isEmpty()
+  val testTag =
+      if (isEmpty) GardenScreenTestTags.EMPTY_GARDEN_MSG else GardenScreenTestTags.EMPTY_FILTER_MSG
+  val message =
+      if (isEmpty) stringResource(R.string.empty_garden_message)
+      else stringResource(R.string.empty_filter_message)
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(EMPTY_LIST_MESSAGE_PADDING)
-            .testTag(testTag),
-        contentAlignment = Alignment.Center
-    ) {
+  Box(
+      modifier = modifier.fillMaxSize().padding(EMPTY_LIST_MESSAGE_PADDING).testTag(testTag),
+      contentAlignment = Alignment.Center) {
         Text(text = message)
-    }
+      }
 }

@@ -108,7 +108,7 @@ class GardenViewModel(
    * @param option the new sorting option to apply
    */
   fun setSortOption(option: SortOption) {
-      applyFiltersAndSorting(sortOption = option)
+    applyFiltersAndSorting(sortOption = option)
   }
 
   /**
@@ -117,7 +117,7 @@ class GardenViewModel(
    * @param option the new filtering option to apply
    */
   fun setFilterOption(option: FilterOption) {
-      applyFiltersAndSorting(filterOption = option)
+    applyFiltersAndSorting(filterOption = option)
   }
 
   /**
@@ -134,14 +134,13 @@ class GardenViewModel(
       filterOption: FilterOption = _uiState.value.currentFilterOption
   ) {
     val currentState = _uiState.value
-      val filtered = filterPlants(currentState.plants, filterOption)
-      val sorted = sortPlants(filtered, sortOption)
-      _uiState.value =
-          _uiState.value.copy(
-              filteredAndSortedPlants = sorted,
-              currentSortOption = sortOption,
-              currentFilterOption = filterOption
-          )
+    val filtered = filterPlants(currentState.plants, filterOption)
+    val sorted = sortPlants(filtered, sortOption)
+    _uiState.value =
+        _uiState.value.copy(
+            filteredAndSortedPlants = sorted,
+            currentSortOption = sortOption,
+            currentFilterOption = filterOption)
   }
 
   /**
