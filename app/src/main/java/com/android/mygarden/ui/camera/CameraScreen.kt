@@ -102,6 +102,9 @@ fun CameraScreen(
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.RequestPermission(),
           onResult = { cameraPermission.value = it })
+
+  // Opens the system photo picker and sends the selected image to the ViewModel,
+  // so it follows the same flow as when a picture is taken with the camera
   val photoPickerLauncher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) { uri
         ->

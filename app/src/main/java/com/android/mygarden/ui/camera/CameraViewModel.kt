@@ -99,16 +99,17 @@ class CameraViewModel : ViewModel() {
         })
   }
 
-  /** Traite une image venant de la galerie pour suivre le même flux que la caméra. */
+  // Handles an image picked from the gallery and runs it through the same steps as the camera:
+  // decode → fix orientation → save locally → trigger onPictureTaken with the file path
   fun onImagePickedFromGallery(context: Context, uri: Uri, onPictureTaken: (String) -> Unit) {
     try {
-      // 1) Decode le bitmap depuis l'URI
+      // Decode the bitmap from the given URI
       val input =
           context.contentResolver.openInputStream(uri)
               ?: throw IllegalStateException("Cannot open input stream for gallery image")
       var bitmap = input.use { BitmapFactory.decodeStream(it) }
 
-      // 2) Corrige l'orientation via EXIF si dispo
+      // 2) Fix rotation if needed using EXIF data
       val orientation =
           runCatching {
                 context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
@@ -121,10 +122,10 @@ class CameraViewModel : ViewModel() {
 
       bitmap = rotateBitmapIfNeeded(bitmap, orientation)
 
-      // 3) Sauvegarde localement exactement comme pour la caméra
+      // Save locally (same as camera flow)
       val file = saveBitmapToFile(context, bitmap, "plant_${System.currentTimeMillis()}")
 
-      // 4) Renvoie le path au même callback (même flow que caméra)
+      // Pass the file path back through the same callback
       onPictureTaken(file.absolutePath)
     } catch (e: Exception) {
       toastPictureFail(context)
