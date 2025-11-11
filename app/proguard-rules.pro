@@ -38,7 +38,8 @@
     <init>();
 }
 
-# Specifically keep Serialized classes (these are what Firestore actually uses)
+# Specifically keep Serialized classes (redundant with above, but kept for documentation)
+# These are the core classes that Firestore actually uses - if something breaks, check these first
 -keep class com.android.mygarden.model.plant.SerializedPlant { *; }
 -keep class com.android.mygarden.model.plant.SerializedOwnedPlant { *; }
 -keep class com.android.mygarden.model.profile.Profile { *; }
@@ -59,8 +60,8 @@
     @com.google.firebase.firestore.ServerTimestamp <methods>;
 }
 
-# Keep all Parcelable implementations
--keepclassmembers class * implements android.os.Parcelable {
+# Keep Parcelable implementations in model classes
+-keepclassmembers class com.android.mygarden.model.** implements android.os.Parcelable {
     static ** CREATOR;
 }
 
@@ -93,18 +94,28 @@
 
 # ===== Other Android/Kotlin Essentials =====
 
-# Keep Kotlin data classes constructors
--keepclassmembers class **.*$Companion { *; }
-
-# Keep Parcelable implementations
--keepclassmembers class * implements android.os.Parcelable {
-    static ** CREATOR;
-}
+# Keep Kotlin companion objects in model classes (needed for Firebase serialization)
+-keepclassmembers class com.android.mygarden.model.**$Companion { *; }
 
 # Keep coroutines
 -keep class kotlin.coroutines.Continuation
 
-# Keep R8 from removing default parameter constructors
--keepclassmembers class * {
+# Keep constructors in model classes (Firebase needs these for deserialization)
+-keepclassmembers class com.android.mygarden.model.** {
     public <init>(...);
 }
+
+# ===== Android @Keep Annotation Support =====
+
+# Keep classes and members annotated with @Keep
+-keep class androidx.annotation.Keep
+-keep @androidx.annotation.Keep class * { *; }
+-keepclassmembers class * {
+    @androidx.annotation.Keep *;
+}
+
+# ===== Navigation Component (if used) =====
+
+# Uncomment if you use Jetpack Navigation with Safe Args
+#-keepnames class androidx.navigation.fragment.NavHostFragment
+#-keep class * extends androidx.navigation.Navigator
