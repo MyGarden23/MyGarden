@@ -99,9 +99,9 @@ class PlantInfoScreenTests {
 
   @Test
   fun locationTextIsDisplayedAfterClickingLocationTab() {
-      setContent(plant)
-      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
-      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertIsDisplayed()
+    setContent(plant)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertIsDisplayed()
   }
 
   @Test
@@ -117,7 +117,7 @@ class PlantInfoScreenTests {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertDoesNotExist()
-      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertDoesNotExist()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertDoesNotExist()
   }
 
   @Test
@@ -176,16 +176,18 @@ class PlantInfoScreenTests {
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
         .assertTextEquals(context.getString(R.string.watering_frequency, plant.wateringFrequency))
   }
-    @Test
-    fun locationTabDisplaysCorrectText() {
-        setContent(plant)
-        composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
-        composeTestRule
-            .onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT)
-            .assertTextEquals(plant.location.name)
-        composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT)
-            .assertTextEquals(plant.lightExposure)
-    }
+
+  @Test
+  fun locationTabDisplaysCorrectText() {
+    setContent(plant)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT)
+        .assertTextEquals(plant.location.name)
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT)
+        .assertTextEquals(plant.lightExposure)
+  }
 
   @Test
   fun needsWaterStatusDisplaysCorrectDescription() {

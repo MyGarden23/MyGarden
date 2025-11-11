@@ -242,26 +242,24 @@ fun PlantInfosScreen(
                         }
                         // --- Health Tab Content ---
                         SelectedPlantInfoTab.LOCATION -> {
-                            // Location text, INDOOR or OUTDOOR
-                            Text(
-                                text = uiState.location.name,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                lineHeight = 20.sp,
-                                modifier = Modifier.testTag(PlantInfoScreenTestTags.LOCATION_TEXT))
+                          // Location text, INDOOR or OUTDOOR
+                          Text(
+                              text = uiState.location.name,
+                              fontSize = 16.sp,
+                              fontWeight = FontWeight.Medium,
+                              color = MaterialTheme.colorScheme.onBackground,
+                              lineHeight = 20.sp,
+                              modifier = Modifier.testTag(PlantInfoScreenTestTags.LOCATION_TEXT))
 
-                            Spacer(modifier = Modifier.height(8.dp))
-                            // Light exposure description
-                            Text(
-                                text = uiState.lightExposure,
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                lineHeight = 20.sp,
-                                modifier =
-                                    Modifier.testTag(
-                                        PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT)
-                            )
+                          Spacer(modifier = Modifier.height(8.dp))
+                          // Light exposure description
+                          Text(
+                              text = uiState.lightExposure,
+                              fontSize = 14.sp,
+                              color = MaterialTheme.colorScheme.onBackground,
+                              lineHeight = 20.sp,
+                              modifier =
+                                  Modifier.testTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT))
                         }
                       }
                     }
