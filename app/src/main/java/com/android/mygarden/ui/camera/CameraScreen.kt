@@ -112,8 +112,14 @@ fun CameraScreen(
           cameraViewModel.onImagePickedFromGallery(
               context = context,
               uri = it,
-              onPictureTaken = onPictureTaken // same callback as the camera button
-              )
+              onPictureTaken = onPictureTaken,
+              onError = {
+                  Toast.makeText(
+                      context,
+                      context.getString(R.string.error_fail_take_picture),
+                      Toast.LENGTH_SHORT)
+                      .show()
+              })// same callback as the camera button
         }
       }
 

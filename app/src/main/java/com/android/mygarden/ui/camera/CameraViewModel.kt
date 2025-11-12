@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -101,7 +102,13 @@ class CameraViewModel : ViewModel() {
 
   // Handles an image picked from the gallery and runs it through the same steps as the camera:
   // decode → fix orientation → save locally → trigger onPictureTaken with the file path
-  fun onImagePickedFromGallery(context: Context, uri: Uri, onPictureTaken: (String) -> Unit) {
+  fun onImagePickedFromGallery(
+      context: Context,
+      uri: Uri,
+      onPictureTaken: (String) -> Unit,
+      onError: () -> Unit
+  )
+  {
     try {
       // Decode the bitmap from the given URI
       val input =
@@ -128,7 +135,7 @@ class CameraViewModel : ViewModel() {
       // Pass the file path back through the same callback
       onPictureTaken(file.absolutePath)
     } catch (e: Exception) {
-      toastPictureFail(context)
+      onError()
       Log.e(CAMERA_ERROR_TAG, "Failed to import gallery image", e)
     }
   }
@@ -144,15 +151,6 @@ class CameraViewModel : ViewModel() {
     if (degrees == 0f) return src
     val m = Matrix().apply { postRotate(degrees) }
     return Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
-  }
-
-  /**
-   * Display a Toast saying "Failed to take picture." on a fail to take a picture.
-   *
-   * @param context the context of the application used to display the Toast
-   */
-  private fun toastPictureFail(context: Context) {
-    Toast.makeText(context, "Failed to take picture.", Toast.LENGTH_SHORT).show()
   }
 
   /* Camera permission handling */

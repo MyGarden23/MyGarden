@@ -30,6 +30,7 @@
     <string name="give_camera_access_text">Give camera access</string>
     <string name="error_accessing_settings_user">"Error accessing the settings app :("</string>
     <string name="error_fail_take_picture">"Failed to take picture."</string>
+    <string name="error_fail_gallery_picture">"Failed to import gallery image."</string>
 
 
     <!-- Edit Plant Screen -->
