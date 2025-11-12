@@ -58,10 +58,10 @@ class ProfileRepositoryFirestore(
   /**
    * Attach the given Firebase Cloud Messaging token to the user's Firestore profile in a field
    * called "fcmToken". Create the field if it does not already exist and updates it if it exists.
+   * If the user currently has no Firestore profile stored, creates one.
    *
    * @param token the new token that will be attached to the profile
-   * @return true if the query succeeded otherwise false if the user has no Firestore profile yet or
-   *   if the update failed
+   * @return true if the query succeeded otherwise false
    */
   override suspend fun attachFCMToken(token: String): Boolean {
     val uid = getCurrentUserId() ?: return false

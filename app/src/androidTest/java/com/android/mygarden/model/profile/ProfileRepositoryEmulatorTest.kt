@@ -1,9 +1,12 @@
 package com.android.mygarden.model.profile
 
+import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.android.mygarden.model.notifications.PushNotificationsService
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FirestoreProfileTest
 import kotlinx.coroutines.flow.first
@@ -112,4 +115,41 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
     assertNotNull(uid)
     assertTrue(uid!!.isNotBlank())
   }
+
+    // Notification test with the profile repository
+
+    @Test
+    fun attachFCMToken_attaches_token_when_logged_in() = runTest {
+        val profile =
+            Profile(
+                firstName = "Ada",
+                lastName = "Lovelace",
+                gardeningSkill = GardeningSkill.BEGINNER,
+                favoritePlant = "Rose",
+                country = "UK",
+                hasSignedIn = false)
+        repo.saveProfile(profile)
+
+        // User should be logged in hence the token should attach
+        val res = repo.attachFCMToken("fake-token")
+        assertTrue(res)
+        val token = repo.getFCMToken()
+        assertTrue(token != null && token == "fake-token")
+    }
+
+    @Test
+    fun attachFCMToken_attach_when_not_logged_in() = runTest {
+        // No profile corresponding
+        val res = repo.attachFCMToken("fake-token")
+        assertTrue(res)
+        val token = repo.getFCMToken()
+        assertTrue(token != null && token == "fake-token")
+    }
+
+    @Test
+    fun getFCMToken_fail_when_no_token_attached() = runTest {
+        // No profile corresponding
+        val token = repo.getFCMToken()
+        assertTrue(token == null)
+    }
 }

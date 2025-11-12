@@ -32,10 +32,10 @@ interface ProfileRepository {
   /**
    * Attach the given token to the user's profile in a field called "fcmToken".
    * Create the field if it does not already exist and updates it if it exists.
+   * If the user currently has no profile stored, creates one.
    *
    * @param token the new token that will be attached to the profile
-   * @return true if the query succeeded otherwise false if the user has no profile yet or
-   *   if the update failed
+   * @return true if the query succeeded otherwise false
    */
   suspend fun attachFCMToken(token: String): Boolean
 
