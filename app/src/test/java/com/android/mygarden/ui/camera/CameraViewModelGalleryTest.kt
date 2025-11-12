@@ -102,7 +102,7 @@ class CameraViewModelGalleryTest {
     val uri = Uri.fromFile(tmp)
 
     var cb: String? = null
-    vm.onImagePickedFromGallery(context, uri) { cb = it }
+    vm.onImagePickedFromGallery(context, uri, onPictureTaken = { cb = it }, onError = {})
 
     // Callback should provide the saved path.
     assertNotNull("Callback should be invoked", cb)
@@ -126,15 +126,27 @@ class CameraViewModelGalleryTest {
 
   @Test
   fun `onImagePickedFromGallery error path does not crash and does not callback`() {
-    // Route a content:// URI to a provider that always fails.
-    ShadowContentResolver.registerProviderInternal("com.test.fail", FailingProvider())
-    val bad = Uri.parse("content://com.test.fail/anything")
+    // Provider qui échoue systématiquement
+    val authority = "com.test.fail"
+    val provider = FailingProvider().apply {
+      attachInfo(context, ProviderInfo().apply { this.authority = authority })
+    }
+    ShadowContentResolver.registerProviderInternal(authority, provider)
 
-    var called = false
-    vm.onImagePickedFromGallery(context, bad) { called = true }
+    val bad = Uri.parse("content://$authority/anything")
 
-    // If VM returns early in catch (recommended), callback must not be hit.
-    assertFalse(called)
+    var onSuccessCalled = false
+    var onErrorCalled = false
+
+    vm.onImagePickedFromGallery(
+      context = context,
+      uri = bad,
+      onPictureTaken = { onSuccessCalled = true }, // ne doit pas être appelé
+      onError = { onErrorCalled = true }           // doit être appelé
+    )
+
+    assertFalse("onPictureTaken must not be called on failure", onSuccessCalled)
+    assertTrue("onError must be called on failure", onErrorCalled)
   }
 
   // Provider bound to a specific file; serves both InputStream and FileDescriptor.
@@ -205,7 +217,7 @@ class CameraViewModelGalleryTest {
     }
     // Call VM: if try-block (incl. EXIF via PFD) executes, callback is non-null
     var cb: String? = null
-    vm.onImagePickedFromGallery(context, uri) { cb = it }
+    vm.onImagePickedFromGallery(context, uri, onPictureTaken = { cb = it }, onError = {})
 
     assertNotNull("Callback should be invoked", cb)
     assertTrue(File(cb!!).exists())
