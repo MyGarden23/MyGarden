@@ -34,7 +34,7 @@ class PushNotificationsService : FirebaseMessagingService() {
   override fun onNewToken(token: String) {
     super.onNewToken(token)
 
-    val profileRepo = ProfileRepositoryProvider.repository as ProfileRepositoryFirestore
+    val profileRepo = ProfileRepositoryProvider.repository
 
     CoroutineScope(Dispatchers.IO).launch {
       // Try to attach the new token to the user's Firestore profile

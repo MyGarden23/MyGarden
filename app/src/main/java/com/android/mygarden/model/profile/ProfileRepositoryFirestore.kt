@@ -63,7 +63,7 @@ class ProfileRepositoryFirestore(
    * @return true if the query succeeded otherwise false if the user has no Firestore profile yet or
    *   if the update failed
    */
-  suspend fun attachFCMToken(token: String): Boolean {
+  override suspend fun attachFCMToken(token: String): Boolean {
     val uid = getCurrentUserId() ?: return false
 
     return try {
@@ -81,7 +81,7 @@ class ProfileRepositoryFirestore(
    *
    * @return the FCM token of the current user or null if there is none
    */
-  suspend fun getFCMToken(): String? {
+  override suspend fun getFCMToken(): String? {
     val uid = getCurrentUserId() ?: return null
 
     return try {

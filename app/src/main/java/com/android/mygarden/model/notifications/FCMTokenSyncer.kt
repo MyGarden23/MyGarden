@@ -22,7 +22,7 @@ object FCMTokenSyncer {
    */
   suspend fun trySync(context: Context) {
     // If the user currently has has no account on Firestore then do nothing
-    val profileRepo = ProfileRepositoryProvider.repository as ProfileRepositoryFirestore
+    val profileRepo = ProfileRepositoryProvider.repository
     profileRepo.getCurrentUserId() ?: return
 
     // If there is no pending token to upload to Firestore then do nothing

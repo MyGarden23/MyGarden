@@ -27,4 +27,23 @@ interface ProfileRepository {
    * @param profile The updated [Profile] to persist.
    */
   suspend fun saveProfile(profile: Profile)
-}
+
+
+  /**
+   * Attach the given token to the user's profile in a field called "fcmToken".
+   * Create the field if it does not already exist and updates it if it exists.
+   *
+   * @param token the new token that will be attached to the profile
+   * @return true if the query succeeded otherwise false if the user has no profile yet or
+   *   if the update failed
+   */
+  suspend fun attachFCMToken(token: String): Boolean
+
+  /**
+   * Return the token currently attached to the current user. Return null if there
+   * is an error or if the user has no token attached yet.
+   *
+   * @return the token of the current user or null if there is none
+   */
+  suspend fun getFCMToken(): String?
+  }
