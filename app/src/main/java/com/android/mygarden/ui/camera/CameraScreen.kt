@@ -238,9 +238,7 @@ fun CameraScreen(
                       try {
                         context.startActivity(intent)
                       } catch (_: ActivityNotFoundException) {
-                        Log.e(
-                            "NoCameraAccessScreen",
-                            context.getString(R.string.error_accessing_settings_log_e))
+                        Log.e("NoCameraAccessScreen", "Error accessing the settings app.")
                         Toast.makeText(
                                 context,
                                 context.getString(R.string.error_accessing_settings_user),

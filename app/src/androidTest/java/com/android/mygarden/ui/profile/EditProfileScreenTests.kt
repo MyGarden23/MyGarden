@@ -115,7 +115,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).assertTextContains("Doe")
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD)
-        .assertTextContains(GardeningSkill.INTERMEDIATE.toString())
+        .assertTextContains(GardeningSkill.INTERMEDIATE.name)
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.FAVORITE_PLANT_FIELD)
         .assertTextContains("Rose")
@@ -148,7 +148,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
     // Then: the field should display the updated skill level
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD)
-        .assertTextContains(GardeningSkill.EXPERT.toString())
+        .assertTextContains(GardeningSkill.EXPERT.name)
   }
 
   @Test

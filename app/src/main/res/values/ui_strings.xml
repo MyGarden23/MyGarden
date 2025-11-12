@@ -28,7 +28,6 @@
     <string name="open_gallery_icon_description">Open Gallery Icon</string>
     <string name="upload_picture_gallery_text">Upload Plant from Gallery</string>
     <string name="give_camera_access_text">Give camera access</string>
-    <string name="error_accessing_settings_log_e">Error accessing the settings app.</string>
     <string name="error_accessing_settings_user">"Error accessing the settings app :("</string>
     <string name="error_fail_take_picture">"Failed to take picture."</string>
 
