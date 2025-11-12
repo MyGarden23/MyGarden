@@ -144,7 +144,11 @@ fun AppNavHost(
           plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
           onNextPlant = { plantId ->
-            navigationActions.navTo(Screen.EditPlant(plantId, Screen.PlantInfo.route))
+            // Navigate to EditPlant and remove PlantInfo from backstack
+            // This prevents going back to PlantInfo after saving (local image is deleted)
+            navController.navigate(Screen.EditPlant.buildRoute(plantId, Screen.PlantInfo.route)) {
+              popUpTo(Screen.Camera.route) { inclusive = false }
+            }
           })
     }
 
