@@ -64,8 +64,7 @@ class GardenFilterSortScreenTests {
       flow.value = profile
     }
 
-      override fun cleanup() {
-      }
+    override fun cleanup() {}
   }
 
   @Before

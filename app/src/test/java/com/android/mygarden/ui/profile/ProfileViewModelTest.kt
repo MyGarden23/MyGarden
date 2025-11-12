@@ -36,8 +36,7 @@ class ProfileViewModelTest {
       flow.value = profile
     }
 
-    override fun cleanup() {
-    }
+    override fun cleanup() {}
   }
 
   private lateinit var viewModel: ProfileViewModel

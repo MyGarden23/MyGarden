@@ -114,8 +114,7 @@ class GardenScreenTests {
       flow.value = profile
     }
 
-      override fun cleanup() {
-      }
+    override fun cleanup() {}
   }
 
   private lateinit var plantsRepo: PlantsRepository

@@ -71,8 +71,7 @@ class GardenViewModelTests {
       flow.value = profile
     }
 
-      override fun cleanup() {
-      }
+    override fun cleanup() {}
   }
 
   private lateinit var repositoryScope: TestScope
