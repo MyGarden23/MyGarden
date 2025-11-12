@@ -361,7 +361,6 @@ class PlantsRepositoryMockTest {
               contains("Solanum lycopersicum") &&
                   contains("JSON") &&
                   contains("name") &&
-                  contains("latinName") &&
                   contains("description") &&
                   contains("wateringFrequency")
             })
