@@ -15,6 +15,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -51,27 +52,34 @@ class PlantsRepositoryFirestore(
   // thirsty plant
   private val _plantsUpdate = MutableSharedFlow<Boolean>()
 
-  val scope = CoroutineScope(Job())
+    private var scope = CoroutineScope(Job())
 
   /**
    * This flow collects the user's plant list from Firebase with updated health status either when
    * 1) the list of plants is updated and this could trigger a plant to be thirsty
    * 2) a tick is emitted then emit the updated list ; to be collected by the pop-up VM
    */
-  override val plantsFlow: StateFlow<List<OwnedPlant>> =
-      combine(_plantsUpdate, ticks) { update, time ->
+  private var _plantsFlow: StateFlow<List<OwnedPlant>> = createPlantsFlow()
+
+    override val plantsFlow: StateFlow<List<OwnedPlant>>
+        get() = _plantsFlow
+
+    private fun createPlantsFlow(): StateFlow<List<OwnedPlant>> {
+        return combine(_plantsUpdate, ticks) { update, time ->
             // ensures that a user is authenticated to get all of his plants
             if (auth.currentUser != null) {
-              getAllOwnedPlants()
+                getAllOwnedPlants()
             } else emptyList()
-          }
-          .distinctUntilChanged()
-          .stateIn(
-              scope,
-              SharingStarted.WhileSubscribed(plantsFlowTimeoutWhenNoSubscribers),
-              emptyList())
+        }
+            .distinctUntilChanged()
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(plantsFlowTimeoutWhenNoSubscribers),
+                emptyList()
+            )
+    }
 
-  /** The list of plants owned by the user, in the repository of the user. */
+    /** The list of plants owned by the user, in the repository of the user. */
   private fun userPlantsCollection() =
       firestore.collection(usersCollection).document(currentUserId()).collection(plantsCollection)
 
@@ -247,4 +255,14 @@ class PlantsRepositoryFirestore(
     val updatedPlant = ownedPlant.plant.copy(healthStatus = calculatedStatus)
     return ownedPlant.copy(plant = updatedPlant)
   }
+
+    /**
+     * Cleans up resources before logout.
+     * Cancels the coroutine scope to stop all flows and prevent PERMISSION_DENIED errors.
+     */
+    override fun cleanup() {
+        scope.cancel()
+        scope = CoroutineScope(Job())
+        _plantsFlow = createPlantsFlow()
+    }
 }
