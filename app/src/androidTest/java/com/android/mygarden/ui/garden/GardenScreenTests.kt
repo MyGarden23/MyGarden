@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
@@ -51,6 +52,8 @@ class GardenScreenTests {
           null,
           "laurem ipsum",
           "beautiful plant",
+          PlantLocation.INDOOR,
+          "Direct light",
           PlantHealthStatus.HEALTHY,
           "is healthy",
           10)
@@ -60,6 +63,8 @@ class GardenScreenTests {
           null,
           "laurem ipsum",
           "even more beautiful plant",
+          PlantLocation.INDOOR,
+          "Undirect light",
           PlantHealthStatus.NEEDS_WATER,
           "is thirsty",
           10)
@@ -69,6 +74,8 @@ class GardenScreenTests {
           null,
           "laurem ipsum",
           "water ++ plant",
+          PlantLocation.OUTDOOR,
+          "Morning light",
           PlantHealthStatus.OVERWATERED,
           "is full",
           10)
@@ -78,6 +85,8 @@ class GardenScreenTests {
           null,
           "laurem ipsum",
           "who is this guy",
+          PlantLocation.INDOOR,
+          "Afternoon light",
           PlantHealthStatus.UNKNOWN,
           "is ?",
           10)

@@ -133,16 +133,25 @@ abstract class PlantsRepositoryBase : PlantsRepository {
    * Generates plant information using AI based on the provided plant name and a base Plant object.
    *
    * This function interacts with an AI model to generate details about a plant, including its name,
-   * Latin name, description, and watering frequency. It parses the AI output and fills in missing
-   * or error details as needed.
+   * description, location, lightExposure and watering frequency. It parses the AI output and fills
+   * in missing or error details as needed.
    *
    * @param basePlant The base Plant object to use for default values and structure
    * @return A Plant object containing the AI-generated information
    */
   override suspend fun generatePlantWithAI(basePlant: Plant): Plant {
     val prompt =
-        "Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. The response must start with { and end with }. The formatting of the JSON MUST be a single object, NOT an array. Describe the plant by its latin name '${basePlant.latinName}'. The object should include: name, latinName, description, wateringFrequency. For 'name', use the simple/common name (e.g., 'tomato' not 'garden tomato'). 'wateringFrequency' must be an integer representing the number of days between waterings."
-
+        """Reply ONLY with a valid JSON object as plain text, with no markdown blocks or extra explanation. 
+            |The response must start with { and end with }. 
+            |The formatting of the JSON MUST be a single object, NOT an array. 
+            |Describe the plant by its latin name '${basePlant.latinName}'. 
+            |The object should include: name, description, location, lightExposure, wateringFrequency. 
+            |For 'name', use the simple/common name (e.g., 'tomato' not 'garden tomato'). 
+            |'wateringFrequency' must be an integer representing the number of days between waterings. 
+            |'location' must be either 'INDOOR' or 'OUTDOOR'. 
+            |'lightExposure' a short recommendation for light exposure (e.g., 'Needs bright indirect light.')
+            """
+            .trimIndent()
     val outputStr =
         try {
           plantDescriptionCallGemini(prompt)
@@ -157,11 +166,21 @@ abstract class PlantsRepositoryBase : PlantsRepository {
 
     try {
       val jsonObject = Json.parseToJsonElement(outputStr).jsonObject
+      val location = jsonObject["location"]?.jsonPrimitive?.content?.uppercase() ?: "UNKNOWN"
+      val plantLocation =
+          try {
+            PlantLocation.valueOf(location)
+          } catch (_: IllegalArgumentException) {
+            PlantLocation.UNKNOWN
+          }
       val res =
           basePlant.copy(
               name = jsonObject["name"]?.jsonPrimitive?.content ?: basePlant.name,
               description =
                   jsonObject["description"]?.jsonPrimitive?.content ?: basePlant.description,
+              location = plantLocation,
+              lightExposure =
+                  jsonObject["lightExposure"]?.jsonPrimitive?.content ?: basePlant.lightExposure,
               wateringFrequency =
                   jsonObject["wateringFrequency"]?.jsonPrimitive?.doubleOrNull?.toInt()
                       ?: basePlant.wateringFrequency)

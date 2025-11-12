@@ -109,6 +109,7 @@
     <string name="name">Name</string>
     <string name="latin_name">Latin name</string>
     <string name="description">Description</string>
+    <string name="location">Location</string>
     <string name="description_error">Description cannot be empty</string>
     <string name="last_time_watered">Last time watered</string>
     <string name="last_time_watered_error">Last time watered is required</string>

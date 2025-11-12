@@ -11,10 +11,12 @@ import androidx.compose.ui.test.performScrollTo
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.model.plant.PlantLocation
+import com.android.mygarden.utils.FirestoreProfileTest
 import org.junit.Rule
 import org.junit.Test
 
-class PlantInfoScreenTests {
+class PlantInfoScreenTests : FirestoreProfileTest() {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var context: Context
@@ -25,6 +27,8 @@ class PlantInfoScreenTests {
           image = null,
           latinName = "testinus_plantus",
           description = "This is a test plant.",
+          location = PlantLocation.INDOOR,
+          lightExposure = "Test light exposure",
           healthStatus = PlantHealthStatus.HEALTHY,
           healthStatusDescription = "This plant is healthy.",
           wateringFrequency = 1,
@@ -55,6 +59,7 @@ class PlantInfoScreenTests {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TAB_ROW).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TAB).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.CONTENT_CONTAINER).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
@@ -67,6 +72,7 @@ class PlantInfoScreenTests {
     // Verify description is shown and health info is not
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).assertDoesNotExist()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertDoesNotExist()
   }
 
   @Test
@@ -93,11 +99,26 @@ class PlantInfoScreenTests {
   }
 
   @Test
-  fun switchingToHealthTabHidesDescription() {
+  fun locationTextIsDisplayedAfterClickingLocationTab() {
+    setContent(plant)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertIsDisplayed()
+  }
+
+  @Test
+  fun lightExposureDescriptionIsDisplayedAfterClickingLocationTab() {
+    setContent(plant)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT).assertIsDisplayed()
+  }
+
+  @Test
+  fun switchingToHealthTabHidesDescriptionAndLocationText() {
     setContent(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertDoesNotExist()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertDoesNotExist()
   }
 
   @Test
@@ -155,6 +176,18 @@ class PlantInfoScreenTests {
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
         .assertTextEquals(context.getString(R.string.watering_frequency, plant.wateringFrequency))
+  }
+
+  @Test
+  fun locationTabDisplaysCorrectText() {
+    setContent(plant)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT)
+        .assertTextEquals(plant.location.name)
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT)
+        .assertTextEquals(plant.lightExposure)
   }
 
   @Test

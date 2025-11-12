@@ -3,6 +3,7 @@ package com.android.mygarden.ui.garden
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.profile.GardeningSkill
@@ -40,6 +41,8 @@ class GardenViewModelTests {
           null,
           "laurem ipsum",
           "beautiful plant",
+          PlantLocation.INDOOR,
+          "Test light exposure",
           PlantHealthStatus.HEALTHY,
           "is healthy",
           2)
@@ -154,9 +157,39 @@ class GardenViewModelTests {
   @Test
   fun sortingByPlantNameWorks() = runTest {
     // Create plants with different names
-    val plantA = Plant("Apple", null, "Malus", "A fruit", PlantHealthStatus.HEALTHY, "Good", 3)
-    val plantC = Plant("Cherry", null, "Prunus", "A fruit", PlantHealthStatus.HEALTHY, "Good", 3)
-    val plantB = Plant("Banana", null, "Musa", "A fruit", PlantHealthStatus.HEALTHY, "Good", 3)
+    val plantA =
+        Plant(
+            "Apple",
+            null,
+            "Malus",
+            "A fruit",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "Good",
+            3)
+    val plantC =
+        Plant(
+            "Cherry",
+            null,
+            "Prunus",
+            "A fruit",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "Good",
+            3)
+    val plantB =
+        Plant(
+            "Banana",
+            null,
+            "Musa",
+            "A fruit",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "Good",
+            3)
 
     // Add plants in non-alphabetical order
 
@@ -185,13 +218,50 @@ class GardenViewModelTests {
   @Test
   fun filteringByDryPlantsWorks() = runTest {
     // Create plants with different health statuses
-    val healthyPlant = Plant("Healthy", null, "H", "Healthy", PlantHealthStatus.HEALTHY, "Good", 2)
+    val healthyPlant =
+        Plant(
+            "Healthy",
+            null,
+            "H",
+            "Healthy",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "Good",
+            2)
     val dryPlant =
-        Plant("Dry", null, "D", "Needs water", PlantHealthStatus.NEEDS_WATER, "Thirsty", 2)
+        Plant(
+            "Dry",
+            null,
+            "D",
+            "Needs water",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.NEEDS_WATER,
+            "Thirsty",
+            2)
     val severelyDryPlant =
-        Plant("VeryDry", null, "VD", "Very dry", PlantHealthStatus.SEVERELY_DRY, "Very thirsty", 2)
+        Plant(
+            "VeryDry",
+            null,
+            "VD",
+            "Very dry",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.SEVERELY_DRY,
+            "Very thirsty",
+            2)
     val overwateredPlant =
-        Plant("Wet", null, "W", "Too much", PlantHealthStatus.OVERWATERED, "Wet", 7)
+        Plant(
+            "Wet",
+            null,
+            "W",
+            "Too much",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.OVERWATERED,
+            "Wet",
+            7)
 
     // Add plants
     plantsRepo.saveToGarden(
@@ -230,11 +300,38 @@ class GardenViewModelTests {
   fun filteringByHealthyPlantsWorks() = runTest {
     // Create plants with different health statuses
     val healthyPlant1 =
-        Plant("Healthy1", null, "H1", "Healthy", PlantHealthStatus.HEALTHY, "Good", 5)
+        Plant(
+            "Healthy1",
+            null,
+            "H1",
+            "Healthy",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "Good",
+            5)
     val healthyPlant2 =
-        Plant("Healthy2", null, "H2", "Healthy", PlantHealthStatus.HEALTHY, "Good", 5)
+        Plant(
+            "Healthy2",
+            null,
+            "H2",
+            "Healthy",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "Good",
+            5)
     val dryPlant =
-        Plant("Dry", null, "D", "Needs water", PlantHealthStatus.NEEDS_WATER, "Thirsty", 2)
+        Plant(
+            "Dry",
+            null,
+            "D",
+            "Needs water",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.NEEDS_WATER,
+            "Thirsty",
+            2)
 
     // Add plants
     plantsRepo.saveToGarden(
@@ -265,9 +362,31 @@ class GardenViewModelTests {
   fun sortByLatinNameWorks() = runTest {
     // Sort alphabetically by latin name
     plantsRepo.saveToGarden(
-        Plant("A", null, "Zebra", "", PlantHealthStatus.HEALTHY, "", 2), "1", Timestamp(0))
+        Plant(
+            "A",
+            null,
+            "Zebra",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "",
+            2),
+        "1",
+        Timestamp(0))
     plantsRepo.saveToGarden(
-        Plant("B", null, "Alpha", "", PlantHealthStatus.HEALTHY, "", 2), "2", Timestamp(0))
+        Plant(
+            "B",
+            null,
+            "Alpha",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "",
+            2),
+        "2",
+        Timestamp(0))
     runCurrent()
     vm.refreshUIState()
     vm.setSortOption(SortOption.LATIN_NAME)
@@ -283,9 +402,31 @@ class GardenViewModelTests {
   fun sortByLastWateredAscWorks() = runTest {
     // Oldest watered first
     plantsRepo.saveToGarden(
-        Plant("New", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "1", Timestamp(100))
+        Plant(
+            "New",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "",
+            2),
+        "1",
+        Timestamp(100))
     plantsRepo.saveToGarden(
-        Plant("Old", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "2", Timestamp(50))
+        Plant(
+            "Old",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "",
+            2),
+        "2",
+        Timestamp(50))
     runCurrent()
     vm.refreshUIState()
     vm.setSortOption(SortOption.LAST_WATERED_ASC)
@@ -301,9 +442,31 @@ class GardenViewModelTests {
   fun sortByLastWateredDescWorks() = runTest {
     // Most recent watered first
     plantsRepo.saveToGarden(
-        Plant("New", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "1", Timestamp(100))
+        Plant(
+            "New",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "",
+            2),
+        "1",
+        Timestamp(100))
     plantsRepo.saveToGarden(
-        Plant("Old", null, "", "", PlantHealthStatus.HEALTHY, "", 2), "2", Timestamp(50))
+        Plant(
+            "Old",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "",
+            2),
+        "2",
+        Timestamp(50))
     runCurrent()
     vm.refreshUIState()
     vm.setSortOption(SortOption.LAST_WATERED_DESC)
@@ -319,16 +482,43 @@ class GardenViewModelTests {
   fun filterOverwateredWorks() = runTest {
     // Show only overwatered plants - use 7 day frequency for more reliable timing
     plantsRepo.saveToGarden(
-        Plant("Wet", null, "", "", PlantHealthStatus.OVERWATERED, "", 7),
+        Plant(
+            "Wet",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.OVERWATERED,
+            "",
+            7),
         "1",
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)))
     plantsRepo.saveToGarden(
-        Plant("VeryWet", null, "", "", PlantHealthStatus.SEVERELY_OVERWATERED, "", 15),
+        Plant(
+            "VeryWet",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.SEVERELY_OVERWATERED,
+            "",
+            15),
         "2",
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)))
 
     plantsRepo.saveToGarden(
-        Plant("Ok", null, "", "", PlantHealthStatus.HEALTHY, "", 2),
+        Plant(
+            "Ok",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "",
+            2),
         "3",
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)))
 
@@ -347,13 +537,42 @@ class GardenViewModelTests {
   fun filterCriticalWorks() = runTest {
     // Show only severely dry or overwatered
     plantsRepo.saveToGarden(
-        Plant("Critical1", null, "", "", PlantHealthStatus.SEVERELY_DRY, "", 2), "1", Timestamp(0))
+        Plant(
+            "Critical1",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.SEVERELY_DRY,
+            "",
+            2),
+        "1",
+        Timestamp(0))
     plantsRepo.saveToGarden(
-        Plant("Critical2", null, "", "", PlantHealthStatus.SEVERELY_OVERWATERED, "", 15),
+        Plant(
+            "Critical2",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.SEVERELY_OVERWATERED,
+            "",
+            15),
         "2",
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)))
     plantsRepo.saveToGarden(
-        Plant("Ok", null, "", "", PlantHealthStatus.HEALTHY, "", 2),
+        Plant(
+            "Ok",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "",
+            2),
         "3",
         Timestamp(System.currentTimeMillis()))
     runCurrent()
@@ -369,13 +588,42 @@ class GardenViewModelTests {
   fun sortAndFilterCombinedWorks() = runTest {
     // Filter dry plants AND sort by name
     plantsRepo.saveToGarden(
-        Plant("Z-Dry", null, "", "", PlantHealthStatus.SLIGHTLY_DRY, "", 7),
+        Plant(
+            "Z-Dry",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.SLIGHTLY_DRY,
+            "",
+            7),
         "1",
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(5)))
     plantsRepo.saveToGarden(
-        Plant("A-Dry", null, "", "", PlantHealthStatus.SEVERELY_DRY, "", 2), "2", Timestamp(0))
+        Plant(
+            "A-Dry",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.SEVERELY_DRY,
+            "",
+            2),
+        "2",
+        Timestamp(0))
     plantsRepo.saveToGarden(
-        Plant("Healthy", null, "", "", PlantHealthStatus.HEALTHY, "", 7),
+        Plant(
+            "Healthy",
+            null,
+            "",
+            "",
+            PlantLocation.INDOOR,
+            "Test light exposure",
+            PlantHealthStatus.HEALTHY,
+            "",
+            7),
         "3",
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3)))
     runCurrent()
