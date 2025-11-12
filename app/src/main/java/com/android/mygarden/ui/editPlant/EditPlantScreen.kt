@@ -290,12 +290,18 @@ fun EditPlantScreen(
               Spacer(Modifier.height(8.dp))
 
               // Save
+              // Enable the Save button if the plant has been recognized by the API and the
+              // lastWatered field is set and description is not blank or if the fields are all
+              // filled if the plant is not recognized.
               val isSaveEnabled =
-                  plantUIState.description.isNotBlank() &&
-                      plantUIState.name.isNotBlank() &&
-                      plantUIState.latinName.isNotBlank() &&
-                      plantUIState.lastWatered != null
-
+                  if (plantUIState.isRecognized) {
+                    plantUIState.description.isNotBlank() && plantUIState.lastWatered != null
+                  } else {
+                    plantUIState.description.isNotBlank() &&
+                        plantUIState.name.isNotBlank() &&
+                        plantUIState.latinName.isNotBlank() &&
+                        plantUIState.lastWatered != null
+                  }
               Button(
                   onClick = {
                     // ensure user sees the error if they never touched the field
