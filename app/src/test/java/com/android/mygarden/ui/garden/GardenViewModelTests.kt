@@ -70,6 +70,9 @@ class GardenViewModelTests {
     override suspend fun saveProfile(profile: Profile) {
       flow.value = profile
     }
+
+      override fun cleanup() {
+      }
   }
 
   private lateinit var repositoryScope: TestScope
