@@ -26,6 +26,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
+
 private const val NEXT_BUTTON_TXT = "Next"
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
