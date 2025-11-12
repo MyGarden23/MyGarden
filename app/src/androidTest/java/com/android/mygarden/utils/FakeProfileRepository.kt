@@ -41,16 +41,12 @@ class FakeProfileRepository(val profile: Profile? = null) : ProfileRepository {
     /* no-op, succeed */
   }
 
-  /**
-   * Token handling does nothing.
-   */
+  /** Token handling does nothing. */
   override suspend fun attachFCMToken(token: String): Boolean {
     return false
   }
 
-  /**
-   * No token is available.
-   */
+  /** No token is available. */
   override suspend fun getFCMToken(): String? {
     return null
   }

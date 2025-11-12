@@ -3,7 +3,6 @@ package com.android.mygarden.model.notifications
 import androidx.core.content.edit
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.android.mygarden.model.profile.ProfileRepositoryFirestore
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage

@@ -2,7 +2,6 @@ package com.android.mygarden.model.notifications
 
 import android.content.Context
 import androidx.core.content.edit
-import com.android.mygarden.model.profile.ProfileRepositoryFirestore
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 
 /**

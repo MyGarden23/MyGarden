@@ -71,13 +71,13 @@ class GardenViewModelTests {
       flow.value = profile
     }
 
-      override suspend fun attachFCMToken(token: String): Boolean {
-          return false
-      }
+    override suspend fun attachFCMToken(token: String): Boolean {
+      return false
+    }
 
-      override suspend fun getFCMToken(): String? {
-          return null
-      }
+    override suspend fun getFCMToken(): String? {
+      return null
+    }
   }
 
   private lateinit var repositoryScope: TestScope
