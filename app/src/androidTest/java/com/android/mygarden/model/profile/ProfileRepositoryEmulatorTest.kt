@@ -112,4 +112,98 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
     assertNotNull(uid)
     assertTrue(uid!!.isNotBlank())
   }
+
+  @Test
+  fun cleanup_doesNotThrowException() = runTest {
+    val profile =
+        Profile(
+            firstName = "Test",
+            lastName = "User",
+            gardeningSkill = GardeningSkill.BEGINNER,
+            favoritePlant = "Rose",
+            country = "US",
+            hasSignedIn = false)
+    repo.saveProfile(profile)
+
+    // Call cleanup - should not throw
+    repo.cleanup()
+  }
+
+  @Test
+  fun cleanup_canBeCalledMultipleTimes() = runTest {
+    val profile =
+        Profile(
+            firstName = "Multi",
+            lastName = "Cleanup",
+            gardeningSkill = GardeningSkill.INTERMEDIATE,
+            favoritePlant = "Tulip",
+            country = "UK",
+            hasSignedIn = false)
+    repo.saveProfile(profile)
+
+    // Call cleanup multiple times - should not throw exceptions
+    repo.cleanup()
+    repo.cleanup()
+    repo.cleanup()
+
+    // Verify the repository is still functional
+    val fetched = repo.getProfile().first()
+    assertNotNull(fetched)
+    assertEquals("Multi", fetched!!.firstName)
+  }
+
+  @Test
+  fun cleanup_repositoryStillFunctional() = runTest {
+    val profile =
+        Profile(
+            firstName = "Functional",
+            lastName = "Test",
+            gardeningSkill = GardeningSkill.ADVANCED,
+            favoritePlant = "Orchid",
+            country = "US",
+            hasSignedIn = false)
+    repo.saveProfile(profile)
+
+    // Call cleanup
+    repo.cleanup()
+
+    // Verify we can still get the profile
+    val fetched = repo.getProfile().first()
+    assertNotNull(fetched)
+    assertEquals("Functional", fetched!!.firstName)
+
+    // Verify we can still save updates
+    val updated = profile.copy(favoritePlant = "Lily")
+    repo.saveProfile(updated)
+    val fetchedAfterUpdate = repo.getProfile().first()
+    assertEquals("Lily", fetchedAfterUpdate!!.favoritePlant)
+  }
+
+  @Test
+  fun cleanup_doesNotDeleteData() = runTest {
+    val profile =
+        Profile(
+            firstName = "Persistent",
+            lastName = "Data",
+            gardeningSkill = GardeningSkill.BEGINNER,
+            favoritePlant = "Cactus",
+            country = "MX",
+            hasSignedIn = true)
+    repo.saveProfile(profile)
+
+    // Verify profile exists before cleanup
+    val before = repo.getProfile().first()
+    assertNotNull(before)
+    assertEquals("Persistent", before!!.firstName)
+    assertTrue(before.hasSignedIn)
+
+    // Call cleanup
+    repo.cleanup()
+
+    // Verify profile still exists after cleanup
+    val after = repo.getProfile().first()
+    assertNotNull(after)
+    assertEquals("Persistent", after!!.firstName)
+    assertTrue(after.hasSignedIn)
+  }
 }
