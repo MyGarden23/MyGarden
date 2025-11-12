@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 enum class SelectedPlantInfoTab(val textRes: Int) {
   DESCRIPTION(R.string.description),
   HEALTH_STATUS(R.string.tab_health),
-  LOCATION(9999)
+  LOCATION(R.string.location)
 }
 
 /** UI state for the plant info screen. Contains all the plant information to be displayed. */
@@ -28,7 +28,7 @@ data class PlantInfoUIState(
     val latinName: String = "",
     val description: String = "",
     val location: PlantLocation = PlantLocation.UNKNOWN,
-    val lightExposure: String = "Unknown",
+    val lightExposure: String = "",
     val healthStatus: PlantHealthStatus = PlantHealthStatus.UNKNOWN,
     val healthStatusDescription: String = "",
     val wateringFrequency: Int = 0,
