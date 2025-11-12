@@ -1,21 +1,27 @@
 package com.android.mygarden.ui.plantinfos
 
+import androidx.compose.ui.test.ExperimentalTestApi
 import android.content.Context
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.model.plant.PlantsRepositoryLocal
+import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.utils.FirestoreProfileTest
 import org.junit.Rule
 import org.junit.Test
 
-class PlantInfoScreenTests {
+class PlantInfoScreenTests : FirestoreProfileTest() {
   @get:Rule val composeTestRule = createComposeRule()
+  private lateinit var gatedRepo: GatedPlantsRepository
 
   private lateinit var context: Context
 
@@ -252,6 +258,9 @@ class PlantInfoScreenTests {
 
   @Test
   fun saveButtonTriggersOnSavePlantCallback() {
+    gatedRepo.gate.complete(Unit)
+    composeTestRule.waitForIdle()
+
     var savePlantCalled = false
     setContent(plant, onSavePlant = { savePlantCalled = true })
 
@@ -284,5 +293,36 @@ class PlantInfoScreenTests {
 
     // Verify that the callback was called
     assert(backPressedCalled) { "onBackPressed callback should have been called" }
+  }
+
+  @org.junit.Before
+  fun installRepo() {
+    val local = PlantsRepositoryLocal()
+    gatedRepo = GatedPlantsRepository(local)
+    PlantsRepositoryProvider.repository = gatedRepo
+  }
+
+  @OptIn(ExperimentalTestApi::class)
+  @Test
+  fun nextButton_showsLoading_untilWorkCompletes() {
+    setContent(plant)
+
+    // Click → VM put isSaving=true and bloc one gate.await()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+
+    // Wait loader
+    composeTestRule.waitUntil(timeoutMillis = 5_000) {
+      composeTestRule
+          .onAllNodesWithTag(PlantInfoScreenTestTags.NEXT_BUTTON_LOADING, useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
+    }
+
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON_LOADING, useUnmergedTree = true)
+        .assertIsDisplayed()
+
+    gatedRepo.gate.complete(Unit)
+    composeTestRule.waitForIdle()
   }
 }
