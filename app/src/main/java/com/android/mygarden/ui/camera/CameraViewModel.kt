@@ -100,16 +100,16 @@ class CameraViewModel : ViewModel() {
         })
   }
 
-    /**
-     * Processes an image selected from the gallery so it can follow the same flow as a camera capture.
-     * The image is decoded, its orientation corrected if possible, saved locally, then returned through
-     * [onPictureTaken]. Errors are reported via [onError].
-     *
-     * @param context used to access the content resolver and internal storage.
-     * @param uri the URI of the gallery image.
-     * @param onPictureTaken callback receiving the saved image file path.
-     * @param onError callback triggered if decoding, EXIF reading, or saving fails.
-     */
+  /**
+   * Processes an image selected from the gallery so it can follow the same flow as a camera
+   * capture. The image is decoded, its orientation corrected if possible, saved locally, then
+   * returned through [onPictureTaken]. Errors are reported via [onError].
+   *
+   * @param context used to access the content resolver and internal storage.
+   * @param uri the URI of the gallery image.
+   * @param onPictureTaken callback receiving the saved image file path.
+   * @param onError callback triggered if decoding, EXIF reading, or saving fails.
+   */
   fun onImagePickedFromGallery(
       context: Context,
       uri: Uri,
@@ -124,11 +124,11 @@ class CameraViewModel : ViewModel() {
               ?: throw IllegalStateException("Cannot open input stream for gallery image")
       var bitmap = input.use { BitmapFactory.decodeStream(it) }
 
-// Try to read the EXIF orientation of the image.
-// We must open a ParcelFileDescriptor because ExifInterface cannot parse EXIF metadata
-// from a simple InputStream. If EXIF is present, we extract the orientation tag
-// (e.g., ROTATE_90, ROTATE_180…). If anything fails (provider does not support PFD,
-// corrupted EXIF header, or any I/O error), we safely default to ORIENTATION_NORMAL.
+      // Try to read the EXIF orientation of the image.
+      // We must open a ParcelFileDescriptor because ExifInterface cannot parse EXIF metadata
+      // from a simple InputStream. If EXIF is present, we extract the orientation tag
+      // (e.g., ROTATE_90, ROTATE_180…). If anything fails (provider does not support PFD,
+      // corrupted EXIF header, or any I/O error), we safely default to ORIENTATION_NORMAL.
       val orientation =
           try {
             context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
@@ -152,9 +152,9 @@ class CameraViewModel : ViewModel() {
     }
   }
 
-    //function that rotates the bitmap if needed
+  // function that rotates the bitmap if needed
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   internal fun rotateBitmapIfNeeded(src: Bitmap, exifOrientation: Int): Bitmap {
     val degrees =
         when (exifOrientation) {

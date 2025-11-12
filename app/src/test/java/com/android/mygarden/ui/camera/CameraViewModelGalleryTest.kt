@@ -67,12 +67,12 @@ class CameraViewModelGalleryTest {
   fun `rotateBitmapIfNeeded covers 0 90 180 270 in one go`() {
     val src = Bitmap.createBitmap(100, 50, Bitmap.Config.ARGB_8888)
 
-    val cases = listOf(
-      ExifInterface.ORIENTATION_NORMAL     to (100 to 50),
-      ExifInterface.ORIENTATION_ROTATE_90  to (50  to 100),
-      ExifInterface.ORIENTATION_ROTATE_180 to (100 to 50),
-      ExifInterface.ORIENTATION_ROTATE_270 to (50  to 100)
-    )
+    val cases =
+        listOf(
+            ExifInterface.ORIENTATION_NORMAL to (100 to 50),
+            ExifInterface.ORIENTATION_ROTATE_90 to (50 to 100),
+            ExifInterface.ORIENTATION_ROTATE_180 to (100 to 50),
+            ExifInterface.ORIENTATION_ROTATE_270 to (50 to 100))
 
     for ((exif, expected) in cases) {
       val out = vm.rotateBitmapIfNeeded(src, exif)
