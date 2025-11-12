@@ -309,11 +309,11 @@ abstract class PlantsRepositoryBase : PlantsRepository {
     return generatePlantWithAI(plantWLatinName)
   }
 
-    /**
-     * Default cleanup implementation (no-op).
-     * Subclasses should override this if they need to clean up resources.
-     */
-    override fun cleanup() {
-        // Default: do nothing. Firestore implementation will override.
-    }
+  /**
+   * Default cleanup implementation (no-op). Subclasses should override this if they need to clean
+   * up resources.
+   */
+  override fun cleanup() {
+    // Default: do nothing. Firestore implementation will override.
+  }
 }

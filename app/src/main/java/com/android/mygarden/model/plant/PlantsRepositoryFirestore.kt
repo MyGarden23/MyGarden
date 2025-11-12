@@ -52,7 +52,7 @@ class PlantsRepositoryFirestore(
   // thirsty plant
   private val _plantsUpdate = MutableSharedFlow<Boolean>()
 
-    private var scope = CoroutineScope(Job())
+  private var scope = CoroutineScope(Job())
 
   /**
    * This flow collects the user's plant list from Firebase with updated health status either when
@@ -61,25 +61,22 @@ class PlantsRepositoryFirestore(
    */
   private var _plantsFlow: StateFlow<List<OwnedPlant>> = createPlantsFlow()
 
-    override val plantsFlow: StateFlow<List<OwnedPlant>>
-        get() = _plantsFlow
+  override val plantsFlow: StateFlow<List<OwnedPlant>>
+    get() = _plantsFlow
 
-    private fun createPlantsFlow(): StateFlow<List<OwnedPlant>> {
-        return combine(_plantsUpdate, ticks) { update, time ->
-            // ensures that a user is authenticated to get all of his plants
-            if (auth.currentUser != null) {
-                getAllOwnedPlants()
-            } else emptyList()
+  private fun createPlantsFlow(): StateFlow<List<OwnedPlant>> {
+    return combine(_plantsUpdate, ticks) { update, time ->
+          // ensures that a user is authenticated to get all of his plants
+          if (auth.currentUser != null) {
+            getAllOwnedPlants()
+          } else emptyList()
         }
-            .distinctUntilChanged()
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(plantsFlowTimeoutWhenNoSubscribers),
-                emptyList()
-            )
-    }
+        .distinctUntilChanged()
+        .stateIn(
+            scope, SharingStarted.WhileSubscribed(plantsFlowTimeoutWhenNoSubscribers), emptyList())
+  }
 
-    /** The list of plants owned by the user, in the repository of the user. */
+  /** The list of plants owned by the user, in the repository of the user. */
   private fun userPlantsCollection() =
       firestore.collection(usersCollection).document(currentUserId()).collection(plantsCollection)
 
@@ -256,13 +253,13 @@ class PlantsRepositoryFirestore(
     return ownedPlant.copy(plant = updatedPlant)
   }
 
-    /**
-     * Cleans up resources before logout.
-     * Cancels the coroutine scope to stop all flows and prevent PERMISSION_DENIED errors.
-     */
-    override fun cleanup() {
-        scope.cancel()
-        scope = CoroutineScope(Job())
-        _plantsFlow = createPlantsFlow()
-    }
+  /**
+   * Cleans up resources before logout. Cancels the coroutine scope to stop all flows and prevent
+   * PERMISSION_DENIED errors.
+   */
+  override fun cleanup() {
+    scope.cancel()
+    scope = CoroutineScope(Job())
+    _plantsFlow = createPlantsFlow()
+  }
 }

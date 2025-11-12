@@ -182,8 +182,8 @@ interface PlantsRepository {
   /**
    * Cleans up any active listeners, coroutine scopes, or resources.
    *
-   * This should be called before signing out to prevent PERMISSION_DENIED errors
-   * from Firestore listeners attempting to access data after the user is logged out.
+   * This should be called before signing out to prevent PERMISSION_DENIED errors from Firestore
+   * listeners attempting to access data after the user is logged out.
    */
   fun cleanup()
 }

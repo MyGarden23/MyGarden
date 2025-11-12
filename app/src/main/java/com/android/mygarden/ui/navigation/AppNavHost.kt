@@ -125,9 +125,9 @@ fun AppNavHost(
             navigationActions.navTo(Screen.EditPlant(ownedPlant.id, Screen.Garden.route))
           },
           onSignOut = {
-              // Clean up repositories before signing out to prevent PERMISSION_DENIED errors
-              PlantsRepositoryProvider.repository.cleanup()
-              ProfileRepositoryProvider.repository.cleanup()
+            // Clean up repositories before signing out to prevent PERMISSION_DENIED errors
+            PlantsRepositoryProvider.repository.cleanup()
+            ProfileRepositoryProvider.repository.cleanup()
             FirebaseAuth.getInstance().signOut()
             navigationActions.navTo(Screen.Auth)
           })
