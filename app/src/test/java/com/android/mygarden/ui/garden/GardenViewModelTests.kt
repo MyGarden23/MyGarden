@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.garden
 
+import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
@@ -88,17 +89,15 @@ class GardenViewModelTests {
   /** Tests that the setErrorMessage function updates correctly the vm */
   @Test
   fun setErrorMsgUpdatesCorrectly() {
-    val errorMsg = "Error"
-    vm.setErrorMsg(errorMsg)
-    assertEquals(errorMsg, vm.uiState.value.errorMsg)
+    vm.setErrorMsg(R.string.error_fetch_all_plants_garden)
+    assertEquals(R.string.error_fetch_all_plants_garden, vm.uiState.value.errorMsg)
   }
 
   /** Tests that the clearErrorMessage function updates correctly the vm */
   @Test
   fun clearErrorMsgClearsCorrectly() {
-    val errorMsg = "Error"
-    vm.setErrorMsg(errorMsg)
-    assertEquals(errorMsg, vm.uiState.value.errorMsg)
+    vm.setErrorMsg(R.string.error_fetch_all_plants_garden)
+    assertEquals(R.string.error_fetch_all_plants_garden, vm.uiState.value.errorMsg)
     vm.clearErrorMsg()
     assertNull(vm.uiState.value.errorMsg)
   }

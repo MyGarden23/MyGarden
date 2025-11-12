@@ -61,9 +61,10 @@ class NavigationS1Tests {
 
   @Composable
   fun FictionalApp() {
+    val context = LocalContext.current
+
     val navController = rememberNavController()
     val navActions = NavigationActions(navController)
-    val context = LocalContext.current
     val startDest = context.getString(Screen.Camera.nameResId)
     NavHost(navController = navController, startDestination = startDest) {
       navigation(startDestination = Screen.Camera.route, route = startDest) {

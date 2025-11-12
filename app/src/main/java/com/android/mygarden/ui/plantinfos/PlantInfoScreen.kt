@@ -24,11 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
-
-// Text for the button to go from plant info screen to edit plant screen before saving the plant in
-// the garden
-private const val NEXT_BUTTON_TXT = "Next"
 
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
@@ -70,6 +67,7 @@ fun PlantInfosScreen(
     onBackPressed: () -> Unit,
     onNextPlant: (String) -> Unit = {}
 ) {
+  val context = LocalContext.current
   // Observe UI state from ViewModel
   val uiState by plantInfoViewModel.uiState.collectAsState()
 
@@ -79,7 +77,10 @@ fun PlantInfosScreen(
   val healthScrollState = rememberScrollState()
 
   // Initialize UI state when plant changes
-  LaunchedEffect(plant) { plantInfoViewModel.initializeUIState(plant) }
+  LaunchedEffect(plant) {
+    val loadingText = context.getString(R.string.loading_plant_infos)
+    plantInfoViewModel.initializeUIState(plant, loadingText)
+  }
 
   Scaffold(
       modifier = Modifier.testTag(PlantInfoScreenTestTags.SCREEN),
@@ -107,7 +108,10 @@ fun PlantInfosScreen(
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = MaterialTheme.colorScheme.primaryContainer)) {
-                    Text(text = NEXT_BUTTON_TXT, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        text = context.getString(R.string.next),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium)
                   }
             }
       }) { paddingValues ->
@@ -122,11 +126,8 @@ fun PlantInfosScreen(
                 // Placeholder for plant image
                 Box(modifier = Modifier.fillMaxSize()) {
                   AsyncImage(
-                      model =
-                          ImageRequest.Builder(LocalContext.current)
-                              .data(plant.image ?: "")
-                              .build(),
-                      contentDescription = "Image of the plant",
+                      model = ImageRequest.Builder(context).data(plant.image ?: "").build(),
+                      contentDescription = context.getString(R.string.image_plant_description),
                       modifier =
                           Modifier.fillMaxWidth()
                               .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -145,7 +146,7 @@ fun PlantInfosScreen(
                             .testTag(PlantInfoScreenTestTags.BACK_BUTTON)) {
                       Icon(
                           imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                          contentDescription = "Back",
+                          contentDescription = context.getString(R.string.back_description),
                           tint = MaterialTheme.colorScheme.onPrimary)
                     }
               }
@@ -217,7 +218,9 @@ fun PlantInfosScreen(
                           Text(
                               // text = "Status: ${uiState.healthStatus.description}"
                               text =
-                                  "Status: ${stringResource(id = uiState.healthStatus.descriptionRes)}",
+                                  stringResource(
+                                      R.string.status_label,
+                                      stringResource(id = uiState.healthStatus.descriptionRes)),
                               fontSize = 16.sp,
                               fontWeight = FontWeight.Medium,
                               color = MaterialTheme.colorScheme.onBackground,
@@ -226,7 +229,9 @@ fun PlantInfosScreen(
 
                           // Watering frequency information
                           Text(
-                              text = "Watering Frequency: Every ${uiState.wateringFrequency} days",
+                              text =
+                                  context.getString(
+                                      R.string.watering_frequency, uiState.wateringFrequency),
                               fontSize = 14.sp,
                               color = MaterialTheme.colorScheme.onBackground,
                               modifier =
@@ -265,7 +270,7 @@ fun ModulableTabRow(
               modifier = tabModifier,
               text = {
                 Text(
-                    text = tab.text,
+                    text = stringResource(id = tab.textRes),
                     fontWeight =
                         if (uiState.selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
                     fontSize = 16.sp)

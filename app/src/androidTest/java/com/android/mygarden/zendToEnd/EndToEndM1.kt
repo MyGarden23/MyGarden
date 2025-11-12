@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
+import com.android.mygarden.R
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
@@ -30,13 +31,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 // Constant string for the e2e test
-private const val LOADING_DESCRIPTION_MESSAGE = "Loading Plant Infos..."
 private const val ERROR_LATIN_NAME_DESCRIPTION = "There was an error getting the plant latin name."
 private const val NOT_IDENTIFY_PLANT_DESCRIPTION = "The AI was not able to identify the plant."
 private const val UNKNOWN_PLANT_NAME = "Unknown"
 private const val NO_HEALTH_DESCRIPTION = "No health status description available"
-private const val WATERING_FREQUENCY_0 = "Watering Frequency: Every 0 days"
-private val UNKNOWN_STATUS_PLANT = "Status: ${PlantHealthStatus.UNKNOWN.description}"
 /**
  * End-to-end test for MyGarden's core user flow. This test assume that we have an internet
  * connection
@@ -90,6 +88,7 @@ class EndToEndM1 {
    */
   @Test
   fun endToEndTest() {
+    val context = composeTestRule.activity
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
     // === CAMERA SCREEN ===
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
@@ -126,7 +125,8 @@ class EndToEndM1 {
             ?.joinToString(separator = "") { it.text } ?: ""
     assertTrue(
         "Expected one of the possible texts, but was: $text",
-        text == LOADING_DESCRIPTION_MESSAGE || text == ERROR_LATIN_NAME_DESCRIPTION)
+        text == context.getString(R.string.loading_plant_infos) ||
+            text == ERROR_LATIN_NAME_DESCRIPTION)
 
     /**
      * This is in the specific case where the AI does not return the [ERROR_LATIN_NAME_DESCRIPTION]
@@ -135,7 +135,7 @@ class EndToEndM1 {
      * Need to wait for Gemini description, assume that it takes < 10 seconds. The pictures are
      * taken from the emulator, hence the AI does not recognize plants
      */
-    if (text == LOADING_DESCRIPTION_MESSAGE) {
+    if (text == context.getString(R.string.loading_plant_infos)) {
       composeTestRule.waitUntil(TIMEOUT) {
         val currentText =
             composeTestRule
@@ -168,10 +168,11 @@ class EndToEndM1 {
         .assertTextEquals(NO_HEALTH_DESCRIPTION)
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals(UNKNOWN_STATUS_PLANT)
+        .assertTextEquals(
+            context.getString(R.string.status_label, PlantHealthStatus.UNKNOWN.description))
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
-        .assertTextEquals(WATERING_FREQUENCY_0)
+        .assertTextEquals(context.getString(R.string.watering_frequency, 0))
 
     // === BACK TO CAMERA ===
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).isDisplayed()

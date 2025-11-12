@@ -172,7 +172,8 @@ fun CameraScreen(
                             .testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
                       Icon(
                           Icons.Default.FlipCameraAndroid,
-                          contentDescription = "Flip Camera Icon",
+                          contentDescription =
+                              context.getString(R.string.flip_camera_icon_description),
                           modifier = modifier.size(30.dp),
                           tint = BUTTONS_COLOR)
                     }
@@ -185,11 +186,22 @@ fun CameraScreen(
                             .size(70.dp)
                             .testTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON),
                     onClick = {
-                      cameraViewModel.takePicture(context, controller, onPictureTaken)
+                      cameraViewModel.takePicture(
+                          context = context,
+                          controller = controller,
+                          onPictureTaken = onPictureTaken,
+                          onError = {
+                            Toast.makeText(
+                                    context,
+                                    context.getString(R.string.error_fail_take_picture),
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                          })
                     }) {
                       Icon(
                           painter = painterResource(R.drawable.ic_photo_button_mygarden),
-                          contentDescription = "Take picture Icon",
+                          contentDescription =
+                              context.getString(R.string.take_picture_icon_description),
                           modifier = modifier.size(70.dp),
                           tint = BUTTONS_COLOR)
                     }
@@ -208,7 +220,8 @@ fun CameraScreen(
                     }) {
                       Icon(
                           Icons.Default.Photo,
-                          contentDescription = "Open Gallery Icon",
+                          contentDescription =
+                              context.getString(R.string.open_gallery_icon_description),
                           modifier = modifier.size(40.dp),
                           tint = BUTTONS_COLOR)
                     }
@@ -227,7 +240,9 @@ fun CameraScreen(
                       } catch (_: ActivityNotFoundException) {
                         Log.e("NoCameraAccessScreen", "Error accessing the settings app.")
                         Toast.makeText(
-                                context, "Error accessing the settings app :(", Toast.LENGTH_SHORT)
+                                context,
+                                context.getString(R.string.error_accessing_settings_user),
+                                Toast.LENGTH_SHORT)
                             .show()
                       }
                     },
@@ -279,6 +294,7 @@ private fun NoCameraAccessScreen(
     onGalleryAccess: () -> Unit = {},
     onReaskCameraAccess: () -> Unit = {}
 ) {
+  val context = LocalContext.current
   Column(
       modifier = modifier.fillMaxSize().wrapContentSize(align = Alignment.Center),
       verticalArrangement = Arrangement.Center,
@@ -292,13 +308,15 @@ private fun NoCameraAccessScreen(
             onClick = { onGalleryAccess() }) {
               Icon(
                   Icons.Default.Photo,
-                  contentDescription = "Open Gallery Icon",
+                  contentDescription = context.getString(R.string.open_gallery_icon_description),
                   modifier = modifier.size(30.dp),
                   tint = BUTTONS_COLOR)
-              Text("Upload Plant from Gallery", modifier = modifier.padding(horizontal = 5.dp))
+              Text(
+                  context.getString(R.string.upload_picture_gallery_text),
+                  modifier = modifier.padding(horizontal = 5.dp))
             }
         Text(
-            "Give camera access",
+            context.getString(R.string.give_camera_access_text),
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier =
                 modifier

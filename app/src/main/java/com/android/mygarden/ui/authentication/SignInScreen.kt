@@ -80,7 +80,8 @@ fun SignInScreen(
   // Navigate to the next screen on successful login
   LaunchedEffect(uiState.user) {
     uiState.user?.let {
-      Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show()
+      Toast.makeText(context, context.getString(R.string.login_successful), Toast.LENGTH_SHORT)
+          .show()
       if (uiState.isNewUser) onSignedIn() else onLogIn()
     }
   }
@@ -91,7 +92,7 @@ fun SignInScreen(
         R.drawable.app_logo_light
       }
   // For testing
-  val resName = LocalContext.current.resources.getResourceEntryName(logoRes)
+  val resName = context.resources.getResourceEntryName(logoRes)
   Box(
       modifier =
           Modifier.fillMaxSize()
@@ -103,7 +104,7 @@ fun SignInScreen(
         ) {
           Image(
               painter = painterResource(id = logoRes),
-              contentDescription = "My Garden logo",
+              contentDescription = context.getString(R.string.description_logo),
               contentScale = ContentScale.Crop,
               modifier =
                   Modifier.fillMaxWidth(0.9f)
@@ -130,14 +131,14 @@ fun SignInScreen(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                   Icon(
                       painter = painterResource(R.drawable.google_logo),
-                      contentDescription = "google Icon",
+                      contentDescription = context.getString(R.string.description_google_icon),
                       tint = Color.Unspecified, // To keep the reel colors of the logo
                       modifier = Modifier.size(20.dp))
 
                   Spacer(modifier = Modifier.fillMaxWidth(0.03f))
 
                   Text(
-                      text = "Sign in with Google",
+                      text = context.getString(R.string.sign_in_with_google),
                       color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
           }

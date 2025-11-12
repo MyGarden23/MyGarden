@@ -1,10 +1,13 @@
 package com.android.mygarden.ui.profile
 
+import android.content.Context
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.platform.app.InstrumentationRegistry
+import com.android.mygarden.R
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.ui.navigation.NavigationTestTags
@@ -29,8 +32,10 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
 
   @get:Rule override val composeTestRule = createComposeRule()
 
-  override val expectedTitle = "Edit Profile"
-  override val expectedButtonText = "Save Profile"
+  override val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
+
+  override val expectedTitle = context.getString(R.string.edit_profile_screen_title)
+  override val expectedButtonText = context.getString(R.string.save_profile_button_text)
 
   /** Helper function to set up the composable content for testing. */
   override fun setContent() {
@@ -110,7 +115,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).assertTextContains("Doe")
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD)
-        .assertTextContains("INTERMEDIATE")
+        .assertTextContains(GardeningSkill.INTERMEDIATE.name)
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.FAVORITE_PLANT_FIELD)
         .assertTextContains("Rose")
@@ -143,7 +148,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
     // Then: the field should display the updated skill level
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD)
-        .assertTextContains("EXPERT")
+        .assertTextContains(GardeningSkill.EXPERT.name)
   }
 
   @Test

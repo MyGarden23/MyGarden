@@ -75,9 +75,11 @@ fun EditPlantScreen(
   val snackbarHostState = remember { SnackbarHostState() }
 
   LaunchedEffect(plantUIState.errorMsg) {
-    plantUIState.errorMsg?.let { msg ->
+    plantUIState.errorMsg?.let { resId ->
       snackbarHostState.showSnackbar(
-          message = msg, withDismissAction = true, duration = SnackbarDuration.Short)
+          message = context.getString(resId),
+          withDismissAction = true,
+          duration = SnackbarDuration.Short)
       editPlantViewModel.clearErrorMsg()
     }
   }
@@ -105,10 +107,14 @@ fun EditPlantScreen(
                 }
                 showDatePicker = false
               }) {
-                Text("OK")
+                Text(context.getString(R.string.ok))
               }
         },
-        dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } }) {
+        dismissButton = {
+          TextButton(onClick = { showDatePicker = false }) {
+            Text(context.getString(R.string.cancel))
+          }
+        }) {
           DatePicker(state = pickerState)
         }
   }
@@ -134,11 +140,11 @@ fun EditPlantScreen(
               if (plantUIState.image != null) {
                 AsyncImage(
                     model =
-                        ImageRequest.Builder(LocalContext.current)
+                        ImageRequest.Builder(context)
                             .data(plantUIState.image)
                             .error(R.drawable.error_image_download)
                             .build(),
-                    contentDescription = "Plant image",
+                    contentDescription = context.getString(R.string.plant_image_description),
                     modifier =
                         Modifier.fillMaxWidth()
                             .height(220.dp)
@@ -157,7 +163,7 @@ fun EditPlantScreen(
                             .testTag(EditPlantScreenTestTags.PLANT_IMAGE),
                     contentAlignment = Alignment.Center) {
                       Text(
-                          text = "No image available",
+                          text = context.getString(R.string.plant_image_no_image_available),
                           style = MaterialTheme.typography.bodyMedium,
                           color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -167,7 +173,7 @@ fun EditPlantScreen(
               OutlinedTextField(
                   value = plantUIState.name,
                   onValueChange = {},
-                  label = { Text("Name") },
+                  label = { Text(context.getString(R.string.name)) },
                   singleLine = true,
                   readOnly = true,
                   enabled = false,
@@ -177,7 +183,7 @@ fun EditPlantScreen(
               OutlinedTextField(
                   value = plantUIState.latinName,
                   onValueChange = {},
-                  label = { Text("Latin name") },
+                  label = { Text(context.getString(R.string.latin_name)) },
                   singleLine = true,
                   readOnly = true,
                   enabled = false,
@@ -187,7 +193,7 @@ fun EditPlantScreen(
               OutlinedTextField(
                   value = plantUIState.description,
                   onValueChange = { editPlantViewModel.setDescription(it) },
-                  label = { Text("Description") },
+                  label = { Text(context.getString(R.string.description)) },
                   minLines = 3,
                   isError = isDescriptionError,
                   modifier =
@@ -197,7 +203,7 @@ fun EditPlantScreen(
                           .onFocusChanged { if (it.isFocused) touchedDesc = true })
               if (plantUIState.description.isBlank() && touchedDesc) {
                 Text(
-                    text = "Description cannot be empty",
+                    text = context.getString(R.string.description_error),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_DESCRIPTION))
@@ -205,7 +211,9 @@ fun EditPlantScreen(
 
               // Last time watered
               Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("Last time watered", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    context.getString(R.string.last_time_watered),
+                    style = MaterialTheme.typography.labelLarge)
 
                 val isDateError = plantUIState.lastWatered == null && touchedLastWatered
                 OutlinedTextField(
@@ -219,7 +227,7 @@ fun EditPlantScreen(
                     onValueChange = {},
                     readOnly = true,
                     isError = isDateError,
-                    placeholder = { Text("Select a date") },
+                    placeholder = { Text(context.getString(R.string.select_date)) },
                     trailingIcon = {
                       IconButton(
                           onClick = {
@@ -227,7 +235,10 @@ fun EditPlantScreen(
                             showDatePicker = true
                           },
                           modifier = Modifier.testTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON)) {
-                            Icon(Icons.Filled.CalendarMonth, contentDescription = "Pick date")
+                            Icon(
+                                Icons.Filled.CalendarMonth,
+                                contentDescription =
+                                    context.getString(R.string.pick_date_icon_description))
                           }
                     },
                     modifier =
@@ -236,7 +247,7 @@ fun EditPlantScreen(
                             .onFocusChanged { if (it.isFocused) touchedLastWatered = true })
                 if (isDateError) {
                   Text(
-                      text = "Last time watered is required",
+                      text = context.getString(R.string.last_time_watered_error),
                       color = MaterialTheme.colorScheme.error,
                       style = MaterialTheme.typography.bodySmall,
                       modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_DATE))
@@ -263,7 +274,7 @@ fun EditPlantScreen(
                       Modifier.fillMaxWidth()
                           .height(56.dp)
                           .testTag(EditPlantScreenTestTags.PLANT_SAVE)) {
-                    Text("Save")
+                    Text(context.getString(R.string.save))
                   }
 
               // Delete
@@ -277,7 +288,9 @@ fun EditPlantScreen(
                           contentDescription = null,
                           tint = MaterialTheme.colorScheme.error)
                       Spacer(Modifier.width(8.dp))
-                      Text("Delete", color = MaterialTheme.colorScheme.error)
+                      Text(
+                          context.getString(R.string.delete),
+                          color = MaterialTheme.colorScheme.error)
                     }
 
                 // Show deletion popup when the according button is pressed

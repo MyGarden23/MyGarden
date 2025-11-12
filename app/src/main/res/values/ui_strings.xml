@@ -28,7 +28,6 @@
     <string name="open_gallery_icon_description">Open Gallery Icon</string>
     <string name="upload_picture_gallery_text">Upload Plant from Gallery</string>
     <string name="give_camera_access_text">Give camera access</string>
-    <string name="error_accessing_settings_log_e">Error accessing the settings app.</string>
     <string name="error_accessing_settings_user">"Error accessing the settings app :("</string>
     <string name="error_fail_take_picture">"Failed to take picture."</string>
 
@@ -106,7 +105,6 @@
     <string name="save">Save</string>
     <string name="next">Next</string>
 
-
     <!-- Form labels and placeholders-->
     <string name="name">Name</string>
     <string name="latin_name">Latin name</string>
@@ -115,5 +113,7 @@
     <string name="last_time_watered">Last time watered</string>
     <string name="last_time_watered_error">Last time watered is required</string>
     <string name="select_date">Select a date</string>
+
+
 
 </resources>

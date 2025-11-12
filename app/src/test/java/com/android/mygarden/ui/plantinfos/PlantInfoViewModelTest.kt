@@ -1,5 +1,8 @@
 package com.android.mygarden.ui.plantinfos
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
@@ -14,24 +17,29 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 /**
  * Unit tests for PlantInfoViewModel.
  *
  * These tests verify the business logic of the ViewModel without UI dependencies.
  */
+@RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlantInfoViewModelTest {
 
   private lateinit var viewModel: PlantInfoViewModel
   private lateinit var repository: PlantsRepositoryLocal
   private val testDispatcher = StandardTestDispatcher()
+  private lateinit var context: Context
 
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
     repository = PlantsRepositoryLocal()
     viewModel = PlantInfoViewModel(repository)
+    context = ApplicationProvider.getApplicationContext()
   }
 
   @After
@@ -85,7 +93,7 @@ class PlantInfoViewModelTest {
             healthStatusDescription = "The plant is thriving",
             wateringFrequency = 3)
 
-    viewModel.initializeUIState(plant)
+    viewModel.initializeUIState(plant, context.getString(R.string.loading_plant_infos))
     advanceUntilIdle()
 
     val uiState = viewModel.uiState.value
@@ -102,7 +110,7 @@ class PlantInfoViewModelTest {
     // Image reference should be preserved during initialization
     val plant = createTestPlant()
 
-    viewModel.initializeUIState(plant)
+    viewModel.initializeUIState(plant, context.getString(R.string.loading_plant_infos))
     advanceUntilIdle()
 
     val uiState = viewModel.uiState.value
@@ -116,7 +124,7 @@ class PlantInfoViewModelTest {
     PlantHealthStatus.values().forEach { status ->
       val plant =
           createTestPlant(healthStatus = status, healthStatusDescription = status.description)
-      viewModel.initializeUIState(plant)
+      viewModel.initializeUIState(plant, context.getString(R.string.loading_plant_infos))
       advanceUntilIdle()
 
       val uiState = viewModel.uiState.value
@@ -129,7 +137,7 @@ class PlantInfoViewModelTest {
   fun setTab_updatesSelectedTabToDescription() = runTest {
     // Tab switching should correctly update the selected tab
     // Initialize with a plant first
-    viewModel.initializeUIState(createTestPlant())
+    viewModel.initializeUIState(createTestPlant(), context.getString(R.string.loading_plant_infos))
     advanceUntilIdle()
 
     // Switch to health tab first
@@ -148,7 +156,7 @@ class PlantInfoViewModelTest {
   fun setTab_updatesSelectedTabToHealth() = runTest {
     // Verify switching to health tab works correctly
     // Initialize with a plant first
-    viewModel.initializeUIState(createTestPlant())
+    viewModel.initializeUIState(createTestPlant(), context.getString(R.string.loading_plant_infos))
     advanceUntilIdle()
 
     viewModel.setTab(SelectedPlantInfoTab.HEALTH_STATUS)
@@ -162,7 +170,7 @@ class PlantInfoViewModelTest {
   fun setTab_doesNotAffectOtherUIStateProperties() = runTest {
     // Tab switching should only change the tab, not other plant data
     val plant = createTestPlant(name = "Cactus", latinName = "Cactaceae")
-    viewModel.initializeUIState(plant)
+    viewModel.initializeUIState(plant, context.getString(R.string.loading_plant_infos))
     advanceUntilIdle()
 
     viewModel.setTab(SelectedPlantInfoTab.HEALTH_STATUS)
@@ -222,12 +230,12 @@ class PlantInfoViewModelTest {
     val plant1 = createTestPlant(name = "First Plant")
     val plant2 = createTestPlant(name = "Second Plant")
 
-    viewModel.initializeUIState(plant1)
+    viewModel.initializeUIState(plant1, context.getString(R.string.loading_plant_infos))
     advanceUntilIdle()
     var uiState = viewModel.uiState.value
     assertEquals("First Plant", uiState.name)
 
-    viewModel.initializeUIState(plant2)
+    viewModel.initializeUIState(plant2, context.getString(R.string.loading_plant_infos))
     advanceUntilIdle()
     uiState = viewModel.uiState.value
     assertEquals("Second Plant", uiState.name)

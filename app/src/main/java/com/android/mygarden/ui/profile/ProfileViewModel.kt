@@ -2,7 +2,6 @@ package com.android.mygarden.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
@@ -25,78 +24,15 @@ data class ProfileUIState(
     val country: String = "",
     val registerPressed: Boolean = false,
     val avatar: Avatar = Avatar.A1, // By default 1st avatar
-) {
-
-  /**
-   * Validates that the first name is not blank
-   *
-   * @return true if first name is valid, false otherwise
-   */
-  private fun firstNameValid(): Boolean {
-    return firstName.isNotBlank()
-  }
-
-  /**
-   * Determines if the first name field should show an error
-   *
-   * @return true if register was pressed and first name is invalid
-   */
-  fun firstNameIsError(): Boolean {
-    return registerPressed && !firstNameValid()
-  }
-
-  /**
-   * Validates that the last name is not blank
-   *
-   * @return true if last name is valid, false otherwise
-   */
-  private fun lastNameValid(): Boolean {
-    return lastName.isNotBlank()
-  }
-
-  /**
-   * Determines if the last name field should show an error
-   *
-   * @return true if register was pressed and last name is invalid
-   */
-  fun lastNameIsError(): Boolean {
-    return registerPressed && !lastNameValid()
-  }
-
-  /**
-   * Validates that the selected country is in the list of valid countries
-   *
-   * @return true if country is valid, false otherwise
-   */
-  private fun countryValid(): Boolean {
-    return Countries.ALL.contains(country)
-  }
-
-  /**
-   * Determines if the country field should show an error
-   *
-   * @return true if register was pressed and country is invalid
-   */
-  fun countryIsError(): Boolean {
-    return registerPressed && !countryValid()
-  }
-
-  /**
-   * Checks if all required fields are valid for registration
-   *
-   * @return true if all validation passes, false otherwise
-   */
-  fun canRegister(): Boolean {
-    return firstNameValid() && lastNameValid() && countryValid()
-  }
-}
+)
 
 /**
  * ViewModel for managing the new profile creation screen state Handles user input updates and form
  * validation
  */
-class ProfileViewModel(private val repo: ProfileRepository = ProfileRepositoryProvider.repository) :
-    ViewModel() {
+class ProfileViewModel(
+    private val repo: ProfileRepository = ProfileRepositoryProvider.repository,
+) : ViewModel() {
   // Private mutable state flow for internal state management
   private val _uiState = MutableStateFlow(ProfileUIState())
 
@@ -129,6 +65,18 @@ class ProfileViewModel(private val repo: ProfileRepository = ProfileRepositoryPr
       // If profile is null, the form keeps its default values from NewProfileUIState
       initialized = true
     }
+  }
+
+  /** List of valid country names used for validation */
+  private var countries: List<String> = emptyList()
+
+  /**
+   * Updates the list of valid countries
+   *
+   * @param list The new list of valid country names
+   */
+  fun setCountries(list: List<String>) {
+    countries = list
   }
 
   /**
@@ -202,7 +150,7 @@ class ProfileViewModel(private val repo: ProfileRepository = ProfileRepositoryPr
     // show errors if needed
     setRegisterPressed(true)
     val state = _uiState.value
-    if (!state.canRegister()) {
+    if (!canRegister()) {
       onResult(false)
       return
     }
@@ -233,5 +181,68 @@ class ProfileViewModel(private val repo: ProfileRepository = ProfileRepositoryPr
         onResult(false)
       }
     }
+  }
+
+  /**
+   * Validates that the first name is not blank
+   *
+   * @return true if first name is valid, false otherwise
+   */
+  private fun firstNameValid(): Boolean {
+    return _uiState.value.firstName.isNotBlank()
+  }
+
+  /**
+   * Validates that the last name is not blank
+   *
+   * @return true if last name is valid, false otherwise
+   */
+  private fun lastNameValid(): Boolean {
+    return _uiState.value.lastName.isNotBlank()
+  }
+
+  /**
+   * Validates that the selected country is in the list of valid countries
+   *
+   * @return true if country is valid, false otherwise
+   */
+  private fun countryValid(): Boolean {
+    return countries.contains(_uiState.value.country)
+  }
+
+  /**
+   * Determines if the first name field should show an error
+   *
+   * @return true if register was pressed and first name is invalid
+   */
+  fun firstNameIsError(): Boolean {
+    return _uiState.value.registerPressed && !firstNameValid()
+  }
+
+  /**
+   * Determines if the last name field should show an error
+   *
+   * @return true if register was pressed and last name is invalid
+   */
+  fun lastNameIsError(): Boolean {
+    return _uiState.value.registerPressed && !lastNameValid()
+  }
+
+  /**
+   * Determines if the country field should show an error
+   *
+   * @return true if register was pressed and country is invalid
+   */
+  fun countryIsError(): Boolean {
+    return _uiState.value.registerPressed && !countryValid()
+  }
+
+  /**
+   * Checks if all required fields are valid for registration
+   *
+   * @return true if all validation passes, false otherwise
+   */
+  fun canRegister(): Boolean {
+    return firstNameValid() && lastNameValid() && countryValid()
   }
 }

@@ -23,6 +23,8 @@ class MainActivitySmokeTest {
 
   @Test
   fun activity_launches_and_composes() {
+    val context = rule.activity
+
     // If Compose is up, the root semantics node exists.
     waitForRoot()
 
@@ -35,7 +37,10 @@ class MainActivitySmokeTest {
     // 2) If you DO render a sign-in button with text, this won’t fail if it’s not there.
     // Replace "Sign in" with your real text or remove this block if you prefer.
     try {
-      val nodes = rule.onAllNodesWithText("Sign in").fetchSemanticsNodes()
+      val nodes =
+          rule
+              .onAllNodesWithText(context.getString(R.string.sign_in_with_google))
+              .fetchSemanticsNodes()
       if (nodes.isNotEmpty()) {
         // Good enough to know sign-in UI rendered
       }

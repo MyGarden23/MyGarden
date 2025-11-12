@@ -59,6 +59,7 @@ fun ChooseProfilePictureScreen(
     onBack: () -> Unit
 ) {
   val context = LocalContext.current
+
   Scaffold(
       modifier = modifier.testTag(ChooseProfilePictureScreenTestTags.SCREEN),
       topBar = {
@@ -85,7 +86,8 @@ fun ChooseProfilePictureScreen(
                             .testTag(ChooseProfilePictureScreenTestTags.getTestTagAvatar(avatar))) {
                       Image(
                           painter = painterResource(avatar.resId),
-                          contentDescription = "Avatar ${avatar.name}",
+                          contentDescription =
+                              context.getString(R.string.avatar_description, avatar.name),
                           modifier = modifier.fillMaxSize())
                     }
               }
