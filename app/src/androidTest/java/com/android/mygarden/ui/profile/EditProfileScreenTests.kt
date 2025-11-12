@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeProfileRepository
 import org.junit.Assert.assertEquals
@@ -151,7 +152,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
     setContent()
 
     // When: the back button is clicked
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.BACK_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
 
     // Then: the back callback should be triggered
     assertEquals(true, onBackPressedCalled)

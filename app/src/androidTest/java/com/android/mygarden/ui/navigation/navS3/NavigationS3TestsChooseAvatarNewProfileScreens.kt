@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.ui.navigation.AppNavHost
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.profile.ChooseProfilePictureScreenTestTags
@@ -68,7 +69,7 @@ class NavigationS3TestsChooseAvatarNewProfileScreens {
   fun chooseAvatar_backButton_returnsToNewProfile() {
     clickAvatar()
     composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.BACK_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
   }
 

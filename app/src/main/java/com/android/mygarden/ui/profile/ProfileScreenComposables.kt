@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,12 +30,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.model.profile.Countries
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.ui.navigation.TopBar
 
 // Layout proportions
 private const val HEADER_SECTION_WEIGHT = 0.2f
@@ -98,20 +96,12 @@ private fun ProfileHeader(
     modifier: Modifier = Modifier,
     uiState: ProfileUIState,
     onAvatarClick: () -> Unit,
-    title: String = "New Profile",
 ) {
   Row(modifier = modifier) {
     Column(
         modifier = Modifier.weight(CONTENT_SECTION_WEIGHT).fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly) {
-          Text(
-              text = title,
-              fontSize = TITLE_FONT_SIZE,
-              fontWeight = FontWeight.Medium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.testTag(ProfileScreenTestTags.TITLE))
-
           // Avatar placeholder with person icon
           Box(
               modifier =
@@ -445,20 +435,16 @@ fun ProfileScreenBase(
   Scaffold(
       modifier = Modifier.testTag(ProfileScreenTestTags.SCREEN),
       topBar = {
-        if (onNavBackIconClick != null) {
-          TopAppBar(
-              title = {},
-              navigationIcon = {
-                IconButton(
-                    onClick = onNavBackIconClick,
-                    modifier = Modifier.testTag(ProfileScreenTestTags.BACK_BUTTON)) {
-                      Icon(
-                          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                          contentDescription = "Navigate back",
-                          tint = MaterialTheme.colorScheme.onSurface)
-                    }
-              })
-        }
+        // Back button displayed only when Edit Profile, not New Profile
+        TopBar(
+            title = title,
+            hasGoBackButton = onNavBackIconClick != null,
+            onGoBack =
+                if (onNavBackIconClick != null) {
+                  onNavBackIconClick
+                } else {
+                  {}
+                })
       },
       bottomBar = {
         SaveButton(
@@ -475,7 +461,6 @@ fun ProfileScreenBase(
               ProfileHeader(
                   uiState = uiState,
                   onAvatarClick = onAvatarClick,
-                  title = title,
                   modifier = Modifier.weight(HEADER_SECTION_WEIGHT),
               )
 

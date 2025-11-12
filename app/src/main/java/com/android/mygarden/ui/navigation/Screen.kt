@@ -1,24 +1,27 @@
 package com.android.mygarden.ui.navigation
 
+import com.android.mygarden.R
+
 /**
  * Representation of a specific screen of the app
  *
  * @param route the route of the screen
- * @param name the name of the screen
+ * @param nameResId the name of the screen
  * @param isTopLevel whether the screen is a core screen that can be accessible from the bottom bar
  *   or not
  */
-sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean = false) {
-  object Auth : Screen(route = "auth", name = "Authentication")
+sealed class Screen(val route: String, val nameResId: Int, val isTopLevel: Boolean = false) {
+  object Auth : Screen(route = "auth", nameResId = R.string.authentication_screen_title)
 
-  object Camera : Screen(route = "camera", name = "Camera", isTopLevel = true)
+  object Camera :
+      Screen(route = "camera", nameResId = R.string.camera_screen_title, isTopLevel = true)
 
-  object PlantInfo : Screen(route = "plant_info", name = "Plant Info")
+  object PlantInfo : Screen(route = "plant_info", nameResId = R.string.plant_info_screen_title)
 
-  object NewProfile : Screen(route = "new_profile", name = "New Profile")
+  object NewProfile : Screen(route = "new_profile", nameResId = R.string.new_profile_screen_title)
 
   data class EditPlant(val ownedPlantId: String, val from: String? = null) :
-      Screen(route = buildRoute(ownedPlantId, from), name = "Edit Plant") {
+      Screen(route = buildRoute(ownedPlantId, from), nameResId = R.string.edit_plant_screen_title) {
 
     /**
      * Companion object defining constants and utilities for the EditPlant screen navigation.
@@ -53,9 +56,12 @@ sealed class Screen(val route: String, val name: String, val isTopLevel: Boolean
     }
   }
 
-  object EditProfile : Screen(route = "edit_profile", name = "New Profile")
+  object EditProfile :
+      Screen(route = "edit_profile", nameResId = R.string.edit_profile_screen_title)
 
-  object Garden : Screen(route = "garden", name = "Garden", isTopLevel = true)
+  object Garden :
+      Screen(route = "garden", nameResId = R.string.garden_screen_title, isTopLevel = true)
 
-  object ChooseAvatar : Screen(route = "choose_avatar", name = "Choose Avatar")
+  object ChooseAvatar :
+      Screen(route = "choose_avatar", nameResId = R.string.choose_avatar_screen_title)
 }

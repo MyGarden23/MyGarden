@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -42,8 +43,8 @@ class ChooseProfilePictureScreenTest {
     setContentWith()
 
     composeRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.SCREEN).assertIsDisplayed()
-    composeRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.TOP_APP_BAR).assertIsDisplayed()
-    composeRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.BACK_BUTTON).assertIsDisplayed()
+    composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR).assertIsDisplayed()
+    composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).assertIsDisplayed()
     composeRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.AVATAR_GRID).assertIsDisplayed()
   }
 
@@ -53,7 +54,7 @@ class ChooseProfilePictureScreenTest {
     val backCalls = mutableListOf<Boolean>()
     setContentWith(onBackCalled = backCalls)
 
-    composeRule.onNodeWithTag(ChooseProfilePictureScreenTestTags.BACK_BUTTON).performClick()
+    composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
 
     assertTrue(backCalls.isNotEmpty())
   }

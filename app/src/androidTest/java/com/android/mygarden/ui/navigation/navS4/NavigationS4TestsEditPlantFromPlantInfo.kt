@@ -107,7 +107,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
     navigateFromPlantInfoToEditPlant()
 
     // Click back button on EditPlant
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.GO_BACK_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
 
     // Verify we're back on PlantInfo screen
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
