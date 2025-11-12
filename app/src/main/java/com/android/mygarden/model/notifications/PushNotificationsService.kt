@@ -7,6 +7,7 @@ import com.android.mygarden.model.profile.ProfileRepositoryFirestore
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,6 +23,8 @@ class PushNotificationsService : FirebaseMessagingService() {
     var isAppInForeGround = false
   }
 
+  var testDispatcher: CoroutineDispatcher? = null
+
   /**
    * Called when a new token for the Firebase project is generated. This is invoked after app
    * install when a token is first generated, and again if the token changes. It handles new tokens
@@ -35,8 +38,9 @@ class PushNotificationsService : FirebaseMessagingService() {
     super.onNewToken(token)
 
     val profileRepo = ProfileRepositoryProvider.repository
+    val dispatcher = testDispatcher ?: Dispatchers.IO
 
-    CoroutineScope(Dispatchers.IO).launch {
+    CoroutineScope(dispatcher).launch {
       // Try to attach the new token to the user's Firestore profile
       val success = profileRepo.attachFCMToken(token)
 

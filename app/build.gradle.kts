@@ -244,6 +244,8 @@ dependencies {
     // ----------         Mockito      ------------
     implementation(libs.mockito.core)
     implementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockito.kotlin)
 
     // --------- Firebase AI Logic (Gemini/Imagen) ---------
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
