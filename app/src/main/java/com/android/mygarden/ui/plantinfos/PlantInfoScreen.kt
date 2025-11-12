@@ -240,7 +240,7 @@ fun PlantInfosScreen(
                               modifier =
                                   Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
                         }
-                        // --- Health Tab Content ---
+                        // --- Location Tab Content ---
                         SelectedPlantInfoTab.LOCATION -> {
                           // Location text, INDOOR or OUTDOOR
                           Text(

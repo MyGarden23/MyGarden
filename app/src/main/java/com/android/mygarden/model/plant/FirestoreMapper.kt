@@ -10,7 +10,8 @@ import java.sql.Timestamp
  * requirements.
  *
  * @property name The common name of the plant (e.g., "Rose", "Tomato").
- * @property image The visual representation of the plant.
+ * @property image The visual representation of the plant, in String? because it is an URL to find
+ *   the actual image.
  * @property latinName The scientific/botanical name of the plant (e.g., "Rosa rubiginosa").
  * @property description A detailed text description of the plant, including care instructions.
  * @property location The best location for the plant to grow, indoor or outdoor.
