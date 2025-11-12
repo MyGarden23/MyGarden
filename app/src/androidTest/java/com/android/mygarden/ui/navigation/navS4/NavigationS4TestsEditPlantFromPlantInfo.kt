@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.navigation.navS4
 
+import android.Manifest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -7,7 +8,10 @@ import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
+import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
@@ -29,23 +33,38 @@ import org.junit.runner.RunWith
  * EditPlant (instead of directly to Garden), allowing the user to set the description and last
  * watered date.
  */
+@RequiresCamera
 @RunWith(AndroidJUnit4::class)
 class NavigationS4TestsEditPlantFromPlantInfo {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  /**
+   * Automatically grants camera permission before tests run. Essential for camera functionality
+   * testing without user interaction prompts.
+   */
+  @get:Rule
+  val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
+
   private lateinit var navController: NavHostController
 
   @Before
   fun setUp() {
+    PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
+
     composeTestRule.setContent {
       val controller = rememberNavController()
       navController = controller
       MyGardenTheme {
-        // Start at PlantInfo screen
-        AppNavHost(navController = controller, startDestination = Screen.PlantInfo.route)
+        // Start at Camera screen because we need the Camera in the stack to navigate to Camera from
+        // EditPlant with Back button
+        AppNavHost(navController = controller, startDestination = Screen.Camera.route)
       }
     }
+    composeTestRule.waitForIdle()
+    // Go to PlantInfo because the objective of this test is not to verify the Camera → PlantInfo
+    // navigation
+    composeTestRule.runOnUiThread { navController.navigate(Screen.PlantInfo.route) }
     composeTestRule.waitForIdle()
   }
 
@@ -84,7 +103,6 @@ class NavigationS4TestsEditPlantFromPlantInfo {
     // Start on PlantInfo screen
     composeTestRule.waitForIdle()
     navigateFromPlantInfoToEditPlant()
-
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertIsDisplayed()
 
     // Click "Save" on EditPlant screen
@@ -95,22 +113,27 @@ class NavigationS4TestsEditPlantFromPlantInfo {
   }
 
   /**
-   * Tests navigation from PlantInfo to EditPlant, then back to PlantInfo using back button.
+   * Tests navigation from PlantInfo to EditPlant, then back to Camera using back button.
    *
-   * User journey: 1. User sees plant info 2. User clicks "Next" to save 3. User is on EditPlant 4.
-   * User clicks back button 5. User returns to PlantInfo (and plant is deleted)
+   * User journey:
+   * 1. User sees plant info
+   * 2. User clicks "Next" to save
+   * 3. User is on EditPlant
+   * 4. User clicks back button
+   * 5. User returns to Camera (PlantInfo is removed from backstack, and plant is deleted)
    */
   @Test
-  fun navigateFromPlantInfoToEditPlantAndBackToPlantInfoByPressingBack() {
+  fun navigateFromPlantInfoToEditPlantAndBackToCameraByPressingBack() {
     // Start on PlantInfo screen
     composeTestRule.waitForIdle()
     navigateFromPlantInfoToEditPlant()
 
     // Click back button on EditPlant
-    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.GO_BACK_BUTTON).performClick()
+    composeTestRule.waitForIdle()
 
-    // Verify we're back on PlantInfo screen
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
+    // Verify we're back on Camera screen (not PlantInfo, since it was removed from backstack)
+    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
 
     // Verify the plant was deleted (check that no plant exists in repository)
     val repo = PlantsRepositoryProvider.repository
