@@ -26,7 +26,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
-
+private const val NEXT_BUTTON_TXT = "Next"
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
   const val SCREEN = "plant_info_screen"
@@ -43,6 +43,7 @@ object PlantInfoScreenTestTags {
   const val HEALTH_STATUS = "health_status"
   const val WATERING_FREQUENCY = "watering_frequency"
   const val NEXT_BUTTON = "next_button"
+  const val NEXT_BUTTON_LOADING = "next_button_loading"
 }
 
 /**
@@ -105,13 +106,30 @@ fun PlantInfosScreen(
                           .height(56.dp)
                           .testTag(PlantInfoScreenTestTags.NEXT_BUTTON),
                   shape = RoundedCornerShape(28.dp),
+                  enabled = !uiState.isSaving,
                   colors =
                       ButtonDefaults.buttonColors(
-                          containerColor = MaterialTheme.colorScheme.primaryContainer)) {
-                    Text(
-                        text = context.getString(R.string.next),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium)
+                          containerColor = MaterialTheme.colorScheme.primaryContainer,
+                          disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                    if (uiState.isSaving) {
+                      Row(
+                          modifier = Modifier.testTag(PlantInfoScreenTestTags.NEXT_BUTTON_LOADING),
+                          horizontalArrangement = Arrangement.Center,
+                          verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                strokeWidth = 2.dp)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = stringResource(id = R.string.uploading),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                          }
+                    } else {
+                      Text(text = NEXT_BUTTON_TXT, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                    }
                   }
             }
       }) { paddingValues ->
@@ -140,6 +158,7 @@ fun PlantInfosScreen(
                       plantInfoViewModel.resetUIState()
                       onBackPressed()
                     },
+                    enabled = !uiState.isSaving,
                     modifier =
                         Modifier.align(Alignment.TopStart)
                             .padding(8.dp)
