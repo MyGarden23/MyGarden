@@ -116,14 +116,14 @@ class CameraViewModel : ViewModel() {
 
       // 2) Fix rotation if needed using EXIF data
       val orientation =
-          runCatching {
-                context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-                  ExifInterface(pfd.fileDescriptor)
-                      .getAttributeInt(
-                          ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-                } ?: ExifInterface.ORIENTATION_NORMAL
-              }
-              .getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+          try {
+            context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+              ExifInterface(pfd.fileDescriptor)
+                  .getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            } ?: ExifInterface.ORIENTATION_NORMAL
+          } catch (_: Throwable) {
+            ExifInterface.ORIENTATION_NORMAL
+          }
 
       bitmap = rotateBitmapIfNeeded(bitmap, orientation)
 
