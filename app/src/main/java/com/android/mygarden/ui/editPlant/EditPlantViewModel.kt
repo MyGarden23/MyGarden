@@ -112,7 +112,9 @@ class EditPlantViewModel(
     val updated =
         newPlant.copy(
             lastWatered = watered,
-            plant = newPlant.plant.copy(description = _uiState.value.description))
+            plant =
+                newPlant.plant.copy(
+                    description = _uiState.value.description, name = _uiState.value.name))
 
     viewModelScope.launch {
       try {

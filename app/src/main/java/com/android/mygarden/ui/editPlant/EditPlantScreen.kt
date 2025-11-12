@@ -173,12 +173,12 @@ fun EditPlantScreen(
               OutlinedTextField(
                   value = plantUIState.name,
                   onValueChange = {
-                      if (!plantUIState.isRecognized) editPlantViewModel.setName(it)
+                    if (!plantUIState.isRecognized) editPlantViewModel.setName(it)
                   },
                   label = { Text(context.getString(R.string.name)) },
                   singleLine = true,
-                  readOnly = true,
-                  enabled = false,
+                  //                  readOnly = true,
+                  //                  enabled = false,
                   modifier = Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.PLANT_NAME))
 
               // Latin name (read-only)
