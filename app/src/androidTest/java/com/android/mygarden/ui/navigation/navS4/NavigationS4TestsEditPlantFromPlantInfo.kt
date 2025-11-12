@@ -129,7 +129,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
     navigateFromPlantInfoToEditPlant()
 
     // Click back button on EditPlant
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.GO_BACK_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
     composeTestRule.waitForIdle()
 
     // Verify we're back on Camera screen (not PlantInfo, since it was removed from backstack)
