@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -99,14 +100,23 @@ class CameraViewModel : ViewModel() {
         })
   }
 
-  // Handles an image picked from the gallery and runs it through the same steps as the camera:
-  // decode → fix orientation → save locally → trigger onPictureTaken with the file path
+    /**
+     * Processes an image selected from the gallery so it can follow the same flow as a camera capture.
+     * The image is decoded, its orientation corrected if possible, saved locally, then returned through
+     * [onPictureTaken]. Errors are reported via [onError].
+     *
+     * @param context used to access the content resolver and internal storage.
+     * @param uri the URI of the gallery image.
+     * @param onPictureTaken callback receiving the saved image file path.
+     * @param onError callback triggered if decoding, EXIF reading, or saving fails.
+     */
   fun onImagePickedFromGallery(
       context: Context,
       uri: Uri,
       onPictureTaken: (String) -> Unit,
       onError: () -> Unit
   ) {
+
     try {
       // Decode the bitmap from the given URI
       val input =
@@ -114,7 +124,11 @@ class CameraViewModel : ViewModel() {
               ?: throw IllegalStateException("Cannot open input stream for gallery image")
       var bitmap = input.use { BitmapFactory.decodeStream(it) }
 
-      // 2) Fix rotation if needed using EXIF data
+// Try to read the EXIF orientation of the image.
+// We must open a ParcelFileDescriptor because ExifInterface cannot parse EXIF metadata
+// from a simple InputStream. If EXIF is present, we extract the orientation tag
+// (e.g., ROTATE_90, ROTATE_180…). If anything fails (provider does not support PFD,
+// corrupted EXIF header, or any I/O error), we safely default to ORIENTATION_NORMAL.
       val orientation =
           try {
             context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
@@ -138,7 +152,10 @@ class CameraViewModel : ViewModel() {
     }
   }
 
-  private fun rotateBitmapIfNeeded(src: Bitmap, exifOrientation: Int): Bitmap {
+    //function that rotates the bitmap if needed
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  internal fun rotateBitmapIfNeeded(src: Bitmap, exifOrientation: Int): Bitmap {
     val degrees =
         when (exifOrientation) {
           ExifInterface.ORIENTATION_ROTATE_90 -> 90f

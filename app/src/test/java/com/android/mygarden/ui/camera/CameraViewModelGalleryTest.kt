@@ -65,27 +65,17 @@ class CameraViewModelGalleryTest {
 
   @Test
   fun `rotateBitmapIfNeeded covers 0 90 180 270 in one go`() {
-    // Table-driven: one test covers all EXIF branches.
-    fun rotate(bmp: Bitmap, exif: Int): Bitmap {
-      val m =
-          CameraViewModel::class
-              .java
-              .getDeclaredMethod(
-                  "rotateBitmapIfNeeded", Bitmap::class.java, Int::class.javaPrimitiveType)
-      m.isAccessible = true
-      return m.invoke(vm, bmp, exif) as Bitmap
-    }
-
     val src = Bitmap.createBitmap(100, 50, Bitmap.Config.ARGB_8888)
-    val cases =
-        listOf(
-            ExifInterface.ORIENTATION_NORMAL to (100 to 50),
-            ExifInterface.ORIENTATION_ROTATE_90 to (50 to 100),
-            ExifInterface.ORIENTATION_ROTATE_180 to (100 to 50),
-            ExifInterface.ORIENTATION_ROTATE_270 to (50 to 100))
+
+    val cases = listOf(
+      ExifInterface.ORIENTATION_NORMAL     to (100 to 50),
+      ExifInterface.ORIENTATION_ROTATE_90  to (50  to 100),
+      ExifInterface.ORIENTATION_ROTATE_180 to (100 to 50),
+      ExifInterface.ORIENTATION_ROTATE_270 to (50  to 100)
+    )
 
     for ((exif, expected) in cases) {
-      val out = rotate(src, exif)
+      val out = vm.rotateBitmapIfNeeded(src, exif)
       assertEquals("width for exif=$exif", expected.first, out.width)
       assertEquals("height for exif=$exif", expected.second, out.height)
     }
@@ -126,7 +116,7 @@ class CameraViewModelGalleryTest {
 
   @Test
   fun `onImagePickedFromGallery error path does not crash and does not callback`() {
-    // Provider qui échoue systématiquement
+    // Provider fails systematically
     val authority = "com.test.fail"
     val provider =
         FailingProvider().apply {
@@ -142,8 +132,8 @@ class CameraViewModelGalleryTest {
     vm.onImagePickedFromGallery(
         context = context,
         uri = bad,
-        onPictureTaken = { onSuccessCalled = true }, // ne doit pas être appelé
-        onError = { onErrorCalled = true } // doit être appelé
+        onPictureTaken = { onSuccessCalled = true }, // should not be called
+        onError = { onErrorCalled = true } // should be called
         )
 
     assertFalse("onPictureTaken must not be called on failure", onSuccessCalled)
