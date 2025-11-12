@@ -128,9 +128,10 @@ class CameraViewModelGalleryTest {
   fun `onImagePickedFromGallery error path does not crash and does not callback`() {
     // Provider qui échoue systématiquement
     val authority = "com.test.fail"
-    val provider = FailingProvider().apply {
-      attachInfo(context, ProviderInfo().apply { this.authority = authority })
-    }
+    val provider =
+        FailingProvider().apply {
+          attachInfo(context, ProviderInfo().apply { this.authority = authority })
+        }
     ShadowContentResolver.registerProviderInternal(authority, provider)
 
     val bad = Uri.parse("content://$authority/anything")
@@ -139,11 +140,11 @@ class CameraViewModelGalleryTest {
     var onErrorCalled = false
 
     vm.onImagePickedFromGallery(
-      context = context,
-      uri = bad,
-      onPictureTaken = { onSuccessCalled = true }, // ne doit pas être appelé
-      onError = { onErrorCalled = true }           // doit être appelé
-    )
+        context = context,
+        uri = bad,
+        onPictureTaken = { onSuccessCalled = true }, // ne doit pas être appelé
+        onError = { onErrorCalled = true } // doit être appelé
+        )
 
     assertFalse("onPictureTaken must not be called on failure", onSuccessCalled)
     assertTrue("onError must be called on failure", onErrorCalled)

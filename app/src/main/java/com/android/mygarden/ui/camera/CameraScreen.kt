@@ -114,12 +114,12 @@ fun CameraScreen(
               uri = it,
               onPictureTaken = onPictureTaken,
               onError = {
-                  Toast.makeText(
-                      context,
-                      context.getString(R.string.error_fail_take_picture),
-                      Toast.LENGTH_SHORT)
-                      .show()
-              })// same callback as the camera button
+                Toast.makeText(
+                        context,
+                        context.getString(R.string.error_fail_take_picture),
+                        Toast.LENGTH_SHORT)
+                    .show()
+              }) // same callback as the camera button
         }
       }
 

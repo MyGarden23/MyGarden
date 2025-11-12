@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -107,8 +106,7 @@ class CameraViewModel : ViewModel() {
       uri: Uri,
       onPictureTaken: (String) -> Unit,
       onError: () -> Unit
-  )
-  {
+  ) {
     try {
       // Decode the bitmap from the given URI
       val input =
