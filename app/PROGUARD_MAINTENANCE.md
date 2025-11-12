@@ -332,3 +332,7 @@ When modifying ProGuard rules, use this checklist:
 - [Kotlin ProGuard Rules](https://kotlinlang.org/docs/reference/using-gradle.html#proguard)
 
 ---
+
+**Transparency Note**  
+This guide was drafted with the assistance of an AI tool and subsequently reviewed and refined by a human author to ensure accuracy and clarity.
+
