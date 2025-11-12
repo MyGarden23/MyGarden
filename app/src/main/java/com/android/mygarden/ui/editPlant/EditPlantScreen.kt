@@ -172,7 +172,9 @@ fun EditPlantScreen(
               // Name (read-only)
               OutlinedTextField(
                   value = plantUIState.name,
-                  onValueChange = {},
+                  onValueChange = {
+                      if (!plantUIState.isRecognized) editPlantViewModel.setName(it)
+                  },
                   label = { Text(context.getString(R.string.name)) },
                   singleLine = true,
                   readOnly = true,

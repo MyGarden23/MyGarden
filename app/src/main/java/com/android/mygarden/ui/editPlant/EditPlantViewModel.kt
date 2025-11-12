@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
+import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import java.sql.Timestamp
@@ -19,7 +20,8 @@ data class EditPlantUIState(
     val description: String = "",
     val errorMsg: Int? = null,
     val lastWatered: Timestamp? = null,
-    val image: String? = null
+    val image: String? = null,
+    val isRecognized: Boolean = false,
 )
 
 class EditPlantViewModel(
@@ -50,7 +52,8 @@ class EditPlantViewModel(
                 latinName = plant.latinName,
                 description = plant.description,
                 lastWatered = owned.lastWatered,
-                image = plant.image)
+                image = plant.image,
+                isRecognized = plant.name != Plant().name)
       } catch (e: Exception) {
         Log.e("EditPlantViewModel", "Error loading Plant by ID. $ownedPlantId", e)
         setErrorMsg(R.string.error_failed_load_plant_edit)
@@ -60,6 +63,10 @@ class EditPlantViewModel(
 
   override fun setLastWatered(timestamp: Timestamp) {
     _uiState.value = _uiState.value.copy(lastWatered = timestamp)
+  }
+
+  override fun setName(newName: String) {
+    _uiState.value = _uiState.value.copy(name = newName)
   }
 
   override fun setDescription(newDescription: String) {
