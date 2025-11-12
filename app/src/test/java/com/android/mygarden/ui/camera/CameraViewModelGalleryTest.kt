@@ -3,6 +3,8 @@ package com.android.mygarden.ui.camera
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.ProviderInfo
+import android.content.res.AssetFileDescriptor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -133,5 +135,79 @@ class CameraViewModelGalleryTest {
 
     // If VM returns early in catch (recommended), callback must not be hit.
     assertFalse(called)
+  }
+
+  // Provider bound to a specific file; serves both InputStream and FileDescriptor.
+  private class PfdProvider(private val file: File) : ContentProvider() {
+    override fun onCreate() = true
+
+    override fun getType(uri: Uri) = "image/jpeg"
+
+    override fun query(
+        u: Uri,
+        p: Array<out String>?,
+        s: String?,
+        a: Array<out String>?,
+        o: String?
+    ) = null
+
+    override fun insert(u: Uri, v: ContentValues?) = null
+
+    override fun delete(u: Uri, s: String?, a: Array<out String>?) = 0
+
+    override fun update(u: Uri, v: ContentValues?, s: String?, a: Array<out String>?) = 0
+
+    // used by ContentResolver.openInputStream(uri)
+    override fun openAssetFile(uri: Uri, mode: String): AssetFileDescriptor {
+      val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+      return AssetFileDescriptor(
+          pfd,
+          /* startOffset = */ 0,
+          /* length      = */ AssetFileDescriptor.UNKNOWN_LENGTH // <- key change
+          )
+    }
+
+    // used by ContentResolver.openFileDescriptor(uri, "r")
+    override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor {
+      return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+    }
+  }
+
+  @Test
+  fun `onImagePickedFromGallery hits EXIF block via PFD`() {
+    // Create a real JPEG on disk
+    val bmp = Bitmap.createBitmap(40, 20, Bitmap.Config.ARGB_8888)
+    val tmp = File.createTempFile("exif_src_", ".jpg", context.cacheDir)
+    FileOutputStream(tmp).use { bmp.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+
+    // (Optional) write an EXIF orientation; we won’t assert rotation in Robolectric
+    ExifInterface(tmp.absolutePath).apply {
+      setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_90.toString())
+      saveAttributes()
+    }
+
+    // Attach and register a provider with a real authority
+    val authority = "com.test.imageprovider"
+    val provider = PfdProvider(tmp)
+    val info = ProviderInfo().apply { this.authority = authority }
+    provider.attachInfo(context, info)
+    ShadowContentResolver.registerProviderInternal(authority, provider)
+
+    // Build a content:// URI (any path segment is fine)
+    val uri = Uri.parse("content://$authority/image")
+
+    // Sanity: both resolver calls must succeed, or VM will go to catch {}
+    context.contentResolver.openInputStream(uri).use { ins ->
+      assertNotNull("openInputStream must work", ins)
+    }
+    context.contentResolver.openFileDescriptor(uri, "r").use { pfd ->
+      assertNotNull("openFileDescriptor must work", pfd)
+    }
+    // Call VM: if try-block (incl. EXIF via PFD) executes, callback is non-null
+    var cb: String? = null
+    vm.onImagePickedFromGallery(context, uri) { cb = it }
+
+    assertNotNull("Callback should be invoked", cb)
+    assertTrue(File(cb!!).exists())
   }
 }
