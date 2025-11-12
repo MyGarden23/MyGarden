@@ -69,6 +69,10 @@ class EditPlantViewModel(
     _uiState.value = _uiState.value.copy(name = newName)
   }
 
+  override fun setLatinName(newLatinName: String) {
+    _uiState.value = _uiState.value.copy(latinName = newLatinName)
+  }
+
   override fun setDescription(newDescription: String) {
     _uiState.value = _uiState.value.copy(description = newDescription)
   }

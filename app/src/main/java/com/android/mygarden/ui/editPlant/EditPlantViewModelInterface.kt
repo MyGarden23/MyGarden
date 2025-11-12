@@ -40,6 +40,13 @@ interface EditPlantViewModelInterface {
    * @param newName The new name to be set.
    */
   fun setName(newName: String)
+  /**
+   * Sets the latin name in the UI state. This function should be called only if the Plant is not
+   * recognized.
+   *
+   * @param newLatinName The new latin name to be set.
+   */
+  fun setLatinName(newLatinName: String)
 
   /**
    * Sets the description in the UI state.
