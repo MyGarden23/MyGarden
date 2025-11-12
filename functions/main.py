@@ -134,7 +134,7 @@ def _send_water_notification(uid: str, plant_id: str, plant_name: str, new_statu
 
     message = messaging.Message(
         token=token,
-        notification=messaging.Notification(title=title, body=body),
+        notification=messaging.AndroidNotification(title=title, body=body, click_action="FLUTTER_NOTIFICATION_CLICK"),
         data={
             "type": "WATER_PLANT",
             "plantId": plant_id,

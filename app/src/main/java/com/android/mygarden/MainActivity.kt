@@ -2,6 +2,7 @@ package com.android.mygarden
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -18,9 +19,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.android.mygarden.model.notifications.AppLifecycleObserver
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.BottomBar
@@ -36,20 +39,28 @@ import kotlin.contracts.contract
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleObserver)
+
     setContent {
       MyGardenTheme() {
         // A surface container using the 'background' color from the theme
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          MyGardenApp()
+          MyGardenApp(intent = intent)
         }
       }
     }
+  }
+
+  override fun onNewIntent(intent: Intent?) {
+    super.onNewIntent(intent)
+    setIntent(intent)
   }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyGardenApp() {
+fun MyGardenApp(intent: Intent? = null) {
   // The main NavController drives all navigation between screens
   val navController = rememberNavController()
   // Small wrapper to simplify navigation calls
@@ -71,6 +82,15 @@ fun MyGardenApp() {
   /* For Sprint 5, assume that the user will accept to receive notifications.
   Permission handling will be done in a separate task in Sprint 6 */
   AskForNotificationsPermission()
+
+  // If the app is launched by a notification, go to the garden
+  LaunchedEffect(intent) {
+    val notificationType = intent?.getStringExtra("type")
+    if (intent != null && notificationType == "WATER_PLANT") {
+      actions.navTo(Screen.Garden)
+      intent.removeExtra("type")
+    }
+  }
 
   // Determine where to start: if the user is logged in, skip Sign-In
   // For end-to-end tests, we can force starting on camera

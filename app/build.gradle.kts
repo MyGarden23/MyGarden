@@ -165,6 +165,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.process)
 
     // Multidex support
     implementation(libs.androidx.multidex)
@@ -247,10 +248,6 @@ dependencies {
     // --------- Firebase AI Logic (Gemini/Imagen) ---------
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
     implementation("com.google.firebase:firebase-ai")
-
-    // --------- Push Notifications ---------
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
 
     implementation(libs.kotlinx.coroutines.play.services)
 }
