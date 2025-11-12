@@ -72,7 +72,7 @@ class GardenViewModel(
       try {
         plantsRepo.getAllOwnedPlants()
       } catch (e: Exception) {
-        setErrorMsg("Failed to load plants")
+        setErrorMsg(R.string.error_failed_load_plant_edit)
       }
     }
   }
