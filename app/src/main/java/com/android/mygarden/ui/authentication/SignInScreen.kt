@@ -99,19 +99,21 @@ fun SignInScreen(
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
+            // verticalArrangement = Arrangement.SpaceEvenly
         ) {
+          Spacer(modifier = Modifier.weight(0.3f))
           Image(
               painter = painterResource(id = logoRes),
               contentDescription = context.getString(R.string.description_logo),
               contentScale = ContentScale.Fit,
               modifier =
-                  Modifier.fillMaxWidth(0.6f)
+                  Modifier.fillMaxWidth(0.9f)
                       .aspectRatio(1f)
                       .heightIn(max = 180.dp)
                       .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
                       .semantics { this.logoRes = resName })
 
-          Spacer(modifier = Modifier.fillMaxHeight(0.4f))
+          Spacer(modifier = Modifier.fillMaxHeight(0.35f))
 
           // Authenticate With Google Button
           if (uiState.isLoading) {
@@ -133,12 +135,12 @@ fun SignInScreen(
                       tint = Color.Unspecified, // To keep the reel colors of the logo
                       modifier = Modifier.size(20.dp))
 
-                  Spacer(modifier = Modifier.fillMaxWidth(0.03f))
-
                   Text(
                       text = context.getString(R.string.sign_in_with_google),
                       color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.35f))
           }
         }
       }
