@@ -3,5 +3,7 @@ __pycache__/
 
 # Python virtual environment
 venv/
+.venv/
+.pytest_cache/
 *.local
 .vscode
