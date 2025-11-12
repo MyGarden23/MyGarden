@@ -17,7 +17,10 @@ class ProfileRepositoryFirestore(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ProfileRepository {
 
-  // Returns the currently logged-in user's UID (or null if no one is logged in)
+    // Keep track of active listeners so we can clean them up
+    private var activeListenerRegistration: ListenerRegistration? = null
+
+    // Returns the currently logged-in user's UID (or null if no one is logged in)
   override fun getCurrentUserId(): String? = auth.currentUser?.uid
 
   // Shortcut to the current user's document in the "users" collection
@@ -28,15 +31,19 @@ class ProfileRepositoryFirestore(
 
   // Listen to the user's profile in Firestore as a Flow (real-time updates)
   override fun getProfile(): Flow<Profile?> {
-    val uid = getCurrentUserId() ?: return flowOf(null)
-    val docRef = userProfile
+      val uid = getCurrentUserId()
+
+      // If no user is logged in, return a flow that emits null
+      if (uid == null) return flowOf(null)
+
+      val docRef = userProfile
 
     return callbackFlow {
       // Start a Firestore snapshot listener
       val reg: ListenerRegistration =
           docRef.addSnapshotListener { snap, err ->
             if (err != null) {
-              // Something went wrong → send null instead of crashing
+                // Handle PERMISSION_DENIED gracefully (happens after logout)
               trySend(null)
               return@addSnapshotListener
             }
@@ -44,8 +51,14 @@ class ProfileRepositoryFirestore(
             trySend(snap?.toProfileOrNull())
           }
 
+        // Store the registration so we can clean it up manually if needed
+        activeListenerRegistration = reg
+
       // Clean up listener when the flow collector is closed
-      awaitClose { reg.remove() }
+        awaitClose {
+            reg.remove()
+            activeListenerRegistration = null
+        }
     }
   }
 
@@ -95,4 +108,10 @@ class ProfileRepositoryFirestore(
           "country" to country,
           "hasSignedIn" to hasSignedIn,
           "avatar" to avatar.name) // avatar is stored as string like "A1"
+
+    // Cleanup method to remove active listeners before logout
+    override fun cleanup() {
+        activeListenerRegistration?.remove()
+        activeListenerRegistration = null
+    }
 }
