@@ -1,5 +1,6 @@
 package com.android.mygarden.model.notifications
 
+import android.content.Context
 import androidx.core.content.edit
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -22,7 +23,9 @@ class PushNotificationsService : FirebaseMessagingService() {
     var isAppInForeGround = false
   }
 
+  /** Useful dependencies for testing */
   var testDispatcher: CoroutineDispatcher? = null
+  var testContext: Context? = null
 
   /**
    * Called when a new token for the Firebase project is generated. This is invoked after app
@@ -38,6 +41,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     val profileRepo = ProfileRepositoryProvider.repository
     val dispatcher = testDispatcher ?: Dispatchers.IO
+    val contextForPrefs = testContext ?: this
 
     CoroutineScope(dispatcher).launch {
       // Try to attach the new token to the user's Firestore profile
@@ -45,7 +49,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
       // If there is none, save it locally until the user logs in
       if (!success) {
-        getSharedPreferences("notifications_prefs", MODE_PRIVATE).edit {
+        contextForPrefs.getSharedPreferences("notifications_prefs", MODE_PRIVATE).edit {
           putString("fcm_token", token)
         }
       }
