@@ -13,9 +13,9 @@ import androidx.compose.ui.test.performScrollTo
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
-import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.utils.FirestoreProfileTest
 import org.junit.Rule
 import org.junit.Test
