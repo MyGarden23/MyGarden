@@ -27,6 +27,7 @@ import com.android.mygarden.ui.profile.ProfileScreenTestTags
 import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -53,7 +54,9 @@ class EndToEndM2 {
   @get:Rule
   val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
 
-  // TODO add rule for notification permission
+  @get:Rule
+  val permissionNotifsRule: GrantPermissionRule =
+      GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
   private val TIMEOUT = 10_000L
 
@@ -88,7 +91,7 @@ class EndToEndM2 {
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
         .performClick()
-    runTest { firebaseUtils.signIn() }
+    runBlocking { firebaseUtils.signIn() }
     composeTestRule.waitForIdle()
     // === NEW PROFILE SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
@@ -205,7 +208,7 @@ class EndToEndM2 {
       composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).isDisplayed()
     }
 
-    runTest { firebaseUtils.signIn() }
+    runBlocking { firebaseUtils.signIn() }
 
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
@@ -223,16 +226,32 @@ class EndToEndM2 {
 
     composeTestRule.waitForIdle()
 
+    // Wait for the garden list to appear
+    composeTestRule.waitUntil(TIMEOUT) {
+      try {
+        composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).isDisplayed()
+        true
+      } catch (e: AssertionError) {
+        false
+      }
+    }
+
     var plantTag = ""
-    runTest {
+    runBlocking {
       val listOfOwnedPlantAfterLogout = PlantsRepositoryProvider.repository.getAllOwnedPlants()
       assert(listOfOwnedPlantAfterLogout.size == 1)
-      // Assign the plant tag to use outside runTest
       plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlantAfterLogout.first())
     }
 
-    // click on plant - UI operations outside runTest
-    composeTestRule.waitUntil(TIMEOUT) { composeTestRule.onNodeWithTag(plantTag).isDisplayed() }
+    // click on plant - UI operations outside _root_ide_package_.kotlinx.coroutines.runBlocking
+    composeTestRule.waitUntil(TIMEOUT) {
+      try {
+        composeTestRule.onNodeWithTag(plantTag).isDisplayed()
+        true
+      } catch (e: AssertionError) {
+        false
+      }
+    }
     composeTestRule.onNodeWithTag(plantTag).assertIsDisplayed().performClick()
 
     // Edit Plant
