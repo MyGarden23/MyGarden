@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.MemoryCacheSettings
 import com.google.firebase.firestore.MemoryEagerGcSettings
+import com.google.firebase.storage.FirebaseStorage
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -20,8 +21,8 @@ import org.json.JSONObject
 
 /**
  * Firebase Emulator helper for androidTest:
- * - Configures Auth + Firestore emulators (idempotent)
- * - Provides REST helpers to wipe Auth/Firestore between tests
+ * - Configures Auth + Firestore + Storage emulators (idempotent)
+ * - Provides REST helpers to wipe Auth/Firestore/Storage between tests
  */
 object FirebaseEmulator {
 
@@ -53,6 +54,7 @@ object FirebaseEmulator {
   const val EMULATORS_PORT = 4400
   const val AUTH_PORT = 9099
   const val FIRESTORE_PORT = 8080
+  const val STORAGE_PORT = 9199
 
   // ---------- Firebase app / project ----------
   private val projectId: String by lazy {
@@ -60,6 +62,13 @@ object FirebaseEmulator {
     if (FirebaseApp.getApps(ctx).isEmpty()) FirebaseApp.initializeApp(ctx)
     FirebaseApp.getInstance().options.projectId
         ?: error("Firebase projectId missing — ensure google-services.json is present.")
+  }
+
+  private val storageBucket: String by lazy {
+    val ctx: Context = ApplicationProvider.getApplicationContext()
+    if (FirebaseApp.getApps(ctx).isEmpty()) FirebaseApp.initializeApp(ctx)
+    FirebaseApp.getInstance().options.storageBucket
+        ?: error("Firebase storageBucket missing — ensure google-services.json is present.")
   }
 
   // ---------- Emulator hub probe ----------
@@ -121,6 +130,23 @@ object FirebaseEmulator {
     return db
   }
 
+  // ---------- Storage wiring ----------
+  @Volatile private var storageConfigured = false
+
+  fun connectStorage(): FirebaseStorage {
+    val ctx: Context = ApplicationProvider.getApplicationContext()
+    if (FirebaseApp.getApps(ctx).isEmpty()) FirebaseApp.initializeApp(ctx)
+
+    val storage = FirebaseStorage.getInstance()
+
+    if (!storageConfigured) {
+      storage.useEmulator(HOST, STORAGE_PORT)
+      storageConfigured = true
+      Log.i("FirebaseEmulator", "Storage -> emulator at $HOST:$STORAGE_PORT, bucket=$storageBucket")
+    }
+    return storage
+  }
+
   // ---------- REST endpoints for wipes ----------
   private val authAccountsEndpoint: String
     get() = "http://$HOST:$AUTH_PORT/emulator/v1/projects/$projectId/accounts"
@@ -129,6 +155,9 @@ object FirebaseEmulator {
     get() =
         "http://$HOST:$FIRESTORE_PORT/emulator/v1/projects/$projectId/databases/(default)/documents"
 
+  private val storageEndpoint: String
+    get() = "http://$HOST:$STORAGE_PORT/v0/b/$storageBucket/o"
+
   fun clearAuthEmulator() {
     httpDelete(URL(authAccountsEndpoint))
   }
@@ -136,6 +165,15 @@ object FirebaseEmulator {
   /** Danger: deletes ALL docs in the Firestore emulator (default DB). */
   fun clearFirestoreEmulator() {
     httpDelete(URL(firestoreDocsEndpoint))
+  }
+
+  /** Danger: deletes ALL files in the Storage emulator. */
+  fun clearStorageEmulator() {
+    try {
+      httpDelete(URL(storageEndpoint))
+    } catch (e: Exception) {
+      Log.w("FirebaseEmulator", "Failed to clear Storage emulator: ${e.message}")
+    }
   }
 
   // ---------- Seed / update via Auth REST ----------
