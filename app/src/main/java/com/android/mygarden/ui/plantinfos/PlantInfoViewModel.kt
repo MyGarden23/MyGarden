@@ -33,6 +33,7 @@ data class PlantInfoUIState(
     val healthStatusDescription: String = "",
     val wateringFrequency: Int = 0,
     val selectedTab: SelectedPlantInfoTab = SelectedPlantInfoTab.DESCRIPTION,
+    val isRecognized: Boolean = false,
 ) {
   fun savePlant(): Plant {
     return Plant(
@@ -44,7 +45,8 @@ data class PlantInfoUIState(
         lightExposure = lightExposure,
         healthStatus = healthStatus,
         healthStatusDescription = healthStatusDescription,
-        wateringFrequency = wateringFrequency)
+        wateringFrequency = wateringFrequency,
+        isRecognized = isRecognized)
   }
 }
 
@@ -80,6 +82,7 @@ class PlantInfoViewModel(
               generatedPlant.healthStatus,
               generatedPlant.healthStatusDescription,
               generatedPlant.wateringFrequency,
+              isRecognized = generatedPlant.isRecognized,
           )
     }
   }

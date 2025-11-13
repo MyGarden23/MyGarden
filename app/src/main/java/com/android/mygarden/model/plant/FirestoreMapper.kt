@@ -19,7 +19,7 @@ import java.sql.Timestamp
  * @property healthStatus The current health condition of the plant.
  * @property healthStatusDescription A detailed description of the plant's health status.
  * @property wateringFrequency How often the plant should be watered, measured in days.
- * @property isRecognized A boolean to tell if the plant was recognised by the API or not.
+ * @property recognized A boolean to tell if the plant was recognised by the API or not.
  */
 data class SerializedPlant(
     val name: String = "Unknown",
@@ -31,7 +31,7 @@ data class SerializedPlant(
     val healthStatus: String = "UNKNOWN",
     val healthStatusDescription: String = "No health status description available",
     val wateringFrequency: Int = 0, // in days,
-    val isRecognized: Boolean = false,
+    val recognized: Boolean = false,
 )
 
 /**
@@ -110,7 +110,7 @@ object FirestoreMapper {
         healthStatus = plant.healthStatus.name,
         healthStatusDescription = plant.healthStatusDescription,
         wateringFrequency = plant.wateringFrequency,
-        isRecognized = plant.isRecognized)
+        recognized = plant.isRecognized)
   }
 
   /**
@@ -143,6 +143,6 @@ object FirestoreMapper {
             },
         healthStatusDescription = sPlant.healthStatusDescription,
         wateringFrequency = sPlant.wateringFrequency,
-        isRecognized = sPlant.isRecognized)
+        isRecognized = sPlant.recognized)
   }
 }
