@@ -12,6 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.android.mygarden.model.plant.Plant
+import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.editPlant.EditPlantScreen
@@ -123,6 +125,9 @@ fun AppNavHost(
             navigationActions.navTo(Screen.EditPlant(ownedPlant.id, Screen.Garden.route))
           },
           onSignOut = {
+            // Clean up repositories before signing out to prevent PERMISSION_DENIED errors
+            PlantsRepositoryProvider.repository.cleanup()
+            ProfileRepositoryProvider.repository.cleanup()
             FirebaseAuth.getInstance().signOut()
             navigationActions.navTo(Screen.Auth)
           })

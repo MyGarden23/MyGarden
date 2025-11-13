@@ -35,6 +35,8 @@ class ProfileViewModelTest {
     override suspend fun saveProfile(profile: Profile) {
       flow.value = profile
     }
+
+    override fun cleanup() {}
   }
 
   private lateinit var viewModel: ProfileViewModel

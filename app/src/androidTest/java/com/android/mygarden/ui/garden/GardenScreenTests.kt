@@ -113,6 +113,8 @@ class GardenScreenTests {
     override suspend fun saveProfile(profile: Profile) {
       flow.value = profile
     }
+
+    override fun cleanup() {}
   }
 
   private lateinit var plantsRepo: PlantsRepository

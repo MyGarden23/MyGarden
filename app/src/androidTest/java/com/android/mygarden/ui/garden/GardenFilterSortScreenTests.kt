@@ -63,6 +63,8 @@ class GardenFilterSortScreenTests {
     override suspend fun saveProfile(profile: Profile) {
       flow.value = profile
     }
+
+    override fun cleanup() {}
   }
 
   @Before
