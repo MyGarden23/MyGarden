@@ -65,7 +65,7 @@ class PlantsRepositoryFirestore(
     get() = _plantsFlow
 
   private fun createPlantsFlow(): StateFlow<List<OwnedPlant>> {
-    return combine(_plantsUpdate, ticks) { update, time ->
+    return combine(_plantsUpdate, ticks) { _, _ ->
           // ensures that a user is authenticated to get all of his plants
           if (auth.currentUser != null) {
             getAllOwnedPlants()
