@@ -15,12 +15,20 @@ import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.model.plant.PlantsRepositoryLocal
+import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
+import com.android.mygarden.utils.FakeJwtGenerator
+import com.android.mygarden.utils.FirebaseEmulator
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -66,6 +74,9 @@ class EndToEndM1 {
 
   private val TIMEOUT = 10_000L
 
+  // Store original repository to restore after test
+  private lateinit var originalRepository: com.android.mygarden.model.plant.PlantsRepository
+
   /**
    * Pre-test setup method that ensures the application is fully loaded before test execution.
    *
@@ -76,6 +87,25 @@ class EndToEndM1 {
    */
   @Before
   fun setUp() {
+    // Fake authentification even tho it is not tested
+    // Store original repository before overriding
+    originalRepository = PlantsRepositoryProvider.repository
+
+    // Set up Firebase emulator and authenticate with a test user
+    FirebaseEmulator.connectAuth()
+    FirebaseEmulator.clearAuthEmulator()
+
+    // Create a fake JWT token and sign in
+    val fakeIdToken =
+        FakeJwtGenerator.createFakeGoogleIdToken(
+            name = "E2E Test User", email = "e2etest@example.com")
+    val credential = GoogleAuthProvider.getCredential(fakeIdToken, null)
+
+    runBlocking { FirebaseAuth.getInstance().signInWithCredential(credential).await() }
+
+    // Use local repository for E2E test to avoid Firestore dependencies
+    PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
+
     // Wait for the app to be fully loaded
     composeTestRule.waitForIdle()
     waitForAppToLoad()
@@ -251,11 +281,27 @@ class EndToEndM1 {
         false
       }
     }
+
+    // Additional wait for camera initialization
+    composeTestRule.waitUntil(TIMEOUT) {
+      try {
+        // Check if camera screen and camera button are available
+        composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).isDisplayed() &&
+            composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
+      } catch (_: Throwable) {
+        false
+      }
+    }
   }
 
   @After
   fun tearDown() {
+    // Restore original repository
+    PlantsRepositoryProvider.repository = originalRepository
+
     // Clean up the system property to avoid affecting other tests
     System.clearProperty("mygarden.e2e")
+    // Sign out from Firebase Auth
+    FirebaseAuth.getInstance().signOut()
   }
 }
