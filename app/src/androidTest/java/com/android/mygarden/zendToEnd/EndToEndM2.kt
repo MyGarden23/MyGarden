@@ -14,6 +14,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
 import com.android.mygarden.model.plant.Plant
+import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
@@ -56,7 +57,7 @@ class EndToEndM2 {
 
   private val TIMEOUT = 10_000L
 
-  private val mockPlant = Plant(name = "Rose", latinName = "Rosa")
+  private val mockPlant = Plant(name = "Rose", latinName = "Rosa", location = PlantLocation.OUTDOOR)
 
   private val firebaseUtils: FirebaseUtils = FirebaseUtils()
   private val fakePlantRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoFirestore)
@@ -82,13 +83,17 @@ class EndToEndM2 {
   }
 
   @Test
-  fun test_end_to_end_m2() = runTest {
+  fun test_end_to_end_m2() {
     composeTestRule
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
         .performClick()
-    firebaseUtils.signIn()
+    runTest { firebaseUtils.signIn() }
+    composeTestRule.waitForIdle()
     // === NEW PROFILE SCREEN ===
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).isDisplayed()
+    }
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
@@ -106,6 +111,9 @@ class EndToEndM2 {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
     }
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).isDisplayed()
+    }
     composeTestRule
         .onNodeWithTag(GardenScreenTestTags.USERNAME)
         .assertIsDisplayed()
@@ -113,11 +121,17 @@ class EndToEndM2 {
 
     // goto edit profile screen
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).performClick()
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).isDisplayed()
+    }
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextClearance()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("Ada")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+    }
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).isDisplayed()
     }
     composeTestRule
         .onNodeWithTag(GardenScreenTestTags.USERNAME)
@@ -140,32 +154,59 @@ class EndToEndM2 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
     }
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).isDisplayed()
+    }
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).isDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).assertTextContains("Rose")
 
+    // See plant location
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT)
+        .assertTextContains("OUTDOOR")
+
     // click on next
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).isDisplayed()
+    }
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
     }
 
     // === EDIT PLANT SCREEN ===
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).isDisplayed()
+    }
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
 
     // === GARDEN SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
     }
-    // get owned plant
-    val listOfOwnedPlant = PlantsRepositoryProvider.repository.getAllOwnedPlants()
-    assert(listOfOwnedPlant.size == 1)
+
+    // Wait for the garden list to appear in the UI (confirms plant data has loaded)
+    composeTestRule.waitUntil(TIMEOUT) {
+      try {
+        composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).isDisplayed()
+        true
+      } catch (e: AssertionError) {
+        false
+      }
+    }
 
     // logout
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).isDisplayed()
+    }
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).isDisplayed()
     }
-    firebaseUtils.signIn()
+
+    runTest { firebaseUtils.signIn() }
+
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
 
@@ -179,19 +220,28 @@ class EndToEndM2 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
     }
-    val listOfOwnedPlantAfterLogout = PlantsRepositoryProvider.repository.getAllOwnedPlants()
-    assert(listOfOwnedPlantAfterLogout.size == 1)
 
-    // click on plant
-    composeTestRule
-        .onNodeWithTag(
-            GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlantAfterLogout.first()))
-        .assertIsDisplayed()
-        .performClick()
+    composeTestRule.waitForIdle()
+
+    var plantTag = ""
+    runTest {
+      val listOfOwnedPlantAfterLogout = PlantsRepositoryProvider.repository.getAllOwnedPlants()
+      assert(listOfOwnedPlantAfterLogout.size == 1)
+      // Assign the plant tag to use outside runTest
+      plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlantAfterLogout.first())
+    }
+
+    // click on plant - UI operations outside runTest
+    composeTestRule.waitUntil(TIMEOUT) { composeTestRule.onNodeWithTag(plantTag).isDisplayed() }
+    composeTestRule.onNodeWithTag(plantTag).assertIsDisplayed().performClick()
 
     // Edit Plant
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).isDisplayed()
+    }
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME)
         .assertTextContains(mockPlant.name)
+    composeTestRule.waitForIdle()
   }
 }
