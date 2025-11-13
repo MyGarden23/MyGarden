@@ -18,9 +18,17 @@ import kotlinx.coroutines.launch
  */
 class PushNotificationsService : FirebaseMessagingService() {
 
-  /** Tracker for the app's foreground/background state. */
   companion object {
+    /** Tracker for the app's foreground/background state. */
     var isAppInForeGround = false
+    /** Notification type identifier used to retrieve the intent */
+    const val NOTIFICATIONS_TYPE_IDENTIFIER = "type"
+    /** Notification type for watering a plant; used to retrieve the intent */
+    const val NOTIFICATIONS_TYPE_WATER_PLANT = "WATER_PLANT"
+    /** Notification shared preferences */
+    const val NOTIFICATIONS_SHARED_PREFS = "notifications_prefs"
+    /** FCM token identifier in the notifications shared preferences */
+    const val FCM_TOKEN_IDENTIFIER = "fcm_token"
   }
 
   /** Useful dependencies for testing */
@@ -49,8 +57,8 @@ class PushNotificationsService : FirebaseMessagingService() {
 
       // If there is none, save it locally until the user logs in
       if (!success) {
-        contextForPrefs.getSharedPreferences("notifications_prefs", MODE_PRIVATE).edit {
-          putString("fcm_token", token)
+        contextForPrefs.getSharedPreferences(NOTIFICATIONS_SHARED_PREFS, MODE_PRIVATE).edit {
+          putString(FCM_TOKEN_IDENTIFIER, token)
         }
       }
     }

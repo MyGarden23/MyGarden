@@ -36,7 +36,9 @@ class PushNotificationsServiceTest {
 
     service.testDispatcher = testDispatcher // Inject test dispatcher
 
-    val prefs = context.getSharedPreferences("notifications_prefs", Context.MODE_PRIVATE)
+    val prefs =
+        context.getSharedPreferences(
+            PushNotificationsService.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
     prefs.edit().clear().commit()
   }
 
@@ -53,8 +55,10 @@ class PushNotificationsServiceTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         verify(mockProfileRepo, times(1)).attachFCMToken(testToken)
-        val prefs = context.getSharedPreferences("notifications_prefs", Context.MODE_PRIVATE)
-        val token = prefs.getString("fcm_token", null)
+        val prefs =
+            context.getSharedPreferences(
+                PushNotificationsService.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
+        val token = prefs.getString(PushNotificationsService.FCM_TOKEN_IDENTIFIER, null)
         assertTrue("Token should be saved: $token", token != null && token == "test_fcm_token")
       }
 
@@ -70,7 +74,9 @@ class PushNotificationsServiceTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         verify(mockProfileRepo, times(1)).attachFCMToken(testToken)
-        val prefs = context.getSharedPreferences("notifications_prefs", Context.MODE_PRIVATE)
+        val prefs =
+            context.getSharedPreferences(
+                PushNotificationsService.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
         assertTrue("SharedPreferences should remain empty", prefs.all.isEmpty())
       }
 }

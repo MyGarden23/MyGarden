@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.android.mygarden.model.notifications.AppLifecycleObserver
+import com.android.mygarden.model.notifications.PushNotificationsService
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.BottomBar
@@ -34,7 +35,6 @@ import com.android.mygarden.ui.popup.PopupViewModel
 import com.android.mygarden.ui.popup.WaterPlantPopup
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.google.firebase.auth.FirebaseAuth
-import kotlin.contracts.contract
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,10 +102,11 @@ fun MyGardenApp(intent: Intent? = null) {
   // Only create the LaunchedEffect if there's an intent and not in test mode
   if (intent != null && !isInTestEnvironment) {
     LaunchedEffect(intent) {
-      val notificationType = intent.getStringExtra("type")
-      if (notificationType == "WATER_PLANT") {
+      val notificationType =
+          intent.getStringExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
+      if (notificationType == PushNotificationsService.NOTIFICATIONS_TYPE_WATER_PLANT) {
         actions.navTo(Screen.Garden)
-        intent.removeExtra("type")
+        intent.removeExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
       }
     }
   }

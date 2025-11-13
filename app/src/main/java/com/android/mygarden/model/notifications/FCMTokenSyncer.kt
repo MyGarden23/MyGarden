@@ -25,8 +25,10 @@ object FCMTokenSyncer {
     profileRepo.getCurrentUserId() ?: return
 
     // If there is no pending token to upload to Firestore then do nothing
-    val prefs = context.getSharedPreferences("notifications_prefs", Context.MODE_PRIVATE)
-    val token = prefs.getString("fcm_token", null) ?: return
+    val prefs =
+        context.getSharedPreferences(
+            PushNotificationsService.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
+    val token = prefs.getString(PushNotificationsService.FCM_TOKEN_IDENTIFIER, null) ?: return
 
     // If there is already the same token on Firestore then do nothing
     val remoteToken = profileRepo.getFCMToken()
@@ -38,7 +40,7 @@ object FCMTokenSyncer {
 
     // Delete local shared preference that was holding the new token if it succeeds
     if (success) {
-      prefs.edit { remove("fcm_token") }
+      prefs.edit { remove(PushNotificationsService.FCM_TOKEN_IDENTIFIER) }
     }
   }
 }
