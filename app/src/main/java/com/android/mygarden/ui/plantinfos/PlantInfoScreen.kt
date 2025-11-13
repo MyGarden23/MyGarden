@@ -27,7 +27,6 @@ import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 
-private const val NEXT_BUTTON_TXT = "Next"
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
   const val SCREEN = "plant_info_screen"
@@ -132,7 +131,7 @@ fun PlantInfosScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
                           }
                     } else {
-                      Text(text = NEXT_BUTTON_TXT, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                      Text(text = context.getString(R.string.next), fontSize = 18.sp, fontWeight = FontWeight.Medium)
                     }
                   }
             }
