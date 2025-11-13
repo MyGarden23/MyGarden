@@ -114,14 +114,6 @@ fun MyGardenApp(intent: Intent? = null) {
   // Determine where to start: if the user is logged in, skip Sign-In
   // For end-to-end tests, we can force starting on camera
   val startDestination = remember {
-    // Simple check for end-to-end test mode via system property
-    val isEndToEndTest = System.getProperty("mygarden.e2e") == "true"
-
-    if (isEndToEndTest) {
-      // In end-to-end test mode, always start on camera screen
-      Screen.NewProfile.route
-    } else {
-      // In normal app mode, check authentication
       val user =
           runCatching { FirebaseAuth.getInstance().currentUser }
               .onFailure {
@@ -129,7 +121,6 @@ fun MyGardenApp(intent: Intent? = null) {
               }
               .getOrNull()
       if (user == null) Screen.Auth.route else Screen.Camera.route
-    }
   }
 
   // Observe the current destination so we can update UI accordingly
