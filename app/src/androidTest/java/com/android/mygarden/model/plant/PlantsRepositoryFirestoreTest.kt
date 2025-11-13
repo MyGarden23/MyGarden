@@ -94,6 +94,13 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     return id
   }
 
+  /** Suspend version: Saves a plant and returns its id (for use inside runTest blocks) */
+  private suspend fun savePlantSuspend(plant: Plant = healthyPlant): String {
+    val id = repository.getNewId()
+    repository.saveToGarden(plant, id, Timestamp(System.currentTimeMillis()))
+    return id
+  }
+
   /**
    * Updates the health status of a plant based on current watering cycle.
    *
@@ -419,7 +426,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
       // initial emission from stateIn
       assertEquals(emptyList<OwnedPlant>(), awaitItem())
 
-      val id = saveHealthyPlantAndReturnId()
+      val id = savePlantSuspend()
 
       val list = awaitItem()
       assertEquals(1, list.size)
@@ -493,7 +500,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
       // initial emission from stateIn
       assertEquals(emptyList<OwnedPlant>(), awaitItem())
 
-      saveHealthyPlantAndReturnId()
+      savePlantSuspend()
       awaitItem()
 
       repository.getAllOwnedPlants()
@@ -531,9 +538,8 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   /** Tests that cleanup() can be called without throwing exceptions. */
   @Test
   fun cleanup_doesNotThrowException() = runTest {
-    // Save a plant directly
-    val id = repository.getNewId()
-    repository.saveToGarden(healthyPlant, id, Timestamp(System.currentTimeMillis()))
+    // Save a plant
+    savePlantSuspend()
 
     // Call cleanup - should not throw
     repository.cleanup()
@@ -542,9 +548,8 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   /** Tests that cleanup() can be called multiple times safely. */
   @Test
   fun cleanup_canBeCalledMultipleTimes() = runTest {
-    // Save a plant directly
-    val id = repository.getNewId()
-    repository.saveToGarden(healthyPlant, id, Timestamp(System.currentTimeMillis()))
+    // Save a plant
+    savePlantSuspend()
 
     // Call cleanup multiple times - should not throw exceptions
     repository.cleanup()
@@ -559,9 +564,8 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   /** Tests that after cleanup(), basic repository operations still work. */
   @Test
   fun cleanup_repositoryStillFunctional() = runTest {
-    // Save a plant directly
-    val id = repository.getNewId()
-    repository.saveToGarden(healthyPlant, id, Timestamp(System.currentTimeMillis()))
+    // Save a plant
+    val id = savePlantSuspend()
 
     // Call cleanup
     repository.cleanup()
@@ -576,8 +580,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     assertEquals(1, allPlants.size)
 
     // Verify we can still save a new plant
-    val newId = repository.getNewId()
-    repository.saveToGarden(healthyPlant, newId, Timestamp(System.currentTimeMillis()))
+    savePlantSuspend()
     val updatedList = repository.getAllOwnedPlants()
     assertEquals(2, updatedList.size)
   }
@@ -585,13 +588,10 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   /** Tests that cleanup() doesn't interfere with existing data in Firestore. */
   @Test
   fun cleanup_doesNotDeleteData() = runTest {
-    // Save multiple plants directly
-    val id1 = repository.getNewId()
-    repository.saveToGarden(healthyPlant, id1, Timestamp(System.currentTimeMillis()))
-    val id2 = repository.getNewId()
-    repository.saveToGarden(plant2, id2, Timestamp(System.currentTimeMillis()))
-    val id3 = repository.getNewId()
-    repository.saveToGarden(plant3, id3, Timestamp(System.currentTimeMillis()))
+    // Save multiple plants
+    savePlantSuspend(healthyPlant)
+    savePlantSuspend(plant2)
+    savePlantSuspend(plant3)
 
     // Verify we have 3 plants
     val beforeCleanup = repository.getAllOwnedPlants()
