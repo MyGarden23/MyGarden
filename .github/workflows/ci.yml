@@ -120,8 +120,14 @@ jobs:
           cat > firebase.json <<'JSON'
           {
             "emulators": {
+              "singleProjectMode": true,
               "auth": { "port": 9099, "host": "0.0.0.0" },
-              "firestore": { "port": 8080, "host": "0.0.0.0" }
+              "firestore": { "port": 8080, "host": "0.0.0.0" },
+              "storage": { "port": 9199, "host": "0.0.0.0" },
+              "ui": { "enabled": true }
+            },
+            "storage": {
+              "rules": "storage.rules"
             }
           }
           JSON
@@ -130,7 +136,7 @@ jobs:
         run: |
           if [ -e "firebase.json" ]; then
             echo "Starting Firebase emulators for instrumentation tests..."
-            firebase emulators:start --only auth,firestore --project "${{ steps.firebase_project.outputs.project_id }}" &
+            firebase emulators:start --only auth,firestore,storage --project "${{ steps.firebase_project.outputs.project_id }}" &
             sleep 5
             echo "Firebase emulators started in background"
           else
@@ -169,6 +175,7 @@ jobs:
             # Forward Firebase emulator ports to Android emulator
             adb reverse tcp:9099 tcp:9099   # Auth
             adb reverse tcp:8080 tcp:8080   # Firestore
+            adb reverse tcp:9199 tcp:9199   # Storage
             adb reverse tcp:4400 tcp:4400 || true
 
             export CI=true
