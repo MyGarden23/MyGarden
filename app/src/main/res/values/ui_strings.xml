@@ -41,6 +41,8 @@
     <string name="error_failed_delete_plant_edit">Failed to delete plant</string>
     <string name="error_plant_not_loaded">Plant not loaded yet</string>
     <string name="error_description_blank">Please put a description</string>
+    <string name="error_name_blank">Please put a name</string>
+    <string name="error_latin_name_blank">Please put a latin name</string>
     <string name="error_last_watered_missing">Please select the last time watered</string>
     <string name="error_failed_save_changes_edit">Failed to save changes</string>
 
@@ -113,6 +115,8 @@
     <string name="description">Description</string>
     <string name="location">Location</string>
     <string name="description_error">Description cannot be empty</string>
+    <string name="name_error">Name cannot be empty</string>
+    <string name="latin_name_error">Latin name cannot be empty</string>
     <string name="last_time_watered">Last time watered</string>
     <string name="last_time_watered_error">Last time watered is required</string>
     <string name="select_date">Select a date</string>

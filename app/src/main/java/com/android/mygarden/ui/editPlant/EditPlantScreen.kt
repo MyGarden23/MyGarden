@@ -37,6 +37,8 @@ object EditPlantScreenTestTags {
   const val INPUT_LAST_WATERED = "inputLastWatered"
   const val ERROR_MESSAGE_DATE = "errorMessageDate"
   const val ERROR_MESSAGE_DESCRIPTION = "errorMessageDescription"
+  const val ERROR_MESSAGE_NAME = "errorMessageName"
+  const val ERROR_MESSAGE_LATIN_NAME = "errorMessageLatinName"
 
   const val PLANT_SAVE = "plantSave"
   const val PLANT_DELETE = "plantDelete"
@@ -87,6 +89,11 @@ fun EditPlantScreen(
   // Mutable states needed for the UI
   var showDeletePopup by remember { mutableStateOf(false) }
   var touchedDesc by remember { mutableStateOf(false) }
+  var touchedName by remember { mutableStateOf(false) }
+  var touchedLatinName by remember { mutableStateOf(false) }
+  val isNameError = !plantUIState.isRecognized && plantUIState.name.isBlank() && touchedName
+  val isLatinNameError =
+      !plantUIState.isRecognized && plantUIState.latinName.isBlank() && touchedLatinName
   var touchedLastWatered by remember { mutableStateOf(false) }
   var showDatePicker by remember { mutableStateOf(false) }
   val dateFmt = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
@@ -169,25 +176,51 @@ fun EditPlantScreen(
                     }
               }
 
-              // Name (read-only)
+              // Name
               OutlinedTextField(
                   value = plantUIState.name,
-                  onValueChange = {},
+                  onValueChange = {
+                    if (!plantUIState.isRecognized) editPlantViewModel.setName(it)
+                  },
                   label = { Text(context.getString(R.string.name)) },
                   singleLine = true,
-                  readOnly = true,
-                  enabled = false,
-                  modifier = Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.PLANT_NAME))
+                  readOnly = plantUIState.isRecognized,
+                  enabled = !plantUIState.isRecognized,
+                  isError = isNameError,
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .testTag(EditPlantScreenTestTags.PLANT_NAME)
+                          .onFocusChanged { if (it.isFocused) touchedName = true })
+              if (isNameError) {
+                Text(
+                    text = context.getString(R.string.name_error),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_NAME))
+              }
 
-              // Latin name (read-only)
+              // Latin name
               OutlinedTextField(
                   value = plantUIState.latinName,
-                  onValueChange = {},
+                  onValueChange = {
+                    if (!plantUIState.isRecognized) editPlantViewModel.setLatinName(it)
+                  },
                   label = { Text(context.getString(R.string.latin_name)) },
                   singleLine = true,
-                  readOnly = true,
-                  enabled = false,
-                  modifier = Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.PLANT_LATIN))
+                  readOnly = plantUIState.isRecognized,
+                  enabled = !plantUIState.isRecognized,
+                  isError = isLatinNameError,
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .testTag(EditPlantScreenTestTags.PLANT_LATIN)
+                          .onFocusChanged { if (it.isFocused) touchedLatinName = true })
+              if (isLatinNameError) {
+                Text(
+                    text = context.getString(R.string.latin_name_error),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_LATIN_NAME))
+              }
 
               // Description
               OutlinedTextField(
@@ -201,7 +234,7 @@ fun EditPlantScreen(
                           .heightIn(min = 100.dp)
                           .testTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
                           .onFocusChanged { if (it.isFocused) touchedDesc = true })
-              if (plantUIState.description.isBlank() && touchedDesc) {
+              if (isDescriptionError) {
                 Text(
                     text = context.getString(R.string.description_error),
                     color = MaterialTheme.colorScheme.error,
@@ -257,12 +290,24 @@ fun EditPlantScreen(
               Spacer(Modifier.height(8.dp))
 
               // Save
+              // Enable the Save button if the plant has been recognized by the API and the
+              // lastWatered field is set and description is not blank or if the fields are all
+              // filled if the plant is not recognized.
               val isSaveEnabled =
-                  plantUIState.description.isNotBlank() && plantUIState.lastWatered != null
-
+                  if (plantUIState.isRecognized) {
+                    plantUIState.description.isNotBlank() && plantUIState.lastWatered != null
+                  } else {
+                    plantUIState.description.isNotBlank() &&
+                        plantUIState.name.isNotBlank() &&
+                        plantUIState.latinName.isNotBlank() &&
+                        plantUIState.lastWatered != null
+                  }
               Button(
                   onClick = {
                     // ensure user sees the error if they never touched the field
+                    if (plantUIState.name.isBlank()) touchedName = true
+                    if (plantUIState.latinName.isBlank()) touchedLatinName = true
+                    if (plantUIState.description.isBlank()) touchedDesc = true
                     if (plantUIState.lastWatered == null) touchedLastWatered = true
                     if (isSaveEnabled) {
                       editPlantViewModel.editPlant(ownedPlantId)

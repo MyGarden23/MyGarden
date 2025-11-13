@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
@@ -200,6 +201,15 @@ class EndToEndM1 {
 
     // Verify we're on EditPlant screen
     composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
+
+    // Fill the name, latin name and description
+    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).performTextInput("FakePlant")
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN)
+        .performTextInput("FakePlantus")
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
+        .performTextInput("Just a test plant")
 
     // Click Save to navigate to Garden
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()

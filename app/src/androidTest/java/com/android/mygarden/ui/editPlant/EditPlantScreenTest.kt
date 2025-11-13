@@ -77,12 +77,25 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Verifies that the plant's common name and Latin name fields are read-only and disabled for user
-   * input on the edit screen.
+   * Verifies that the plant's common name and Latin name fields are enabled for user input on the
+   * edit screen when the image is not recognized.
    */
   @Test
-  fun nameAndLatin_areReadOnlyDisabled() {
+  fun nameAndLatin_areNotReadOnlyDisabledWhenImageNotRecognized() {
     setContentWith()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertIsEnabled()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsEnabled()
+  }
+  /**
+   * Verifies that the plant's common name and Latin name fields are read-only and disabled for user
+   * input on the edit screen when the image is recognized.
+   */
+  @Test
+  fun nameAndLatin_areNotEditable_whenPlantIsRecognized() {
+    val vm = FakeEditPlantViewModel().apply { setIsRecognized() }
+
+    setContentWith(vm = vm)
+
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertIsNotEnabled()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsNotEnabled()
   }
@@ -99,9 +112,10 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Verifies that the 'Save' button is initially disabled and only becomes enabled after both the
-   * description and the last watered date have been provided by the user. Once enabled, it confirms
-   * that clicking 'Save' triggers the ViewModel's `editPlant` method and the `onSaved` callback.
+   * Verifies that the 'Save' button is initially disabled and only becomes enabled after all the
+   * fields : description, name, latin name and the last watered date have been provided by the
+   * user. Once enabled, it confirms that clicking 'Save' triggers the ViewModel's `editPlant`
+   * method and the `onSaved` callback.
    */
   @Test
   fun save_disabledUntilDescriptionAndDateProvided_thenCallsVmAndCallback() {
@@ -109,6 +123,8 @@ class EditPlantScreenTest {
         FakeEditPlantViewModel().apply {
           // Start blank to force disabled state
           setDescription("")
+          setName("")
+          setLatinName("")
           setLastWateredNull(null)
         }
     val onSaved = mutableListOf<Boolean>()
@@ -123,7 +139,7 @@ class EditPlantScreenTest {
 
     composeRule.waitForIdle()
 
-    // Still disabled because no date set, and description is blank
+    // Still disabled because no date set, and description, name, latin name are blank
     saveNode.assertIsNotEnabled()
 
     // Provide valid description first
@@ -132,14 +148,30 @@ class EditPlantScreenTest {
         .performClick()
         .performTextInput("OK")
     composeRule.waitForIdle()
-    // Still disabled because date is missing
+    // Still disabled because date is missing and name, latin name are blank
     saveNode.assertIsNotEnabled()
 
     // Now set the date via VM (what the dialog would do)
     vm.setLastWatered(Timestamp(1760384175))
     composeRule.waitForIdle()
 
-    // Enabled once both fields are valid
+    // Provide valid name
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME)
+        .performClick()
+        .performTextInput("OK")
+    composeRule.waitForIdle()
+    // Still disabled because latin name is blank
+    saveNode.assertIsNotEnabled()
+
+    // Provide valid latin name
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN)
+        .performClick()
+        .performTextInput("OK")
+    composeRule.waitForIdle()
+
+    // Enabled once all fields are valid
     saveNode.assertIsEnabled()
 
     // Click save -> calls VM.editPlant and onSaved
@@ -336,7 +368,8 @@ private class FakeEditPlantViewModel : EditPlantViewModelInterface {
               description = "Initial description",
               lastWatered = Timestamp(1760384175),
               image = null,
-              errorMsg = null))
+              errorMsg = null,
+              isRecognized = false))
   override val uiState: StateFlow<EditPlantUIState> = _ui
 
   val loadCalls = mutableListOf<String>()
@@ -364,6 +397,14 @@ private class FakeEditPlantViewModel : EditPlantViewModelInterface {
     _ui.value = _ui.value.copy(lastWatered = timestamp)
   }
 
+  override fun setName(newName: String) {
+    _ui.value = _ui.value.copy(name = newName)
+  }
+
+  override fun setLatinName(newLatinName: String) {
+    _ui.value = _ui.value.copy(latinName = newLatinName)
+  }
+
   override fun setErrorMsg(resId: Int) {
     errorMsgs += resId
     _ui.value = _ui.value.copy(errorMsg = resId)
@@ -375,5 +416,9 @@ private class FakeEditPlantViewModel : EditPlantViewModelInterface {
 
   fun setLastWateredNull(ts: Timestamp?) {
     _ui.value = _ui.value.copy(lastWatered = ts)
+  }
+
+  fun setIsRecognized() {
+    _ui.value = _ui.value.copy(isRecognized = true)
   }
 }

@@ -35,6 +35,22 @@ interface EditPlantViewModelInterface {
   fun setLastWatered(timestamp: Timestamp)
 
   /**
+   * Sets the name in the UI state. This function should be called only if the Plant is not
+   * recognized by the API.
+   *
+   * @param newName The new name to be set.
+   */
+  fun setName(newName: String)
+
+  /**
+   * Sets the latin name in the UI state. This function should be called only if the Plant is not
+   * recognized by the API.
+   *
+   * @param newLatinName The new latin name to be set.
+   */
+  fun setLatinName(newLatinName: String)
+
+  /**
    * Sets the description in the UI state.
    *
    * @param newDescription The new description to be set.
