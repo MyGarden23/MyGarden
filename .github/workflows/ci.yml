@@ -154,6 +154,13 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back emulated  -camera-front webcam0 -memory 4096 -partition-size 4096
           disable-animations: true
           script: |
+            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+            # Forward Firebase emulator ports to Android emulator
+            adb reverse tcp:9099 tcp:9099   # Auth
+            adb reverse tcp:8080 tcp:8080   # Firestore
+            adb reverse tcp:9199 tcp:9199   # Storage
+            adb reverse tcp:4400 tcp:4400 || true
+
             echo "Starting instrumented tests..."
             export CI=true
             ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.ui.camera.RequiresCamera
