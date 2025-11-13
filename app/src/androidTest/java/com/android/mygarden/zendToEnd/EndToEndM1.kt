@@ -211,9 +211,6 @@ class EndToEndM1 {
         .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
         .performTextInput("Just a test plant")
 
-    // Pick a date
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON).performClick()
-
     // Click Save to navigate to Garden
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
 
