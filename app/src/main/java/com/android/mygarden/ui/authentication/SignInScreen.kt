@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.authentication
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -68,7 +67,7 @@ fun SignInScreen(
 
   val context = LocalContext.current
   val uiState by authViewModel.uiState.collectAsState()
-    val isEndToEndTest = System.getProperty("mygarden.e2e") == "true"
+  val isEndToEndTest = System.getProperty("mygarden.e2e") == "true"
 
   // Show error message if login fails
   LaunchedEffect(uiState.errorMsg) {
@@ -123,9 +122,12 @@ fun SignInScreen(
           } else {
             OutlinedButton(
                 onClick = {
-                    if (isEndToEndTest){
-                        onSignedIn()} else {
-                    authViewModel.signIn(context, credentialManager)} },
+                  if (isEndToEndTest) {
+                    onSignedIn()
+                  } else {
+                    authViewModel.signIn(context, credentialManager)
+                  }
+                },
                 modifier =
                     Modifier.height(60.dp)
                         .fillMaxWidth(0.75f)

@@ -114,13 +114,13 @@ fun MyGardenApp(intent: Intent? = null) {
   // Determine where to start: if the user is logged in, skip Sign-In
   // For end-to-end tests, we can force starting on camera
   val startDestination = remember {
-      val user =
-          runCatching { FirebaseAuth.getInstance().currentUser }
-              .onFailure {
-                android.util.Log.w("MyGarden", "FirebaseAuth unavailable; defaulting to Auth", it)
-              }
-              .getOrNull()
-      if (user == null) Screen.Auth.route else Screen.Camera.route
+    val user =
+        runCatching { FirebaseAuth.getInstance().currentUser }
+            .onFailure {
+              android.util.Log.w("MyGarden", "FirebaseAuth unavailable; defaulting to Auth", it)
+            }
+            .getOrNull()
+    if (user == null) Screen.Auth.route else Screen.Camera.route
   }
 
   // Observe the current destination so we can update UI accordingly

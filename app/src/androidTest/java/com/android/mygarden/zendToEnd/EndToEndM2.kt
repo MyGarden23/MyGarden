@@ -25,10 +25,8 @@ import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
 import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
-import com.android.mygarden.utils.FirestoreProfileTest
 import com.android.mygarden.utils.PlantRepositoryType
 import kotlinx.coroutines.test.runTest
-import okhttp3.internal.wait
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -45,8 +43,7 @@ class EndToEndM2 {
     }
   }
 
-  @get:Rule
-  val composeTestRule = createAndroidComposeRule<MainActivity>()
+  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
   /**
    * Automatically grants camera permission before tests run. Essential for camera functionality
@@ -55,7 +52,7 @@ class EndToEndM2 {
   @get:Rule
   val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
 
-  //TODO add rule for notification permission
+  // TODO add rule for notification permission
 
   private val TIMEOUT = 10_000L
 
@@ -64,9 +61,8 @@ class EndToEndM2 {
   private val firebaseUtils: FirebaseUtils = FirebaseUtils()
   private val fakePlantRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoFirestore)
 
-
   @Before
-  fun setUp() = runTest{
+  fun setUp() = runTest {
     // Set up any necessary configurations or states before each test
     Log.d("EndToEndM2", "setUpEntry")
     firebaseUtils.initialize()
@@ -87,15 +83,18 @@ class EndToEndM2 {
 
   @Test
   fun test_end_to_end_m2() = runTest {
-    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).assertIsDisplayed().performClick()
+    composeTestRule
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
     firebaseUtils.signIn()
     // === NEW PROFILE SCREEN ===
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
     composeTestRule
-      .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
-      .performTextInput("Switzerland")
+        .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
+        .performTextInput("Switzerland")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
@@ -108,9 +107,9 @@ class EndToEndM2 {
     }
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
     composeTestRule
-      .onNodeWithTag(GardenScreenTestTags.USERNAME)
-      .assertIsDisplayed()
-      .assertTextContains("John")
+        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .assertIsDisplayed()
+        .assertTextContains("John")
 
     // goto edit profile screen
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).performClick()
@@ -120,9 +119,10 @@ class EndToEndM2 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
     }
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).assertIsDisplayed()
-      .assertTextContains("Ada")
-
+    composeTestRule
+        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .assertIsDisplayed()
+        .assertTextContains("Ada")
 
     // goto camera screen
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
@@ -156,17 +156,17 @@ class EndToEndM2 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
     }
-    //get owned plant
+    // get owned plant
     val listOfOwnedPlant = PlantsRepositoryProvider.repository.getAllOwnedPlants()
     assert(listOfOwnedPlant.size == 1)
 
-    //logout
+    // logout
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).performClick()
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).isDisplayed()
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
     firebaseUtils.signIn()
 
-    //goto garden
+    // goto garden
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
@@ -174,11 +174,16 @@ class EndToEndM2 {
     val listOfOwnedPlantAfterLogout = PlantsRepositoryProvider.repository.getAllOwnedPlants()
     assert(listOfOwnedPlantAfterLogout.size == 1)
 
-    //click on plant
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlantAfterLogout.first())).assertIsDisplayed().performClick()
+    // click on plant
+    composeTestRule
+        .onNodeWithTag(
+            GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlantAfterLogout.first()))
+        .assertIsDisplayed()
+        .performClick()
 
-    //Edit Plant
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertTextContains(mockPlant.name)
-
+    // Edit Plant
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME)
+        .assertTextContains(mockPlant.name)
   }
 }
