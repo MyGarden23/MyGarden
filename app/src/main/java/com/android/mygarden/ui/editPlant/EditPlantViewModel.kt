@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
-import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import java.sql.Timestamp
@@ -53,7 +52,7 @@ class EditPlantViewModel(
                 description = plant.description,
                 lastWatered = owned.lastWatered,
                 image = plant.image,
-                isRecognized = plant.name != Plant().name)
+                isRecognized = plant.isRecognized)
       } catch (e: Exception) {
         Log.e("EditPlantViewModel", "Error loading Plant by ID. $ownedPlantId", e)
         setErrorMsg(R.string.error_failed_load_plant_edit)

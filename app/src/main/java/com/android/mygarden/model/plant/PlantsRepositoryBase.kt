@@ -183,7 +183,8 @@ abstract class PlantsRepositoryBase : PlantsRepository {
                   jsonObject["lightExposure"]?.jsonPrimitive?.content ?: basePlant.lightExposure,
               wateringFrequency =
                   jsonObject["wateringFrequency"]?.jsonPrimitive?.doubleOrNull?.toInt()
-                      ?: basePlant.wateringFrequency)
+                      ?: basePlant.wateringFrequency,
+              isRecognized = true)
 
       return res
     } catch (e: Exception) {
