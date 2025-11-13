@@ -86,11 +86,17 @@ class EndToEndM2 {
 
   @Test
   fun test_end_to_end_m2() {
+    // First, make sure the sign-in screen is displayed
     composeTestRule
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
-        .performClick()
+
+    // IMPORTANT: Click the button FIRST (while currentUser is still null)
+    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
+
+    // THEN sign in (this will be called by the navigation callback)
     runBlocking { firebaseUtils.signIn() }
+
     // === NEW PROFILE SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).isDisplayed()
