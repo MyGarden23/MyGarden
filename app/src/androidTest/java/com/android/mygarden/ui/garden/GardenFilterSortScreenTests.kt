@@ -71,7 +71,7 @@ class GardenFilterSortScreenTests {
     override suspend fun getFCMToken(): String? {
       return null
     }
-    
+
     override fun cleanup() {}
   }
 

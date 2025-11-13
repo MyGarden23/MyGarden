@@ -171,6 +171,8 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
     // No profile corresponding
     val token = repo.getFCMToken()
     assertTrue(token == null)
+  }
+
   @Test
   fun cleanup_doesNotThrowException() = runTest {
     saveProfileSuspend()

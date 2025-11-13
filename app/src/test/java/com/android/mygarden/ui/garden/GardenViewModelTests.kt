@@ -78,7 +78,7 @@ class GardenViewModelTests {
     override suspend fun getFCMToken(): String? {
       return null
     }
-    
+
     override fun cleanup() {}
   }
 

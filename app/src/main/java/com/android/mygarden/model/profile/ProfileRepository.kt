@@ -45,7 +45,8 @@ interface ProfileRepository {
    * @return the token of the current user or null if there is none
    */
   suspend fun getFCMToken(): String?
-  
+
+  /**
    * Cleans up any active listeners or resources.
    *
    * This should be called before signing out to prevent PERMISSION_DENIED errors from Firestore
