@@ -40,4 +40,6 @@ class FakeProfileRepository(val profile: Profile? = null) : ProfileRepository {
   override suspend fun saveProfile(profile: Profile) {
     /* no-op, succeed */
   }
+
+  override fun cleanup() {}
 }
