@@ -27,6 +27,7 @@ sonar = "4.4.1.3373"
 navigationCompose = "2.8.5"
 lifecycleCompose = "2.8.6"
 mockk = "1.13.11"
+exifinterface = "1.3.7"
 
 # Credential Manager
 credentialsPlayServicesAuth = "1.3.0"
@@ -75,6 +76,7 @@ mockito-android = { module = "org.mockito:mockito-android", version.ref = "mocki
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterface" }
 
 mockk = { module = "io.mockk:mockk", version = "1.13.11" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk" }

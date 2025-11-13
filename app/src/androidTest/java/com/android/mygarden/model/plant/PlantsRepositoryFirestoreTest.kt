@@ -94,6 +94,13 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     return id
   }
 
+  /** Suspend version: Saves a plant and returns its id (for use inside runTest blocks) */
+  private suspend fun savePlantSuspend(plant: Plant = healthyPlant): String {
+    val id = repository.getNewId()
+    repository.saveToGarden(plant, id, Timestamp(System.currentTimeMillis()))
+    return id
+  }
+
   /**
    * Updates the health status of a plant based on current watering cycle.
    *
@@ -419,7 +426,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
       // initial emission from stateIn
       assertEquals(emptyList<OwnedPlant>(), awaitItem())
 
-      val id = saveHealthyPlantAndReturnId()
+      val id = savePlantSuspend()
 
       val list = awaitItem()
       assertEquals(1, list.size)
@@ -493,7 +500,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
       // initial emission from stateIn
       assertEquals(emptyList<OwnedPlant>(), awaitItem())
 
-      saveHealthyPlantAndReturnId()
+      savePlantSuspend()
       awaitItem()
 
       repository.getAllOwnedPlants()
@@ -524,5 +531,77 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
 
       cancelAndIgnoreRemainingEvents()
     }
+  }
+
+  /*--------------------- CLEANUP TESTS -----------------*/
+
+  /** Tests that cleanup() can be called without throwing exceptions. */
+  @Test
+  fun cleanup_doesNotThrowException() = runTest {
+    // Save a plant
+    savePlantSuspend()
+
+    // Call cleanup - should not throw
+    repository.cleanup()
+  }
+
+  /** Tests that cleanup() can be called multiple times safely. */
+  @Test
+  fun cleanup_canBeCalledMultipleTimes() = runTest {
+    // Save a plant
+    savePlantSuspend()
+
+    // Call cleanup multiple times - should not throw exceptions
+    repository.cleanup()
+    repository.cleanup()
+    repository.cleanup()
+
+    // Verify the repository is still functional after multiple cleanups
+    val plants = repository.getAllOwnedPlants()
+    assertEquals(1, plants.size)
+  }
+
+  /** Tests that after cleanup(), basic repository operations still work. */
+  @Test
+  fun cleanup_repositoryStillFunctional() = runTest {
+    // Save a plant
+    val id = savePlantSuspend()
+
+    // Call cleanup
+    repository.cleanup()
+
+    // Verify we can still get the plant
+    val plant = repository.getOwnedPlant(id)
+    assertNotNull(plant)
+    assertEquals(id, plant.id)
+
+    // Verify we can still get all plants
+    val allPlants = repository.getAllOwnedPlants()
+    assertEquals(1, allPlants.size)
+
+    // Verify we can still save a new plant
+    savePlantSuspend()
+    val updatedList = repository.getAllOwnedPlants()
+    assertEquals(2, updatedList.size)
+  }
+
+  /** Tests that cleanup() doesn't interfere with existing data in Firestore. */
+  @Test
+  fun cleanup_doesNotDeleteData() = runTest {
+    // Save multiple plants
+    savePlantSuspend(healthyPlant)
+    savePlantSuspend(plant2)
+    savePlantSuspend(plant3)
+
+    // Verify we have 3 plants
+    val beforeCleanup = repository.getAllOwnedPlants()
+    assertEquals(3, beforeCleanup.size)
+
+    // Call cleanup
+    repository.cleanup()
+
+    // Verify all plants are still there
+    val afterCleanup = repository.getAllOwnedPlants()
+    assertEquals(3, afterCleanup.size)
   }
 }

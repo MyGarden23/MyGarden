@@ -50,4 +50,6 @@ class FakeProfileRepository(val profile: Profile? = null) : ProfileRepository {
   override suspend fun getFCMToken(): String? {
     return null
   }
+  
+  override fun cleanup() {}
 }

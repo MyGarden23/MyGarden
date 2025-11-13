@@ -43,6 +43,8 @@ class ProfileViewModelTest {
     override suspend fun getFCMToken(): String? {
       return null
     }
+    
+    override fun cleanup() {}
   }
 
   private lateinit var viewModel: ProfileViewModel

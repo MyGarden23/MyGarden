@@ -29,6 +29,29 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
     compose.setContent { MyGardenTheme {} }
   }
 
+  // --- HELPER FUNCTIONS ---
+
+  /** Suspend helper: Creates and saves a profile (for use inside runTest blocks) */
+  private suspend fun saveProfileSuspend(
+      firstName: String = "Test",
+      lastName: String = "User",
+      gardeningSkill: GardeningSkill = GardeningSkill.BEGINNER,
+      favoritePlant: String = "Rose",
+      country: String = "US",
+      hasSignedIn: Boolean = false
+  ): Profile {
+    val profile =
+        Profile(
+            firstName = firstName,
+            lastName = lastName,
+            gardeningSkill = gardeningSkill,
+            favoritePlant = favoritePlant,
+            country = country,
+            hasSignedIn = hasSignedIn)
+    repo.saveProfile(profile)
+    return profile
+  }
+
   // --- TESTS START HERE ---
 
   @Test
@@ -148,5 +171,65 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
     // No profile corresponding
     val token = repo.getFCMToken()
     assertTrue(token == null)
+  @Test
+  fun cleanup_doesNotThrowException() = runTest {
+    saveProfileSuspend()
+
+    // Call cleanup - should not throw
+    repo.cleanup()
+  }
+
+  @Test
+  fun cleanup_canBeCalledMultipleTimes() = runTest {
+    saveProfileSuspend(firstName = "Multi")
+
+    // Call cleanup multiple times - should not throw exceptions
+    repo.cleanup()
+    repo.cleanup()
+    repo.cleanup()
+
+    // Verify the repository is still functional
+    val fetched = repo.getProfile().first()
+    assertNotNull(fetched)
+    assertEquals("Multi", fetched!!.firstName)
+  }
+
+  @Test
+  fun cleanup_repositoryStillFunctional() = runTest {
+    val profile = saveProfileSuspend(firstName = "Functional")
+
+    // Call cleanup
+    repo.cleanup()
+
+    // Verify we can still get the profile
+    val fetched = repo.getProfile().first()
+    assertNotNull(fetched)
+    assertEquals("Functional", fetched!!.firstName)
+
+    // Verify we can still save updates
+    val updated = profile.copy(favoritePlant = "Lily")
+    repo.saveProfile(updated)
+    val fetchedAfterUpdate = repo.getProfile().first()
+    assertEquals("Lily", fetchedAfterUpdate!!.favoritePlant)
+  }
+
+  @Test
+  fun cleanup_doesNotDeleteData() = runTest {
+    saveProfileSuspend(firstName = "Persistent", hasSignedIn = true)
+
+    // Verify profile exists before cleanup
+    val before = repo.getProfile().first()
+    assertNotNull(before)
+    assertEquals("Persistent", before!!.firstName)
+    assertTrue(before.hasSignedIn)
+
+    // Call cleanup
+    repo.cleanup()
+
+    // Verify profile still exists after cleanup
+    val after = repo.getProfile().first()
+    assertNotNull(after)
+    assertEquals("Persistent", after!!.firstName)
+    assertTrue(after.hasSignedIn)
   }
 }

@@ -121,6 +121,8 @@ class GardenScreenTests {
     override suspend fun getFCMToken(): String? {
       return null
     }
+    
+    override fun cleanup() {}
   }
 
   private lateinit var plantsRepo: PlantsRepository
