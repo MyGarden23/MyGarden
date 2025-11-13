@@ -29,31 +29,30 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
     compose.setContent { MyGardenTheme {} }
   }
 
-    // --- HELPER FUNCTIONS ---
+  // --- HELPER FUNCTIONS ---
 
-    /** Suspend helper: Creates and saves a profile (for use inside runTest blocks) */
-    private suspend fun saveProfileSuspend(
-        firstName: String = "Test",
-        lastName: String = "User",
-        gardeningSkill: GardeningSkill = GardeningSkill.BEGINNER,
-        favoritePlant: String = "Rose",
-        country: String = "US",
-        hasSignedIn: Boolean = false
-    ): Profile {
-        val profile =
-            Profile(
-                firstName = firstName,
-                lastName = lastName,
-                gardeningSkill = gardeningSkill,
-                favoritePlant = favoritePlant,
-                country = country,
-                hasSignedIn = hasSignedIn
-            )
-        repo.saveProfile(profile)
-        return profile
-    }
+  /** Suspend helper: Creates and saves a profile (for use inside runTest blocks) */
+  private suspend fun saveProfileSuspend(
+      firstName: String = "Test",
+      lastName: String = "User",
+      gardeningSkill: GardeningSkill = GardeningSkill.BEGINNER,
+      favoritePlant: String = "Rose",
+      country: String = "US",
+      hasSignedIn: Boolean = false
+  ): Profile {
+    val profile =
+        Profile(
+            firstName = firstName,
+            lastName = lastName,
+            gardeningSkill = gardeningSkill,
+            favoritePlant = favoritePlant,
+            country = country,
+            hasSignedIn = hasSignedIn)
+    repo.saveProfile(profile)
+    return profile
+  }
 
-    // --- TESTS START HERE ---
+  // --- TESTS START HERE ---
 
   @Test
   fun canSaveAndRetrieveProfile() = runTest {
@@ -139,7 +138,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @Test
   fun cleanup_doesNotThrowException() = runTest {
-      saveProfileSuspend()
+    saveProfileSuspend()
 
     // Call cleanup - should not throw
     repo.cleanup()
@@ -147,7 +146,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @Test
   fun cleanup_canBeCalledMultipleTimes() = runTest {
-      saveProfileSuspend(firstName = "Multi")
+    saveProfileSuspend(firstName = "Multi")
 
     // Call cleanup multiple times - should not throw exceptions
     repo.cleanup()
@@ -162,7 +161,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @Test
   fun cleanup_repositoryStillFunctional() = runTest {
-      val profile = saveProfileSuspend(firstName = "Functional")
+    val profile = saveProfileSuspend(firstName = "Functional")
 
     // Call cleanup
     repo.cleanup()
@@ -181,7 +180,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @Test
   fun cleanup_doesNotDeleteData() = runTest {
-      saveProfileSuspend(firstName = "Persistent", hasSignedIn = true)
+    saveProfileSuspend(firstName = "Persistent", hasSignedIn = true)
 
     // Verify profile exists before cleanup
     val before = repo.getProfile().first()
