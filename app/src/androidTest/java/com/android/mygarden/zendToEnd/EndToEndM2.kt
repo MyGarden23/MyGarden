@@ -80,7 +80,6 @@ class EndToEndM2 {
 
   @After
   fun tearDown() {
-    firebaseUtils.signOut()
     // Clean up the system property to avoid affecting other tests
     System.clearProperty("mygarden.e2e")
   }
@@ -92,7 +91,6 @@ class EndToEndM2 {
         .assertIsDisplayed()
         .performClick()
     runBlocking { firebaseUtils.signIn() }
-    composeTestRule.waitForIdle()
     // === NEW PROFILE SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).isDisplayed()
@@ -210,7 +208,6 @@ class EndToEndM2 {
 
     runBlocking { firebaseUtils.signIn() }
 
-    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
 
     // Wait for navigation to be ready after re-login
@@ -223,8 +220,6 @@ class EndToEndM2 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
     }
-
-    composeTestRule.waitForIdle()
 
     // Wait for the garden list to appear
     composeTestRule.waitUntil(TIMEOUT) {
