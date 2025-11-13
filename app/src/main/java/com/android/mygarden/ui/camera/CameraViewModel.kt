@@ -4,8 +4,11 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.net.Uri
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -13,6 +16,7 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.view.LifecycleCameraController
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.ViewModel
 import java.io.File
 import java.io.FileOutputStream
@@ -94,6 +98,74 @@ class CameraViewModel : ViewModel() {
             Log.e(CAMERA_ERROR_TAG, "Picture could not been taken", exception)
           }
         })
+  }
+
+  /**
+   * Processes an image selected from the gallery so it can follow the same flow as a camera
+   * capture. The image is decoded, its orientation corrected if possible, saved locally, then
+   * returned through [onPictureTaken]. Errors are reported via [onError].
+   *
+   * @param context used to access the content resolver and internal storage.
+   * @param uri the URI of the gallery image.
+   * @param onPictureTaken callback receiving the saved image file path.
+   * @param onError callback triggered if decoding, EXIF reading, or saving fails.
+   */
+  fun onImagePickedFromGallery(
+      context: Context,
+      uri: Uri,
+      onPictureTaken: (String) -> Unit,
+      onError: () -> Unit
+  ) {
+
+    try {
+      // Decode the bitmap from the given URI
+      val input =
+          context.contentResolver.openInputStream(uri)
+              ?: throw IllegalStateException("Cannot open input stream for gallery image")
+      var bitmap = input.use { BitmapFactory.decodeStream(it) }
+
+      // Try to read the EXIF orientation of the image.
+      // We must open a ParcelFileDescriptor because ExifInterface cannot parse EXIF metadata
+      // from a simple InputStream. If EXIF is present, we extract the orientation tag
+      // (e.g., ROTATE_90, ROTATE_180…). If anything fails (provider does not support PFD,
+      // corrupted EXIF header, or any I/O error), we safely default to ORIENTATION_NORMAL.
+      val orientation =
+          try {
+            context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+              ExifInterface(pfd.fileDescriptor)
+                  .getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            } ?: ExifInterface.ORIENTATION_NORMAL
+          } catch (_: Throwable) {
+            ExifInterface.ORIENTATION_NORMAL
+          }
+
+      bitmap = rotateBitmapIfNeeded(bitmap, orientation)
+
+      // Save locally (same as camera flow)
+      val file = saveBitmapToFile(context, bitmap, "plant_${System.currentTimeMillis()}")
+
+      // Pass the file path back through the same callback
+      onPictureTaken(file.absolutePath)
+    } catch (e: Exception) {
+      onError()
+      Log.e(CAMERA_ERROR_TAG, "Failed to import gallery image", e)
+    }
+  }
+
+  // function that rotates the bitmap if needed
+
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  internal fun rotateBitmapIfNeeded(src: Bitmap, exifOrientation: Int): Bitmap {
+    val degrees =
+        when (exifOrientation) {
+          ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+          ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+          ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+          else -> 0f
+        }
+    if (degrees == 0f) return src
+    val m = Matrix().apply { postRotate(degrees) }
+    return Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
   }
 
   /* Camera permission handling */
