@@ -13,6 +13,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Represents the UI state of the Edit Plant screen.
+ *
+ * This state contains all the editable data for a plant, such as its name, latin name, description,
+ * image, last watered date, and error messages. It also keeps track of whether the plant was
+ * recognized by the AI or not.
+ *
+ * @property name The common name of the plant (e.g., "Rose", "Tomato").
+ * @property latinName The scientific/botanical name of the plant (e.g., "Rosa rubiginosa").
+ * @property description A detailed text description of the plant, including care instructions.
+ * @property errorMsg The resource ID of an error message to display (nullable).
+ * @property lastWatered The timestamp of the last watering date.
+ * @property image The visual representation of the plant, in String? because it is either a path in
+ *     * local or an URL to find the actual image.
+ *
+ * @property isRecognized Whether the plant was recognized by the AI or not.
+ */
 data class EditPlantUIState(
     val name: String = "",
     val latinName: String = "",
@@ -23,6 +40,14 @@ data class EditPlantUIState(
     val isRecognized: Boolean = false,
 )
 
+/**
+ * ViewModel for the Edit Plant screen.
+ *
+ * Handles all logic related to loading, editing, and deleting a plant. This class implements
+ * [EditPlantViewModelInterface].
+ *
+ * @param repository The [PlantsRepository] used for plant's data access.
+ */
 class EditPlantViewModel(
     private val repository: PlantsRepository = PlantsRepositoryProvider.repository,
 ) : ViewModel(), EditPlantViewModelInterface {
@@ -92,6 +117,8 @@ class EditPlantViewModel(
     val newPlant = newOwnedPlant
     val watered = _uiState.value.lastWatered
     val description = _uiState.value.description
+    val name = _uiState.value.name
+    val latinName = _uiState.value.latinName
 
     if (newPlant == null) {
       Log.e("EditPlantViewModel", "Failed to edit plant (Plant not loaded).")
@@ -99,9 +126,24 @@ class EditPlantViewModel(
       return
     }
 
+    // Cannot have a blank description
     if (description.isBlank()) {
       Log.e("EditPlantViewModel", "Failed to edit plant. (no description selected).")
       setErrorMsg(R.string.error_description_blank)
+      return
+    }
+
+    // Cannot have a blank name
+    if (name.isBlank()) {
+      Log.e("EditPlantViewModel", "Failed to edit plant. (no name selected).")
+      setErrorMsg(R.string.error_name_blank)
+      return
+    }
+
+    // Cannot have a blank latin name
+    if (latinName.isBlank()) {
+      Log.e("EditPlantViewModel", "Failed to edit plant. (no latin name selected).")
+      setErrorMsg(R.string.error_latin_name_blank)
       return
     }
 
@@ -116,8 +158,7 @@ class EditPlantViewModel(
         newPlant.copy(
             lastWatered = watered,
             plant =
-                newPlant.plant.copy(
-                    description = _uiState.value.description, name = _uiState.value.name))
+                newPlant.plant.copy(description = description, name = name, latinName = latinName))
 
     viewModelScope.launch {
       try {

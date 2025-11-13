@@ -191,7 +191,7 @@ fun EditPlantScreen(
                       Modifier.fillMaxWidth()
                           .testTag(EditPlantScreenTestTags.PLANT_NAME)
                           .onFocusChanged { if (it.isFocused) touchedName = true })
-              if (plantUIState.name.isBlank() && touchedName) {
+              if (isNameError) {
                 Text(
                     text = context.getString(R.string.name_error),
                     color = MaterialTheme.colorScheme.error,
@@ -214,7 +214,7 @@ fun EditPlantScreen(
                       Modifier.fillMaxWidth()
                           .testTag(EditPlantScreenTestTags.PLANT_LATIN)
                           .onFocusChanged { if (it.isFocused) touchedLatinName = true })
-              if (plantUIState.latinName.isBlank() && touchedLatinName) {
+              if (isLatinNameError) {
                 Text(
                     text = context.getString(R.string.latin_name_error),
                     color = MaterialTheme.colorScheme.error,
@@ -234,7 +234,7 @@ fun EditPlantScreen(
                           .heightIn(min = 100.dp)
                           .testTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
                           .onFocusChanged { if (it.isFocused) touchedDesc = true })
-              if (plantUIState.description.isBlank() && touchedDesc) {
+              if (isDescriptionError) {
                 Text(
                     text = context.getString(R.string.description_error),
                     color = MaterialTheme.colorScheme.error,

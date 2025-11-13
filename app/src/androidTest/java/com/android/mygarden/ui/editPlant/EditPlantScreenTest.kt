@@ -92,7 +92,7 @@ class EditPlantScreenTest {
    */
   @Test
   fun nameAndLatin_areNotEditable_whenPlantIsRecognized() {
-    val vm = FakeEditPlantViewModel().apply { setIsRecongnized() }
+    val vm = FakeEditPlantViewModel().apply { setIsRecognized() }
 
     setContentWith(vm = vm)
 
@@ -418,7 +418,7 @@ private class FakeEditPlantViewModel : EditPlantViewModelInterface {
     _ui.value = _ui.value.copy(lastWatered = ts)
   }
 
-  fun setIsRecongnized() {
+  fun setIsRecognized() {
     _ui.value = _ui.value.copy(isRecognized = true)
   }
 }
