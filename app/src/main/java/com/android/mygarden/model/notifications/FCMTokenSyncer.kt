@@ -20,7 +20,7 @@ object FCMTokenSyncer {
    * @param context The application [Context] used to access SharedPreferences.
    */
   suspend fun trySync(context: Context) {
-    // If the user currently has has no account on Firestore then do nothing
+    // If the user currently has no account on Firestore then do nothing
     val profileRepo = ProfileRepositoryProvider.repository
     profileRepo.getCurrentUserId() ?: return
 
@@ -28,7 +28,7 @@ object FCMTokenSyncer {
     val prefs =
         context.getSharedPreferences(
             PushNotificationsService.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
-    val token = prefs.getString(PushNotificationsService.FCM_TOKEN_IDENTIFIER, null) ?: return
+    val token = prefs.getString(PushNotificationsService.SHARED_PREFS_FCM_TOKEN_ID, null) ?: return
 
     // If there is already the same token on Firestore then do nothing
     val remoteToken = profileRepo.getFCMToken()
@@ -40,7 +40,7 @@ object FCMTokenSyncer {
 
     // Delete local shared preference that was holding the new token if it succeeds
     if (success) {
-      prefs.edit { remove(PushNotificationsService.FCM_TOKEN_IDENTIFIER) }
+      prefs.edit { remove(PushNotificationsService.SHARED_PREFS_FCM_TOKEN_ID) }
     }
   }
 }

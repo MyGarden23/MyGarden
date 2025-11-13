@@ -220,7 +220,7 @@ private fun AskForNotificationsPermission() {
   val context = LocalContext.current
   val notificationPermission = remember { mutableStateOf(hasNotificationsPermission(context)) }
 
-  val notificationLaucher =
+  val notificationLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.RequestPermission(),
           onResult = { notificationPermission.value = it })
@@ -228,7 +228,7 @@ private fun AskForNotificationsPermission() {
   // Side-effect: only trigger once, not on every recomposition
   LaunchedEffect(Unit) {
     if (!hasNotificationsPermission(context)) {
-      notificationLaucher.launch(Manifest.permission.POST_NOTIFICATIONS)
+      notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
   }
 }

@@ -42,6 +42,7 @@ class PushNotificationsServiceTest {
     prefs.edit().clear().commit()
   }
 
+  /** Make sure onNewToken saves the token locally when the user is not logged in */
   @Test
   fun onNewToken_saves_token_locally_when_user_is_not_logged_in() =
       runTest(testDispatcher) {
@@ -58,10 +59,11 @@ class PushNotificationsServiceTest {
         val prefs =
             context.getSharedPreferences(
                 PushNotificationsService.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
-        val token = prefs.getString(PushNotificationsService.FCM_TOKEN_IDENTIFIER, null)
+        val token = prefs.getString(PushNotificationsService.SHARED_PREFS_FCM_TOKEN_ID, null)
         assertTrue("Token should be saved: $token", token != null && token == "test_fcm_token")
       }
 
+  /** Make sure onNewToken attaches the token to the user when the user is logged in */
   @Test
   fun onNewToken_attaches_token_when_user_is_logged_in() =
       runTest(testDispatcher) {

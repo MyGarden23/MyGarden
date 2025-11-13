@@ -1,6 +1,7 @@
 package com.android.mygarden.model.profile
 
 import android.util.Log
+import com.android.mygarden.model.notifications.PushNotificationsService
 import com.android.mygarden.ui.profile.Avatar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -67,7 +68,9 @@ class ProfileRepositoryFirestore(
     val uid = getCurrentUserId() ?: return false
 
     return try {
-      userProfile.set(mapOf("fcmToken" to token), SetOptions.merge()).await()
+      userProfile
+          .set(mapOf(PushNotificationsService.FIRESTORE_FCM_TOKEN_ID to token), SetOptions.merge())
+          .await()
       true
     } catch (e: Exception) {
       Log.e("FirestoreProfile", "Failed to attach FCM token to user $uid", e)
@@ -86,7 +89,7 @@ class ProfileRepositoryFirestore(
 
     return try {
       val snap = userProfile.get().await()
-      snap.getString("fcmToken")
+      snap.getString(PushNotificationsService.FIRESTORE_FCM_TOKEN_ID)
     } catch (e: Exception) {
       Log.e("FirestoreProfile", "Failed to fetch FCM token for user $uid", e)
       null

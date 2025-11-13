@@ -53,7 +53,7 @@ def test_overwatered_threshold():
     status = main.compute_status(ms(last), watering_freq)
     assert status == main.PlantHealthStatus.OVERWATERED
 
-def test_severly_overwatered_threshold():
+def test_severely_overwatered_threshold():
     now = datetime.now(timezone.utc)
     last = now - timedelta(days=1)
     watering_freq = 20
@@ -72,11 +72,11 @@ def test_grace_period():
     status = main.compute_status(ms(last), watering_freq, ms(prev))
     assert status == main.PlantHealthStatus.HEALTHY
 
-def test_inital_watering():
+def test_initial_watering():
     now = datetime.now(timezone.utc)
     last = now - timedelta(days=0.4)
     watering_freq = 10
 
-    # this setting should trigger the inital watering
+    # this setting should trigger the initial watering
     status = main.compute_status(ms(last), watering_freq)
     assert status == main.PlantHealthStatus.HEALTHY

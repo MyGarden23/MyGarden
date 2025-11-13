@@ -28,7 +28,9 @@ class PushNotificationsService : FirebaseMessagingService() {
     /** Notification shared preferences */
     const val NOTIFICATIONS_SHARED_PREFS = "notifications_prefs"
     /** FCM token identifier in the notifications shared preferences */
-    const val FCM_TOKEN_IDENTIFIER = "fcm_token"
+    const val SHARED_PREFS_FCM_TOKEN_ID = "fcm_token"
+
+    const val FIRESTORE_FCM_TOKEN_ID = "fcmToken"
   }
 
   /** Useful dependencies for testing */
@@ -51,6 +53,8 @@ class PushNotificationsService : FirebaseMessagingService() {
     val dispatcher = testDispatcher ?: Dispatchers.IO
     val contextForPrefs = testContext ?: this
 
+    // A possible improvement would be to not use a new coroutine for each new token (small
+    // optimization)
     CoroutineScope(dispatcher).launch {
       // Try to attach the new token to the user's Firestore profile
       val success = profileRepo.attachFCMToken(token)
@@ -58,7 +62,7 @@ class PushNotificationsService : FirebaseMessagingService() {
       // If there is none, save it locally until the user logs in
       if (!success) {
         contextForPrefs.getSharedPreferences(NOTIFICATIONS_SHARED_PREFS, MODE_PRIVATE).edit {
-          putString(FCM_TOKEN_IDENTIFIER, token)
+          putString(SHARED_PREFS_FCM_TOKEN_ID, token)
         }
       }
     }
