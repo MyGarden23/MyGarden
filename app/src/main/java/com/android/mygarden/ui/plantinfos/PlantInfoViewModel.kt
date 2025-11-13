@@ -33,6 +33,7 @@ data class PlantInfoUIState(
     val healthStatusDescription: String = "",
     val wateringFrequency: Int = 0,
     val selectedTab: SelectedPlantInfoTab = SelectedPlantInfoTab.DESCRIPTION,
+    val isSaving: Boolean = false,
 ) {
   fun savePlant(): Plant {
     return Plant(
@@ -96,8 +97,10 @@ class PlantInfoViewModel(
    */
   fun savePlant(plant: Plant, onPlantSaved: (String) -> Unit) {
     viewModelScope.launch {
+      _uiState.value = _uiState.value.copy(isSaving = true)
       val newId = plantsRepository.getNewId()
       plantsRepository.saveToGarden(plant, newId, Timestamp(System.currentTimeMillis()))
+      _uiState.value = _uiState.value.copy(isSaving = false)
       onPlantSaved(newId)
     }
   }
