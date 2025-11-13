@@ -165,6 +165,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.process)
 
     // Multidex support
     implementation(libs.androidx.multidex)
@@ -220,8 +221,8 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
-    // Add the dependency for the Cloud Storage for Firestore
     implementation(libs.firebase.storage)
+    implementation(libs.firebase.messaging)
 
 
     //Credential Manager
@@ -243,6 +244,8 @@ dependencies {
     // ----------         Mockito      ------------
     implementation(libs.mockito.core)
     implementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockito.kotlin)
 
     // --------- Firebase AI Logic (Gemini/Imagen) ---------
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))

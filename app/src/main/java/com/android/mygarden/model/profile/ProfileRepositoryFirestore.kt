@@ -1,5 +1,7 @@
 package com.android.mygarden.model.profile
 
+import android.util.Log
+import com.android.mygarden.model.notifications.PushNotificationsService
 import com.android.mygarden.ui.profile.Avatar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -65,6 +67,46 @@ class ProfileRepositoryFirestore(
   // Save or update the user's profile in Firestore (merge keeps existing fields)
   override suspend fun saveProfile(profile: Profile) {
     userProfile.set(profile.toMap(), SetOptions.merge()).await()
+  }
+
+  /**
+   * Attach the given Firebase Cloud Messaging token to the user's Firestore profile in a field
+   * called "fcmToken". Create the field if it does not already exist and updates it if it exists.
+   * If the user currently has no Firestore profile stored, creates one.
+   *
+   * @param token the new token that will be attached to the profile
+   * @return true if the query succeeded otherwise false
+   */
+  override suspend fun attachFCMToken(token: String): Boolean {
+    val uid = getCurrentUserId() ?: return false
+
+    return try {
+      userProfile
+          .set(mapOf(PushNotificationsService.FIRESTORE_FCM_TOKEN_ID to token), SetOptions.merge())
+          .await()
+      true
+    } catch (e: Exception) {
+      Log.e("FirestoreProfile", "Failed to attach FCM token to user $uid", e)
+      false
+    }
+  }
+
+  /**
+   * Return the FCM token currently attached to the current user on Firestore. Return null if there
+   * is an error or if the user has no FCM attached yet.
+   *
+   * @return the FCM token of the current user or null if there is none
+   */
+  override suspend fun getFCMToken(): String? {
+    val uid = getCurrentUserId() ?: return null
+
+    return try {
+      val snap = userProfile.get().await()
+      snap.getString(PushNotificationsService.FIRESTORE_FCM_TOKEN_ID)
+    } catch (e: Exception) {
+      Log.e("FirestoreProfile", "Failed to fetch FCM token for user $uid", e)
+      null
+    }
   }
 
   // Converts a Firestore document to a Profile object

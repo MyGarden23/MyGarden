@@ -136,6 +136,43 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
     assertTrue(uid!!.isNotBlank())
   }
 
+  // Notification test with the profile repository
+
+  @Test
+  fun attachFCMToken_attaches_token_when_logged_in() = runTest {
+    val profile =
+        Profile(
+            firstName = "Ada",
+            lastName = "Lovelace",
+            gardeningSkill = GardeningSkill.BEGINNER,
+            favoritePlant = "Rose",
+            country = "UK",
+            hasSignedIn = false)
+    repo.saveProfile(profile)
+
+    // User should be logged in hence the token should attach
+    val res = repo.attachFCMToken("fake-token")
+    assertTrue(res)
+    val token = repo.getFCMToken()
+    assertTrue(token != null && token == "fake-token")
+  }
+
+  @Test
+  fun attachFCMToken_attach_when_not_logged_in() = runTest {
+    // No profile corresponding
+    val res = repo.attachFCMToken("fake-token")
+    assertTrue(res)
+    val token = repo.getFCMToken()
+    assertTrue(token != null && token == "fake-token")
+  }
+
+  @Test
+  fun getFCMToken_fail_when_no_token_attached() = runTest {
+    // No profile corresponding
+    val token = repo.getFCMToken()
+    assertTrue(token == null)
+  }
+
   @Test
   fun cleanup_doesNotThrowException() = runTest {
     saveProfileSuspend()

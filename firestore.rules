@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permissive rules for emulator testing
+    // In production, upload more restrictive rules to Firebase console
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
