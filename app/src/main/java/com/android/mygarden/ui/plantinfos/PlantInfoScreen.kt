@@ -131,7 +131,10 @@ fun PlantInfosScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
                           }
                     } else {
-                      Text(text = context.getString(R.string.next), fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                      Text(
+                          text = context.getString(R.string.next),
+                          fontSize = 18.sp,
+                          fontWeight = FontWeight.Medium)
                     }
                   }
             }

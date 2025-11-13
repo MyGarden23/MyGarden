@@ -60,7 +60,7 @@ class PlantsRepositoryLocal(
     if (ownedPlant == null) {
       throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
     } else {
-        //Update the status of the plant because we need a refresh the status
+      // Update the status of the plant because we need a refresh the status
       return updatePlantHealthStatus(ownedPlant)
     }
   }
