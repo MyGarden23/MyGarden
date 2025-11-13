@@ -137,7 +137,7 @@ class EndToEndM2 {
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
 
     // === PLANT INFO SCREEN ===
-    composeTestRule.waitUntil(TIMEOUT * 100) {
+    composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
     }
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).isDisplayed()
@@ -145,7 +145,7 @@ class EndToEndM2 {
 
     // click on next
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
-    composeTestRule.waitUntil(TIMEOUT * 100) {
+    composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
     }
 
