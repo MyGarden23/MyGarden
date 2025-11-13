@@ -92,9 +92,13 @@ class EndToEndM2 {
         .assertIsDisplayed()
 
     // IMPORTANT: Click the button FIRST (while currentUser is still null)
+    // This will trigger onSignedIn() navigation because currentUser == null at this moment
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
 
-    // THEN sign in (this will be called by the navigation callback)
+    // Wait for the onClick logic to execute and navigation to start
+    composeTestRule.waitForIdle()
+
+    // THEN sign in to actually authenticate the user (after navigation has been triggered)
     runBlocking { firebaseUtils.signIn() }
 
     // === NEW PROFILE SCREEN ===
