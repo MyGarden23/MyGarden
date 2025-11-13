@@ -6,13 +6,15 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import org.junit.Assert.assertNotNull
 
 class FirebaseUtils {
-  private lateinit var db: FirebaseFirestore
-  protected lateinit var auth: FirebaseAuth
+  lateinit var db: FirebaseFirestore
+  lateinit var auth: FirebaseAuth
   protected lateinit var cred: AuthCredential
+  lateinit var storage: FirebaseStorage
 
   suspend fun initialize() {
     // Emulators
@@ -20,6 +22,8 @@ class FirebaseUtils {
     FirebaseEmulator.clearAuthEmulator()
     db = FirebaseEmulator.connectFirestore()
     FirebaseEmulator.clearFirestoreEmulator()
+    storage = FirebaseEmulator.connectStorage()
+    FirebaseEmulator.clearStorageEmulator()
     auth = FirebaseEmulator.auth
 
     // Fake sign-in (suspend)
