@@ -7,8 +7,6 @@ import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import io.mockk.coEvery
 import io.mockk.spyk
-import kotlinx.coroutines.test.runTest
-
 /**
  * Enumeration of available plant repository types for testing.
  *
@@ -133,7 +131,7 @@ class FakePlantRepositoryUtils(repoType: PlantRepositoryType) {
    *   overridden with the actual path parameter from the call.
    * @see PlantsRepository.identifyPlant
    */
-  fun mockIdentifyPlant(plant: Plant) = runTest {
+  fun mockIdentifyPlant(plant: Plant) {
     coEvery { repository.identifyPlant(any()) } answers
         {
           val path = firstArg<String?>()
@@ -152,7 +150,7 @@ class FakePlantRepositoryUtils(repoType: PlantRepositoryType) {
    * @return The result of the test coroutine execution
    * @see PlantsRepository.plantDescriptionCallGemini
    */
-  fun mockPlantDescriptionCallGemini(resJSON: String) = runTest {
+  fun mockPlantDescriptionCallGemini(resJSON: String) {
     coEvery { repository.plantDescriptionCallGemini(any()) } returns resJSON
   }
 
@@ -167,7 +165,7 @@ class FakePlantRepositoryUtils(repoType: PlantRepositoryType) {
    * @return The result of the test coroutine execution
    * @see PlantsRepository.plantNetAPICall
    */
-  fun mockPlantNetAPI(resJSON: String) = runTest {
+  fun mockPlantNetAPI(resJSON: String) {
     coEvery { repository.plantNetAPICall(any(), any()) } returns resJSON
   }
 }
