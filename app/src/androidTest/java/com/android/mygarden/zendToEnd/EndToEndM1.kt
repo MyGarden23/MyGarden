@@ -15,8 +15,6 @@ import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantsRepositoryLocal
-import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
@@ -60,7 +58,11 @@ class EndToEndM1 {
    * testing without user interaction prompts.
    */
   @get:Rule
-  val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
+  val permissionCamera: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
+
+  @get:Rule
+  val permissionNotifsRule: GrantPermissionRule =
+      GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
   private val TIMEOUT = 10_000L
 
@@ -70,6 +72,7 @@ class EndToEndM1 {
    * Performs:
    * - Waits for Compose UI to be idle
    * - Calls waitForAppToLoad() to verify core components are ready
+   * - Resets notification-related global state
    */
   @Before
   fun setUp() {
@@ -89,7 +92,6 @@ class EndToEndM1 {
   @Test
   fun endToEndTest() {
     val context = composeTestRule.activity
-    PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
     // === CAMERA SCREEN ===
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
 
