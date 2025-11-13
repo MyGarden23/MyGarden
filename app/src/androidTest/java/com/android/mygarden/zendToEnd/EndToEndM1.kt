@@ -1,6 +1,7 @@
 package com.android.mygarden.zendToEnd
 
 import android.Manifest
+import android.util.Log
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
@@ -18,6 +19,7 @@ import com.android.mygarden.R
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
@@ -30,6 +32,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import com.android.mygarden.ui.profile.ProfileScreenTestTags
+import com.android.mygarden.utils.FirebaseUtils
+import com.android.mygarden.utils.FirestoreProfileTest
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -74,6 +80,7 @@ class EndToEndM1 {
       GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
   private val TIMEOUT = 10_000L
+    private val firebaseUtils: FirebaseUtils = FirebaseUtils()
 
   // Store original repository to restore after test
   private lateinit var originalRepository: com.android.mygarden.model.plant.PlantsRepository
@@ -107,9 +114,11 @@ class EndToEndM1 {
     // Use local repository for E2E test to avoid Firestore dependencies
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
 
+  fun setUp() = runTest {
+      firebaseUtils.initialize()
+      firebaseUtils.injectProfileRepository()
     // Wait for the app to be fully loaded
     composeTestRule.waitForIdle()
-    waitForAppToLoad()
   }
 
   /**
@@ -121,19 +130,25 @@ class EndToEndM1 {
    * 5. Bottom bar navigation
    */
   @Test
-  fun endToEndTest() {
+  fun endToEndTest() = runTest {
     val context = composeTestRule.activity
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
-
-    // === NEW PROFILE SCREEN ===
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
-    composeTestRule
-        .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
-        .performTextInput("Switzerland")
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
-
+      composeTestRule
+          .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+          .assertIsDisplayed()
+          .performClick()
+      firebaseUtils.signIn()
+      // === NEW PROFILE SCREEN ===
+      composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
+      composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
+      composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
+      composeTestRule
+          .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
+          .performTextInput("Switzerland")
+      composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
+      composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
+      }
     // === CAMERA SCREEN ===
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
 
