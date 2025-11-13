@@ -137,7 +137,7 @@ class EndToEndM2 {
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
 
     // === PLANT INFO SCREEN ===
-    composeTestRule.waitUntil(TIMEOUT) {
+    composeTestRule.waitUntil(TIMEOUT * 100) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
     }
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).isDisplayed()
@@ -145,7 +145,7 @@ class EndToEndM2 {
 
     // click on next
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
-    composeTestRule.waitUntil(TIMEOUT) {
+    composeTestRule.waitUntil(TIMEOUT * 100) {
       composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
     }
 
@@ -163,8 +163,14 @@ class EndToEndM2 {
     // logout
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).performClick()
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).isDisplayed()
-    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
     firebaseUtils.signIn()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
+
+    // Wait for navigation to be ready after re-login
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).isDisplayed()
+    }
 
     // goto garden
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()

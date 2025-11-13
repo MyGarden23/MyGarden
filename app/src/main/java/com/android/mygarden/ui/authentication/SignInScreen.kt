@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
+import com.google.firebase.auth.FirebaseAuth
 
 /** Semantic for testing */
 val LogoResNameKey = SemanticsPropertyKey<String>("LogoResName")
@@ -123,7 +124,11 @@ fun SignInScreen(
             OutlinedButton(
                 onClick = {
                   if (isEndToEndTest) {
-                    onSignedIn()
+                    if (FirebaseAuth.getInstance().currentUser == null) {
+                      onSignedIn()
+                    } else {
+                      onLogIn()
+                    }
                   } else {
                     authViewModel.signIn(context, credentialManager)
                   }
