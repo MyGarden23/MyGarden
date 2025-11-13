@@ -1,7 +1,6 @@
 package com.android.mygarden.zendToEnd
 
 import android.Manifest
-import android.util.Log
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
@@ -34,7 +33,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
 import com.android.mygarden.utils.FirebaseUtils
-import com.android.mygarden.utils.FirestoreProfileTest
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertTrue
@@ -80,7 +78,7 @@ class EndToEndM1 {
       GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
   private val TIMEOUT = 10_000L
-    private val firebaseUtils: FirebaseUtils = FirebaseUtils()
+  private val firebaseUtils: FirebaseUtils = FirebaseUtils()
 
   // Store original repository to restore after test
   private lateinit var originalRepository: com.android.mygarden.model.plant.PlantsRepository
@@ -115,8 +113,8 @@ class EndToEndM1 {
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
 
   fun setUp() = runTest {
-      firebaseUtils.initialize()
-      firebaseUtils.injectProfileRepository()
+    firebaseUtils.initialize()
+    firebaseUtils.injectProfileRepository()
     // Wait for the app to be fully loaded
     composeTestRule.waitForIdle()
   }
@@ -133,22 +131,22 @@ class EndToEndM1 {
   fun endToEndTest() = runTest {
     val context = composeTestRule.activity
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
-      composeTestRule
-          .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
-          .assertIsDisplayed()
-          .performClick()
-      firebaseUtils.signIn()
-      // === NEW PROFILE SCREEN ===
-      composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
-      composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
-      composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
-      composeTestRule
-          .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
-          .performTextInput("Switzerland")
-      composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
-      composeTestRule.waitUntil(TIMEOUT) {
-          composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
-      }
+    composeTestRule
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+    firebaseUtils.signIn()
+    // === NEW PROFILE SCREEN ===
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
+    composeTestRule
+        .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
+        .performTextInput("Switzerland")
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
+    }
     // === CAMERA SCREEN ===
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
 
