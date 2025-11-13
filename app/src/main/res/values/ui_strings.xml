@@ -30,6 +30,7 @@
     <string name="give_camera_access_text">Give camera access</string>
     <string name="error_accessing_settings_user">"Error accessing the settings app :("</string>
     <string name="error_fail_take_picture">"Failed to take picture."</string>
+    <string name="error_fail_gallery_picture">"Failed to import gallery image."</string>
 
 
     <!-- Edit Plant Screen -->
@@ -110,6 +111,7 @@
     <string name="name">Name</string>
     <string name="latin_name">Latin name</string>
     <string name="description">Description</string>
+    <string name="location">Location</string>
     <string name="description_error">Description cannot be empty</string>
     <string name="last_time_watered">Last time watered</string>
     <string name="last_time_watered_error">Last time watered is required</string>

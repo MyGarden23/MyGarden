@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import java.sql.Timestamp
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 enum class SelectedPlantInfoTab(val textRes: Int) {
   DESCRIPTION(R.string.description),
   HEALTH_STATUS(R.string.tab_health),
+  LOCATION(R.string.location)
 }
 
 /** UI state for the plant info screen. Contains all the plant information to be displayed. */
@@ -25,6 +27,8 @@ data class PlantInfoUIState(
     val image: String? = null,
     val latinName: String = "",
     val description: String = "",
+    val location: PlantLocation = PlantLocation.UNKNOWN,
+    val lightExposure: String = "",
     val healthStatus: PlantHealthStatus = PlantHealthStatus.UNKNOWN,
     val healthStatusDescription: String = "",
     val wateringFrequency: Int = 0,
@@ -37,6 +41,8 @@ data class PlantInfoUIState(
         image = image,
         latinName = latinName,
         description = description,
+        location = location,
+        lightExposure = lightExposure,
         healthStatus = healthStatus,
         healthStatusDescription = healthStatusDescription,
         wateringFrequency = wateringFrequency)
@@ -70,6 +76,8 @@ class PlantInfoViewModel(
               plant.image,
               generatedPlant.latinName,
               generatedPlant.description,
+              generatedPlant.location,
+              generatedPlant.lightExposure,
               generatedPlant.healthStatus,
               generatedPlant.healthStatusDescription,
               generatedPlant.wateringFrequency,

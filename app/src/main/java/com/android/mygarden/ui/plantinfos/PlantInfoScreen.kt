@@ -38,10 +38,13 @@ object PlantInfoScreenTestTags {
   const val TAB_ROW = "tab_row"
   const val DESCRIPTION_TAB = "description_tab"
   const val HEALTH_TAB = "health_tab"
+  const val LOCATION_TAB = "location_tab"
   const val CONTENT_CONTAINER = "content_container"
   const val DESCRIPTION_TEXT = "description_text"
   const val HEALTH_STATUS_DESCRIPTION = "health_status_description"
   const val HEALTH_STATUS = "health_status"
+  const val LOCATION_TEXT = "location_text"
+  const val LIGHT_EXPOSURE_TEXT = "light_exposure_text"
   const val WATERING_FREQUENCY = "watering_frequency"
   const val NEXT_BUTTON = "next_button"
   const val NEXT_BUTTON_LOADING = "next_button_loading"
@@ -188,7 +191,7 @@ fun PlantInfosScreen(
                 modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME))
           }
 
-          // --- Tab Row for Description/Health ---
+          // --- Tab Row for Description/Health/Location ---
           ModulableTabRow(
               uiState = uiState,
               plantInfoViewModel = plantInfoViewModel,
@@ -257,6 +260,27 @@ fun PlantInfosScreen(
                               modifier =
                                   Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
                         }
+                        // --- Location Tab Content ---
+                        SelectedPlantInfoTab.LOCATION -> {
+                          // Location text, INDOOR or OUTDOOR
+                          Text(
+                              text = uiState.location.name,
+                              fontSize = 16.sp,
+                              fontWeight = FontWeight.Medium,
+                              color = MaterialTheme.colorScheme.onBackground,
+                              lineHeight = 20.sp,
+                              modifier = Modifier.testTag(PlantInfoScreenTestTags.LOCATION_TEXT))
+
+                          Spacer(modifier = Modifier.height(8.dp))
+                          // Light exposure description
+                          Text(
+                              text = uiState.lightExposure,
+                              fontSize = 14.sp,
+                              color = MaterialTheme.colorScheme.onBackground,
+                              lineHeight = 20.sp,
+                              modifier =
+                                  Modifier.testTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT))
+                        }
                       }
                     }
               }
@@ -275,13 +299,15 @@ fun ModulableTabRow(
       modifier = modifier,
       containerColor = MaterialTheme.colorScheme.background,
       contentColor = MaterialTheme.colorScheme.onBackground) {
-        for (tab in SelectedPlantInfoTab.values()) {
+        for (tab in SelectedPlantInfoTab.entries) {
           val tabModifier =
               when (tab) {
                 SelectedPlantInfoTab.DESCRIPTION ->
                     Modifier.testTag(PlantInfoScreenTestTags.DESCRIPTION_TAB)
                 SelectedPlantInfoTab.HEALTH_STATUS ->
                     Modifier.testTag(PlantInfoScreenTestTags.HEALTH_TAB)
+                SelectedPlantInfoTab.LOCATION ->
+                    Modifier.testTag(PlantInfoScreenTestTags.LOCATION_TAB)
               }
 
           Tab(
