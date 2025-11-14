@@ -29,7 +29,6 @@ import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -67,7 +66,7 @@ class EndToEndM2 {
   private val fakePlantRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoFirestore)
 
   @Before
-  fun setUp() = runTest {
+  fun setUp() = runBlocking {
     // Set up any necessary configurations or states before each test
     Log.d("EndToEndM2", "setUpEntry")
     firebaseUtils.initialize()
@@ -87,12 +86,12 @@ class EndToEndM2 {
   }
 
   @Test
-  fun test_end_to_end_m2() {
+  fun test_end_to_end_m2() = runBlocking {
     composeTestRule
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
         .performClick()
-    runBlocking { firebaseUtils.signIn() }
+    firebaseUtils.signIn()
     // === NEW PROFILE SCREEN ===
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
@@ -202,7 +201,7 @@ class EndToEndM2 {
       composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).isDisplayed()
     }
 
-    runBlocking { firebaseUtils.signIn() }
+    firebaseUtils.signIn()
 
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
 
@@ -219,29 +218,15 @@ class EndToEndM2 {
 
     // Wait for the garden list to appear
     composeTestRule.waitUntil(TIMEOUT) {
-      try {
-        composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).isDisplayed()
-        true
-      } catch (e: AssertionError) {
-        false
-      }
+      composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).isDisplayed()
     }
 
-    val listOfOwnedPlantAfterLogout = runBlocking {
-      PlantsRepositoryProvider.repository.getAllOwnedPlants()
-    }
+    val listOfOwnedPlantAfterLogout = PlantsRepositoryProvider.repository.getAllOwnedPlants()
     assert(listOfOwnedPlantAfterLogout.size == 1)
     val plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlantAfterLogout.first())
 
     // click on plant - UI operations outside _root_ide_package_.kotlinx.coroutines.runBlocking
-    composeTestRule.waitUntil(TIMEOUT) {
-      try {
-        composeTestRule.onNodeWithTag(plantTag).isDisplayed()
-        true
-      } catch (e: AssertionError) {
-        false
-      }
-    }
+    composeTestRule.waitUntil(TIMEOUT) { composeTestRule.onNodeWithTag(plantTag).isDisplayed() }
     composeTestRule.onNodeWithTag(plantTag).assertIsDisplayed().performClick()
 
     // Edit Plant
