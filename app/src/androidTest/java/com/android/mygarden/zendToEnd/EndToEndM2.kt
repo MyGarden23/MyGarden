@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -76,6 +77,7 @@ class EndToEndM2 {
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     fakePlantRepoUtils.setUpMockRepo()
     Log.d("EndToEndM2", "Set up mock repo")
+    waitForAppToLoad()
   }
 
   @After
@@ -267,5 +269,18 @@ class EndToEndM2 {
         .onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME)
         .assertTextContains(mockPlant.name)
     composeTestRule.waitForIdle()
+  }
+
+  /** Waits for the app to fully load by checking for key UI elements */
+  private fun waitForAppToLoad() {
+    composeTestRule.waitUntil(TIMEOUT) {
+      try {
+        // Check if root is available
+        composeTestRule.onRoot().fetchSemanticsNode()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
   }
 }
