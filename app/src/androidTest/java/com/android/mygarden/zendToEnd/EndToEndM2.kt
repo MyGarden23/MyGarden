@@ -255,6 +255,9 @@ class EndToEndM2 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).isDisplayed()
     }
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME)
+        .assertTextContains(mockPlant.name)
     composeTestRule.waitForIdle()
   }
 
