@@ -76,7 +76,19 @@ class EndToEndM2 {
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     fakePlantRepoUtils.setUpMockRepo()
     Log.d("EndToEndM2", "Set up mock repo")
+    composeTestRule.waitForIdle()
     waitForAppToLoad()
+    // Explicitly wait for sign-in screen to be ready
+    composeTestRule.waitUntil(TIMEOUT) {
+      try {
+        composeTestRule
+            .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+            .fetchSemanticsNode()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
   }
 
   @After
