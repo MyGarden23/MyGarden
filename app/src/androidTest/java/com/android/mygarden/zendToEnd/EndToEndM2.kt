@@ -92,6 +92,7 @@ class EndToEndM2 {
         .assertIsDisplayed()
         .performClick()
     firebaseUtils.signIn()
+    firebaseUtils.waitForAuthReady()
     // === NEW PROFILE SCREEN ===
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
@@ -202,6 +203,7 @@ class EndToEndM2 {
     }
 
     firebaseUtils.signIn()
+    firebaseUtils.waitForAuthReady()
 
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
 
