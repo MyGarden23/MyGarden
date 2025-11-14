@@ -70,9 +70,6 @@ class EndToEndM2 {
   fun setUp() = runTest {
     // Set up any necessary configurations or states before each test
     Log.d("EndToEndM2", "setUpEntry")
-    firebaseUtils.initialize()
-    Log.d("EndToEndM2", "Initialized")
-    firebaseUtils.injectProfileRepository()
     Log.d("EndToEndM2", "Injected profile repository")
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     fakePlantRepoUtils.setUpMockRepo()
@@ -115,6 +112,8 @@ class EndToEndM2 {
         .assertIsDisplayed()
         .performClick()
     runBlocking {
+      firebaseUtils.initialize()
+      firebaseUtils.injectProfileRepository()
       firebaseUtils.signIn()
       firebaseUtils.waitForAuthReady()
     }
