@@ -87,27 +87,6 @@ class EndToEndM2 {
 
     composeTestRule.waitForIdle()
     waitForAppToLoad()
-
-    // Wait for either sign-in screen OR camera screen to be ready
-    // (depends on timing of when MainActivity detected auth state)
-    composeTestRule.waitUntil(TIMEOUT) {
-      try {
-        // Check if we're on the sign-in screen
-        composeTestRule
-            .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
-            .fetchSemanticsNode()
-        true
-      } catch (_: Throwable) {
-        try {
-          // Or check if we somehow ended up on camera screen
-          composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).fetchSemanticsNode()
-          Log.d("EndToEndM2", "Sign-in screen not found, but camera screen is ready")
-          true
-        } catch (_: Throwable) {
-          false
-        }
-      }
-    }
   }
 
   @After
