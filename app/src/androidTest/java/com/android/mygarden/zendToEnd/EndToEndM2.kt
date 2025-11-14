@@ -5,12 +5,13 @@ import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.isDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
@@ -46,7 +47,7 @@ class EndToEndM2 {
     }
   }
 
-  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
+  @get:Rule val composeTestRule = createEmptyComposeRule()
 
   /**
    * Automatically grants camera permission before tests run. Essential for camera functionality
@@ -66,14 +67,24 @@ class EndToEndM2 {
   private val firebaseUtils: FirebaseUtils = FirebaseUtils()
   private val fakePlantRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoFirestore)
 
+  private lateinit var scenario: ActivityScenario<MainActivity>
+
   @Before
   fun setUp() = runTest {
     // Set up any necessary configurations or states before each test
     Log.d("EndToEndM2", "setUpEntry")
+    firebaseUtils.initialize()
+    Log.d("EndToEndM2", "Initialized and signed out")
+    firebaseUtils.injectProfileRepository()
     Log.d("EndToEndM2", "Injected profile repository")
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     fakePlantRepoUtils.setUpMockRepo()
     Log.d("EndToEndM2", "Set up mock repo")
+
+    // Now launch the activity AFTER Firebase is cleaned up
+    scenario = ActivityScenario.launch(MainActivity::class.java)
+    Log.d("EndToEndM2", "Activity launched")
+
     composeTestRule.waitForIdle()
     waitForAppToLoad()
 
@@ -101,6 +112,10 @@ class EndToEndM2 {
 
   @After
   fun tearDown() {
+    // Clean up the activity scenario
+    if (::scenario.isInitialized) {
+      scenario.close()
+    }
     // Clean up the system property to avoid affecting other tests
     System.clearProperty("mygarden.e2e")
   }
@@ -112,8 +127,6 @@ class EndToEndM2 {
         .assertIsDisplayed()
         .performClick()
     runBlocking {
-      firebaseUtils.initialize()
-      firebaseUtils.injectProfileRepository()
       firebaseUtils.signIn()
       firebaseUtils.waitForAuthReady()
     }
