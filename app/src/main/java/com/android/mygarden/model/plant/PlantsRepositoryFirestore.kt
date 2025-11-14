@@ -42,7 +42,8 @@ private fun differentIdsErrMsg(id1: String, id2: String) =
 /** Repository that implements PlantsRepository but stores the data in Firestore. */
 class PlantsRepositoryFirestore(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 ) : PlantsRepositoryBase() {
   private val healthCalculator = PlantHealthCalculator()
 
@@ -80,8 +81,6 @@ class PlantsRepositoryFirestore(
   private fun userPlantsCollection() =
       firestore.collection(usersCollection).document(currentUserId()).collection(plantsCollection)
 
-  /** The access to Cloud Storage for Firestore of type FirebaseStorage. */
-  private val storage: FirebaseStorage = FirebaseStorage.getInstance()
   /**
    * Gives the reference to the image associated to the id given in argument in the current user's
    * plants collection in Cloud Storage. All the images are stored in JPG format : plantId.jpg

@@ -6,6 +6,7 @@ import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -16,6 +17,7 @@ abstract class FirestoreProfileTest {
 
   protected lateinit var db: FirebaseFirestore
   protected lateinit var auth: FirebaseAuth
+  protected lateinit var storage: FirebaseStorage
   protected lateinit var repo: ProfileRepository
 
   @Before
@@ -25,6 +27,8 @@ abstract class FirestoreProfileTest {
     FirebaseEmulator.clearAuthEmulator()
     db = FirebaseEmulator.connectFirestore()
     FirebaseEmulator.clearFirestoreEmulator()
+    storage = FirebaseEmulator.connectStorage()
+    FirebaseEmulator.clearStorageEmulator()
     auth = FirebaseEmulator.auth
 
     // Fake sign-in (suspend)
@@ -45,7 +49,7 @@ abstract class FirestoreProfileTest {
   }
 
   @After
-  fun tearDown() {
+  open fun tearDown() {
     auth.signOut()
   }
 }

@@ -120,8 +120,14 @@ jobs:
           cat > firebase.json <<'JSON'
           {
             "emulators": {
+              "singleProjectMode": true,
               "auth": { "port": 9099, "host": "0.0.0.0" },
-              "firestore": { "port": 8080, "host": "0.0.0.0" }
+              "firestore": { "port": 8080, "host": "0.0.0.0" },
+              "storage": { "port": 9199, "host": "0.0.0.0" },
+              "ui": { "enabled": true }
+            },
+            "storage": {
+              "rules": "storage.rules"
             }
           }
           JSON
@@ -130,7 +136,7 @@ jobs:
         run: |
           if [ -e "firebase.json" ]; then
             echo "Starting Firebase emulators for instrumentation tests..."
-            firebase emulators:start --only auth,firestore --project "${{ steps.firebase_project.outputs.project_id }}" &
+            firebase emulators:start --only auth,firestore,storage --project "${{ steps.firebase_project.outputs.project_id }}" &
             sleep 5
             echo "Firebase emulators started in background"
           else
@@ -148,9 +154,33 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -skin 1080x2400 -dpi-device 420 -noaudio -no-boot-anim -camera-back emulated  -camera-front webcam0 -memory 4096 -partition-size 4096
           disable-animations: true
           script: |
+            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+            # Forward Firebase emulator ports to Android emulator
+            adb reverse tcp:9099 tcp:9099   # Auth
+            adb reverse tcp:8080 tcp:8080   # Firestore
+            adb reverse tcp:9199 tcp:9199   # Storage
+            adb reverse tcp:4400 tcp:4400 || true
+
             echo "Starting instrumented tests..."
             export CI=true
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.ui.camera.RequiresCamera
+            
+            # Start capturing logcat in background
+            mkdir -p test-logs
+            adb logcat -c
+            adb logcat > test-logs/logcat-with-camera.txt &
+            LOGCAT_PID=$!
+            
+            # Run tests and capture exit code
+            set +e
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.ui.camera.RequiresCamera --stacktrace
+            TEST_EXIT_CODE=$?
+            set -e
+            
+            # Stop logcat capture
+            kill $LOGCAT_PID || true
+            
+            # Exit with test result
+            exit $TEST_EXIT_CODE
         env:
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
 
@@ -169,14 +199,165 @@ jobs:
             # Forward Firebase emulator ports to Android emulator
             adb reverse tcp:9099 tcp:9099   # Auth
             adb reverse tcp:8080 tcp:8080   # Firestore
+            adb reverse tcp:9199 tcp:9199   # Storage
             adb reverse tcp:4400 tcp:4400 || true
 
             export CI=true
             adb shell pm revoke com.android.mygarden android.permission.CAMERA
 
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.ui.camera.RequiresCamera
+            # Start capturing logcat in background
+            mkdir -p test-logs
+            adb logcat -c
+            adb logcat > test-logs/logcat-no-camera.txt &
+            LOGCAT_PID=$!
+            
+            # Run tests and capture exit code
+            set +e
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.ui.camera.RequiresCamera --stacktrace
+            TEST_EXIT_CODE=$?
+            set -e
+            
+            # Stop logcat capture
+            kill $LOGCAT_PID || true
+            
+            # Exit with test result
+            exit $TEST_EXIT_CODE
         env:
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
+
+      # Display test failures in a readable format
+      - name: Display Test Failures
+        if: failure()
+        run: |
+          echo "=========================================="
+          echo "TEST FAILURES SUMMARY"
+          echo "=========================================="
+          
+          # Find and display test result XML files with detailed failure info
+          for file in $(find . -path "*/build/outputs/androidTest-results/connected/*.xml" -type f); do
+            echo ""
+            echo "Processing: $file"
+            echo "----------------------------------------"
+          
+            # Extract failures using grep and sed
+            if grep -q 'failures="[1-9]' "$file" 2>/dev/null; then
+              echo "Found failures in: $file"
+              echo ""
+          
+              # Extract and display each failed test with full details
+              awk '
+                /<testcase/ {
+                  in_testcase = 1
+                  testcase = $0
+                  failure_content = ""
+                }
+                in_testcase && /<failure/ {
+                  has_failure = 1
+                  failure_content = failure_content $0 "\n"
+                }
+                in_testcase && has_failure && !/<testcase/ {
+                  failure_content = failure_content $0 "\n"
+                }
+                /<\/testcase>/ {
+                  if (has_failure) {
+                    print "❌ FAILED TEST:"
+                    print testcase
+                    print "FAILURE DETAILS:"
+                    print failure_content
+                    print "----------------------------------------"
+                  }
+                  in_testcase = 0
+                  has_failure = 0
+                }
+              ' "$file" || echo "Could not extract failure details"
+            fi
+          done
+          
+          echo ""
+          echo "=========================================="
+          echo "DETAILED STACK TRACES FROM TEST RESULTS"
+          echo "=========================================="
+          
+          # Find and display stack traces from HTML reports
+          for htmlfile in $(find . -path "*/build/reports/androidTests/connected/*.html" -type f 2>/dev/null); do
+            if grep -q "class=\"failures\"" "$htmlfile" 2>/dev/null; then
+              echo ""
+              echo "Found failures in: $htmlfile"
+              echo "----------------------------------------"
+              # Extract pre-formatted failure text from HTML
+              sed -n '/<span class="code">/,/<\/span>/p' "$htmlfile" | 
+                sed 's/<[^>]*>//g' | 
+                grep -E "\.kt:|Exception|Error|Assert" || echo "Could not extract stack trace"
+            fi
+          done
+          
+          echo ""
+          echo "=========================================="
+          echo "CHECKING FOR END-TO-END TEST LOGS"
+          echo "=========================================="
+          
+          # Look for specific EndToEndM2 logs in logcat
+          if [ -f "test-logs/logcat-with-camera.txt" ]; then
+            echo ""
+            echo "EndToEndM2 related logs:"
+            echo "----------------------------------------"
+            grep -i "EndToEndM2\|E2E\|test_end_to_end_m2" test-logs/logcat-with-camera.txt | tail -100 || echo "No EndToEndM2 logs found"
+          fi
+          
+          echo ""
+          echo "=========================================="
+          echo "RECENT ERROR LOGS FROM LOGCAT"
+          echo "=========================================="
+          
+          # Display recent errors from all logcat files
+          for logfile in test-logs/logcat-*.txt; do
+            if [ -f "$logfile" ]; then
+              echo ""
+              echo "Errors from: $logfile"
+              echo "----------------------------------------"
+              grep -E "E/|AndroidRuntime|FATAL|Exception|Error" "$logfile" | tail -100 || echo "No errors found"
+            fi
+          done
+          
+          echo ""
+          echo "=========================================="
+          echo "INSTRUMENTATION TEST RUNNER OUTPUT"
+          echo "=========================================="
+          
+          # Try to find and display the actual test runner output from logcat
+          for logfile in test-logs/logcat-*.txt; do
+            if [ -f "$logfile" ]; then
+              echo ""
+              echo "Test runner output from: $logfile"
+              echo "----------------------------------------"
+              # Look for test execution and failure patterns
+              grep -E "TestRunner|INSTRUMENTATION_STATUS|INSTRUMENTATION_RESULT|started:|finished:" "$logfile" | tail -200 || echo "No test runner output found"
+            fi
+          done
+
+      # Upload test reports as artifacts
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            app/build/reports/androidTests/connected/
+            app/build/outputs/androidTest-results/
+            test-logs/
+          retention-days: 14
+
+      # Upload test failure screenshots if any exist
+      - name: Upload Test Failure Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-failure-screenshots
+          path: |
+            app/build/outputs/connected_android_test_additional_output/
+            /sdcard/Pictures/
+          retention-days: 14
+        continue-on-error: true
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report

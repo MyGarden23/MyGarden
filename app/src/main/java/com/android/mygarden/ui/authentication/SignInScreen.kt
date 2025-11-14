@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
+import com.google.firebase.auth.FirebaseAuth
 
 /** Semantic for testing */
 val LogoResNameKey = SemanticsPropertyKey<String>("LogoResName")
@@ -67,6 +68,7 @@ fun SignInScreen(
 
   val context = LocalContext.current
   val uiState by authViewModel.uiState.collectAsState()
+  val isEndToEndTest = System.getProperty("mygarden.e2e") == "true"
 
   // Show error message if login fails
   LaunchedEffect(uiState.errorMsg) {
@@ -120,7 +122,17 @@ fun SignInScreen(
             CircularProgressIndicator(modifier = Modifier.size(48.dp))
           } else {
             OutlinedButton(
-                onClick = { authViewModel.signIn(context, credentialManager) },
+                onClick = {
+                  if (isEndToEndTest) {
+                    if (FirebaseAuth.getInstance().currentUser == null) {
+                      onSignedIn()
+                    } else {
+                      onLogIn()
+                    }
+                  } else {
+                    authViewModel.signIn(context, credentialManager)
+                  }
+                },
                 modifier =
                     Modifier.height(60.dp)
                         .fillMaxWidth(0.75f)
