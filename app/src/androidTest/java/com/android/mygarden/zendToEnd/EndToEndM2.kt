@@ -29,6 +29,7 @@ import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -66,7 +67,7 @@ class EndToEndM2 {
   private val fakePlantRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoFirestore)
 
   @Before
-  fun setUp() = runBlocking {
+  fun setUp() = runTest {
     // Set up any necessary configurations or states before each test
     Log.d("EndToEndM2", "setUpEntry")
     firebaseUtils.initialize()
@@ -78,15 +79,25 @@ class EndToEndM2 {
     Log.d("EndToEndM2", "Set up mock repo")
     composeTestRule.waitForIdle()
     waitForAppToLoad()
-    // Explicitly wait for sign-in screen to be ready
+
+    // Wait for either sign-in screen OR camera screen to be ready
+    // (depends on timing of when MainActivity detected auth state)
     composeTestRule.waitUntil(TIMEOUT) {
       try {
+        // Check if we're on the sign-in screen
         composeTestRule
             .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
             .fetchSemanticsNode()
         true
       } catch (_: Throwable) {
-        false
+        try {
+          // Or check if we somehow ended up on camera screen
+          composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).fetchSemanticsNode()
+          Log.d("EndToEndM2", "Sign-in screen not found, but camera screen is ready")
+          true
+        } catch (_: Throwable) {
+          false
+        }
       }
     }
   }
@@ -98,13 +109,15 @@ class EndToEndM2 {
   }
 
   @Test
-  fun test_end_to_end_m2() = runBlocking {
+  fun test_end_to_end_m2() {
     composeTestRule
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
         .performClick()
-    firebaseUtils.signIn()
-    firebaseUtils.waitForAuthReady()
+    runBlocking {
+      firebaseUtils.signIn()
+      firebaseUtils.waitForAuthReady()
+    }
     // === NEW PROFILE SCREEN ===
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
@@ -214,8 +227,10 @@ class EndToEndM2 {
       composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).isDisplayed()
     }
 
-    firebaseUtils.signIn()
-    firebaseUtils.waitForAuthReady()
+    runBlocking {
+      firebaseUtils.signIn()
+      firebaseUtils.waitForAuthReady()
+    }
 
     composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
 
@@ -235,11 +250,13 @@ class EndToEndM2 {
       composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).isDisplayed()
     }
 
-    val listOfOwnedPlantAfterLogout = PlantsRepositoryProvider.repository.getAllOwnedPlants()
+    val listOfOwnedPlantAfterLogout = runBlocking {
+      PlantsRepositoryProvider.repository.getAllOwnedPlants()
+    }
     assert(listOfOwnedPlantAfterLogout.size == 1)
     val plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlantAfterLogout.first())
 
-    // click on plant - UI operations outside _root_ide_package_.kotlinx.coroutines.runBlocking
+    // click on plant
     composeTestRule.waitUntil(TIMEOUT) { composeTestRule.onNodeWithTag(plantTag).isDisplayed() }
     composeTestRule.onNodeWithTag(plantTag).assertIsDisplayed().performClick()
 
