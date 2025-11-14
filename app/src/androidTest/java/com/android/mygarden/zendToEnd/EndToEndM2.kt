@@ -16,7 +16,6 @@ import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantLocation
-import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
@@ -88,54 +87,13 @@ class EndToEndM2 {
   }
 
   @Test
-  fun test_end_to_end_m2() = runTest {
-    PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
-    composeTestRule
-      .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
-      .assertIsDisplayed()
-      .performClick()
-    firebaseUtils.signIn()
-    // === NEW PROFILE SCREEN ===
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
-    composeTestRule
-      .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
-      .performTextInput("Switzerland")
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
-    }
-
-
-
-
-
-
-
-
-
-
-    /*
-    // First, make sure the sign-in screen is displayed
+  fun test_end_to_end_m2() {
     composeTestRule
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
-
-    // IMPORTANT: Click the button FIRST (while currentUser is still null)
-    // This will trigger onSignedIn() navigation because currentUser == null at this moment
-    composeTestRule.onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON).performClick()
-
-    // Wait for the onClick logic to execute and navigation to start
-    composeTestRule.waitForIdle()
-
-    // THEN sign in to actually authenticate the user (after navigation has been triggered)
+        .performClick()
     runBlocking { firebaseUtils.signIn() }
-
     // === NEW PROFILE SCREEN ===
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).isDisplayed()
-    }
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
@@ -149,9 +107,6 @@ class EndToEndM2 {
 
     // goto MyGarden
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
-    }
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).isDisplayed()
@@ -272,12 +227,11 @@ class EndToEndM2 {
       }
     }
 
-    var plantTag = ""
-    runBlocking {
-      val listOfOwnedPlantAfterLogout = PlantsRepositoryProvider.repository.getAllOwnedPlants()
-      assert(listOfOwnedPlantAfterLogout.size == 1)
-      plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlantAfterLogout.first())
+    val listOfOwnedPlantAfterLogout = runBlocking {
+      PlantsRepositoryProvider.repository.getAllOwnedPlants()
     }
+    assert(listOfOwnedPlantAfterLogout.size == 1)
+    val plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlantAfterLogout.first())
 
     // click on plant - UI operations outside _root_ide_package_.kotlinx.coroutines.runBlocking
     composeTestRule.waitUntil(TIMEOUT) {
@@ -298,8 +252,6 @@ class EndToEndM2 {
         .onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME)
         .assertTextContains(mockPlant.name)
     composeTestRule.waitForIdle()
-
-    */
   }
 
   /** Waits for the app to fully load by checking for key UI elements */
