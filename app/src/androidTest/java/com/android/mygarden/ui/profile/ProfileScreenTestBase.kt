@@ -122,6 +122,12 @@ abstract class ProfileScreenTestBase {
   }
 
   @org.junit.Test
+  fun pseudoFieldAcceptsInput() {
+    setContent()
+    performTextInputAndAssert(ProfileScreenTestTags.PSEUDO_FIELD, "pseudo")
+  }
+
+  @org.junit.Test
   fun experienceDropdownOpensWhenClicked() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD).performClick()

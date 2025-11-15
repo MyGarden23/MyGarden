@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.R
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.model.profile.PseudoRepositoryProvider
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
@@ -20,6 +21,7 @@ import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeProfileRepository
+import com.android.mygarden.utils.FakePseudoRepository
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -43,6 +45,7 @@ class NavigationS4TestsEditProfile {
       }
     }
     ProfileRepositoryProvider.repository = FakeProfileRepository()
+    PseudoRepositoryProvider.repository = FakePseudoRepository()
     composeTestRule.waitForIdle()
   }
 
