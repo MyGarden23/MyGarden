@@ -112,6 +112,7 @@ class EndToEndM2 {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.PSEUDO_FIELD).performTextInput("pseudo")
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
         .performTextInput("Switzerland")
@@ -129,7 +130,7 @@ class EndToEndM2 {
     composeTestRule
         .onNodeWithTag(GardenScreenTestTags.USERNAME)
         .assertIsDisplayed()
-        .assertTextContains("John")
+        .assertTextContains("pseudo")
 
     // goto edit profile screen
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).performClick()
@@ -148,7 +149,7 @@ class EndToEndM2 {
     composeTestRule
         .onNodeWithTag(GardenScreenTestTags.USERNAME)
         .assertIsDisplayed()
-        .assertTextContains("Ada")
+        .assertTextContains("pseudo")
 
     // goto camera screen
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()

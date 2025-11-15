@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.mygarden.R
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeProfileRepository
+import com.android.mygarden.utils.FakePseudoRepository
 import org.junit.Rule
 
 /**
@@ -39,7 +40,8 @@ class NewProfileScreenTests : ProfileScreenTestBase() {
 
   override fun setContentWithFakeRepo() {
     val repo = FakeProfileRepository()
-    val vm = ProfileViewModel(repo)
+    val repoPseudo = FakePseudoRepository()
+    val vm = ProfileViewModel(repo, repoPseudo)
     onSavePressedCalled = false
     composeTestRule.setContent {
       MyGardenTheme {

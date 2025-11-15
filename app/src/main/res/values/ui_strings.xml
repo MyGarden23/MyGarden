@@ -82,6 +82,9 @@
 
     <!-- Profile Screen Base -->
     <string name="avatar_picture_description">Profile Avatar</string>
+    <string name="mandatory_pseudo_label">Pseudo (your public name) *</string>
+    <string name="mandatory_pseudo_placeholder">Enter your pseudo (public name)</string>
+    <string name="error_pseudo_taken">This pseudo is already taken or must be non empty</string>
     <string name="mandatory_first_name_label">First Name *</string>
     <string name="mandatory_first_name_placeholder">Enter your first name</string>
     <string name="mandatory_last_name_label">Last Name *</string>

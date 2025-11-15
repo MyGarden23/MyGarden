@@ -115,6 +115,7 @@ class ProfileRepositoryFirestore(
 
     val firstName = data["firstName"] as? String ?: return null
     val lastName = data["lastName"] as? String ?: return null
+    val pseudo = data["pseudo"] as? String ?: return null
     val favoritePlant = data["favoritePlant"] as? String ?: return null
     val country = data["country"] as? String ?: return null
 
@@ -133,6 +134,7 @@ class ProfileRepositoryFirestore(
     return Profile(
         firstName = firstName,
         lastName = lastName,
+        pseudo = pseudo,
         gardeningSkill = gardeningSkill,
         favoritePlant = favoritePlant,
         country = country,
@@ -145,6 +147,7 @@ class ProfileRepositoryFirestore(
       mapOf(
           "firstName" to firstName,
           "lastName" to lastName,
+          "pseudo" to pseudo,
           "gardeningSkill" to gardeningSkill.name, // store enum as String
           "favoritePlant" to favoritePlant,
           "country" to country,

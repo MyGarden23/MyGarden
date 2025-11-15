@@ -54,6 +54,7 @@ class GardenViewModelTests {
           Profile(
               firstName = "Test",
               lastName = "User",
+              pseudo = "pseudo",
               gardeningSkill = GardeningSkill.BEGINNER,
               favoritePlant = "Rose",
               country = "Switzerland",
@@ -122,6 +123,7 @@ class GardenViewModelTests {
         Profile(
             firstName = "Test",
             lastName = "User",
+            pseudo = "pseudo",
             gardeningSkill = GardeningSkill.BEGINNER,
             favoritePlant = "Rose",
             country = "Switzerland",
@@ -131,7 +133,7 @@ class GardenViewModelTests {
     vm.refreshUIState()
     runCurrent()
 
-    assertEquals(expected.firstName, vm.uiState.value.userName)
+    assertEquals(expected.pseudo, vm.uiState.value.userName)
     assertEquals(expected.avatar, vm.uiState.value.userAvatar)
     repositoryScope.cancel()
   }

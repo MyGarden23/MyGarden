@@ -8,6 +8,7 @@ object ProfileScreenTestTags {
   const val AVATAR = "profile_avatar"
   const val FIRST_NAME_FIELD = "first_name_field"
   const val LAST_NAME_FIELD = "last_name_field"
+  const val PSEUDO_FIELD = "pseudo_field"
   const val EXPERIENCE_FIELD = "experience_field"
   const val EXPERIENCE_DROPDOWN = "experience_dropdown"
   const val FAVORITE_PLANT_FIELD = "favorite_plant_field"

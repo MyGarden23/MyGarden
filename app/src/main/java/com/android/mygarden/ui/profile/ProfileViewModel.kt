@@ -7,6 +7,8 @@ import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.model.profile.PseudoRepository
+import com.android.mygarden.model.profile.PseudoRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +22,8 @@ import kotlinx.coroutines.launch
 data class ProfileUIState(
     val firstName: String = "",
     val lastName: String = "",
+    val pseudo: String = "",
+    val previousPseudo: String = "",
     val gardeningSkill: GardeningSkill? = null,
     val favoritePlant: String = "",
     val country: String = "",
@@ -32,13 +36,17 @@ data class ProfileUIState(
  * validation
  */
 class ProfileViewModel(
-    private val repo: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val pseudoRepository: PseudoRepository = PseudoRepositoryProvider.repository,
 ) : ViewModel() {
   // Private mutable state flow for internal state management
   private val _uiState = MutableStateFlow(ProfileUIState())
 
   // Public immutable state flow exposed to the UI
   val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()
+
+  // Private mutable state flow for internal pseudo availability management
+  private val _pseudoAvailable = MutableStateFlow(true)
 
   var initialized: Boolean = false
 
@@ -52,11 +60,12 @@ class ProfileViewModel(
     if (initialized) return
     viewModelScope.launch {
       // Get the first profile emission (or null if no profile exists)
-      val profile = repo.getProfile().firstOrNull()
+      val profile = profileRepository.getProfile().firstOrNull()
 
       // If a profile exists, populate the form fields with its data
       profile?.let {
         setFirstName(it.firstName)
+        setPseudo(it.pseudo, true)
         setLastName(it.lastName)
         setCountry(it.country)
         setGardeningSkill(it.gardeningSkill)
@@ -87,6 +96,33 @@ class ProfileViewModel(
    */
   fun setFirstName(firstName: String) {
     _uiState.value = _uiState.value.copy(firstName = firstName)
+  }
+
+  /** Checks if the pseudo is available and updates the UI state accordingly */
+  private fun checkPseudoAvailability() {
+    val pseudo = _uiState.value.pseudo.trim()
+
+    viewModelScope.launch {
+      if (pseudo.isBlank() || pseudo == _uiState.value.previousPseudo) {
+        _pseudoAvailable.value = true
+        return@launch
+      }
+
+      _pseudoAvailable.value = pseudoRepository.isPseudoAvailable(pseudo)
+    }
+  }
+
+  /**
+   * Updates the pseudo in the UI state
+   *
+   * @param pseudo The new pseudo value
+   * @param previous True if we need to also set [previousPseudo] (at the moment of the init)
+   */
+  fun setPseudo(pseudo: String, previous: Boolean) {
+    if (previous) _uiState.value = _uiState.value.copy(previousPseudo = pseudo, pseudo = pseudo)
+    else _uiState.value = _uiState.value.copy(pseudo = pseudo)
+
+    checkPseudoAvailability()
   }
 
   /**
@@ -163,7 +199,7 @@ class ProfileViewModel(
       return
     }
 
-    val uid = repo.getCurrentUserId()
+    val uid = profileRepository.getCurrentUserId()
     if (uid.isNullOrBlank()) {
       // no connected user
       onResult(false)
@@ -172,6 +208,7 @@ class ProfileViewModel(
 
     val profile =
         Profile(
+            pseudo = state.pseudo.trim(),
             firstName = state.firstName.trim(),
             lastName = state.lastName.trim(),
             gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
@@ -182,7 +219,9 @@ class ProfileViewModel(
 
     viewModelScope.launch {
       try {
-        repo.saveProfile(profile)
+        if (state.previousPseudo != "") pseudoRepository.deletePseudo(state.previousPseudo)
+        pseudoRepository.savePseudo(state.pseudo.trim())
+        profileRepository.saveProfile(profile)
         onResult(true)
       } catch (_: Exception) {
         // log if needed
@@ -237,6 +276,24 @@ class ProfileViewModel(
   }
 
   /**
+   * Validates that the pseudo is not blank
+   *
+   * @return true if pseudo is valid, false otherwise
+   */
+  private fun pseudoValid(): Boolean {
+    return _uiState.value.pseudo.isNotBlank() && _pseudoAvailable.value
+  }
+
+  /**
+   * Determines if the pseudo field should show an error
+   *
+   * @return true if register was pressed and pseudo is invalid
+   */
+  fun pseudoIsError(): Boolean {
+    return _uiState.value.registerPressed && !pseudoValid()
+  }
+
+  /**
    * Determines if the country field should show an error
    *
    * @return true if register was pressed and country is invalid
@@ -251,6 +308,6 @@ class ProfileViewModel(
    * @return true if all validation passes, false otherwise
    */
   fun canRegister(): Boolean {
-    return firstNameValid() && lastNameValid() && countryValid()
+    return firstNameValid() && lastNameValid() && countryValid() && pseudoValid()
   }
 }
