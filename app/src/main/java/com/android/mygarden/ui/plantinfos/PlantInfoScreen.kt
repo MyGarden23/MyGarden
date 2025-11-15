@@ -51,6 +51,7 @@ object PlantInfoScreenTestTags {
   const val TIPS_BUTTON = "tips_button"
   const val TIPS_DIALOG = "tips_dialog"
   const val TIPS_TEXT = "tips_text"
+  const val TIPS_CLOSE_BUTTON = "tips_close_button"
 }
 
 /**
@@ -324,9 +325,11 @@ fun PlantInfosScreen(
                 }
               },
               confirmButton = {
-                TextButton(onClick = { plantInfoViewModel.dismissCareTips() }) {
-                  Text(text = stringResource(id = R.string.tips_close_button))
-                }
+                TextButton(
+                    onClick = { plantInfoViewModel.dismissCareTips() },
+                    modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_CLOSE_BUTTON)) {
+                      Text(text = stringResource(id = R.string.tips_close_button))
+                    }
               },
               modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_DIALOG))
         }
