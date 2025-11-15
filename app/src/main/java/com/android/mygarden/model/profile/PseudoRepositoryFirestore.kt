@@ -22,9 +22,7 @@ class PseudoRepositoryFirestore(private val db: FirebaseFirestore) : PseudoRepos
 
     val pseudoRef = db.collection(PSEUDO_COLLECTION_PATH).document(normalized)
 
-    if (pseudoRef.get().await().exists()) {
-      throw IllegalStateException("Pseudo already taken")
-    }
+    check(!(pseudoRef.get().await().exists())) { "Pseudo already taken" }
 
     pseudoRef.set(mapOf("exists" to true)).await()
   }

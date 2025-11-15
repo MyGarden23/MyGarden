@@ -21,6 +21,10 @@ class PseudoRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
+  /**
+   * Starts up everything needed for Firestore (handled by FirestoreProfileTest) & sets up the
+   * repository
+   */
   @Before
   override fun setUp() {
     super.setUp()

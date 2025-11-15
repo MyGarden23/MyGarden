@@ -80,11 +80,11 @@ class ProfileViewModelTest {
   @Test
   fun uiState_initialStateIsDefault() = runTest {
     val initialState = viewModel.uiState.value
-    viewModel.setPseudo("validPseudo", false)
-    advanceUntilIdle()
 
     assertEquals("", initialState.firstName)
     assertEquals("", initialState.lastName)
+    assertEquals("", initialState.pseudo)
+    assertEquals("", initialState.previousPseudo)
     assertEquals(null, initialState.gardeningSkill)
     assertEquals("", initialState.favoritePlant)
     assertEquals("", initialState.country)
