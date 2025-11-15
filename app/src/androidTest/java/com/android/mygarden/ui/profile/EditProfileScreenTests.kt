@@ -101,6 +101,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
         Profile(
             firstName = "John",
             lastName = "Doe",
+            pseudo = "pseudo",
             gardeningSkill = GardeningSkill.INTERMEDIATE,
             favoritePlant = "Rose",
             country = "Switzerland",
@@ -113,6 +114,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
     // Then: all fields should be pre-filled with the existing profile data
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).assertTextContains("John")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).assertTextContains("Doe")
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.PSEUDO_FIELD).assertTextContains("pseudo")
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD)
         .assertTextContains(GardeningSkill.INTERMEDIATE.name)

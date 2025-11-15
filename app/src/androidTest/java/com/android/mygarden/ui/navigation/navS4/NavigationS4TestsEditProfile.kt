@@ -57,6 +57,7 @@ class NavigationS4TestsEditProfile {
         .assertTextContains(context.getString(R.string.edit_profile_screen_title))
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.PSEUDO_FIELD).performTextInput("pseudo")
     composeTestRule
         .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
         .performTextInput("Switzerland")

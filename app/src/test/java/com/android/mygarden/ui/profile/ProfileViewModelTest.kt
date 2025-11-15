@@ -54,7 +54,7 @@ class ProfileViewModelTest {
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = ProfileViewModel(repo = FakeProfileRepository())
+    viewModel = ProfileViewModel(profileRepository = FakeProfileRepository())
 
     fakeCountries =
         listOf("Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda")

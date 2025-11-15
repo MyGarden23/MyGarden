@@ -73,6 +73,7 @@ abstract class ProfileScreenTestBase {
     // Verify all input fields are displayed
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.PSEUDO_FIELD).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FAVORITE_PLANT_FIELD).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).assertIsDisplayed()
@@ -106,6 +107,12 @@ abstract class ProfileScreenTestBase {
   fun lastNameFieldAcceptsInput() {
     setContent()
     performTextInputAndAssert(ProfileScreenTestTags.LAST_NAME_FIELD, "Doe")
+  }
+
+  @org.junit.Test
+  fun pseudoFieldAcceptsInput() {
+    setContent()
+    performTextInputAndAssert(ProfileScreenTestTags.PSEUDO_FIELD, "pseudo")
   }
 
   @org.junit.Test
@@ -269,6 +276,7 @@ abstract class ProfileScreenTestBase {
     setContent()
     performTextInputAndAssert(ProfileScreenTestTags.FIRST_NAME_FIELD, "John")
     performTextInputAndAssert(ProfileScreenTestTags.LAST_NAME_FIELD, "Doe")
+    performTextInputAndAssert(ProfileScreenTestTags.PSEUDO_FIELD, "pseudo")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
     assertEquals(false, onSavePressedCalled)
   }
@@ -288,6 +296,7 @@ abstract class ProfileScreenTestBase {
     // Fill in all mandatory fields
     performTextInputAndAssert(ProfileScreenTestTags.FIRST_NAME_FIELD, "John")
     performTextInputAndAssert(ProfileScreenTestTags.LAST_NAME_FIELD, "Doe")
+    performTextInputAndAssert(ProfileScreenTestTags.PSEUDO_FIELD, "pseudo")
     performTextInputAndAssert(ProfileScreenTestTags.COUNTRY_FIELD, "Canada")
 
     // Wait for UI to process all input changes
