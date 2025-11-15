@@ -167,6 +167,22 @@ private fun ProfileForm(
         isError = profileViewModel.lastNameIsError(),
         singleLine = true)
 
+    OutlinedTextField(
+        value = uiState.pseudo,
+        onValueChange = { profileViewModel.setPseudo(it, false) },
+        label = { Text(context.getString(R.string.mandatory_pseudo_label)) },
+        placeholder = { Text(context.getString(R.string.mandatory_pseudo_placeholder)) },
+        modifier = Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.PSEUDO_FIELD),
+        isError = profileViewModel.pseudoIsError(),
+        supportingText = {
+          if (profileViewModel.pseudoIsError()) {
+            Text(
+                text = context.getString(R.string.error_pseudo_taken),
+                color = MaterialTheme.colorScheme.error)
+          }
+        },
+        singleLine = true)
+
     ExperienceDropdown(
         uiState = uiState,
         profileViewModel = profileViewModel,
