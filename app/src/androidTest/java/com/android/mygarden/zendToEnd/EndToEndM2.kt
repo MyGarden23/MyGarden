@@ -130,7 +130,7 @@ class EndToEndM2 {
     composeTestRule
         .onNodeWithTag(GardenScreenTestTags.USERNAME)
         .assertIsDisplayed()
-        .assertTextContains("John")
+        .assertTextContains("pseudo")
 
     // goto edit profile screen
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).performClick()
@@ -149,7 +149,7 @@ class EndToEndM2 {
     composeTestRule
         .onNodeWithTag(GardenScreenTestTags.USERNAME)
         .assertIsDisplayed()
-        .assertTextContains("Ada")
+        .assertTextContains("pseudo")
 
     // goto camera screen
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()

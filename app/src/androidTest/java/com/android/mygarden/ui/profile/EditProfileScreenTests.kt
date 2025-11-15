@@ -13,6 +13,7 @@ import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeProfileRepository
+import com.android.mygarden.utils.FakePseudoRepository
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -44,7 +45,8 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
     onBackPressedCalled = false
 
     val repo = FakeProfileRepository()
-    val vm = ProfileViewModel(repo)
+    val repoPseudo = FakePseudoRepository()
+    val vm = ProfileViewModel(repo, repoPseudo)
 
     // Set up the EditProfileScreen with a test callback
     composeTestRule.setContent {
@@ -62,7 +64,8 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
 
   override fun setContentWithFakeRepo() {
     val repo = FakeProfileRepository()
-    val vm = ProfileViewModel(repo)
+    val repoPseudo = FakePseudoRepository()
+    val vm = ProfileViewModel(repo, repoPseudo)
     onSavePressedCalled = false
 
     composeTestRule.setContent {
@@ -73,9 +76,10 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
   }
 
   /** Helper function to set up the screen with a pre-existing profile. */
-  private fun setContentWithProfile(profile: Profile) {
+  private fun setContentWithProfile(profile: Profile, pseudo: String) {
     val repo = FakeProfileRepository(profile)
-    val vm = ProfileViewModel(repo)
+    val repoPseudo = FakePseudoRepository(pseudo)
+    val vm = ProfileViewModel(repo, repoPseudo)
     onSavePressedCalled = false
     onBackPressedCalled = false
 
@@ -109,7 +113,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
             avatar = Avatar.A10)
 
     // When: the edit screen is loaded
-    setContentWithProfile(existingProfile)
+    setContentWithProfile(existingProfile, "pseudo")
 
     // Then: all fields should be pre-filled with the existing profile data
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).assertTextContains("John")
@@ -133,13 +137,14 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
         Profile(
             firstName = "Jane",
             lastName = "Smith",
+            pseudo = "pseudo",
             gardeningSkill = GardeningSkill.BEGINNER,
             favoritePlant = "Orchid",
             country = "Canada",
             hasSignedIn = true,
             avatar = Avatar.A5)
 
-    setContentWithProfile(existingProfile)
+    setContentWithProfile(existingProfile, "pseudo")
 
     // When: the user changes the gardening skill to EXPERT
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD).performClick()
@@ -172,13 +177,14 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
         Profile(
             firstName = "Alice",
             lastName = "Wonder",
+            pseudo = "pseudo",
             gardeningSkill = GardeningSkill.INTERMEDIATE,
             favoritePlant = "Cactus",
             country = "Mexico",
             hasSignedIn = true,
             avatar = Avatar.A15)
 
-    setContentWithProfile(existingProfile)
+    setContentWithProfile(existingProfile, "pseudo")
 
     // When: the user modifies the favorite plant and saves
     composeTestRule

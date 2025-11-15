@@ -110,12 +110,6 @@ abstract class ProfileScreenTestBase {
   }
 
   @org.junit.Test
-  fun pseudoFieldAcceptsInput() {
-    setContent()
-    performTextInputAndAssert(ProfileScreenTestTags.PSEUDO_FIELD, "pseudo")
-  }
-
-  @org.junit.Test
   fun favoritePlantFieldAcceptsInput() {
     setContent()
     performTextInputAndAssert(ProfileScreenTestTags.FAVORITE_PLANT_FIELD, "Rose")

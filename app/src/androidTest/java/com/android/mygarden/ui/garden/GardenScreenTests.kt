@@ -97,6 +97,7 @@ class GardenScreenTests {
           Profile(
               firstName = "Test",
               lastName = "User",
+              pseudo = "Pseudo",
               gardeningSkill = GardeningSkill.BEGINNER,
               favoritePlant = "Rose",
               country = "Switzerland",

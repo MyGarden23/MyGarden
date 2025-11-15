@@ -3,6 +3,7 @@ package com.android.mygarden.ui.profile
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.PseudoRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +25,14 @@ import org.junit.Test
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
+
+  private class FakePseudoRepository : PseudoRepository {
+    override suspend fun isPseudoAvailable(pseudo: String) = true
+
+    override suspend fun savePseudo(pseudo: String) {}
+
+    override suspend fun deletePseudo(pseudo: String) {}
+  }
 
   private class FakeProfileRepository : ProfileRepository {
     private val flow = MutableStateFlow<Profile?>(null)
@@ -54,7 +63,9 @@ class ProfileViewModelTest {
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = ProfileViewModel(profileRepository = FakeProfileRepository())
+    viewModel =
+        ProfileViewModel(
+            profileRepository = FakeProfileRepository(), pseudoRepository = FakePseudoRepository())
 
     fakeCountries =
         listOf("Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda")
@@ -69,6 +80,8 @@ class ProfileViewModelTest {
   @Test
   fun uiState_initialStateIsDefault() = runTest {
     val initialState = viewModel.uiState.value
+    viewModel.setPseudo("validPseudo", false)
+    advanceUntilIdle()
 
     assertEquals("", initialState.firstName)
     assertEquals("", initialState.lastName)
@@ -336,6 +349,7 @@ class ProfileViewModelTest {
   fun canRegister_returnsTrueWhenAllRequiredFieldsValid() = runTest {
     viewModel.setFirstName("John")
     viewModel.setLastName("Doe")
+    viewModel.setPseudo("pseudo", false)
     viewModel.setCountry(fakeCountries.last())
     advanceUntilIdle()
 
@@ -346,6 +360,7 @@ class ProfileViewModelTest {
   fun canRegister_returnsTrueEvenWhenOptionalFieldsEmpty() = runTest {
     viewModel.setFirstName("John")
     viewModel.setLastName("Doe")
+    viewModel.setPseudo("pseudo", false)
     viewModel.setCountry(fakeCountries.first())
     // gardeningSkill is optional and starts as null by default
     viewModel.setFavoritePlant("")
@@ -380,6 +395,7 @@ class ProfileViewModelTest {
     fakeCountries.forEach { country ->
       viewModel.setFirstName("John")
       viewModel.setLastName("Doe")
+      viewModel.setPseudo("pseudo", false)
       viewModel.setCountry(country)
       advanceUntilIdle()
 
@@ -406,12 +422,14 @@ class ProfileViewModelTest {
   @Test
   fun `initialize loads profile when it exists`() = runTest {
     val repo = FakeProfileRepository()
-    val viewModel = ProfileViewModel(repo)
+    val repoPseudo = FakePseudoRepository()
+    val viewModel = ProfileViewModel(repo, repoPseudo)
 
     val sampleProfile =
         Profile(
             firstName = "Ada",
             lastName = "Lovelace",
+            pseudo = "pseudo",
             country = fakeCountries.last(),
             gardeningSkill = GardeningSkill.BEGINNER,
             avatar = Avatar.A1,
@@ -436,7 +454,8 @@ class ProfileViewModelTest {
   @Test
   fun `initialize keeps default values when profile is null`() = runTest {
     val repo = FakeProfileRepository()
-    val viewModel = ProfileViewModel(repo)
+    val repoPseudo = FakePseudoRepository()
+    val viewModel = ProfileViewModel(repo, repoPseudo)
 
     // No profile saved → flow emits null by default
     viewModel.initialize()
@@ -445,6 +464,8 @@ class ProfileViewModelTest {
     val state = viewModel.uiState.value
     assertEquals("", state.firstName)
     assertEquals("", state.lastName)
+    assertEquals("", state.pseudo)
+    assertEquals("", state.previousPseudo)
     assertEquals("", state.country)
     assertTrue(viewModel.initialized)
   }
@@ -452,10 +473,11 @@ class ProfileViewModelTest {
   @Test
   fun `initialize does nothing if already initialized`() = runTest {
     val repo = FakeProfileRepository()
-    val viewModel = ProfileViewModel(repo)
+    val repoPseudo = FakePseudoRepository()
+    val viewModel = ProfileViewModel(repo, repoPseudo)
 
     // First initialization with profile
-    repo.saveProfile(Profile(firstName = "Ada", lastName = "Lovelace"))
+    repo.saveProfile(Profile(firstName = "Ada", lastName = "Lovelace", pseudo = "pseudo"))
     viewModel.initialize()
     advanceUntilIdle()
 
