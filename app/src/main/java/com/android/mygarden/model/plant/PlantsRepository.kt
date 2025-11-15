@@ -110,6 +110,15 @@ interface PlantsRepository {
   suspend fun identifyPlant(path: String?): Plant
 
   /**
+   * Generates care tips for a plant based on its latinName and health status.
+   *
+   * @param latinName The Latin name of the plant
+   * @param healthStatus The current health status of the plant
+   * @return A string containing the generated care tips
+   */
+  suspend fun generateCareTips(latinName: String, healthStatus: PlantHealthStatus): String
+
+  /**
    * Generates a new unique identifier for a plant.
    *
    * @return A unique string identifier

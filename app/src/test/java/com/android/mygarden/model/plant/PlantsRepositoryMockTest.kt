@@ -445,6 +445,7 @@ class PlantsRepositoryMockTest {
     verify(spyRepository, times(1)).plantDescriptionCallGemini(any())
   }
 
+  // ==================== Tests for identifyPlant ====================
   @Test
   fun identifyPlant_returnsFullPlantData_whenSuccessful() = runTest {
     // Arrange: Mock both PlantNet and Gemini API calls
@@ -482,5 +483,36 @@ class PlantsRepositoryMockTest {
     // Verify PlantNet was called but Gemini was not
     verify(spyRepository, times(1)).plantNetAPICall(any(), any())
     verify(spyRepository, never()).plantDescriptionCallGemini(any())
+  }
+
+  // ==================== Tests for generateCareTips ====================
+  @Test
+  fun generateCareTips_callsGeminiAndReturnsResponse() = runTest {
+    // Arrange: stub Gemini to return a simple tips string
+    val expectedTips = "Give moderate water and bright indirect light."
+    doReturn(expectedTips).whenever(spyRepository).plantDescriptionCallGemini(any())
+
+    // Act
+    val result = spyRepository.generateCareTips("Rosa rubiginosa", PlantHealthStatus.HEALTHY)
+
+    // Assert
+    assertEquals(expectedTips, result)
+    // Verify the prompt sent to Gemini contains the latin name and the instruction marker
+    verify(spyRepository, times(1))
+        .plantDescriptionCallGemini(
+            argThat { contains("Rosa rubiginosa") && contains("Reply ONLY") })
+  }
+
+  @Test
+  fun generateCareTips_returnsFallbackOnException() = runTest {
+    // Arrange: make Gemini throw
+    doThrow(RuntimeException("AI error")).whenever(spyRepository).plantDescriptionCallGemini(any())
+
+    // Act
+    val result = spyRepository.generateCareTips("Testus plantus", PlantHealthStatus.UNKNOWN)
+
+    // Assert: should return the fallback message defined in the base implementation
+    assertEquals("Unable to generate care tips at this time.", result)
+    verify(spyRepository, times(1)).plantDescriptionCallGemini(any())
   }
 }
