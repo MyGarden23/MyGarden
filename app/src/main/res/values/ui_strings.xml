@@ -69,9 +69,7 @@
     <string name="tips_loading_message">Loading…</string>
     <string name="tips_title">Care Tips</string>
     <string name="tips_close_button">Close</string>
-
-
-
+    <string name="unknown_plant_tips_message">Plant unknown</string>
 
 
     <!-- Pop Up Screen -->
