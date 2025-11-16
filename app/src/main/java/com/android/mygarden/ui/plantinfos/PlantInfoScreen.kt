@@ -54,6 +54,10 @@ object PlantInfoScreenTestTags {
   const val TIPS_CLOSE_BUTTON = "tips_close_button"
 }
 
+// Padding constants for PlantInfosScreen
+private val PLANT_NAME_SECTION_HORIZONTAL_PADDING = 20.dp
+private val PLANT_NAME_SECTION_VERTICAL_PADDING = 16.dp
+
 /**
  * Screen displaying detailed information about a plant.
  *
@@ -181,9 +185,13 @@ fun PlantInfosScreen(
                     }
               }
 
-          // --- Name and Latin Name Section ---
+          // --- Name, Latin Name and Tips Section ---
           Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(
+                          horizontal = PLANT_NAME_SECTION_HORIZONTAL_PADDING,
+                          vertical = PLANT_NAME_SECTION_VERTICAL_PADDING),
               verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                   // Common name (e.g., "Rose")
@@ -309,29 +317,7 @@ fun PlantInfosScreen(
         }
         // PopUp Tips dialog
         if (uiState.showCareTipsDialog) {
-          AlertDialog(
-              onDismissRequest = { plantInfoViewModel.dismissCareTips() },
-              title = { Text(text = stringResource(R.string.tips_title, uiState.latinName)) },
-              text = {
-                val textToShow =
-                    // Show the loading message if the tips are still loading
-                    if (uiState.careTips == PlantInfoViewModel.LOADING_TIPS_PLACEHOLDER)
-                        stringResource(R.string.tips_loading_message)
-                    else uiState.careTips
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                  Text(
-                      text = textToShow,
-                      modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_TEXT))
-                }
-              },
-              confirmButton = {
-                TextButton(
-                    onClick = { plantInfoViewModel.dismissCareTips() },
-                    modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_CLOSE_BUTTON)) {
-                      Text(text = stringResource(id = R.string.tips_close_button))
-                    }
-              },
-              modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_DIALOG))
+          CareTipsDialog(uiState = uiState, onDismiss = { plantInfoViewModel.dismissCareTips() })
         }
       }
 }
@@ -371,4 +357,32 @@ fun ModulableTabRow(
               })
         }
       }
+}
+
+@Composable
+private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
+  AlertDialog(
+      onDismissRequest = onDismiss,
+      title = { Text(text = stringResource(R.string.tips_title, uiState.latinName)) },
+      text = {
+        val textToShow =
+            when {
+              uiState.careTips == PlantInfoViewModel.LOADING_TIPS_PLACEHOLDER ->
+                  stringResource(R.string.tips_loading_message)
+              uiState.careTips == PlantInfoViewModel.UNKNOWN_PLANT_TIPS_PLACEHOLDER ->
+                  stringResource(R.string.unknown_plant_tips_message)
+              else -> uiState.careTips
+            }
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+          Text(text = textToShow, modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_TEXT))
+        }
+      },
+      confirmButton = {
+        TextButton(
+            onClick = onDismiss,
+            modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_CLOSE_BUTTON)) {
+              Text(text = stringResource(id = R.string.tips_close_button))
+            }
+      },
+      modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_DIALOG))
 }
