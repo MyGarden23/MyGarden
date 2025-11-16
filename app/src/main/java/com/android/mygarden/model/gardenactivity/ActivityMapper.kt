@@ -1,64 +1,14 @@
 package com.android.mygarden.model.gardenactivity
 
-import androidx.annotation.Keep
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFriend
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
+import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAchievement
+import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedActivity
+import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAddedPlant
 import com.android.mygarden.model.plant.FirestoreMapper
-import com.android.mygarden.model.plant.SerializedOwnedPlant
-import com.google.firebase.Timestamp
-
-/**
- * Base serialized activity compatible for Firestore.
- *
- * This serves as the base for all serialized activity types.
- *
- * @property userId The Firebase Auth UID of the user who performed this activity.
- * @property type The type of activity as a string.
- * @property pseudo The username of who performed the activity.
- * @property timestamp The Firestore timestamp of when the activity occurred.
- */
-@Keep
-abstract class SerializedActivity {
-  abstract val userId: String
-  abstract val type: String
-  abstract val pseudo: String
-  abstract val timestamp: Timestamp
-}
-
-/**
- * Represents a serialized "added plant" activity for Firestore.
- *
- * @property userId The user's Firebase Auth UID.
- * @property type Always "ADDED_PLANT"
- * @property pseudo The username of who added the plant.
- * @property timestamp When the plant was added.
- * @property ownedPlant The serialized plant data.
- */
-@Keep
-data class SerializedAddedPlant(
-    override val userId: String = "",
-    override val type: String = "ADDED_PLANT",
-    override val pseudo: String = "",
-    override val timestamp: Timestamp = Timestamp.now(),
-    val ownedPlant: SerializedOwnedPlant = SerializedOwnedPlant()
-) : SerializedActivity()
-
-/**
- * Represents a serialized achievement activity for Firestore.
- *
- * @property userId The user's Firebase Auth UID.
- * @property type Always "ACHIEVEMENT"
- * @property pseudo The username of who earned the achievement.
- * @property timestamp When the achievement was earned.
- */
-@Keep
-data class SerializedAchievement(
-    override val userId: String = "",
-    override val type: String = "ACHIEVEMENT",
-    override val pseudo: String = "",
-    override val timestamp: Timestamp = Timestamp.now()
-) : SerializedActivity()
 
 /**
  * Utility object providing mapping functions between [GardenActivity] instances and their
@@ -91,6 +41,9 @@ object ActivityMapper {
               type = activity.type.name,
               pseudo = activity.pseudo,
               timestamp = activity.timestamp)
+
+        is ActivityAddFriend -> TODO()
+        is ActivityWaterPlant -> TODO()
     }
   }
 
@@ -119,7 +72,6 @@ object ActivityMapper {
             pseudo = serializedActivity.pseudo,
             timestamp = serializedActivity.timestamp)
       }
-      else -> null // Unknown serialized activity type
     }
   }
 }
