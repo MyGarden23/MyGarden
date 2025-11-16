@@ -99,54 +99,17 @@ fun PlantInfosScreen(
       modifier = Modifier.testTag(PlantInfoScreenTestTags.SCREEN),
       containerColor = MaterialTheme.colorScheme.background,
       bottomBar = {
-        // Bottom bar with "Save Plant" button
-        Box(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            contentAlignment = Alignment.Center) {
-              Button(
-                  onClick = {
-                    val plantToSave = uiState.savePlant()
-                    plantInfoViewModel.savePlant(
-                        plantToSave,
-                        onPlantSaved = { plantId ->
-                          plantInfoViewModel.resetUIState()
-                          onNextPlant(plantId)
-                        })
-                  },
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(56.dp)
-                          .testTag(PlantInfoScreenTestTags.NEXT_BUTTON),
-                  shape = RoundedCornerShape(28.dp),
-                  enabled = !uiState.isSaving,
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor = MaterialTheme.colorScheme.primaryContainer,
-                          disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                    if (uiState.isSaving) {
-                      Row(
-                          modifier = Modifier.testTag(PlantInfoScreenTestTags.NEXT_BUTTON_LOADING),
-                          horizontalArrangement = Arrangement.Center,
-                          verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                strokeWidth = 2.dp)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = stringResource(id = R.string.uploading),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                          }
-                    } else {
-                      Text(
-                          text = context.getString(R.string.next),
-                          fontSize = 18.sp,
-                          fontWeight = FontWeight.Medium)
-                    }
-                  }
-            }
+        SavePlantBottomBar(
+            uiState = uiState,
+            onSavePlant = {
+              val plantToSave = uiState.savePlant()
+              plantInfoViewModel.savePlant(
+                  plantToSave,
+                  onPlantSaved = { plantId ->
+                    plantInfoViewModel.resetUIState()
+                    onNextPlant(plantId)
+                  })
+            })
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           // --- Plant Image Header ---
@@ -385,4 +348,44 @@ private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
             }
       },
       modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_DIALOG))
+}
+
+@Composable
+private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Unit) {
+  val context = LocalContext.current
+  Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+    Button(
+        onClick = onSavePlant,
+        modifier =
+            Modifier.fillMaxWidth().height(56.dp).testTag(PlantInfoScreenTestTags.NEXT_BUTTON),
+        shape = RoundedCornerShape(28.dp),
+        enabled = !uiState.isSaving,
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+          if (uiState.isSaving) {
+            Row(
+                modifier = Modifier.testTag(PlantInfoScreenTestTags.NEXT_BUTTON_LOADING),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically) {
+                  CircularProgressIndicator(
+                      modifier = Modifier.size(24.dp),
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                      strokeWidth = 2.dp)
+                  Spacer(modifier = Modifier.width(12.dp))
+                  Text(
+                      text = stringResource(id = R.string.uploading),
+                      fontSize = 18.sp,
+                      fontWeight = FontWeight.Medium,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+          } else {
+            Text(
+                text = context.getString(R.string.next),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium)
+          }
+        }
+  }
 }
