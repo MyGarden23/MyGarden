@@ -119,6 +119,9 @@ class PlantInfoViewModel(
   companion object {
     // Utils for loading tips text to avoid hardcoding
     const val LOADING_TIPS_PLACEHOLDER = "__LOADING_TIPS__"
+
+    // Placeholder value used to signal the UI that the plant is unknown
+    const val UNKNOWN_PLANT_TIPS_PLACEHOLDER = "__UNKNOWN_PLANT__"
   }
 
   /**
@@ -131,6 +134,14 @@ class PlantInfoViewModel(
     viewModelScope.launch {
       _uiState.value =
           _uiState.value.copy(showCareTipsDialog = true, careTips = LOADING_TIPS_PLACEHOLDER)
+
+      // If the plant's latin name is missing or equals "unknown", don't attempt to
+      // generate tips — show a fallback message instead.
+      if (latinName.isBlank() || latinName.equals("unknown", true)) {
+        _uiState.value = _uiState.value.copy(careTips = UNKNOWN_PLANT_TIPS_PLACEHOLDER)
+        return@launch
+      }
+
       val tips =
           try {
             plantsRepository.generateCareTips(latinName, healthStatus)
@@ -138,6 +149,7 @@ class PlantInfoViewModel(
             Log.e("plantInfoViewModel", "Error generating care tips for $latinName", e)
             "Impossible to generate care tips"
           }
+
       _uiState.value = _uiState.value.copy(careTips = tips)
     }
   }
