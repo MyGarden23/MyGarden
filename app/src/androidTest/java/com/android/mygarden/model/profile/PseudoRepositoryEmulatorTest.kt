@@ -45,14 +45,14 @@ class PseudoRepositoryEmulatorTest : FirestoreProfileTest() {
 
     assertTrue(pseudoRepo.isPseudoAvailable(pseudo))
 
-    pseudoRepo.savePseudo(pseudo)
+    pseudoRepo.savePseudo(pseudo, "uid")
 
     assertFalse(pseudoRepo.isPseudoAvailable(pseudo))
   }
 
   @Test
   fun savePseudo_is_case_insensitive() = runTest {
-    pseudoRepo.savePseudo("Turing")
+    pseudoRepo.savePseudo("Turing", "uid")
 
     // Should normalize to lowercase and detect collision
     val available = pseudoRepo.isPseudoAvailable("tUrInG")
@@ -61,11 +61,11 @@ class PseudoRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @Test
   fun savePseudo_throws_if_already_taken() = runTest {
-    pseudoRepo.savePseudo("hopper")
+    pseudoRepo.savePseudo("hopper", "uid")
 
     val error =
         assertThrows(IllegalStateException::class.java) {
-          runBlocking { pseudoRepo.savePseudo("HoPpEr") }
+          runBlocking { pseudoRepo.savePseudo("HoPpEr", "uid") }
         }
 
     assertEquals("Pseudo already taken", error.message)
@@ -75,7 +75,7 @@ class PseudoRepositoryEmulatorTest : FirestoreProfileTest() {
   fun deletePseudo_makes_it_available_again() = runTest {
     val pseudo = "grace"
 
-    pseudoRepo.savePseudo(pseudo)
+    pseudoRepo.savePseudo(pseudo, "uid")
     assertFalse(pseudoRepo.isPseudoAvailable(pseudo))
 
     pseudoRepo.deletePseudo(pseudo)
@@ -84,7 +84,7 @@ class PseudoRepositoryEmulatorTest : FirestoreProfileTest() {
 
   @Test
   fun pseudoNormalization_lowercases_document_id() = runTest {
-    pseudoRepo.savePseudo("CamelCasePseudo")
+    pseudoRepo.savePseudo("CamelCasePseudo", "uid")
     val snapshot = db.collection("pseudos").document("camelcasepseudo").get().await()
 
     assertTrue(snapshot.exists())

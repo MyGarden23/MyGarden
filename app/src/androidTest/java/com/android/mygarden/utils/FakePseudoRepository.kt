@@ -6,7 +6,7 @@ import com.android.mygarden.model.profile.PseudoRepository
 class FakePseudoRepository() : PseudoRepository {
   override suspend fun isPseudoAvailable(pseudo: String) = true
 
-  override suspend fun savePseudo(pseudo: String) {}
+  override suspend fun savePseudo(pseudo: String, userId: String) {}
 
   override suspend fun deletePseudo(pseudo: String) {}
 }

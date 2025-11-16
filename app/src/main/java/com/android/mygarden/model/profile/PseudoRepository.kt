@@ -15,9 +15,10 @@ interface PseudoRepository {
    * Saves a pseudo to the repository.
    *
    * @param pseudo The pseudo to save.
+   * @param userId The ID of the user associated with the pseudo.
    * @throws IllegalStateException if the pseudo already exists.
    */
-  suspend fun savePseudo(pseudo: String)
+  suspend fun savePseudo(pseudo: String, userId: String)
 
   /**
    * Deletes a pseudo from the repository.

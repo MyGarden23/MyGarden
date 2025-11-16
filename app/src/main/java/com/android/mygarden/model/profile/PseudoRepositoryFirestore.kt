@@ -6,10 +6,8 @@ import kotlinx.coroutines.tasks.await
 /** Constant value for the collection of pseudos in firestore. */
 private const val PSEUDO_COLLECTION_PATH = "pseudos"
 
-/**
- * This document is not really used, it exists so that the pseudo document in not empty in the db.
- */
-private const val DOCUMENT_FIELD = "exists"
+/** Field that associates each pseudo to its user */
+private const val USER_ID_FIELD = "userID"
 
 /** Repository that implements PseudoRepository but stores the data in Firestore. */
 class PseudoRepositoryFirestore(private val db: FirebaseFirestore) : PseudoRepository {
@@ -22,12 +20,12 @@ class PseudoRepositoryFirestore(private val db: FirebaseFirestore) : PseudoRepos
     return !pseudoRef(pseudo).get().await().exists()
   }
 
-  override suspend fun savePseudo(pseudo: String) {
+  override suspend fun savePseudo(pseudo: String, userId: String) {
     val pseudoRef = pseudoRef(pseudo)
 
     check(!(pseudoRef.get().await().exists())) { "Pseudo already taken" }
 
-    pseudoRef.set(mapOf(DOCUMENT_FIELD to true)).await()
+    pseudoRef.set(mapOf(USER_ID_FIELD to userId)).await()
   }
 
   override suspend fun deletePseudo(pseudo: String) {

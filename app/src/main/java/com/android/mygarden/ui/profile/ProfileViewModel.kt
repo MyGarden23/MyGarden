@@ -222,7 +222,7 @@ class ProfileViewModel(
       viewModelScope.launch {
         try {
           if (state.previousPseudo != "") pseudoRepository.deletePseudo(state.previousPseudo)
-          pseudoRepository.savePseudo(state.pseudo.trim())
+          pseudoRepository.savePseudo(state.pseudo.trim(), uid)
           profileRepository.saveProfile(profile)
           onResult(true)
         } catch (_: Exception) {
