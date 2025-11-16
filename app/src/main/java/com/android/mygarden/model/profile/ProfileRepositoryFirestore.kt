@@ -2,10 +2,8 @@ package com.android.mygarden.model.profile
 
 import android.util.Log
 import com.android.mygarden.model.gardenactivity.ActivityMapper
-import com.android.mygarden.model.gardenactivity.SerializedAchievement
-import com.android.mygarden.model.gardenactivity.SerializedActivity
-import com.android.mygarden.model.gardenactivity.SerializedAddedPlant
 import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
+import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedActivity
 import com.android.mygarden.model.notifications.PushNotificationsService
 import com.android.mygarden.ui.profile.Avatar
 import com.google.firebase.auth.FirebaseAuth
@@ -145,11 +143,10 @@ class ProfileRepositoryFirestore(
                   return@addSnapshotListener
                 }
 
-                val activities =
+                val activities: List<GardenActivity> =
                     snapshots?.documents?.mapNotNull { doc ->
-                      doc.toSerializedActivity()?.let {
-                        ActivityMapper.fromSerializedActivityToActivity(it)
-                      }
+                      val serialized: SerializedActivity? = doc.toSerializedActivity()
+                      serialized?.let { ActivityMapper.fromSerializedActivityToActivity(it) }
                     } ?: emptyList()
 
                 trySend(activities)
@@ -187,11 +184,10 @@ class ProfileRepositoryFirestore(
                         "FirestoreProfile", "Failed to listen to activities for user $userId", err)
                     activitiesMap[userId] = emptyList()
                   } else {
-                    val activities =
+                    val activities: List<GardenActivity> =
                         snapshots?.documents?.mapNotNull { doc ->
-                          doc.toSerializedActivity()?.let {
-                            ActivityMapper.fromSerializedActivityToActivity(it)
-                          }
+                          val serialized: SerializedActivity? = doc.toSerializedActivity()
+                          serialized?.let { ActivityMapper.fromSerializedActivityToActivity(it) }
                         } ?: emptyList()
 
                     activitiesMap[userId] = activities
@@ -241,11 +237,8 @@ class ProfileRepositoryFirestore(
     val type = this.getString("type") ?: return null
 
     return try {
-      when (type) {
-        "ADDED_PLANT" -> this.toObject(SerializedAddedPlant::class.java)
-        "ACHIEVEMENT" -> this.toObject(SerializedAchievement::class.java)
-        else -> null
-      }
+      val clazz = ActivityMapper.mapTypeToSerializedClass(type) ?: return null
+      this.toObject(clazz)
     } catch (e: Exception) {
       Log.e("FirestoreProfile", "Failed to deserialize activity of type $type", e)
       null

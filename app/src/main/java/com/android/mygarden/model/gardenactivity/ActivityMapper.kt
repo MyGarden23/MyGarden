@@ -21,86 +21,96 @@ import com.android.mygarden.model.plant.FirestoreMapper
  */
 object ActivityMapper {
 
-    /**
-     * Converts a [GardenActivity] into its Firestore-compatible [SerializedActivity] representation.
-     *
-     * @param activity The activity instance to serialize.
-     * @return A [SerializedActivity] ready to be stored in Firestore.
-     */
-    fun fromActivityToSerializedActivity(activity: GardenActivity): SerializedActivity {
-        return when (activity) {
-            is ActivityAddedPlant ->
-                SerializedAddedPlant(
-                    userId = activity.userId,
-                    type = activity.type.name,
-                    pseudo = activity.pseudo,
-                    timestamp = activity.timestamp,
-                    ownedPlant =
-                        FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant(activity.ownedPlant))
-            is ActivityAchievement ->
-                SerializedAchievement(
-                    userId = activity.userId,
-                    type = activity.type.name,
-                    pseudo = activity.pseudo,
-                    timestamp = activity.timestamp)
-            is ActivityAddFriend ->
-                SerializedAddFriend(
-                    userId = activity.userId,
-                    type = activity.type.name,
-                    pseudo = activity.pseudo,
-                    timestamp = activity.timestamp,
-                    friendId = activity.friendId)
-            is ActivityWaterPlant ->
-                SerializedWaterPlant(
-                    userId = activity.userId,
-                    type = activity.type.name,
-                    pseudo = activity.pseudo,
-                    timestamp = activity.timestamp,
-                    ownedPlant =
-                        FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant(activity.ownedPlant))
-        }
+  /**
+   * Converts a [GardenActivity] into its Firestore-compatible [SerializedActivity] representation.
+   *
+   * @param activity The activity instance to serialize.
+   * @return A [SerializedActivity] ready to be stored in Firestore.
+   */
+  fun fromActivityToSerializedActivity(activity: GardenActivity): SerializedActivity {
+    return when (activity) {
+      is ActivityAddedPlant ->
+          SerializedAddedPlant(
+              userId = activity.userId,
+              type = activity.type.name,
+              pseudo = activity.pseudo,
+              timestamp = activity.timestamp,
+              ownedPlant =
+                  FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant(activity.ownedPlant))
+      is ActivityAchievement ->
+          SerializedAchievement(
+              userId = activity.userId,
+              type = activity.type.name,
+              pseudo = activity.pseudo,
+              timestamp = activity.timestamp)
+      is ActivityAddFriend ->
+          SerializedAddFriend(
+              userId = activity.userId,
+              type = activity.type.name,
+              pseudo = activity.pseudo,
+              timestamp = activity.timestamp,
+              friendId = activity.friendId)
+      is ActivityWaterPlant ->
+          SerializedWaterPlant(
+              userId = activity.userId,
+              type = activity.type.name,
+              pseudo = activity.pseudo,
+              timestamp = activity.timestamp,
+              ownedPlant =
+                  FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant(activity.ownedPlant))
     }
+  }
 
-    /**
-     * Converts a Firestore-compatible [SerializedActivity] back into a [GardenActivity].
-     *
-     * This function handles invalid or unknown enum values safely by returning null if the activity
-     * cannot be reconstructed.
-     *
-     * @param serializedActivity The serialized activity data retrieved from Firestore.
-     * @return The corresponding [GardenActivity], or null if parsing fails.
-     */
-    fun fromSerializedActivityToActivity(serializedActivity: SerializedActivity): GardenActivity? {
-        return when (serializedActivity) {
-            is SerializedAddedPlant -> {
-                ActivityAddedPlant(
-                    userId = serializedActivity.userId,
-                    pseudo = serializedActivity.pseudo,
-                    timestamp = serializedActivity.timestamp,
-                    ownedPlant =
-                        FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant(serializedActivity.ownedPlant))
-            }
-            is SerializedAchievement -> {
-                ActivityAchievement(
-                    userId = serializedActivity.userId,
-                    pseudo = serializedActivity.pseudo,
-                    timestamp = serializedActivity.timestamp)
-            }
-            is SerializedAddFriend -> {
-                ActivityAddFriend(
-                    userId = serializedActivity.userId,
-                    pseudo = serializedActivity.pseudo,
-                    timestamp = serializedActivity.timestamp,
-                    friendId = serializedActivity.friendId)
-            }
-            is SerializedWaterPlant -> {
-                ActivityWaterPlant(
-                    userId = serializedActivity.userId,
-                    pseudo = serializedActivity.pseudo,
-                    timestamp = serializedActivity.timestamp,
-                    ownedPlant =
-                        FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant(serializedActivity.ownedPlant))
-            }
-        }
+  fun mapTypeToSerializedClass(type: String): Class<out SerializedActivity>? {
+    return when (type) {
+      "ADDED_PLANT" -> SerializedAddedPlant::class.java
+      "ACHIEVEMENT" -> SerializedAchievement::class.java
+      "ADDED_FRIEND" -> SerializedAddFriend::class.java
+      "WATERED_PLANT" -> SerializedWaterPlant::class.java
+      else -> null
     }
+  }
+
+  /**
+   * Converts a Firestore-compatible [SerializedActivity] back into a [GardenActivity].
+   *
+   * This function handles invalid or unknown enum values safely by returning null if the activity
+   * cannot be reconstructed.
+   *
+   * @param serializedActivity The serialized activity data retrieved from Firestore.
+   * @return The corresponding [GardenActivity], or null if parsing fails.
+   */
+  fun fromSerializedActivityToActivity(serializedActivity: SerializedActivity): GardenActivity? {
+    return when (serializedActivity) {
+      is SerializedAddedPlant -> {
+        ActivityAddedPlant(
+            userId = serializedActivity.userId,
+            pseudo = serializedActivity.pseudo,
+            timestamp = serializedActivity.timestamp,
+            ownedPlant =
+                FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant(serializedActivity.ownedPlant))
+      }
+      is SerializedAchievement -> {
+        ActivityAchievement(
+            userId = serializedActivity.userId,
+            pseudo = serializedActivity.pseudo,
+            timestamp = serializedActivity.timestamp)
+      }
+      is SerializedAddFriend -> {
+        ActivityAddFriend(
+            userId = serializedActivity.userId,
+            pseudo = serializedActivity.pseudo,
+            timestamp = serializedActivity.timestamp,
+            friendId = serializedActivity.friendId)
+      }
+      is SerializedWaterPlant -> {
+        ActivityWaterPlant(
+            userId = serializedActivity.userId,
+            pseudo = serializedActivity.pseudo,
+            timestamp = serializedActivity.timestamp,
+            ownedPlant =
+                FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant(serializedActivity.ownedPlant))
+      }
+    }
+  }
 }
