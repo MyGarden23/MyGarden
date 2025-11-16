@@ -78,7 +78,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
   /** Helper function to set up the screen with a pre-existing profile. */
   private fun setContentWithProfile(profile: Profile, pseudo: String) {
     val repo = FakeProfileRepository(profile)
-    val repoPseudo = FakePseudoRepository(pseudo)
+    val repoPseudo = FakePseudoRepository()
     val vm = ProfileViewModel(repo, repoPseudo)
     onSavePressedCalled = false
     onBackPressedCalled = false

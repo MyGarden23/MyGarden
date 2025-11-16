@@ -47,6 +47,7 @@ class ProfileViewModel(
 
   // Private mutable state flow for internal pseudo availability management
   private val _pseudoAvailable = MutableStateFlow(true)
+  val pseudoAvailable: StateFlow<Boolean> = _pseudoAvailable.asStateFlow()
 
   var initialized: Boolean = false
 
@@ -99,17 +100,14 @@ class ProfileViewModel(
   }
 
   /** Checks if the pseudo is available and updates the UI state accordingly */
-  private fun checkPseudoAvailability() {
+  private suspend fun checkPseudoAvailability() {
     val pseudo = _uiState.value.pseudo.trim()
 
-    viewModelScope.launch {
-      if (pseudo.isBlank() || pseudo == _uiState.value.previousPseudo) {
-        _pseudoAvailable.value = true
-        return@launch
-      }
-
-      _pseudoAvailable.value = pseudoRepository.isPseudoAvailable(pseudo)
+    if (pseudo.isBlank() || pseudo == _uiState.value.previousPseudo) {
+      _pseudoAvailable.value = true
+      return
     }
+    _pseudoAvailable.value = pseudoRepository.isPseudoAvailable(pseudo)
   }
 
   /**
@@ -122,7 +120,7 @@ class ProfileViewModel(
     if (previous) _uiState.value = _uiState.value.copy(previousPseudo = pseudo, pseudo = pseudo)
     else _uiState.value = _uiState.value.copy(pseudo = pseudo)
 
-    checkPseudoAvailability()
+    _pseudoAvailable.value = true
   }
 
   /**
@@ -193,39 +191,44 @@ class ProfileViewModel(
   fun submit(onResult: (Boolean) -> Unit, context: Context) {
     // show errors if needed
     setRegisterPressed(true)
-    val state = _uiState.value
-    if (!canRegister()) {
-      onResult(false)
-      return
-    }
-
-    val uid = profileRepository.getCurrentUserId()
-    if (uid.isNullOrBlank()) {
-      // no connected user
-      onResult(false)
-      return
-    }
-
-    val profile =
-        Profile(
-            pseudo = state.pseudo.trim(),
-            firstName = state.firstName.trim(),
-            lastName = state.lastName.trim(),
-            gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
-            favoritePlant = state.favoritePlant.trim(),
-            country = state.country.trim(),
-            hasSignedIn = true,
-            avatar = state.avatar)
 
     viewModelScope.launch {
-      try {
-        if (state.previousPseudo != "") pseudoRepository.deletePseudo(state.previousPseudo)
-        pseudoRepository.savePseudo(state.pseudo.trim())
-        profileRepository.saveProfile(profile)
-        onResult(true)
-      } catch (_: Exception) {
-        // log if needed
+      checkPseudoAvailability()
+      val state = _uiState.value
+
+      if (!canRegister()) {
         onResult(false)
+        return@launch
+      }
+
+      val uid = profileRepository.getCurrentUserId()
+      if (uid.isNullOrBlank()) {
+        // no connected user
+        onResult(false)
+        return@launch
+      }
+
+      val profile =
+          Profile(
+              pseudo = state.pseudo.trim(),
+              firstName = state.firstName.trim(),
+              lastName = state.lastName.trim(),
+              gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
+              favoritePlant = state.favoritePlant.trim(),
+              country = state.country.trim(),
+              hasSignedIn = true,
+              avatar = state.avatar)
+
+      viewModelScope.launch {
+        try {
+          if (state.previousPseudo != "") pseudoRepository.deletePseudo(state.previousPseudo)
+          pseudoRepository.savePseudo(state.pseudo.trim())
+          profileRepository.saveProfile(profile)
+          onResult(true)
+        } catch (_: Exception) {
+          // log if needed
+          onResult(false)
+        }
       }
     }
   }
@@ -287,10 +290,11 @@ class ProfileViewModel(
   /**
    * Determines if the pseudo field should show an error
    *
+   * @param pseudoAvailable true if pseudo is available, false otherwise
    * @return true if register was pressed and pseudo is invalid
    */
-  fun pseudoIsError(): Boolean {
-    return _uiState.value.registerPressed && !pseudoValid()
+  fun pseudoIsError(pseudoAvailable: Boolean): Boolean {
+    return !pseudoValid() || !pseudoAvailable
   }
 
   /**
