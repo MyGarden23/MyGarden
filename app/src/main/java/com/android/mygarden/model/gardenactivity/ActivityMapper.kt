@@ -61,19 +61,16 @@ data class SerializedAchievement(
 ) : SerializedActivity()
 
 /**
- * Utility object providing mapping functions between
- * [com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity] instances and their
+ * Utility object providing mapping functions between [GardenActivity] instances and their
  * Firestore-serializable [SerializedActivity] representations.
  *
- * These conversion functions are needed because
- * [com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity] uses types that
- * Firestore cannot directly store.
+ * These conversion functions are needed because [GardenActivity] uses types that Firestore cannot
+ * directly store.
  */
 object ActivityMapper {
 
   /**
-   * Converts a [com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity] into its
-   * Firestore-compatible [SerializedActivity] representation.
+   * Converts a [GardenActivity] into its Firestore-compatible [SerializedActivity] representation.
    *
    * @param activity The activity instance to serialize.
    * @return A [SerializedActivity] ready to be stored in Firestore.
