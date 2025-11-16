@@ -1,8 +1,10 @@
 package com.android.mygarden.utils
 
+import com.android.mygarden.model.gardenactivity.GardenActivity
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 
 /**
@@ -50,6 +52,20 @@ class FakeProfileRepository(val profile: Profile? = null) : ProfileRepository {
   override suspend fun getFCMToken(): String? {
     return null
   }
+
+  override fun getActivities(): Flow<List<GardenActivity>> {
+    return emptyFlow()
+  }
+
+  override fun getActivitiesForUser(userId: String): Flow<List<GardenActivity>> {
+    return emptyFlow()
+  }
+
+  override fun getFeedActivities(userIds: List<String>, limit: Int): Flow<List<GardenActivity>> {
+    return emptyFlow()
+  }
+
+  override suspend fun addActivity(activity: GardenActivity) {}
 
   override fun cleanup() {}
 }

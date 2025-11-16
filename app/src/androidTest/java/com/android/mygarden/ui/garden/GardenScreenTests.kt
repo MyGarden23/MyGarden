@@ -12,6 +12,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.model.gardenactivity.GardenActivity
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
@@ -31,6 +32,7 @@ import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -122,6 +124,20 @@ class GardenScreenTests {
     override suspend fun getFCMToken(): String? {
       return null
     }
+
+    override fun getActivities(): Flow<List<GardenActivity>> {
+      return emptyFlow()
+    }
+
+    override fun getActivitiesForUser(userId: String): Flow<List<GardenActivity>> {
+      return emptyFlow()
+    }
+
+    override fun getFeedActivities(userIds: List<String>, limit: Int): Flow<List<GardenActivity>> {
+      return emptyFlow()
+    }
+
+    override suspend fun addActivity(activity: GardenActivity) {}
 
     override fun cleanup() {}
   }
