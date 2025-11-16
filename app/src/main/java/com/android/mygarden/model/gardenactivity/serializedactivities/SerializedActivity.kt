@@ -15,8 +15,8 @@ import com.google.firebase.Timestamp
  */
 @Keep
 sealed class SerializedActivity {
-    abstract val userId: String
-    abstract val type: String
-    abstract val pseudo: String
-    abstract val timestamp: Timestamp
+  abstract val userId: String
+  abstract val type: String
+  abstract val pseudo: String
+  abstract val timestamp: Timestamp
 }

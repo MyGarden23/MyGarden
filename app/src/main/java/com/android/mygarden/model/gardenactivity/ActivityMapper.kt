@@ -41,9 +41,8 @@ object ActivityMapper {
               type = activity.type.name,
               pseudo = activity.pseudo,
               timestamp = activity.timestamp)
-
-        is ActivityAddFriend -> TODO()
-        is ActivityWaterPlant -> TODO()
+      is ActivityAddFriend -> TODO()
+      is ActivityWaterPlant -> TODO()
     }
   }
 
