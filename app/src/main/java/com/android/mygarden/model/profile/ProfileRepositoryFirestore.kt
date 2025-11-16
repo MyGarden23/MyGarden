@@ -2,10 +2,10 @@ package com.android.mygarden.model.profile
 
 import android.util.Log
 import com.android.mygarden.model.gardenactivity.ActivityMapper
-import com.android.mygarden.model.gardenactivity.GardenActivity
 import com.android.mygarden.model.gardenactivity.SerializedAchievement
 import com.android.mygarden.model.gardenactivity.SerializedActivity
 import com.android.mygarden.model.gardenactivity.SerializedAddedPlant
+import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import com.android.mygarden.model.notifications.PushNotificationsService
 import com.android.mygarden.ui.profile.Avatar
 import com.google.firebase.auth.FirebaseAuth

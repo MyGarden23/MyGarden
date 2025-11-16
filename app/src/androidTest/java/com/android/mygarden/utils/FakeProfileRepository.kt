@@ -1,6 +1,6 @@
 package com.android.mygarden.utils
 
-import com.android.mygarden.model.gardenactivity.GardenActivity
+import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import kotlinx.coroutines.flow.Flow

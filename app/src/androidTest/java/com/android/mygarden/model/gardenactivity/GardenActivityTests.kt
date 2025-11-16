@@ -1,6 +1,8 @@
 package com.android.mygarden.model.gardenactivity
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
@@ -61,21 +63,21 @@ class GardenActivityTests {
   fun addedPlantActivity_isStoredAndRetrievedForCurrentUser() = runTest {
     val uid = firebaseUtils.auth.currentUser!!.uid
 
-    val addedPlantActivity =
-        GardenActivity.AddedPlant(
+    val activityAddedPlantActivity =
+        ActivityAddedPlant(
             userId = uid,
             pseudo = "TestUser",
             timestamp = Timestamp.now(),
             ownedPlant = createTestOwnedPlant())
 
     // Add activity
-    profileRepo.addActivity(addedPlantActivity)
+    profileRepo.addActivity(activityAddedPlantActivity)
 
     // Read back via getActivities() (current user)
     val activities = profileRepo.getActivities().first()
     assertTrue(activities.isNotEmpty())
 
-    val first = activities.first() as GardenActivity.AddedPlant
+    val first = activities.first() as ActivityAddedPlant
     assertEquals(uid, first.userId)
     assertEquals("TestUser", first.pseudo)
     assertEquals(ActivityType.ADDED_PLANT, first.type)
@@ -88,17 +90,17 @@ class GardenActivityTests {
   fun achievementActivity_isStoredAndRetrievedForSpecificUser() = runTest {
     val uid = firebaseUtils.auth.currentUser!!.uid
 
-    val achievement =
-        GardenActivity.Achievement(userId = uid, pseudo = "Achiever", timestamp = Timestamp.now())
+    val activityAchievement =
+        ActivityAchievement(userId = uid, pseudo = "Achiever", timestamp = Timestamp.now())
 
     // Add activity
-    profileRepo.addActivity(achievement)
+    profileRepo.addActivity(activityAchievement)
 
     // Read back via getActivitiesForUser(uid)
     val activities = profileRepo.getActivitiesForUser(uid).first()
     assertTrue(activities.isNotEmpty())
 
-    val first = activities.first() as GardenActivity.Achievement
+    val first = activities.first() as ActivityAchievement
     assertEquals(uid, first.userId)
     assertEquals("Achiever", first.pseudo)
     assertEquals(ActivityType.ACHIEVEMENT, first.type)
@@ -109,10 +111,10 @@ class GardenActivityTests {
     val uid = firebaseUtils.auth.currentUser!!.uid
 
     val activity1 =
-        GardenActivity.Achievement(userId = uid, pseudo = "UserFeed", timestamp = Timestamp.now())
+        ActivityAchievement(userId = uid, pseudo = "UserFeed", timestamp = Timestamp.now())
 
     val activity2 =
-        GardenActivity.AddedPlant(
+        ActivityAddedPlant(
             userId = uid,
             pseudo = "UserFeed",
             timestamp = Timestamp.now(),

@@ -1,5 +1,7 @@
 package com.android.mygarden.model.gardenactivity
 
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
@@ -41,7 +43,7 @@ class ActivityMapperTest {
 
     // Create activity
     val activity =
-        GardenActivity.AddedPlant(
+        ActivityAddedPlant(
             userId = "user123", pseudo = "TestUser", timestamp = timestamp, ownedPlant = ownedPlant)
 
     // Serialize
@@ -61,8 +63,8 @@ class ActivityMapperTest {
 
     // Verify deserialization
     assertNotNull(deserialized)
-    assertTrue(deserialized is GardenActivity.AddedPlant)
-    val deserializedPlant = deserialized as GardenActivity.AddedPlant
+    assertTrue(deserialized is ActivityAddedPlant)
+    val deserializedPlant = deserialized as ActivityAddedPlant
     assertEquals("user123", deserializedPlant.userId)
     assertEquals("TestUser", deserializedPlant.pseudo)
     assertEquals(ActivityType.ADDED_PLANT, deserializedPlant.type)
@@ -77,8 +79,7 @@ class ActivityMapperTest {
 
     // Create achievement activity
     val activity =
-        GardenActivity.Achievement(
-            userId = "user456", pseudo = "AchievementUser", timestamp = timestamp)
+        ActivityAchievement(userId = "user456", pseudo = "AchievementUser", timestamp = timestamp)
 
     // Serialize
     val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)
@@ -95,11 +96,11 @@ class ActivityMapperTest {
 
     // Verify deserialization
     assertNotNull(deserialized)
-    assertTrue(deserialized is GardenActivity.Achievement)
-    val deserializedAchievement = deserialized as GardenActivity.Achievement
-    assertEquals("user456", deserializedAchievement.userId)
-    assertEquals("AchievementUser", deserializedAchievement.pseudo)
-    assertEquals(ActivityType.ACHIEVEMENT, deserializedAchievement.type)
+    assertTrue(deserialized is ActivityAchievement)
+    val deserializedActivityAchievement = deserialized as ActivityAchievement
+    assertEquals("user456", deserializedActivityAchievement.userId)
+    assertEquals("AchievementUser", deserializedActivityAchievement.pseudo)
+    assertEquals(ActivityType.ACHIEVEMENT, deserializedActivityAchievement.type)
   }
 
   @Test
@@ -122,8 +123,8 @@ class ActivityMapperTest {
   fun testActivityTypesMatch() {
     val timestamp = Timestamp.now()
 
-    val addedPlant =
-        GardenActivity.AddedPlant(
+    val activityAddedPlant =
+        ActivityAddedPlant(
             userId = "user1",
             pseudo = "User1",
             timestamp = timestamp,
@@ -133,10 +134,10 @@ class ActivityMapperTest {
                     plant = Plant(name = "Rose", latinName = "Rosa"),
                     lastWatered = SqlTimestamp(System.currentTimeMillis())))
 
-    val achievement =
-        GardenActivity.Achievement(userId = "user2", pseudo = "User2", timestamp = timestamp)
+    val activityAchievement =
+        ActivityAchievement(userId = "user2", pseudo = "User2", timestamp = timestamp)
 
-    assertEquals(ActivityType.ADDED_PLANT, addedPlant.type)
-    assertEquals(ActivityType.ACHIEVEMENT, achievement.type)
+    assertEquals(ActivityType.ADDED_PLANT, activityAddedPlant.type)
+    assertEquals(ActivityType.ACHIEVEMENT, activityAchievement.type)
   }
 }

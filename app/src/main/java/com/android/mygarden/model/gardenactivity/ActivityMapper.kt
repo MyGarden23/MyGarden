@@ -1,6 +1,9 @@
 package com.android.mygarden.model.gardenactivity
 
 import androidx.annotation.Keep
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import com.android.mygarden.model.plant.FirestoreMapper
 import com.android.mygarden.model.plant.SerializedOwnedPlant
 import com.google.firebase.Timestamp
@@ -58,23 +61,26 @@ data class SerializedAchievement(
 ) : SerializedActivity()
 
 /**
- * Utility object providing mapping functions between [GardenActivity] instances and their
+ * Utility object providing mapping functions between
+ * [com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity] instances and their
  * Firestore-serializable [SerializedActivity] representations.
  *
- * These conversion functions are needed because [GardenActivity] uses types that Firestore cannot
- * directly store.
+ * These conversion functions are needed because
+ * [com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity] uses types that
+ * Firestore cannot directly store.
  */
 object ActivityMapper {
 
   /**
-   * Converts a [GardenActivity] into its Firestore-compatible [SerializedActivity] representation.
+   * Converts a [com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity] into its
+   * Firestore-compatible [SerializedActivity] representation.
    *
    * @param activity The activity instance to serialize.
    * @return A [SerializedActivity] ready to be stored in Firestore.
    */
   fun fromActivityToSerializedActivity(activity: GardenActivity): SerializedActivity {
     return when (activity) {
-      is GardenActivity.AddedPlant ->
+      is ActivityAddedPlant ->
           SerializedAddedPlant(
               userId = activity.userId,
               type = activity.type.name,
@@ -82,7 +88,7 @@ object ActivityMapper {
               timestamp = activity.timestamp,
               ownedPlant =
                   FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant(activity.ownedPlant))
-      is GardenActivity.Achievement ->
+      is ActivityAchievement ->
           SerializedAchievement(
               userId = activity.userId,
               type = activity.type.name,
@@ -103,7 +109,7 @@ object ActivityMapper {
   fun fromSerializedActivityToActivity(serializedActivity: SerializedActivity): GardenActivity? {
     return when (serializedActivity) {
       is SerializedAddedPlant -> {
-        GardenActivity.AddedPlant(
+        ActivityAddedPlant(
             userId = serializedActivity.userId,
             pseudo = serializedActivity.pseudo,
             timestamp = serializedActivity.timestamp,
@@ -111,7 +117,7 @@ object ActivityMapper {
                 FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant(serializedActivity.ownedPlant))
       }
       is SerializedAchievement -> {
-        GardenActivity.Achievement(
+        ActivityAchievement(
             userId = serializedActivity.userId,
             pseudo = serializedActivity.pseudo,
             timestamp = serializedActivity.timestamp)
