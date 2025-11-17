@@ -76,6 +76,7 @@ private val PLANT_NAME_SECTION_VERTICAL_PADDING = 16.dp
 @Composable
 fun PlantInfosScreen(
     plant: Plant,
+    ownedPlantId: String?,
     plantInfoViewModel: PlantInfoViewModel = viewModel(),
     onBackPressed: () -> Unit,
     onNextPlant: (String) -> Unit = {}
@@ -92,7 +93,7 @@ fun PlantInfosScreen(
   // Initialize UI state when plant changes
   LaunchedEffect(plant) {
     val loadingText = context.getString(R.string.loading_plant_infos)
-    plantInfoViewModel.initializeUIState(plant, loadingText)
+    plantInfoViewModel.initializeUIState(plant, ownedPlantId, loadingText)
   }
 
   Scaffold(

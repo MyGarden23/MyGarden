@@ -36,6 +36,7 @@ data class PlantInfoUIState(
     val selectedTab: SelectedPlantInfoTab = SelectedPlantInfoTab.DESCRIPTION,
     val isRecognized: Boolean = false,
     val isSaving: Boolean = false,
+    val isFromGarden: Boolean = false,
     val showCareTipsDialog: Boolean = false,
     val careTips: String = ""
 ) {
@@ -65,8 +66,9 @@ class PlantInfoViewModel(
   val uiState: StateFlow<PlantInfoUIState> = _uiState.asStateFlow()
 
   /** Initialize the UI state with plant data. Called when the screen is first displayed. */
-  fun initializeUIState(plant: Plant, loadingText: String) {
+  fun initializeUIState(plant: Plant, ownedPlantId: String?, loadingText: String) {
     viewModelScope.launch {
+      val ownedPlantIdNotNull = ownedPlantId != null
       _uiState.value = _uiState.value.copy(description = loadingText, image = plant.image)
       // firewall to not regenerate is no picture taken
       val generatedPlant =
@@ -87,6 +89,7 @@ class PlantInfoViewModel(
               generatedPlant.healthStatusDescription,
               generatedPlant.wateringFrequency,
               isRecognized = generatedPlant.isRecognized,
+              isFromGarden = ownedPlantIdNotNull,
           )
     }
   }

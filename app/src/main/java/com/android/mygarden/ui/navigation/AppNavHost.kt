@@ -32,6 +32,7 @@ private const val CHOSEN_AVATAR_KEY = "chosen_avatar"
 private const val IMAGE_PATH_KEY = "imagePath"
 private const val FROM_KEY = "from"
 private const val OWNED_PLANT_ID_KEY = "ownedPlantId"
+private const val OWNED_PLANT_ID_TO_PLANT_INFO_KEY = "ownedPlantId_to_plantInfo"
 
 @Composable
 fun AppNavHost(
@@ -122,7 +123,11 @@ fun AppNavHost(
           onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
           onAddPlant = { navigationActions.navTo(Screen.Camera) },
           onPlantClick = { ownedPlant ->
-            navigationActions.navTo(Screen.EditPlant(ownedPlant.id, Screen.Garden.route))
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
+            navigationActions.navTo(Screen.PlantInfo)
+            // navigationActions.navTo(Screen.EditPlant(ownedPlant.id, Screen.Garden.route))
           },
           onSignOut = {
             // Clean up repositories before signing out to prevent PERMISSION_DENIED errors
@@ -143,9 +148,11 @@ fun AppNavHost(
       // Right now it just uses a mock Plant object for demo purposes
 
       val plant = Plant(image = imagePath)
-
+      val ownedPlantId: String? =
+          backStackEntry.arguments?.getString(OWNED_PLANT_ID_TO_PLANT_INFO_KEY)
       PlantInfosScreen(
           plant = plant,
+          ownedPlantId = ownedPlantId,
           plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
           onNextPlant = { plantId ->

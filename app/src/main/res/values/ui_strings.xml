@@ -116,6 +116,7 @@
     <string name="back_description">Back button</string>
     <string name="save">Save</string>
     <string name="next">Next</string>
+    <string name="edit">Edit</string>
     <string name="uploading">Uploading…</string>
 
     <!-- Form labels and placeholders-->
