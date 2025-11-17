@@ -138,9 +138,9 @@ class PlantInfoViewModel(
       _uiState.value =
           _uiState.value.copy(showCareTipsDialog = true, careTips = LOADING_TIPS_PLACEHOLDER)
 
-      // If the plant's latin name is equals "unknown", don't attempt to
+      // If the plant's latin name equals the unknown sentinel, don't attempt to
       // generate tips — show a fallback message instead.
-      if (latinName.equals(Plant().latinName, true)) {
+      if (latinName.equals(Plant.UNKNOWN_NAME, true)) {
         _uiState.value = _uiState.value.copy(careTips = UNKNOWN_PLANT_TIPS_PLACEHOLDER)
         return@launch
       }
