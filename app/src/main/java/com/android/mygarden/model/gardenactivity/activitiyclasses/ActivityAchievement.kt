@@ -18,6 +18,7 @@ data class ActivityAchievement(
     override val userId: String,
     override val pseudo: String,
     override val timestamp: Timestamp = Timestamp(Instant.now()),
+    val achievementName: String
 ) : GardenActivity() {
 
   /** Indicates that this activity represents an [ActivityType.ACHIEVEMENT] event. */

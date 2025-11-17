@@ -16,5 +16,6 @@ data class SerializedAchievement(
     override val userId: String = "",
     override val type: String = "ACHIEVEMENT",
     override val pseudo: String = "",
-    override val timestamp: Timestamp = Timestamp.now()
+    override val timestamp: Timestamp = Timestamp.now(),
+    val achievementName: String = ""
 ) : SerializedActivity()
