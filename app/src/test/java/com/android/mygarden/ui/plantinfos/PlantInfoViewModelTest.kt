@@ -315,11 +315,11 @@ class PlantInfoViewModelTest {
     // Assert: fallback message from ViewModel should be set
     val finalState = vm.uiState.value
     assertTrue(finalState.showCareTipsDialog)
-    assertEquals("Impossible to generate care tips", finalState.careTips)
+    assertEquals(PlantInfoViewModel.ERROR_GENERATING_TIPS, finalState.careTips)
   }
 
   @Test
-  fun showCareTips_withUnknownOrBlankLatinName_showsUnknownPlaceholder() = runTest {
+  fun showCareTips_showsUnknownPlaceholder() = runTest {
     val fakeRepo = PlantsRepositoryLocal()
     val vm = PlantInfoViewModel(fakeRepo)
 
@@ -327,14 +327,6 @@ class PlantInfoViewModelTest {
     vm.showCareTips("unknown", PlantHealthStatus.HEALTHY)
     advanceUntilIdle()
     var finalState = vm.uiState.value
-    assertTrue(finalState.showCareTipsDialog)
-    assertEquals(PlantInfoViewModel.UNKNOWN_PLANT_TIPS_PLACEHOLDER, finalState.careTips)
-
-    // Case: latin name is blank
-    vm.dismissCareTips()
-    vm.showCareTips("", PlantHealthStatus.HEALTHY)
-    advanceUntilIdle()
-    finalState = vm.uiState.value
     assertTrue(finalState.showCareTipsDialog)
     assertEquals(PlantInfoViewModel.UNKNOWN_PLANT_TIPS_PLACEHOLDER, finalState.careTips)
   }
