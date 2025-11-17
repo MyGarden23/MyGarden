@@ -14,10 +14,11 @@ import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
-import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirestoreProfileTest
+import com.android.mygarden.utils.PlantRepositoryType
 import org.junit.Rule
 import org.junit.Test
 
@@ -371,16 +372,10 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   fun clickingTipsButton_showsDialogWithTipsText() {
     // Provide a repo that returns a known tips string
     val fakeTips = "Keep soil slightly moist and provide bright indirect light."
-    val localRepo = PlantsRepositoryLocal()
-    PlantsRepositoryProvider.repository =
-        object : PlantsRepository by localRepo {
-          override suspend fun generateCareTips(
-              latinName: String,
-              healthStatus: PlantHealthStatus
-          ): String {
-            return fakeTips
-          }
-        }
+
+    val fakePlantRepositoryUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoLocal)
+    fakePlantRepositoryUtils.mockPlantCareTips(fakeTips)
+    fakePlantRepositoryUtils.setUpMockRepo()
 
     setContent(plant)
 
@@ -399,16 +394,9 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   fun closingTipsDialog_hidesDialog() {
     // Provide a repo that returns a known tips string
     val fakeTips = "Keep soil slightly moist and provide bright indirect light."
-    val localRepo = PlantsRepositoryLocal()
-    PlantsRepositoryProvider.repository =
-        object : PlantsRepository by localRepo {
-          override suspend fun generateCareTips(
-              latinName: String,
-              healthStatus: PlantHealthStatus
-          ): String {
-            return fakeTips
-          }
-        }
+    val fakePlantRepositoryUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoLocal)
+    fakePlantRepositoryUtils.mockPlantCareTips(fakeTips)
+    fakePlantRepositoryUtils.setUpMockRepo()
 
     setContent(plant)
 

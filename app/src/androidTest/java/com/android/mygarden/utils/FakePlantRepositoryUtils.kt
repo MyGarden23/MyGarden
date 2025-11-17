@@ -141,6 +141,20 @@ class FakePlantRepositoryUtils(repoType: PlantRepositoryType) {
   }
 
   /**
+   * Configure the mocked repository to return a predetermined care tips string.
+   *
+   * This helper sets up the spy repository so that any call to [PlantsRepository.generateCareTips]
+   * (with any parameters) will return the provided `resTips` string. Use this in instrumented tests
+   * to avoid calling the real AI/service and to validate UI behavior when care tips are available
+   * or when error/fallback messages are returned.
+   *
+   * @param resTips The care tips string that the mocked repository should return.
+   */
+  fun mockPlantCareTips(resTips: String) {
+    coEvery { repository.generateCareTips(any(), any()) } returns resTips
+  }
+
+  /**
    * Mocks the Gemini AI plant description API call to return a predetermined JSON response.
    *
    * This method configures the repository spy to return the specified JSON string when
