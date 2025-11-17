@@ -122,6 +122,9 @@ class PlantInfoViewModel(
 
     // Placeholder value used to signal the UI that the plant is unknown
     const val UNKNOWN_PLANT_TIPS_PLACEHOLDER = "__UNKNOWN_PLANT__"
+
+    // Placeholder value used to signal an error when generating tips
+    const val ERROR_GENERATING_TIPS = "__ERROR_GENERATING_TIPS__"
   }
 
   /**
@@ -135,9 +138,9 @@ class PlantInfoViewModel(
       _uiState.value =
           _uiState.value.copy(showCareTipsDialog = true, careTips = LOADING_TIPS_PLACEHOLDER)
 
-      // If the plant's latin name is missing or equals "unknown", don't attempt to
+      // If the plant's latin name is equals "unknown", don't attempt to
       // generate tips — show a fallback message instead.
-      if (latinName.isBlank() || latinName.equals("unknown", true)) {
+      if (latinName.equals(Plant().latinName, true)) {
         _uiState.value = _uiState.value.copy(careTips = UNKNOWN_PLANT_TIPS_PLACEHOLDER)
         return@launch
       }
@@ -147,7 +150,9 @@ class PlantInfoViewModel(
             plantsRepository.generateCareTips(latinName, healthStatus)
           } catch (e: Exception) {
             Log.e("plantInfoViewModel", "Error generating care tips for $latinName", e)
-            "Impossible to generate care tips"
+            // Use a placeholder constant instead of a hardcoded user-facing string.
+            // The UI will map this placeholder to a localized string resource.
+            ERROR_GENERATING_TIPS
           }
 
       _uiState.value = _uiState.value.copy(careTips = tips)

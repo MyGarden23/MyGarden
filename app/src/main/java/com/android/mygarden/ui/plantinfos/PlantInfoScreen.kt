@@ -334,6 +334,8 @@ private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
                   stringResource(R.string.tips_loading_message)
               uiState.careTips == PlantInfoViewModel.UNKNOWN_PLANT_TIPS_PLACEHOLDER ->
                   stringResource(R.string.unknown_plant_tips_message)
+              uiState.careTips == PlantInfoViewModel.ERROR_GENERATING_TIPS ->
+                  stringResource(R.string.error_generating_care_tips)
               else -> uiState.careTips
             }
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {

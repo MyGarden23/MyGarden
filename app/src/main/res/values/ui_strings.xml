@@ -69,6 +69,7 @@
     <string name="tips_loading_message">Loading…</string>
     <string name="tips_title">Care Tips</string>
     <string name="tips_close_button">Close</string>
+    <string name="error_generating_care_tips">Unable to generate care tips</string>
     <string name="unknown_plant_tips_message">Plant unknown</string>
 
 
