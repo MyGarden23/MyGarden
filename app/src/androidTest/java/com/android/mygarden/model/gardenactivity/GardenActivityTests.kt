@@ -14,7 +14,9 @@ import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.utils.FirebaseUtils
 import com.google.firebase.Timestamp
 import java.sql.Timestamp as SqlTimestamp
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -234,5 +236,48 @@ class GardenActivityTests {
     assertTrue(types.contains(ActivityType.ADDED_PLANT))
     assertTrue(types.contains(ActivityType.ADDED_FRIEND))
     assertTrue(types.contains(ActivityType.WATERED_PLANT))
+  }
+
+  @Test
+  fun feedActivities_mergesActivitiesFromMultipleUsers() = runTest {
+    val currentUserId = firebaseUtils.auth.currentUser!!.uid
+    val otherUserId = "otherUser123"
+
+    val activityCurrentUser =
+        ActivityAchievement(
+            userId = currentUserId,
+            pseudo = "CurrentUser",
+            timestamp = Timestamp.now(),
+            achievementName = "Current User Badge")
+
+    val activityOtherUser =
+        ActivityAddedPlant(
+            userId = otherUserId,
+            pseudo = "OtherUser",
+            timestamp = Timestamp.now(),
+            ownedPlant = createTestOwnedPlant())
+
+    // Add activity for current user through the repo
+    profileRepo.addActivity(activityCurrentUser)
+
+    val serializedOtherActivity = ActivityMapper.fromActivityToSerializedActivity(activityOtherUser)
+
+    firebaseUtils.db
+        .collection("users")
+        .document(otherUserId)
+        .collection("activities")
+        .add(serializedOtherActivity)
+        .await()
+
+    val flow = profileRepo.getFeedActivities(listOf(currentUserId, otherUserId), limit = 10)
+    // drop the first because the flow emits per user so we have to wait for the activities of the
+    // second user to be added
+    val feed = flow.drop(1).first()
+
+    assertTrue(feed.isNotEmpty())
+
+    val userIdsInFeed = feed.map { it.userId }.toSet()
+    assertTrue(userIdsInFeed.contains(currentUserId))
+    assertTrue(userIdsInFeed.contains(otherUserId))
   }
 }
