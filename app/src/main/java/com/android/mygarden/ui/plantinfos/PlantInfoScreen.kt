@@ -47,7 +47,16 @@ object PlantInfoScreenTestTags {
   const val WATERING_FREQUENCY = "watering_frequency"
   const val NEXT_BUTTON = "next_button"
   const val NEXT_BUTTON_LOADING = "next_button_loading"
+
+  const val TIPS_BUTTON = "tips_button"
+  const val TIPS_DIALOG = "tips_dialog"
+  const val TIPS_TEXT = "tips_text"
+  const val TIPS_CLOSE_BUTTON = "tips_close_button"
 }
+
+// Padding constants for PlantInfosScreen
+private val PLANT_NAME_SECTION_HORIZONTAL_PADDING = 20.dp
+private val PLANT_NAME_SECTION_VERTICAL_PADDING = 16.dp
 
 /**
  * Screen displaying detailed information about a plant.
@@ -90,54 +99,17 @@ fun PlantInfosScreen(
       modifier = Modifier.testTag(PlantInfoScreenTestTags.SCREEN),
       containerColor = MaterialTheme.colorScheme.background,
       bottomBar = {
-        // Bottom bar with "Save Plant" button
-        Box(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            contentAlignment = Alignment.Center) {
-              Button(
-                  onClick = {
-                    val plantToSave = uiState.savePlant()
-                    plantInfoViewModel.savePlant(
-                        plantToSave,
-                        onPlantSaved = { plantId ->
-                          plantInfoViewModel.resetUIState()
-                          onNextPlant(plantId)
-                        })
-                  },
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(56.dp)
-                          .testTag(PlantInfoScreenTestTags.NEXT_BUTTON),
-                  shape = RoundedCornerShape(28.dp),
-                  enabled = !uiState.isSaving,
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor = MaterialTheme.colorScheme.primaryContainer,
-                          disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                    if (uiState.isSaving) {
-                      Row(
-                          modifier = Modifier.testTag(PlantInfoScreenTestTags.NEXT_BUTTON_LOADING),
-                          horizontalArrangement = Arrangement.Center,
-                          verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                strokeWidth = 2.dp)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = stringResource(id = R.string.uploading),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                          }
-                    } else {
-                      Text(
-                          text = context.getString(R.string.next),
-                          fontSize = 18.sp,
-                          fontWeight = FontWeight.Medium)
-                    }
-                  }
-            }
+        SavePlantBottomBar(
+            uiState = uiState,
+            onSavePlant = {
+              val plantToSave = uiState.savePlant()
+              plantInfoViewModel.savePlant(
+                  plantToSave,
+                  onPlantSaved = { plantId ->
+                    plantInfoViewModel.resetUIState()
+                    onNextPlant(plantId)
+                  })
+            })
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           // --- Plant Image Header ---
@@ -176,22 +148,41 @@ fun PlantInfosScreen(
                     }
               }
 
-          // --- Name and Latin Name Section ---
-          Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
-            // Common name (e.g., "Rose")
-            Text(
-                text = uiState.name,
-                modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_NAME),
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground)
-            // Scientific name (e.g., "Rosa rubiginosa")
-            Text(
-                text = uiState.latinName,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME))
-          }
+          // --- Name, Latin Name and Tips Section ---
+          Row(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(
+                          horizontal = PLANT_NAME_SECTION_HORIZONTAL_PADDING,
+                          vertical = PLANT_NAME_SECTION_VERTICAL_PADDING),
+              verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                  // Common name (e.g., "Rose")
+                  Text(
+                      text = uiState.name,
+                      modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_NAME),
+                      fontSize = 28.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = MaterialTheme.colorScheme.onBackground)
+                  // Scientific name (e.g., "Rosa rubiginosa")
+                  Text(
+                      text = uiState.latinName,
+                      fontSize = 16.sp,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                      modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME))
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Tips button
+                Button(
+                    onClick = {
+                      plantInfoViewModel.showCareTips(uiState.latinName, uiState.healthStatus)
+                    },
+                    modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_BUTTON)) {
+                      Text(text = stringResource(id = R.string.tips_button_label))
+                    }
+              }
 
           // --- Tab Row for Description/Health/Location ---
           ModulableTabRow(
@@ -287,6 +278,10 @@ fun PlantInfosScreen(
                     }
               }
         }
+        // PopUp Tips dialog
+        if (uiState.showCareTipsDialog) {
+          CareTipsDialog(uiState = uiState, onDismiss = { plantInfoViewModel.dismissCareTips() })
+        }
       }
 }
 
@@ -325,4 +320,74 @@ fun ModulableTabRow(
               })
         }
       }
+}
+
+@Composable
+private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
+  AlertDialog(
+      onDismissRequest = onDismiss,
+      title = { Text(text = stringResource(R.string.tips_title, uiState.latinName)) },
+      text = {
+        val textToShow =
+            when {
+              uiState.careTips == PlantInfoViewModel.LOADING_TIPS_PLACEHOLDER ->
+                  stringResource(R.string.tips_loading_message)
+              uiState.careTips == PlantInfoViewModel.UNKNOWN_PLANT_TIPS_PLACEHOLDER ->
+                  stringResource(R.string.unknown_plant_tips_message)
+              uiState.careTips == PlantInfoViewModel.ERROR_GENERATING_TIPS ->
+                  stringResource(R.string.error_generating_care_tips)
+              else -> uiState.careTips
+            }
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+          Text(text = textToShow, modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_TEXT))
+        }
+      },
+      confirmButton = {
+        TextButton(
+            onClick = onDismiss,
+            modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_CLOSE_BUTTON)) {
+              Text(text = stringResource(id = R.string.tips_close_button))
+            }
+      },
+      modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_DIALOG))
+}
+
+@Composable
+private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Unit) {
+  val context = LocalContext.current
+  Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+    Button(
+        onClick = onSavePlant,
+        modifier =
+            Modifier.fillMaxWidth().height(56.dp).testTag(PlantInfoScreenTestTags.NEXT_BUTTON),
+        shape = RoundedCornerShape(28.dp),
+        enabled = !uiState.isSaving,
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+          if (uiState.isSaving) {
+            Row(
+                modifier = Modifier.testTag(PlantInfoScreenTestTags.NEXT_BUTTON_LOADING),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically) {
+                  CircularProgressIndicator(
+                      modifier = Modifier.size(24.dp),
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                      strokeWidth = 2.dp)
+                  Spacer(modifier = Modifier.width(12.dp))
+                  Text(
+                      text = stringResource(id = R.string.uploading),
+                      fontSize = 18.sp,
+                      fontWeight = FontWeight.Medium,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+          } else {
+            Text(
+                text = context.getString(R.string.next),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium)
+          }
+        }
+  }
 }

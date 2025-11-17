@@ -311,6 +311,33 @@ abstract class PlantsRepositoryBase : PlantsRepository {
   }
 
   /**
+   * Generates care tips for a plant based on its latinName and health status.
+   *
+   * @param latinName The Latin name of the plant
+   * @param healthStatus The current health status of the plant
+   * @return A string containing the generated care tips
+   */
+  override suspend fun generateCareTips(
+      latinName: String,
+      healthStatus: PlantHealthStatus
+  ): String {
+    val prompt =
+        """
+        Reply ONLY with plain text advice (no markdown, no JSON).
+        Give 2-3 concise, practical care tips for a $latinName plant that is currently ${healthStatus.descriptionRes}.
+        Each tip should be one short sentence focused on immediate actions.
+    """
+            .trimIndent()
+
+    return try {
+      plantDescriptionCallGemini(prompt)
+    } catch (e: Exception) {
+      Log.e("plantCareTipsLog", "Error while generating care tips for $latinName", e)
+      return "Unable to generate care tips at this time."
+    }
+  }
+
+  /**
    * Default cleanup implementation (no-op). Subclasses should override this if they need to clean
    * up resources.
    */

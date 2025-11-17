@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.plantinfos
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
@@ -35,6 +36,8 @@ data class PlantInfoUIState(
     val selectedTab: SelectedPlantInfoTab = SelectedPlantInfoTab.DESCRIPTION,
     val isRecognized: Boolean = false,
     val isSaving: Boolean = false,
+    val showCareTipsDialog: Boolean = false,
+    val careTips: String = ""
 ) {
   fun savePlant(): Plant {
     return Plant(
@@ -111,5 +114,53 @@ class PlantInfoViewModel(
   /** Update the selected tab (Description or Health). */
   fun setTab(tab: SelectedPlantInfoTab) {
     _uiState.value = _uiState.value.copy(selectedTab = tab)
+  }
+
+  companion object {
+    // Utils for loading tips text to avoid hardcoding
+    const val LOADING_TIPS_PLACEHOLDER = "__LOADING_TIPS__"
+
+    // Placeholder value used to signal the UI that the plant is unknown
+    const val UNKNOWN_PLANT_TIPS_PLACEHOLDER = "__UNKNOWN_PLANT__"
+
+    // Placeholder value used to signal an error when generating tips
+    const val ERROR_GENERATING_TIPS = "__ERROR_GENERATING_TIPS__"
+  }
+
+  /**
+   * Request care tips for a plant and show the dialog.
+   *
+   * @param latinName Scientific (Latin) name of the plant used to tailor the tips.
+   * @param healthStatus Current health status used to adapt the advice.
+   */
+  fun showCareTips(latinName: String, healthStatus: PlantHealthStatus) {
+    viewModelScope.launch {
+      _uiState.value =
+          _uiState.value.copy(showCareTipsDialog = true, careTips = LOADING_TIPS_PLACEHOLDER)
+
+      // If the plant's latin name equals the unknown sentinel, don't attempt to
+      // generate tips — show a fallback message instead.
+      if (latinName.equals(Plant.UNKNOWN_NAME, true)) {
+        _uiState.value = _uiState.value.copy(careTips = UNKNOWN_PLANT_TIPS_PLACEHOLDER)
+        return@launch
+      }
+
+      val tips =
+          try {
+            plantsRepository.generateCareTips(latinName, healthStatus)
+          } catch (e: Exception) {
+            Log.e("plantInfoViewModel", "Error generating care tips for $latinName", e)
+            // Use a placeholder constant instead of a hardcoded user-facing string.
+            // The UI will map this placeholder to a localized string resource.
+            ERROR_GENERATING_TIPS
+          }
+
+      _uiState.value = _uiState.value.copy(careTips = tips)
+    }
+  }
+
+  /** Dismiss the care tips dialog by updating the UI state. */
+  fun dismissCareTips() {
+    _uiState.value = _uiState.value.copy(showCareTipsDialog = false)
   }
 }

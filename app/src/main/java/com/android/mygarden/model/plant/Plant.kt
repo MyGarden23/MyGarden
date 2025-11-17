@@ -24,9 +24,9 @@ import java.sql.Timestamp
  * @property isRecognized A boolean to tell if the plant was recognised by the API or not
  */
 data class Plant(
-    val name: String = "Unknown",
+    val name: String = UNKNOWN_NAME,
     val image: String? = null,
-    val latinName: String = "Unknown",
+    val latinName: String = UNKNOWN_NAME,
     val description: String = "No description available",
     val location: PlantLocation = PlantLocation.UNKNOWN,
     val lightExposure: String = "Unknown",
@@ -34,7 +34,12 @@ data class Plant(
     val healthStatusDescription: String = "No health status description available",
     val wateringFrequency: Int = 0, // in days
     val isRecognized: Boolean = false,
-)
+) {
+  companion object {
+    /** Sentinel value used as the default/unknown plant name */
+    const val UNKNOWN_NAME = "Unknown"
+  }
+}
 
 /**
  * Represents a plant owned by a user in their virtual garden.

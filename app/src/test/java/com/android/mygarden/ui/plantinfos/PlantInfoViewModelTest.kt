@@ -240,4 +240,94 @@ class PlantInfoViewModelTest {
     uiState = viewModel.uiState.value
     assertEquals("Second Plant", uiState.name)
   }
+
+  @Test
+  fun showCareTips_setsDialogAndLoadsTips() = runTest {
+    // Arrange: create a fake repository that returns a predictable tips string
+    val fakeTips = "Water lightly every 3 days"
+    val fakeRepo =
+        object : com.android.mygarden.model.plant.PlantsRepository by PlantsRepositoryLocal() {
+          override suspend fun generateCareTips(
+              latinName: String,
+              healthStatus: PlantHealthStatus
+          ): String {
+            return fakeTips
+          }
+        }
+
+    val vm = PlantInfoViewModel(fakeRepo)
+
+    // Act: call showCareTips and advance coroutines to completion
+    vm.showCareTips("Testus plantus", PlantHealthStatus.HEALTHY)
+    advanceUntilIdle()
+
+    // Assert: dialog visible and tips set
+    val finalState = vm.uiState.value
+    assertTrue(finalState.showCareTipsDialog)
+    assertEquals(fakeTips, finalState.careTips)
+  }
+
+  @Test
+  fun dismissCareTips_hidesDialogButPreservesText() = runTest {
+    val fakeTips = "Keep soil moist"
+    val fakeRepo =
+        object : com.android.mygarden.model.plant.PlantsRepository by PlantsRepositoryLocal() {
+          override suspend fun generateCareTips(
+              latinName: String,
+              healthStatus: PlantHealthStatus
+          ): String {
+            return fakeTips
+          }
+        }
+
+    val vm = PlantInfoViewModel(fakeRepo)
+    vm.showCareTips("Testus plantus", PlantHealthStatus.HEALTHY)
+    advanceUntilIdle()
+
+    // ensure dialog visible and tips present
+    assertTrue(vm.uiState.value.showCareTipsDialog)
+    assertEquals(fakeTips, vm.uiState.value.careTips)
+
+    // dismiss and verify dialog hidden but tips preserved
+    vm.dismissCareTips()
+    assertFalse(vm.uiState.value.showCareTipsDialog)
+    assertEquals(fakeTips, vm.uiState.value.careTips)
+  }
+
+  @Test
+  fun showCareTips_handlesRepositoryException_andShowsFallback() = runTest {
+    // Arrange: repo that throws when generateCareTips is called
+    val throwingRepo =
+        object : com.android.mygarden.model.plant.PlantsRepository by PlantsRepositoryLocal() {
+          override suspend fun generateCareTips(
+              latinName: String,
+              healthStatus: PlantHealthStatus
+          ): String {
+            throw RuntimeException("AI backend down")
+          }
+        }
+    val vm = PlantInfoViewModel(throwingRepo)
+
+    // Act: call showCareTips and advance the coroutine
+    vm.showCareTips("Testus plantus", PlantHealthStatus.UNKNOWN)
+    advanceUntilIdle()
+
+    // Assert: fallback message from ViewModel should be set
+    val finalState = vm.uiState.value
+    assertTrue(finalState.showCareTipsDialog)
+    assertEquals(PlantInfoViewModel.ERROR_GENERATING_TIPS, finalState.careTips)
+  }
+
+  @Test
+  fun showCareTips_showsUnknownPlaceholder() = runTest {
+    val fakeRepo = PlantsRepositoryLocal()
+    val vm = PlantInfoViewModel(fakeRepo)
+
+    // Case: latin name equals "unknown"
+    vm.showCareTips("unknown", PlantHealthStatus.HEALTHY)
+    advanceUntilIdle()
+    var finalState = vm.uiState.value
+    assertTrue(finalState.showCareTipsDialog)
+    assertEquals(PlantInfoViewModel.UNKNOWN_PLANT_TIPS_PLACEHOLDER, finalState.careTips)
+  }
 }

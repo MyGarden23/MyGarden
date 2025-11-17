@@ -16,7 +16,9 @@ import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirestoreProfileTest
+import com.android.mygarden.utils.PlantRepositoryType
 import org.junit.Rule
 import org.junit.Test
 
@@ -356,5 +358,57 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
 
     gatedRepo.gate.complete(Unit)
     composeTestRule.waitForIdle()
+  }
+
+  @Test
+  fun tipsButton_isDisplayed() {
+    PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
+
+    setContent(plant)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_BUTTON).assertIsDisplayed()
+  }
+
+  @Test
+  fun clickingTipsButton_showsDialogWithTipsText() {
+    // Provide a repo that returns a known tips string
+    val fakeTips = "Keep soil slightly moist and provide bright indirect light."
+
+    val fakePlantRepositoryUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoLocal)
+    fakePlantRepositoryUtils.mockPlantCareTips(fakeTips)
+    fakePlantRepositoryUtils.setUpMockRepo()
+
+    setContent(plant)
+
+    // Click the tips button
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify dialog displayed and contains the tips text
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_DIALOG).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_TEXT).assertIsDisplayed()
+    // Check the text equals the expected tips
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_TEXT).assertTextEquals(fakeTips)
+  }
+
+  @Test
+  fun closingTipsDialog_hidesDialog() {
+    // Provide a repo that returns a known tips string
+    val fakeTips = "Keep soil slightly moist and provide bright indirect light."
+    val fakePlantRepositoryUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoLocal)
+    fakePlantRepositoryUtils.mockPlantCareTips(fakeTips)
+    fakePlantRepositoryUtils.setUpMockRepo()
+
+    setContent(plant)
+
+    // Open dialog
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+
+    // Close dialog using the close button
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_CLOSE_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+
+    // Dialog should no longer exist
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_DIALOG).assertDoesNotExist()
   }
 }

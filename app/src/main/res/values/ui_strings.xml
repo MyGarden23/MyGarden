@@ -65,6 +65,12 @@
     <string name="status_label">Status: %1$s</string>
     <string name="tab_health">Health</string>
     <string name="loading_plant_infos">Loading Plant Infos…</string>
+    <string name="tips_button_label">Tips</string>
+    <string name="tips_loading_message">Loading…</string>
+    <string name="tips_title">Care Tips</string>
+    <string name="tips_close_button">Close</string>
+    <string name="error_generating_care_tips">Unable to generate care tips</string>
+    <string name="unknown_plant_tips_message">Plant unknown</string>
 
 
     <!-- Pop Up Screen -->
