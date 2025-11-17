@@ -35,6 +35,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
   private suspend fun saveProfileSuspend(
       firstName: String = "Test",
       lastName: String = "User",
+      pseudo: String = "pseudo",
       gardeningSkill: GardeningSkill = GardeningSkill.BEGINNER,
       favoritePlant: String = "Rose",
       country: String = "US",
@@ -44,6 +45,7 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
         Profile(
             firstName = firstName,
             lastName = lastName,
+            pseudo = pseudo,
             gardeningSkill = gardeningSkill,
             favoritePlant = favoritePlant,
             country = country,

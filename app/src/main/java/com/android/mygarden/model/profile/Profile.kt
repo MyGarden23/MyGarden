@@ -10,6 +10,7 @@ import com.android.mygarden.ui.profile.Avatar
  *
  * @param firstName The user's first name
  * @param lastName The user's last name
+ * @param pseudo The user's pseudo (unique across all the users)
  * @param gardeningSkill The user's gardening expertise (e.g., Beginner, Intermediate, Expert)
  * @param favoritePlant The user's favorite plant
  * @param country The user's country of residence
@@ -19,6 +20,7 @@ import com.android.mygarden.ui.profile.Avatar
 data class Profile(
     val firstName: String = "",
     val lastName: String = "",
+    val pseudo: String = "",
     val gardeningSkill: GardeningSkill = GardeningSkill.BEGINNER,
     val favoritePlant: String = "",
     val country: String = "",
