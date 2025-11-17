@@ -1,7 +1,13 @@
 package com.android.mygarden.model.gardenactivity
 
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFriend
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
+import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAchievement
+import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAddFriend
+import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAddedPlant
+import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedWaterPlant
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
@@ -79,7 +85,11 @@ class ActivityMapperTest {
 
     // Create achievement activity
     val activity =
-        ActivityAchievement(userId = "user456", pseudo = "AchievementUser", timestamp = timestamp)
+        ActivityAchievement(
+            userId = "user456",
+            pseudo = "AchievementUser",
+            timestamp = timestamp,
+            achievementName = "Gained Badge")
 
     // Serialize
     val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)
@@ -104,22 +114,6 @@ class ActivityMapperTest {
   }
 
   @Test
-  fun testDeserializeUnknownActivityType() {
-    // Create a serialized activity with unknown type
-    val unknownActivity =
-        object : SerializedActivity() {
-          override val userId = "user789"
-          override val type = "UNKNOWN_TYPE"
-          override val pseudo = "UnknownUser"
-          override val timestamp = Timestamp.now()
-        }
-
-    // Should return null for unknown types
-    val deserialized = ActivityMapper.fromSerializedActivityToActivity(unknownActivity)
-    assertNull(deserialized)
-  }
-
-  @Test
   fun testActivityTypesMatch() {
     val timestamp = Timestamp.now()
 
@@ -135,9 +129,110 @@ class ActivityMapperTest {
                     lastWatered = SqlTimestamp(System.currentTimeMillis())))
 
     val activityAchievement =
-        ActivityAchievement(userId = "user2", pseudo = "User2", timestamp = timestamp)
+        ActivityAchievement(
+            userId = "user2",
+            pseudo = "User2",
+            timestamp = timestamp,
+            achievementName = "Gained Badge")
 
     assertEquals(ActivityType.ADDED_PLANT, activityAddedPlant.type)
     assertEquals(ActivityType.ACHIEVEMENT, activityAchievement.type)
+  }
+
+  @Test
+  fun testSerializeAndDeserializeAddFriend() {
+    val timestamp = Timestamp.now()
+
+    val activity =
+        ActivityAddFriend(
+            userId = "userFriend",
+            pseudo = "FriendUser",
+            timestamp = timestamp,
+            friendId = "friend123")
+
+    val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)
+
+    assertTrue(serialized is SerializedAddFriend)
+    val serializedFriend = serialized as SerializedAddFriend
+    assertEquals("userFriend", serializedFriend.userId)
+    assertEquals("ADDED_FRIEND", serializedFriend.type)
+    assertEquals("FriendUser", serializedFriend.pseudo)
+    assertEquals("friend123", serializedFriend.friendId)
+
+    val deserialized = ActivityMapper.fromSerializedActivityToActivity(serialized)
+
+    assertNotNull(deserialized)
+    assertTrue(deserialized is ActivityAddFriend)
+    val deserializedFriend = deserialized as ActivityAddFriend
+    assertEquals("userFriend", deserializedFriend.userId)
+    assertEquals("FriendUser", deserializedFriend.pseudo)
+    assertEquals(ActivityType.ADDED_FRIEND, deserializedFriend.type)
+    assertEquals("friend123", deserializedFriend.friendId)
+  }
+
+  @Test
+  fun testSerializeAndDeserializeWaterPlant() {
+    val plant =
+        Plant(
+            name = "Watered Plant",
+            latinName = "Aqua planta",
+            description = "A plant used for watering test",
+            location = PlantLocation.INDOOR,
+            lightExposure = "Partial shade",
+            healthStatus = PlantHealthStatus.HEALTHY,
+            healthStatusDescription = "Hydrated",
+            wateringFrequency = 5,
+            isRecognized = true,
+            image = "https://example.com/watered.jpg")
+
+    val ownedPlant =
+        OwnedPlant(
+            id = "ownedWatered123",
+            plant = plant,
+            lastWatered = SqlTimestamp(System.currentTimeMillis()),
+            previousLastWatered = SqlTimestamp(System.currentTimeMillis() - 3600000))
+
+    val timestamp = Timestamp.now()
+
+    val activity =
+        ActivityWaterPlant(
+            userId = "userWater",
+            pseudo = "WaterUser",
+            timestamp = timestamp,
+            ownedPlant = ownedPlant)
+
+    val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)
+
+    assertTrue(serialized is SerializedWaterPlant)
+    val serializedWater = serialized as SerializedWaterPlant
+    assertEquals("userWater", serializedWater.userId)
+    assertEquals("WATERED_PLANT", serializedWater.type)
+    assertEquals("WaterUser", serializedWater.pseudo)
+    assertEquals("ownedWatered123", serializedWater.ownedPlant.id)
+    assertEquals("Watered Plant", serializedWater.ownedPlant.plant.name)
+
+    val deserialized = ActivityMapper.fromSerializedActivityToActivity(serialized)
+
+    assertNotNull(deserialized)
+    assertTrue(deserialized is ActivityWaterPlant)
+    val deserializedWater = deserialized as ActivityWaterPlant
+    assertEquals("userWater", deserializedWater.userId)
+    assertEquals("WaterUser", deserializedWater.pseudo)
+    assertEquals(ActivityType.WATERED_PLANT, deserializedWater.type)
+    assertEquals("ownedWatered123", deserializedWater.ownedPlant.id)
+    assertEquals("Watered Plant", deserializedWater.ownedPlant.plant.name)
+  }
+
+  @Test
+  fun testMapTypeToSerializedClassKnownTypes() {
+    assertEquals(
+        SerializedAddedPlant::class.java, ActivityMapper.mapTypeToSerializedClass("ADDED_PLANT"))
+    assertEquals(
+        SerializedAchievement::class.java, ActivityMapper.mapTypeToSerializedClass("ACHIEVEMENT"))
+  }
+
+  @Test
+  fun testMapTypeToSerializedClassUnknownType() {
+    assertNull(ActivityMapper.mapTypeToSerializedClass("UNKNOWN_TYPE"))
   }
 }

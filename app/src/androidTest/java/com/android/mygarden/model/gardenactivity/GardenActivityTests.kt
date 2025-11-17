@@ -2,7 +2,9 @@ package com.android.mygarden.model.gardenactivity
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFriend
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
@@ -91,7 +93,11 @@ class GardenActivityTests {
     val uid = firebaseUtils.auth.currentUser!!.uid
 
     val activityAchievement =
-        ActivityAchievement(userId = uid, pseudo = "Achiever", timestamp = Timestamp.now())
+        ActivityAchievement(
+            userId = uid,
+            pseudo = "Achiever",
+            timestamp = Timestamp.now(),
+            achievementName = "Gained Badge")
 
     // Add activity
     profileRepo.addActivity(activityAchievement)
@@ -111,7 +117,11 @@ class GardenActivityTests {
     val uid = firebaseUtils.auth.currentUser!!.uid
 
     val activity1 =
-        ActivityAchievement(userId = uid, pseudo = "UserFeed", timestamp = Timestamp.now())
+        ActivityAchievement(
+            userId = uid,
+            pseudo = "UserFeed",
+            timestamp = Timestamp.now(),
+            achievementName = "Gained Badge")
 
     val activity2 =
         ActivityAddedPlant(
@@ -130,5 +140,99 @@ class GardenActivityTests {
     val types = feed.map { it.type }.toSet()
     assertTrue(types.contains(ActivityType.ACHIEVEMENT))
     assertTrue(types.contains(ActivityType.ADDED_PLANT))
+  }
+
+  @Test
+  fun addFriendActivity_isStoredAndRetrievedForCurrentUser() = runTest {
+    val uid = firebaseUtils.auth.currentUser!!.uid
+
+    val activityAddFriend =
+        ActivityAddFriend(
+            userId = uid,
+            pseudo = "FriendUser",
+            timestamp = Timestamp.now(),
+            friendId = "friend123")
+
+    profileRepo.addActivity(activityAddFriend)
+
+    val activities = profileRepo.getActivities().first()
+    assertTrue(activities.isNotEmpty())
+
+    val first = activities.first { it is ActivityAddFriend } as ActivityAddFriend
+    assertEquals(uid, first.userId)
+    assertEquals("FriendUser", first.pseudo)
+    assertEquals(ActivityType.ADDED_FRIEND, first.type)
+    assertEquals("friend123", first.friendId)
+  }
+
+  @Test
+  fun waterPlantActivity_isStoredAndRetrievedForCurrentUser() = runTest {
+    val uid = firebaseUtils.auth.currentUser!!.uid
+
+    val activityWaterPlant =
+        ActivityWaterPlant(
+            userId = uid,
+            pseudo = "WaterUser",
+            timestamp = Timestamp.now(),
+            ownedPlant = createTestOwnedPlant())
+
+    profileRepo.addActivity(activityWaterPlant)
+
+    val activities = profileRepo.getActivities().first()
+    assertTrue(activities.isNotEmpty())
+
+    val first = activities.first { it is ActivityWaterPlant } as ActivityWaterPlant
+    assertEquals(uid, first.userId)
+    assertEquals("WaterUser", first.pseudo)
+    assertEquals(ActivityType.WATERED_PLANT, first.type)
+    assertEquals("plant123", first.ownedPlant.id)
+    assertEquals("Test Rose", first.ownedPlant.plant.name)
+  }
+
+  @Test
+  fun feedActivities_mergesAllActivityTypesFromSingleUser() = runTest {
+    val uid = firebaseUtils.auth.currentUser!!.uid
+
+    val achievement =
+        ActivityAchievement(
+            userId = uid,
+            pseudo = "FeedUser",
+            timestamp = Timestamp.now(),
+            achievementName = "Gained Badge")
+
+    val addedPlant =
+        ActivityAddedPlant(
+            userId = uid,
+            pseudo = "FeedUser",
+            timestamp = Timestamp.now(),
+            ownedPlant = createTestOwnedPlant())
+
+    val addFriend =
+        ActivityAddFriend(
+            userId = uid,
+            pseudo = "FeedUser",
+            timestamp = Timestamp.now(),
+            friendId = "friendFeed123")
+
+    val waterPlant =
+        ActivityWaterPlant(
+            userId = uid,
+            pseudo = "FeedUser",
+            timestamp = Timestamp.now(),
+            ownedPlant = createTestOwnedPlant())
+
+    profileRepo.addActivity(achievement)
+    profileRepo.addActivity(addedPlant)
+    profileRepo.addActivity(addFriend)
+    profileRepo.addActivity(waterPlant)
+
+    val feed = profileRepo.getFeedActivities(listOf(uid), limit = 10).first()
+    assertTrue(feed.size >= 4)
+
+    val types = feed.map { it.type }.toSet()
+    assertTrue(types.contains(ActivityType.ACHIEVEMENT))
+    assertTrue(types.contains(ActivityType.ADDED_PLANT))
+    assertTrue(types.contains(ActivityType.ADDED_FRIEND))
+    assertTrue(types.contains(ActivityType.WATERED_PLANT))
   }
 }
