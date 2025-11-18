@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.editPlant
 
+import com.android.mygarden.model.plant.PlantLocation
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.StateFlow
 
@@ -56,6 +57,14 @@ interface EditPlantViewModelInterface {
    * @param newDescription The new description to be set.
    */
   fun setDescription(newDescription: String)
+
+  /**
+   * Sets location of the plant in the UI state. This function should be called only if the Plant is
+   * not recognized by the API.
+   *
+   * @param newLocation The new location of the plant.
+   */
+  fun setLocation(newLocation: PlantLocation)
 
   /**
    * Deletes a plant by its ID.

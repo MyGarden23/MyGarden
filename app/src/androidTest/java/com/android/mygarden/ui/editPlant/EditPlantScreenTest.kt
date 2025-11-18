@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import java.sql.Timestamp
@@ -403,6 +404,10 @@ private class FakeEditPlantViewModel : EditPlantViewModelInterface {
 
   override fun setLatinName(newLatinName: String) {
     _ui.value = _ui.value.copy(latinName = newLatinName)
+  }
+
+  override fun setLocation(newLocation: PlantLocation) {
+    _ui.value = _ui.value.copy(location = newLocation)
   }
 
   override fun setErrorMsg(resId: Int) {
