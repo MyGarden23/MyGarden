@@ -101,6 +101,15 @@ class EditPlantViewModelTest {
     assertEquals("New description", viewModel.uiState.value.description)
   }
 
+  /** Test setting the location with arbitrary value. */
+  @Test
+  fun setLocation_updates_state() {
+    for (loc in PlantLocation.entries) {
+      viewModel.setLocation(loc)
+      assertEquals(loc, viewModel.uiState.value.location)
+    }
+  }
+
   /** Test deleting a plant from the repository. */
   @Test
   fun deletePlant_success_removes_from_repository() = runTest {
