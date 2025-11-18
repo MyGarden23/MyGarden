@@ -114,13 +114,20 @@ fun PlantInfosScreen(
         SavePlantBottomBar(
             uiState = uiState,
             onSavePlant = {
-              val plantToSave = uiState.savePlant()
-              plantInfoViewModel.savePlant(
-                  plantToSave,
-                  onPlantSaved = { plantId ->
-                    plantInfoViewModel.resetUIState()
-                    onNextPlant(plantId)
-                  })
+              if (!uiState.isFromGarden) {
+                // If the user doesn't come from the Garden (so from the Camera) it needs to save
+                // the plant in the repository
+                val plantToSave = uiState.savePlant()
+                plantInfoViewModel.savePlant(
+                    plantToSave,
+                    onPlantSaved = { plantId ->
+                      plantInfoViewModel.resetUIState()
+                      onNextPlant(plantId)
+                    })
+              } else {
+                // if the user comes from the Garden the ownedPlantId field is not null
+                onNextPlant(ownedPlantId!!)
+              }
             })
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -394,6 +401,11 @@ private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Uni
                       fontWeight = FontWeight.Medium,
                       color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+          } else if (uiState.isFromGarden) {
+            Text(
+                text = context.getString(R.string.edit),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium)
           } else {
             Text(
                 text = context.getString(R.string.next),
