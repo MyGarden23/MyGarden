@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.plantinfos
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -68,6 +69,8 @@ private val PLANT_NAME_SECTION_VERTICAL_PADDING = 16.dp
  * - Save button to add the plant to user's garden
  *
  * @param plant The plant to display information for
+ * @param ownedPlantId the id of the OwnedPlant to display if we come from the garden or null if we
+ *   come from the camera
  * @param plantInfoViewModel ViewModel managing the UI state
  * @param onBackPressed Callback when the back button is pressed
  * @param onNextPlant Callback when the Save Plant button is clicked, receives the plant ID
@@ -76,7 +79,7 @@ private val PLANT_NAME_SECTION_VERTICAL_PADDING = 16.dp
 @Composable
 fun PlantInfosScreen(
     plant: Plant,
-    ownedPlantId: String?,
+    ownedPlantId: String? = null,
     plantInfoViewModel: PlantInfoViewModel = viewModel(),
     onBackPressed: () -> Unit,
     onNextPlant: (String) -> Unit = {}
@@ -94,6 +97,14 @@ fun PlantInfosScreen(
   LaunchedEffect(plant) {
     val loadingText = context.getString(R.string.loading_plant_infos)
     plantInfoViewModel.initializeUIState(plant, ownedPlantId, loadingText)
+  }
+
+  // Display the error message if fetching the ownedPlant from the repository failed
+  LaunchedEffect(uiState.errorMsg) {
+    uiState.errorMsg?.let { resId ->
+      Toast.makeText(context, context.getString(resId), Toast.LENGTH_SHORT).show()
+      plantInfoViewModel.clearErrorMsg()
+    }
   }
 
   Scaffold(
