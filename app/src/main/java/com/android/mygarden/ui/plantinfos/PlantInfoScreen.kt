@@ -123,7 +123,7 @@ fun PlantInfosScreen(
                 // Placeholder for plant image
                 Box(modifier = Modifier.fillMaxSize()) {
                   AsyncImage(
-                      model = ImageRequest.Builder(context).data(plant.image ?: "").build(),
+                      model = ImageRequest.Builder(context).data(uiState.image ?: "").build(),
                       contentDescription = context.getString(R.string.image_plant_description),
                       modifier =
                           Modifier.fillMaxWidth()

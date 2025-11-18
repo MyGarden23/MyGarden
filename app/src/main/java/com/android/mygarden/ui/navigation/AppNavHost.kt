@@ -113,8 +113,29 @@ fun AppNavHost(
             navController.currentBackStackEntry?.savedStateHandle?.remove<String>(IMAGE_PATH_KEY)
             // Store image path in saved state and navigate to PlantView
             navController.currentBackStackEntry?.savedStateHandle?.set(IMAGE_PATH_KEY, imagePath)
-            navigationActions.navTo(Screen.PlantInfo)
+            navigationActions.navTo(Screen.PlantInfoFromCamera)
           })
+    }
+
+    // Plant Info From Camera
+    composable(Screen.PlantInfoFromCamera.route) {
+      val imagePath =
+          navController.previousBackStackEntry?.savedStateHandle?.get<String>(IMAGE_PATH_KEY)
+
+      val plant = Plant(image = imagePath)
+
+      PlantInfosScreen(
+          plant = plant,
+          ownedPlantId = null,
+          onNextPlant = { plantId ->
+            // Navigate to EditPlant and remove PlantInfo from backstack
+            // This prevents going back to PlantInfo after saving (local image is deleted)
+            navController.navigate(
+                Screen.EditPlant.buildRoute(plantId, Screen.PlantInfoFromCamera.route)) {
+                  popUpTo(Screen.Camera.route) { inclusive = false }
+                }
+          },
+          onBackPressed = { navigationActions.navBack() })
     }
 
     // Garden
@@ -126,8 +147,7 @@ fun AppNavHost(
             navController.currentBackStackEntry
                 ?.savedStateHandle
                 ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
-            navigationActions.navTo(Screen.PlantInfo)
-            // navigationActions.navTo(Screen.EditPlant(ownedPlant.id, Screen.Garden.route))
+            navigationActions.navTo(Screen.PlantInfoFromGarden)
           },
           onSignOut = {
             // Clean up repositories before signing out to prevent PERMISSION_DENIED errors
@@ -136,6 +156,25 @@ fun AppNavHost(
             FirebaseAuth.getInstance().signOut()
             navigationActions.navTo(Screen.Auth)
           })
+    }
+
+    // Plant Info From Garden
+    composable(Screen.PlantInfoFromGarden.route) { entry ->
+      val plantInfoViewModel: PlantInfoViewModel = viewModel()
+      val ownedPlantId: String? =
+          navController.previousBackStackEntry
+              ?.savedStateHandle
+              ?.get<String>(OWNED_PLANT_ID_TO_PLANT_INFO_KEY)
+
+      PlantInfosScreen(
+          plant = Plant(),
+          ownedPlantId = ownedPlantId,
+          plantInfoViewModel = plantInfoViewModel,
+          onBackPressed = { navigationActions.navBack() },
+          onNextPlant = { plantId ->
+            navigationActions.navTo(Screen.EditPlant(plantId, Screen.Garden.route))
+          },
+      )
     }
 
     // Plant Info
@@ -149,7 +188,9 @@ fun AppNavHost(
 
       val plant = Plant(image = imagePath)
       val ownedPlantId: String? =
-          backStackEntry.arguments?.getString(OWNED_PLANT_ID_TO_PLANT_INFO_KEY)
+          navController.previousBackStackEntry
+              ?.savedStateHandle
+              ?.get<String>(OWNED_PLANT_ID_TO_PLANT_INFO_KEY)
       PlantInfosScreen(
           plant = plant,
           ownedPlantId = ownedPlantId,
@@ -194,13 +235,13 @@ fun AppNavHost(
               editPlantViewModel = vm,
               onSaved = { navigationActions.navTo(Screen.Garden) },
               onDeleted =
-                  if (entry.arguments?.getString(FROM_KEY) != Screen.PlantInfo.route) {
+                  if (entry.arguments?.getString(FROM_KEY) != Screen.PlantInfoFromCamera.route) {
                     { navigationActions.navTo(Screen.Garden) }
                   } else {
                     null
                   },
               goBack = {
-                if (entry.arguments?.getString(FROM_KEY) == Screen.PlantInfo.route) {
+                if (entry.arguments?.getString(FROM_KEY) == Screen.PlantInfoFromCamera.route) {
                   // Need to delete manually due to our implementation of Screen.PlantInfo.route (we
                   // add by default the plant to our garden but delete it if the user don't want to
                   // add the plant to the garden)

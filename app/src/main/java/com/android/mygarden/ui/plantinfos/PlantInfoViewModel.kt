@@ -37,6 +37,7 @@ data class PlantInfoUIState(
     val isRecognized: Boolean = false,
     val isSaving: Boolean = false,
     val isFromGarden: Boolean = false,
+    val errorMsg: Int? = null,
     val showCareTipsDialog: Boolean = false,
     val careTips: String = ""
 ) {
@@ -68,30 +69,66 @@ class PlantInfoViewModel(
   /** Initialize the UI state with plant data. Called when the screen is first displayed. */
   fun initializeUIState(plant: Plant, ownedPlantId: String?, loadingText: String) {
     viewModelScope.launch {
-      val ownedPlantIdNotNull = ownedPlantId != null
-      _uiState.value = _uiState.value.copy(description = loadingText, image = plant.image)
-      // firewall to not regenerate is no picture taken
-      val generatedPlant =
-          if (!plant.image.isNullOrEmpty()) {
-            plantsRepository.identifyPlant(plant.image)
-          } else {
-            plant // Wee keep the plant as it is
-          }
-      _uiState.value =
-          PlantInfoUIState(
-              generatedPlant.name,
-              plant.image,
-              generatedPlant.latinName,
-              generatedPlant.description,
-              generatedPlant.location,
-              generatedPlant.lightExposure,
-              generatedPlant.healthStatus,
-              generatedPlant.healthStatusDescription,
-              generatedPlant.wateringFrequency,
-              isRecognized = generatedPlant.isRecognized,
-              isFromGarden = ownedPlantIdNotNull,
-          )
+      val isFromGarden = ownedPlantId != null
+      if (isFromGarden) {
+        try {
+          val ownedPlant = plantsRepository.getOwnedPlant(ownedPlantId)
+          val plant = ownedPlant.plant
+          _uiState.value =
+              PlantInfoUIState(
+                  plant.name,
+                  plant.image,
+                  plant.latinName,
+                  plant.description,
+                  plant.location,
+                  plant.lightExposure,
+                  plant.healthStatus,
+                  plant.healthStatusDescription,
+                  plant.wateringFrequency,
+                  isRecognized = plant.isRecognized,
+                  isFromGarden = true,
+              )
+        } catch (e: Exception) {
+          Log.e("PlantInfoViewModel", "Error loading Plant from repository by ID. $ownedPlantId", e)
+          setErrorMsg(R.string.error_failed_load_plant_info)
+        }
+      } else {
+        _uiState.value = _uiState.value.copy(description = loadingText, image = plant.image)
+        // firewall to not regenerate is no picture taken
+        val generatedPlant =
+            if (!plant.image.isNullOrEmpty()) {
+              plantsRepository.identifyPlant(plant.image)
+            } else {
+              plant // Wee keep the plant as it is
+            }
+        _uiState.value =
+            PlantInfoUIState(
+                generatedPlant.name,
+                plant.image,
+                generatedPlant.latinName,
+                generatedPlant.description,
+                generatedPlant.location,
+                generatedPlant.lightExposure,
+                generatedPlant.healthStatus,
+                generatedPlant.healthStatusDescription,
+                generatedPlant.wateringFrequency,
+                isRecognized = generatedPlant.isRecognized,
+                isFromGarden = false,
+            )
+      }
     }
+  }
+  /**
+   * Sets an error message in the UI state.
+   *
+   * @param resId The resource ID of the error message to be set.
+   */
+  fun setErrorMsg(resId: Int) {
+    _uiState.value = _uiState.value.copy(errorMsg = resId)
+  }
+  /** Clears the error message in the UI state. */
+  fun clearErrorMsg() {
+    _uiState.value = _uiState.value.copy(errorMsg = null)
   }
 
   fun resetUIState() {
