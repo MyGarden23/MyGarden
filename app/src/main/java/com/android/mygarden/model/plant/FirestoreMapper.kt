@@ -49,7 +49,8 @@ data class SerializedOwnedPlant(
     val id: String = "",
     val plant: SerializedPlant = SerializedPlant(),
     val lastWatered: Long = 0,
-    val previousLastWatered: Long = 0
+    val previousLastWatered: Long = 0,
+    val dateOfCreation: Long = 0
 )
 
 /**
@@ -74,7 +75,9 @@ object FirestoreMapper {
         id = ownedPlant.id,
         plant = fromPlantToSerializedPlant(ownedPlant.plant),
         lastWatered = ownedPlant.lastWatered.time,
-        previousLastWatered = ownedPlant.previousLastWatered?.time ?: 0L)
+        previousLastWatered = ownedPlant.previousLastWatered?.time ?: 0L,
+        dateOfCreation = ownedPlant.dateOfCreation.time
+    )
   }
 
   /**
@@ -90,7 +93,9 @@ object FirestoreMapper {
         lastWatered = Timestamp(sOwnedPlant.lastWatered),
         previousLastWatered =
             if (sOwnedPlant.previousLastWatered != 0L) Timestamp(sOwnedPlant.previousLastWatered)
-            else null)
+            else null,
+        dateOfCreation = Timestamp(sOwnedPlant.dateOfCreation)
+    )
   }
 
   /**
