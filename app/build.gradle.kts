@@ -156,67 +156,37 @@ fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    // ----- BOMs -----
+    val composeBom = platform(libs.compose.bom)
+
+    // =======================
+    // Main implementation
+    // =======================
+    implementation(libs.kotlinx.serialization.json)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(platform(libs.compose.bom))
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.navigation.compose)
+
+    // Jetpack Compose
+    implementation(composeBom)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.material3)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.compose.activity)
+    implementation(libs.compose.viewmodel)
+    implementation(libs.compose.preview)
 
     // Multidex support
     implementation(libs.androidx.multidex)
 
-    testImplementation(libs.junit)
-    globalTestImplementation(libs.androidx.junit)
-    globalTestImplementation(libs.androidx.espresso.core)
-    globalTestImplementation(libs.androidx.espresso.intents)
-
-    // ------------- Jetpack Compose ------------------
-    val composeBom = platform(libs.compose.bom)
-    implementation(composeBom)
-    globalTestImplementation(composeBom)
-
-    implementation(libs.compose.ui)
-    implementation(libs.compose.ui.graphics)
-    // Material Design 3
-    implementation(libs.compose.material3)
-    // Material Icons Extended
-    implementation(libs.androidx.material.icons.extended)
-    // Integration with activities
-    implementation(libs.compose.activity)
-    // Integration with ViewModels
-    implementation(libs.compose.viewmodel)
-    // Android Studio Preview support
-    implementation(libs.compose.preview)
-    debugImplementation(libs.compose.tooling)
-    // UI Tests
-    globalTestImplementation(libs.compose.test.junit)
-    debugImplementation(libs.compose.test.manifest)
-    //testing Unit
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    androidTestImplementation(libs.mockk.android) {
-        exclude(group = "org.junit.jupiter")
-        exclude(group = "org.junit.platform")
-        exclude(group = "org.junit") // safe extra guard
-    }
-    androidTestImplementation(libs.json)
-    // Kotlin Flows Test API
-    androidTestImplementation("app.cash.turbine:turbine:1.1.0")
-
-    // --------- Kaspresso test framework ----------
-    globalTestImplementation(libs.kaspresso)
-    globalTestImplementation(libs.kaspresso.compose)
-
-    // ----------       Robolectric     ------------
-    testImplementation(libs.robolectric)
-
-    // ----------         Firebase      ------------
-    // Add the dependency for the Firebase Authentication library
+    // Firebase (Auth, DB, Firestore, Storage, Messaging)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.database.ktx)
@@ -224,37 +194,69 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.firebase.messaging)
 
+    // Firebase AI Logic (Gemini/Imagen)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
 
-    //Credential Manager
+    // Credential Manager
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
 
-    // ----------         CameraX      ------------
+    // CameraX
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
 
-    // ----------         Coil      ------------
-    // Compatible with Kotlin 1.8
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    // Coil
+    implementation(libs.coil.compose)
 
-    // ----------         Mockito      ------------
+    // Mockito (gardé en implementation comme dans ta version)
     implementation(libs.mockito.core)
     implementation(libs.mockito.kotlin)
-    androidTestImplementation(libs.mockito.android)
-    androidTestImplementation(libs.mockito.kotlin)
 
-    // --------- Firebase AI Logic (Gemini/Imagen) ---------
-    implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
-    implementation("com.google.firebase:firebase-ai")
-
+    // Coroutines Play Services
     implementation(libs.kotlinx.coroutines.play.services)
 
-    // Used to read and correct image EXIF metadata (e.g., rotation) for photos from camera/gallery
+    // EXIF
     implementation(libs.androidx.exifinterface)
+
+    // =======================
+    // Debug-only deps
+    // =======================
+    debugImplementation(libs.compose.tooling)
+    debugImplementation(libs.compose.test.manifest)
+
+    // =======================
+    // Unit tests (JVM)
+    // =======================
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+
+    // Déps partagées test + androidTest
+    globalTestImplementation(libs.androidx.junit)
+    globalTestImplementation(libs.androidx.espresso.core)
+    globalTestImplementation(libs.androidx.espresso.intents)
+    globalTestImplementation(composeBom)
+    globalTestImplementation(libs.compose.test.junit)
+    globalTestImplementation(libs.kaspresso)
+    globalTestImplementation(libs.kaspresso.compose)
+
+    // =======================
+    // Instrumentation tests (androidTest)
+    // =======================
+    androidTestImplementation(libs.mockk.android) {
+        exclude(group = "org.junit.jupiter")
+        exclude(group = "org.junit.platform")
+        exclude(group = "org.junit") // safe extra guard
+    }
+    androidTestImplementation(libs.json)
+    androidTestImplementation(libs.turbine)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockito.kotlin)
 }
 
 
