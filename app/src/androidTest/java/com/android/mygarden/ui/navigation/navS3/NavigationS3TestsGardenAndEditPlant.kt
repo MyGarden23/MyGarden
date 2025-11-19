@@ -100,7 +100,7 @@ class NavigationS3TestsGardenAndEditPlant {
     // Verify that navigation happened to the PlantInfo screen
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).performClick()
 
     // Verify that navigation happened to the EditPlant screen
     composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
@@ -127,7 +127,7 @@ class NavigationS3TestsGardenAndEditPlant {
     // Verify that navigation happened to the PlantInfo screen
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).performClick()
 
     // Verify that navigation happened to the EditPlant screen
     composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
@@ -160,7 +160,7 @@ class NavigationS3TestsGardenAndEditPlant {
     // Verify that navigation happened to the PlantInfo screen
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).performClick()
 
     // Verify that navigation happened to the EditPlant screen
     composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
@@ -199,7 +199,7 @@ class NavigationS3TestsGardenAndEditPlant {
     // Verify that navigation happened to the PlantInfo screen
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).performClick()
 
     // Verify that navigation happened to the EditPlant screen
     composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()

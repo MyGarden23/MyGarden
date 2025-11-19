@@ -39,7 +39,8 @@ data class PlantInfoUIState(
     val isFromGarden: Boolean = false,
     val errorMsg: Int? = null,
     val showCareTipsDialog: Boolean = false,
-    val careTips: String = ""
+    val careTips: String = "",
+    val lastTimeWatered: Timestamp? = null,
 ) {
   fun savePlant(): Plant {
     return Plant(
@@ -69,8 +70,8 @@ class PlantInfoViewModel(
   /** Initialize the UI state with plant data. Called when the screen is first displayed. */
   fun initializeUIState(plant: Plant, loadingText: String, ownedPlantId: String? = null) {
     viewModelScope.launch {
-      val isFromGarden = ownedPlantId != null
-      if (isFromGarden) {
+      // If the ownedPlantId is not null, the user is coming from the garden.
+      if (ownedPlantId != null) {
         try {
           val ownedPlant = plantsRepository.getOwnedPlant(ownedPlantId)
           val plant = ownedPlant.plant
@@ -87,6 +88,7 @@ class PlantInfoViewModel(
                   plant.wateringFrequency,
                   isRecognized = plant.isRecognized,
                   isFromGarden = true,
+                  lastTimeWatered = ownedPlant.lastWatered,
               )
         } catch (e: Exception) {
           Log.e("PlantInfoViewModel", "Error loading Plant from repository by ID. $ownedPlantId", e)

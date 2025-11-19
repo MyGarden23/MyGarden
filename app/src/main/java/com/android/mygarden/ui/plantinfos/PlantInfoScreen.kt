@@ -27,6 +27,11 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.ZoneId
+import java.time.format.TextStyle
+import java.util.Locale
 
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
@@ -43,11 +48,13 @@ object PlantInfoScreenTestTags {
   const val DESCRIPTION_TEXT = "description_text"
   const val HEALTH_STATUS_DESCRIPTION = "health_status_description"
   const val HEALTH_STATUS = "health_status"
+  const val LAST_TIME_WATERED = "last_time_watered"
   const val LOCATION_TEXT = "location_text"
   const val LIGHT_EXPOSURE_TEXT = "light_exposure_text"
   const val WATERING_FREQUENCY = "watering_frequency"
   const val NEXT_BUTTON = "next_button"
   const val NEXT_BUTTON_LOADING = "next_button_loading"
+  const val EDIT_BUTTON = "edit_button"
 
   const val TIPS_BUTTON = "tips_button"
   const val TIPS_DIALOG = "tips_dialog"
@@ -125,8 +132,8 @@ fun PlantInfosScreen(
                       onNextPlant(plantId)
                     })
               } else {
-                // if the user comes from the Garden the ownedPlantId field is not null
-                onNextPlant(ownedPlantId!!)
+                // If the user comes from the Garden the ownedPlantId field is not null
+                onNextPlant(requireNotNull(ownedPlantId))
               }
             })
       }) { paddingValues ->
@@ -271,6 +278,29 @@ fun PlantInfosScreen(
                               color = MaterialTheme.colorScheme.onBackground,
                               modifier =
                                   Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
+
+                          // Last time watered information
+                          if (uiState.isFromGarden) {
+                            // Get the TimeStamp of the last time watered it is not null because the
+                            // user comes from the garden.
+                            val timestamp = requireNotNull(uiState.lastTimeWatered)
+                            val dateTime =
+                                LocalDateTime.ofInstant(
+                                    timestamp.toInstant(), ZoneId.systemDefault())
+                            Text(
+                                text =
+                                    context.getString(
+                                        R.string.last_time_watered_plant_info,
+                                        dateTime.dayOfMonth,
+                                        Month.of(dateTime.monthValue)
+                                            .getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                                        dateTime.hour,
+                                        dateTime.minute),
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier =
+                                    Modifier.testTag(PlantInfoScreenTestTags.LAST_TIME_WATERED))
+                          }
                         }
                         // --- Location Tab Content ---
                         SelectedPlantInfoTab.LOCATION -> {
@@ -374,11 +404,13 @@ private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
 @Composable
 private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Unit) {
   val context = LocalContext.current
+  val testTagButton =
+      if (uiState.isFromGarden) PlantInfoScreenTestTags.EDIT_BUTTON
+      else PlantInfoScreenTestTags.NEXT_BUTTON
   Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
     Button(
         onClick = onSavePlant,
-        modifier =
-            Modifier.fillMaxWidth().height(56.dp).testTag(PlantInfoScreenTestTags.NEXT_BUTTON),
+        modifier = Modifier.fillMaxWidth().height(56.dp).testTag(testTagButton),
         shape = RoundedCornerShape(28.dp),
         enabled = !uiState.isSaving,
         colors =

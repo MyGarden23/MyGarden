@@ -64,6 +64,7 @@
     <!-- Plant Info Screen -->
     <string name="image_plant_description">Image of the plant</string>
     <string name="watering_frequency">Watering Frequency: Every %1$d days</string>
+    <string name="last_time_watered_plant_info">Last Time Watered: %1$d %2$s %3$d:%4$d</string>
     <string name="status_label">Status: %1$s</string>
     <string name="tab_health">Health</string>
     <string name="loading_plant_infos">Loading Plant Infos…</string>
