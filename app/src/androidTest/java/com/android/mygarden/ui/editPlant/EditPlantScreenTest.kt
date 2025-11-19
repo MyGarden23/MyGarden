@@ -451,6 +451,10 @@ private class FakeEditPlantViewModel : EditPlantViewModelInterface {
     _ui.value = _ui.value.copy(location = newLocation)
   }
 
+  override fun setLightExposure(newExposure: String) {
+    _ui.value = _ui.value.copy(lightExposure = newExposure)
+  }
+
   override fun setErrorMsg(resId: Int) {
     errorMsgs += resId
     _ui.value = _ui.value.copy(errorMsg = resId)

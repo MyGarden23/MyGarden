@@ -67,6 +67,14 @@ interface EditPlantViewModelInterface {
   fun setLocation(newLocation: PlantLocation)
 
   /**
+   * Sets light exposure of the plant in the UI state. This function should be called only if the
+   * Plant is not recognized by the API.
+   *
+   * @param newExposure The new location of the plant.
+   */
+  fun setLightExposure(newExposure: String)
+
+  /**
    * Deletes a plant by its ID.
    *
    * @param ownedPlantId The ID of the plant to delete.

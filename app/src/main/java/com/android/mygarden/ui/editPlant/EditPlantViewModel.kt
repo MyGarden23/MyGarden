@@ -40,7 +40,8 @@ data class EditPlantUIState(
     val lastWatered: Timestamp? = null,
     val image: String? = null,
     val isRecognized: Boolean = false,
-    val location: PlantLocation = PlantLocation.UNKNOWN
+    val location: PlantLocation = PlantLocation.UNKNOWN,
+    val lightExposure: String = ""
 )
 
 /**
@@ -81,7 +82,8 @@ class EditPlantViewModel(
                 lastWatered = owned.lastWatered,
                 image = plant.image,
                 isRecognized = plant.isRecognized,
-                location = plant.location)
+                location = plant.location,
+                lightExposure = plant.lightExposure)
       } catch (e: Exception) {
         Log.e("EditPlantViewModel", "Error loading Plant by ID. $ownedPlantId", e)
         setErrorMsg(R.string.error_failed_load_plant_edit)
@@ -109,6 +111,10 @@ class EditPlantViewModel(
     _uiState.value = _uiState.value.copy(location = newLocation)
   }
 
+  override fun setLightExposure(newExposure: String) {
+    _uiState.value = _uiState.value.copy(lightExposure = newExposure)
+  }
+
   override fun deletePlant(ownedPlantId: String) {
     viewModelScope.launch {
       try {
@@ -129,6 +135,7 @@ class EditPlantViewModel(
     val name = state.name
     val latinName = state.latinName
     val location = state.location
+    val exposure = state.lightExposure
 
     if (newPlant == null) {
       Log.e("EditPlantViewModel", "Failed to edit plant (Plant not loaded).")
@@ -172,7 +179,8 @@ class EditPlantViewModel(
                     description = description,
                     name = name,
                     latinName = latinName,
-                    location = location))
+                    location = location,
+                    lightExposure = exposure))
 
     viewModelScope.launch {
       try {
