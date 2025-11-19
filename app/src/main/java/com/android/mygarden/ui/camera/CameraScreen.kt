@@ -81,7 +81,6 @@ private val BUTTONS_COLOR = Color.White
  * @param cameraViewModel the optional View Model of the camera screen
  * @param onPictureTaken the optional lambda called whenever the user takes a picture
  *
- * TODO: Implement the picture taking and gallery access logic
  */
 @Composable
 fun CameraScreen(
@@ -89,182 +88,236 @@ fun CameraScreen(
     cameraViewModel: CameraViewModel = viewModel(),
     onPictureTaken: (String) -> Unit = {}
 ) {
-  val uiState = cameraViewModel.uiState.collectAsState()
-  val context = LocalContext.current
-  val lifecycleOwner = LocalLifecycleOwner.current
+    val uiState = cameraViewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-  /* Keep the camera permission in a MutableState to make the screen recompose when
-   * the camera permission is updated */
-  val cameraPermission = remember { mutableStateOf(cameraViewModel.hasCameraPermission(context)) }
+    /* Keep the camera permission in a MutableState to make the screen recompose when
+     * the camera permission is updated */
+    val cameraPermission = remember { mutableStateOf(cameraViewModel.hasCameraPermission(context)) }
 
-  // Composable launchers to access camera or pick a photo from gallery
-  val cameraPermissionLauncher =
-      rememberLauncherForActivityResult(
-          contract = ActivityResultContracts.RequestPermission(),
-          onResult = { cameraPermission.value = it })
+    // Composable launchers to access camera or pick a photo from gallery
+    val cameraPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { cameraPermission.value = it })
 
-  // Opens the system photo picker and sends the selected image to the ViewModel,
-  // so it follows the same flow as when a picture is taken with the camera
-  val photoPickerLauncher =
-      rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) { uri
-        ->
-        uri?.let {
-          cameraViewModel.onImagePickedFromGallery(
-              context = context,
-              uri = it,
-              onPictureTaken = onPictureTaken,
-              onError = {
-                Toast.makeText(
-                        context,
-                        context.getString(R.string.error_fail_take_picture),
-                        Toast.LENGTH_SHORT)
-                    .show()
-              }) // same callback as the camera button
+    // Opens the system photo picker and sends the selected image to the ViewModel,
+    // so it follows the same flow as when a picture is taken with the camera
+    val photoPickerLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) { uri
+            ->
+            uri?.let {
+                cameraViewModel.onImagePickedFromGallery(
+                    context = context,
+                    uri = it,
+                    onPictureTaken = onPictureTaken,
+                    onError = {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.error_fail_take_picture),
+                            Toast.LENGTH_SHORT)
+                            .show()
+                    }) // same callback as the camera button
+            }
         }
-      }
 
-  LaunchedEffect(Unit) {
+    val launchGallery: () -> Unit = {
+        photoPickerLauncher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
+
+    LaunchedEffect(Unit) {
+        refreshAndRequestCameraPermission(
+            cameraViewModel = cameraViewModel,
+            context = context,
+            cameraPermission = cameraPermission,
+            launchPermissionRequest = { cameraPermissionLauncher.launch(CAMERAX_PERMISSION) })
+    }
+
+    /* Make sure that when the screen resumes the access to the camera is updated
+     * (for example when the user comes back from changing preferences in the settings) */
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            createCameraPermissionObserver(
+                lifecycleOwner = lifecycleOwner,
+                cameraViewModel = cameraViewModel,
+                context = context,
+                cameraPermission = cameraPermission)
+
+        // Mandatory to dispose of the observer
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    Scaffold(
+        modifier = modifier.testTag(NavigationTestTags.CAMERA_SCREEN),
+        content = { paddingValues ->
+            Box(
+                modifier =
+                    modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .background(MaterialTheme.colorScheme.background)) {
+                /* Camera preview displayed when the user gave access to the camera */
+                if (cameraPermission.value) {
+                    CameraGrantedContent(
+                        modifier = modifier,
+                        context = context,
+                        cameraSelector = uiState.value.cameraSelector,
+                        cameraViewModel = cameraViewModel,
+                        onPictureTaken = onPictureTaken,
+                        onOpenGallery = launchGallery)
+                } else {
+                    /* Screen displayed when no camera access is granted. The user should still be
+                     * able to upload pictures from the gallery even if no camera access is granted */
+                    NoCameraAccessScreen(
+                        onReaskCameraAccess = {
+                            // Open settings on the right permission page
+                            val intent =
+                                Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", context.packageName, null))
+                            try {
+                                context.startActivity(intent)
+                            } catch (_: ActivityNotFoundException) {
+                                Log.e("NoCameraAccessScreen", "Error accessing the settings app.")
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.error_accessing_settings_user),
+                                    Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        },
+                        onGalleryAccess = { launchGallery() })
+                }
+            }
+        })
+}
+
+private fun refreshAndRequestCameraPermission(
+    cameraViewModel: CameraViewModel,
+    context: android.content.Context,
+    cameraPermission: androidx.compose.runtime.MutableState<Boolean>,
+    launchPermissionRequest: () -> Unit,
+) {
     // Refresh the camera permission when the screen is created
     cameraPermission.value = cameraViewModel.hasCameraPermission(context)
     // If not already asked, ask for the permission to use the camera
     if (!cameraViewModel.hasAlreadyDeniedCameraPermission(context) && !cameraPermission.value) {
-      cameraPermissionLauncher.launch(CAMERAX_PERMISSION)
-      cameraViewModel.sethasAlreadyDeniedCameraPermission(context, true)
+        launchPermissionRequest()
+        cameraViewModel.sethasAlreadyDeniedCameraPermission(context, true)
     }
-  }
+}
 
-  /* Make sure that when the screen resumes the access to the camera is updated
-   * (for example when the user comes back from changing preferences in the settings) */
-  DisposableEffect(lifecycleOwner) {
-    val observer = LifecycleEventObserver { _, event ->
-      // On resume, refresh camera permissions
-      if (event == Lifecycle.Event.ON_RESUME) {
-        cameraPermission.value = cameraViewModel.hasCameraPermission(context)
-      }
-    }
-    // Mandatory to dispose of the observer
-    lifecycleOwner.lifecycle.addObserver(observer)
-    onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-  }
-
-  Scaffold(
-      modifier = modifier.testTag(NavigationTestTags.CAMERA_SCREEN),
-      content = { paddingValues ->
-        Box(
-            modifier =
-                modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.background)) {
-              /* Camera preview displayed when the user gave access to the camera */
-              if (cameraPermission.value) {
-                val controller =
-                    remember(uiState.value.cameraSelector) {
-                      // Enable the camera controller to capture images
-                      try {
-                        LifecycleCameraController(context).apply {
-                          cameraSelector = uiState.value.cameraSelector
-                          setEnabledUseCases(CameraController.IMAGE_CAPTURE)
-                        }
-                      } catch (e: Exception) {
-                        // If no front camera just go to back camera
-                        LifecycleCameraController(context).apply {
-                          cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-                          setEnabledUseCases(CameraController.IMAGE_CAPTURE)
-                        }
-                      }
-                    }
-                CameraPreview(controller = controller, modifier = modifier.fillMaxSize())
-                // Button for switching between back camera and front camera
-                IconButton(
-                    onClick = { cameraViewModel.switchOrientation() },
-                    modifier =
-                        modifier
-                            .padding(20.dp, 20.dp)
-                            .testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
-                      Icon(
-                          Icons.Default.FlipCameraAndroid,
-                          contentDescription =
-                              context.getString(R.string.flip_camera_icon_description),
-                          modifier = modifier.size(30.dp),
-                          tint = BUTTONS_COLOR)
-                    }
-                // Button for taking picture
-                IconButton(
-                    modifier =
-                        modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 60.dp)
-                            .size(70.dp)
-                            .testTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON),
-                    onClick = {
-                      cameraViewModel.takePicture(
-                          context = context,
-                          controller = controller,
-                          onPictureTaken = onPictureTaken,
-                          onError = {
-                            Toast.makeText(
-                                    context,
-                                    context.getString(R.string.error_fail_take_picture),
-                                    Toast.LENGTH_SHORT)
-                                .show()
-                          })
-                    }) {
-                      Icon(
-                          painter = painterResource(R.drawable.ic_photo_button_mygarden),
-                          contentDescription =
-                              context.getString(R.string.take_picture_icon_description),
-                          modifier = modifier.size(70.dp),
-                          tint = BUTTONS_COLOR)
-                    }
-                // Button for accessing the gallery
-                IconButton(
-                    modifier =
-                        modifier
-                            .align(Alignment.BottomCenter)
-                            .offset(x = 100.dp)
-                            .padding(bottom = 60.dp)
-                            .size(70.dp)
-                            .testTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON),
-                    onClick = {
-                      photoPickerLauncher.launch(
-                          PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    }) {
-                      Icon(
-                          Icons.Default.Photo,
-                          contentDescription =
-                              context.getString(R.string.open_gallery_icon_description),
-                          modifier = modifier.size(40.dp),
-                          tint = BUTTONS_COLOR)
-                    }
-              } else {
-                /* Screen displayed when no camera access is granted. The user should still be
-                 * able to upload pictures from the gallery even if no camera access is granted */
-                NoCameraAccessScreen(
-                    onReaskCameraAccess = {
-                      // Open settings on the right permission page
-                      val intent =
-                          Intent(
-                              Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                              Uri.fromParts("package", context.packageName, null))
-                      try {
-                        context.startActivity(intent)
-                      } catch (_: ActivityNotFoundException) {
-                        Log.e("NoCameraAccessScreen", "Error accessing the settings app.")
-                        Toast.makeText(
-                                context,
-                                context.getString(R.string.error_accessing_settings_user),
-                                Toast.LENGTH_SHORT)
-                            .show()
-                      }
-                    },
-                    onGalleryAccess = {
-                      photoPickerLauncher.launch(
-                          PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    })
-              }
+private fun createCameraPermissionObserver(
+    lifecycleOwner: androidx.lifecycle.LifecycleOwner,
+    cameraViewModel: CameraViewModel,
+    context: android.content.Context,
+    cameraPermission: androidx.compose.runtime.MutableState<Boolean>,
+): LifecycleEventObserver {
+    val observer =
+        LifecycleEventObserver { _, event ->
+            // On resume, refresh camera permissions
+            if (event == Lifecycle.Event.ON_RESUME) {
+                cameraPermission.value = cameraViewModel.hasCameraPermission(context)
             }
-      })
+        }
+    lifecycleOwner.lifecycle.addObserver(observer)
+    return observer
+}
+
+@Composable
+private fun CameraGrantedContent(
+    modifier: Modifier,
+    context: android.content.Context,
+    cameraSelector: CameraSelector,
+    cameraViewModel: CameraViewModel,
+    onPictureTaken: (String) -> Unit,
+    onOpenGallery: () -> Unit,
+) {
+    val controller =
+        remember(cameraSelector) {
+            // Enable the camera controller to capture images
+            try {
+                LifecycleCameraController(context).apply {
+                    this.cameraSelector = cameraSelector
+                    setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+                }
+            } catch (_: Exception) {
+                // If no front camera just go to back camera
+                LifecycleCameraController(context).apply {
+                    this.cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                    setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+                }
+            }
+        }
+Box(modifier = Modifier.fillMaxSize()) {
+    CameraPreview(controller = controller, modifier = modifier.fillMaxSize())
+
+    // Button for switching between back camera and front camera
+    IconButton(
+        onClick = { cameraViewModel.switchOrientation() },
+        modifier =
+            modifier
+                .padding(20.dp, 20.dp)
+                .testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)
+    ) {
+        Icon(
+            Icons.Default.FlipCameraAndroid,
+            contentDescription = context.getString(R.string.flip_camera_icon_description),
+            modifier = modifier.size(30.dp),
+            tint = BUTTONS_COLOR
+        )
+    }
+
+    // Button for taking picture
+    IconButton(
+        modifier =
+            modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 60.dp)
+                .size(70.dp)
+                .testTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON),
+        onClick = {
+            cameraViewModel.takePicture(
+                context = context,
+                controller = controller,
+                onPictureTaken = onPictureTaken,
+                onError = {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.error_fail_take_picture),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                })
+        }) {
+        Icon(
+            painter = painterResource(R.drawable.ic_photo_button_mygarden),
+            contentDescription = context.getString(R.string.take_picture_icon_description),
+            modifier = modifier.size(70.dp),
+            tint = BUTTONS_COLOR
+        )
+    }
+
+    // Button for accessing the gallery
+    IconButton(
+        modifier =
+            modifier
+                .align(Alignment.BottomCenter)
+                .offset(x = 100.dp)
+                .padding(bottom = 60.dp)
+                .size(70.dp)
+                .testTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON),
+        onClick = { onOpenGallery() }) {
+        Icon(
+            Icons.Default.Photo,
+            contentDescription = context.getString(R.string.open_gallery_icon_description),
+            modifier = modifier.size(40.dp),
+            tint = BUTTONS_COLOR
+        )
+    }
+}
 }
 
 /**
