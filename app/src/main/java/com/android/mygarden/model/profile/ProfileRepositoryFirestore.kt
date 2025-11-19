@@ -201,10 +201,7 @@ class ProfileRepositoryFirestore(
 
                   // Merge all activities and sort by timestamp
                   val allActivities =
-                      activitiesMap.values
-                          .flatten()
-                          .sortedByDescending { it.createdAt.seconds }
-                          .take(limit)
+                      activitiesMap.values.flatten().sortedByDescending { it.createdAt }.take(limit)
 
                   trySend(allActivities)
                 }
