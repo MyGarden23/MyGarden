@@ -95,7 +95,7 @@ fun EditPlantScreen(
   var showDatePicker by remember { mutableStateOf(false) }
   val dateFmt = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
 
-  // Regroupe les erreurs dans un seul objet (moins de logique dans le composable)
+  // groups the errors in only one place
   val errorFlags =
       remember(plantUIState, touchedName, touchedLatinName, touchedDesc, touchedLastWatered) {
         computeEditPlantErrorFlags(
@@ -111,9 +111,7 @@ fun EditPlantScreen(
     EditPlantDatePickerDialog(
         initialMillis = plantUIState.lastWatered?.time,
         onConfirm = { millis ->
-          if (millis != null) {
-            editPlantViewModel.setLastWatered(Timestamp(millis))
-          }
+          handleDatePicked(millis, editPlantViewModel)
           showDatePicker = false
         },
         onDismiss = { showDatePicker = false },
@@ -230,7 +228,6 @@ fun EditPlantScreen(
   }
 }
 
-// Adapte le nom du type si nécessaire (EditPlantUiState est le nom probable)
 private data class EditPlantErrorFlags(
     val isNameError: Boolean,
     val isLatinNameError: Boolean,
@@ -244,6 +241,12 @@ private data class TouchedFlags(
     val touchedDesc: Boolean,
     val touchedLastWatered: Boolean,
 )
+
+private fun handleDatePicked(millis: Long?, editPlantViewModel: EditPlantViewModelInterface) {
+  if (millis != null) {
+    editPlantViewModel.setLastWatered(Timestamp(millis))
+  }
+}
 
 private fun computeEditPlantErrorFlags(
     uiState: EditPlantUIState,
@@ -265,7 +268,6 @@ private fun computeEditPlantErrorFlags(
   )
 }
 
-// Même condition que dans ton code original, juste sortie dans une fonction pure
 private fun computeIsSaveEnabled(uiState: EditPlantUIState): Boolean {
   return if (uiState.isRecognized) {
     uiState.description.isNotBlank() && uiState.lastWatered != null
@@ -277,7 +279,6 @@ private fun computeIsSaveEnabled(uiState: EditPlantUIState): Boolean {
   }
 }
 
-// Remplace l'ancienne validateFieldsBeforeSave() mais sans if dans le composable
 private fun computeTouchedAfterValidate(
     uiState: EditPlantUIState,
     touchedName: Boolean,
@@ -323,7 +324,7 @@ private fun EditPlantDatePickerDialog(
   }
 }
 
-/** Plant image section (keeps original logic & tags). */
+// Plant image section
 @Composable
 private fun PlantImageSection(imageUrl: String?) {
   val context = LocalContext.current
@@ -363,7 +364,7 @@ private fun PlantImageSection(imageUrl: String?) {
   }
 }
 
-/** Name field (keeps original behaviour). */
+// Name field
 @Composable
 private fun NameFieldSection(
     name: String,
@@ -397,7 +398,7 @@ private fun NameFieldSection(
   }
 }
 
-/** Latin name field. */
+// Latin name field
 @Composable
 private fun LatinNameFieldSection(
     latinName: String,
@@ -431,7 +432,7 @@ private fun LatinNameFieldSection(
   }
 }
 
-/** Description field. */
+// Description field
 @Composable
 private fun DescriptionFieldSection(
     description: String,
@@ -463,7 +464,7 @@ private fun DescriptionFieldSection(
   }
 }
 
-/** Last watered field + date picker trigger. */
+// Last watered field + date picker trigger
 @Composable
 private fun LastWateredSection(
     lastWatered: Timestamp?,
@@ -518,7 +519,7 @@ private fun LastWateredSection(
   }
 }
 
-/** Save button with same enable logic. */
+// Save button with same enable logic
 @Composable
 private fun SaveButtonSection(
     isSaveEnabled: Boolean,
@@ -538,7 +539,7 @@ private fun SaveButtonSection(
   }
 }
 
-/** Delete button + popup. */
+// Delete button + popup.
 @Composable
 private fun DeleteSection(
     onDeleted: (() -> Unit)?,
