@@ -1,7 +1,7 @@
 package com.android.mygarden.model.gardenactivity.activitiyclasses
 
 import com.android.mygarden.model.gardenactivity.ActivityType
-import com.google.firebase.Timestamp
+import java.sql.Timestamp
 
 /**
  * Base sealed class representing a user activity in the garden.
@@ -26,6 +26,6 @@ sealed class GardenActivity {
   /** Public‑facing username or pseudo of the user who performed the activity. */
   abstract val pseudo: String
 
-  /** Timestamp indicating when the activity occurred. */
-  abstract val timestamp: Timestamp
+  /** Timestamp indicating when the activity was created. */
+  abstract val createdAt: Timestamp
 }

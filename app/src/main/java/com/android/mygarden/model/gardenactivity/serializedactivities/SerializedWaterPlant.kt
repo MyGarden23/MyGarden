@@ -2,7 +2,6 @@ package com.android.mygarden.model.gardenactivity.serializedactivities
 
 import androidx.annotation.Keep
 import com.android.mygarden.model.plant.SerializedOwnedPlant
-import com.google.firebase.Timestamp
 
 /**
  * Represents a serialized "watered plant" activity for Firestore.
@@ -16,8 +15,9 @@ import com.google.firebase.Timestamp
 @Keep
 data class SerializedWaterPlant(
     override val userId: String = "",
-    override val type: String = "WATERED_PLANT",
     override val pseudo: String = "",
-    override val timestamp: Timestamp = Timestamp.now(),
+    override val createdAt: Long = 0,
     val ownedPlant: SerializedOwnedPlant = SerializedOwnedPlant(),
-) : SerializedActivity()
+) : SerializedActivity() {
+  override val type: String = "WATERED_PLANT"
+}

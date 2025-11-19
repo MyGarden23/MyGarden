@@ -12,8 +12,7 @@ import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.utils.FirebaseUtils
-import com.google.firebase.Timestamp
-import java.sql.Timestamp as SqlTimestamp
+import java.sql.Timestamp
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
@@ -59,8 +58,8 @@ class GardenActivityTests {
     return OwnedPlant(
         id = "plant123",
         plant = plant,
-        lastWatered = SqlTimestamp(System.currentTimeMillis()),
-        previousLastWatered = SqlTimestamp(System.currentTimeMillis() - 86_400_000L))
+        lastWatered = Timestamp(System.currentTimeMillis()),
+        previousLastWatered = Timestamp(System.currentTimeMillis() - 86_400_000L))
   }
 
   @Test
@@ -71,7 +70,7 @@ class GardenActivityTests {
         ActivityAddedPlant(
             userId = uid,
             pseudo = "TestUser",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             ownedPlant = createTestOwnedPlant())
 
     // Add activity
@@ -98,7 +97,7 @@ class GardenActivityTests {
         ActivityAchievement(
             userId = uid,
             pseudo = "Achiever",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             achievementName = "Gained Badge")
 
     // Add activity
@@ -122,14 +121,14 @@ class GardenActivityTests {
         ActivityAchievement(
             userId = uid,
             pseudo = "UserFeed",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             achievementName = "Gained Badge")
 
     val activity2 =
         ActivityAddedPlant(
             userId = uid,
             pseudo = "UserFeed",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             ownedPlant = createTestOwnedPlant())
 
     profileRepo.addActivity(activity1)
@@ -152,8 +151,8 @@ class GardenActivityTests {
         ActivityAddFriend(
             userId = uid,
             pseudo = "FriendUser",
-            timestamp = Timestamp.now(),
-            friendId = "friend123")
+            createdAt = Timestamp(System.currentTimeMillis()),
+            friendUserId = "friend123")
 
     profileRepo.addActivity(activityAddFriend)
 
@@ -164,7 +163,7 @@ class GardenActivityTests {
     assertEquals(uid, first.userId)
     assertEquals("FriendUser", first.pseudo)
     assertEquals(ActivityType.ADDED_FRIEND, first.type)
-    assertEquals("friend123", first.friendId)
+    assertEquals("friend123", first.friendUserId)
   }
 
   @Test
@@ -175,7 +174,7 @@ class GardenActivityTests {
         ActivityWaterPlant(
             userId = uid,
             pseudo = "WaterUser",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             ownedPlant = createTestOwnedPlant())
 
     profileRepo.addActivity(activityWaterPlant)
@@ -199,28 +198,28 @@ class GardenActivityTests {
         ActivityAchievement(
             userId = uid,
             pseudo = "FeedUser",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             achievementName = "Gained Badge")
 
     val addedPlant =
         ActivityAddedPlant(
             userId = uid,
             pseudo = "FeedUser",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             ownedPlant = createTestOwnedPlant())
 
     val addFriend =
         ActivityAddFriend(
             userId = uid,
             pseudo = "FeedUser",
-            timestamp = Timestamp.now(),
-            friendId = "friendFeed123")
+            createdAt = Timestamp(System.currentTimeMillis()),
+            friendUserId = "friendFeed123")
 
     val waterPlant =
         ActivityWaterPlant(
             userId = uid,
             pseudo = "FeedUser",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             ownedPlant = createTestOwnedPlant())
 
     profileRepo.addActivity(achievement)
@@ -247,14 +246,14 @@ class GardenActivityTests {
         ActivityAchievement(
             userId = currentUserId,
             pseudo = "CurrentUser",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             achievementName = "Current User Badge")
 
     val activityOtherUser =
         ActivityAddedPlant(
             userId = otherUserId,
             pseudo = "OtherUser",
-            timestamp = Timestamp.now(),
+            createdAt = Timestamp(System.currentTimeMillis()),
             ownedPlant = createTestOwnedPlant())
 
     // Add activity for current user through the repo

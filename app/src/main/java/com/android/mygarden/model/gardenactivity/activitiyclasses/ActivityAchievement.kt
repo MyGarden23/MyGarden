@@ -1,8 +1,7 @@
 package com.android.mygarden.model.gardenactivity.activitiyclasses
 
 import com.android.mygarden.model.gardenactivity.ActivityType
-import com.google.firebase.Timestamp
-import java.time.Instant
+import java.sql.Timestamp
 
 /**
  * Activity emitted when a user unlocks or earns an achievement.
@@ -12,12 +11,13 @@ import java.time.Instant
  *
  * @property userId Firebase Auth UID of the user who earned the achievement.
  * @property pseudo Public‑facing username of the user who earned the achievement.
- * @property timestamp Moment at which the achievement was awarded.
+ * @property createdAt Moment at which the achievement was awarded.
+ * @property achievementName Name of the achievement that was earned.
  */
 data class ActivityAchievement(
     override val userId: String,
     override val pseudo: String,
-    override val timestamp: Timestamp = Timestamp(Instant.now()),
+    override val createdAt: Timestamp = Timestamp(System.currentTimeMillis()),
     val achievementName: String
 ) : GardenActivity() {
 

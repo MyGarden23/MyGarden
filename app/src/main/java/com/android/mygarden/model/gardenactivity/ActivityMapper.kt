@@ -11,6 +11,7 @@ import com.android.mygarden.model.gardenactivity.serializedactivities.Serialized
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAddedPlant
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedWaterPlant
 import com.android.mygarden.model.plant.FirestoreMapper
+import java.sql.Timestamp
 
 /**
  * Utility object providing mapping functions between [GardenActivity] instances and their
@@ -32,36 +33,41 @@ object ActivityMapper {
       is ActivityAddedPlant ->
           SerializedAddedPlant(
               userId = activity.userId,
-              type = activity.type.name,
               pseudo = activity.pseudo,
-              timestamp = activity.timestamp,
+              createdAt = activity.createdAt.time,
               ownedPlant =
                   FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant(activity.ownedPlant))
       is ActivityAchievement ->
           SerializedAchievement(
               userId = activity.userId,
-              type = activity.type.name,
               pseudo = activity.pseudo,
-              timestamp = activity.timestamp,
+              createdAt = activity.createdAt.time,
               achievementName = activity.achievementName)
       is ActivityAddFriend ->
           SerializedAddFriend(
               userId = activity.userId,
-              type = activity.type.name,
               pseudo = activity.pseudo,
-              timestamp = activity.timestamp,
-              friendId = activity.friendId)
+              createdAt = activity.createdAt.time,
+              friendId = activity.friendUserId)
       is ActivityWaterPlant ->
           SerializedWaterPlant(
               userId = activity.userId,
-              type = activity.type.name,
               pseudo = activity.pseudo,
-              timestamp = activity.timestamp,
+              createdAt = activity.createdAt.time,
               ownedPlant =
                   FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant(activity.ownedPlant))
     }
   }
 
+  /**
+   * Maps an activity type string to its corresponding [SerializedActivity] class.
+   *
+   * This function is used to determine which class to deserialize Firestore documents into based on
+   * their "type" field.
+   *
+   * @param type The activity type string (e.g., "ADDED_PLANT", "ACHIEVEMENT", etc.).
+   * @return The corresponding [SerializedActivity] class, or null if the type is unknown.
+   */
   fun mapTypeToSerializedClass(type: String): Class<out SerializedActivity>? {
     return when (type) {
       "ADDED_PLANT" -> SerializedAddedPlant::class.java
@@ -87,7 +93,7 @@ object ActivityMapper {
         ActivityAddedPlant(
             userId = serializedActivity.userId,
             pseudo = serializedActivity.pseudo,
-            timestamp = serializedActivity.timestamp,
+            createdAt = Timestamp(serializedActivity.createdAt),
             ownedPlant =
                 FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant(serializedActivity.ownedPlant))
       }
@@ -95,7 +101,7 @@ object ActivityMapper {
         ActivityAchievement(
             userId = serializedActivity.userId,
             pseudo = serializedActivity.pseudo,
-            timestamp = serializedActivity.timestamp,
+            createdAt = Timestamp(serializedActivity.createdAt),
             achievementName = serializedActivity.achievementName,
         )
       }
@@ -103,14 +109,14 @@ object ActivityMapper {
         ActivityAddFriend(
             userId = serializedActivity.userId,
             pseudo = serializedActivity.pseudo,
-            timestamp = serializedActivity.timestamp,
-            friendId = serializedActivity.friendId)
+            createdAt = Timestamp(serializedActivity.createdAt),
+            friendUserId = serializedActivity.friendId)
       }
       is SerializedWaterPlant -> {
         ActivityWaterPlant(
             userId = serializedActivity.userId,
             pseudo = serializedActivity.pseudo,
-            timestamp = serializedActivity.timestamp,
+            createdAt = Timestamp(serializedActivity.createdAt),
             ownedPlant =
                 FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant(serializedActivity.ownedPlant))
       }

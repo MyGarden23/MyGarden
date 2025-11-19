@@ -1,7 +1,6 @@
 package com.android.mygarden.model.gardenactivity.serializedactivities
 
 import androidx.annotation.Keep
-import com.google.firebase.Timestamp
 
 /**
  * Base serialized activity compatible for Firestore.
@@ -18,5 +17,5 @@ sealed class SerializedActivity {
   abstract val userId: String
   abstract val type: String
   abstract val pseudo: String
-  abstract val timestamp: Timestamp
+  abstract val createdAt: Long
 }

@@ -2,8 +2,7 @@ package com.android.mygarden.model.gardenactivity.activitiyclasses
 
 import com.android.mygarden.model.gardenactivity.ActivityType
 import com.android.mygarden.model.plant.OwnedPlant
-import com.google.firebase.Timestamp
-import java.time.Instant
+import java.sql.Timestamp
 
 /**
  * Activity emitted when a user waters a plant in their garden.
@@ -14,12 +13,12 @@ import java.time.Instant
  *
  * @property userId Firebase Auth UID of the user who watered the plant.
  * @property pseudo Public‑facing username of the user who watered the plant.
- * @property timestamp Moment at which the watering action occurred.
+ * @property createdAt Moment at which the watering action occurred.
  */
 data class ActivityWaterPlant(
     override val userId: String,
     override val pseudo: String,
-    override val timestamp: Timestamp = Timestamp(Instant.now()),
+    override val createdAt: Timestamp = Timestamp(System.currentTimeMillis()),
     val ownedPlant: OwnedPlant,
 ) : GardenActivity() {
 

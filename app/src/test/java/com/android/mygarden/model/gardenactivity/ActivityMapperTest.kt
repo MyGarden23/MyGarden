@@ -12,8 +12,7 @@ import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
-import com.google.firebase.Timestamp
-import java.sql.Timestamp as SqlTimestamp
+import java.sql.Timestamp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -42,15 +41,15 @@ class ActivityMapperTest {
         OwnedPlant(
             id = "plant123",
             plant = plant,
-            lastWatered = SqlTimestamp(System.currentTimeMillis()),
-            previousLastWatered = SqlTimestamp(System.currentTimeMillis() - 86400000))
+            lastWatered = Timestamp(System.currentTimeMillis()),
+            previousLastWatered = Timestamp(System.currentTimeMillis() - 86400000))
 
-    val timestamp = Timestamp.now()
+    val timestamp = Timestamp(System.currentTimeMillis())
 
     // Create activity
     val activity =
         ActivityAddedPlant(
-            userId = "user123", pseudo = "TestUser", timestamp = timestamp, ownedPlant = ownedPlant)
+            userId = "user123", pseudo = "TestUser", createdAt = timestamp, ownedPlant = ownedPlant)
 
     // Serialize
     val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)
@@ -81,14 +80,14 @@ class ActivityMapperTest {
 
   @Test
   fun testSerializeAndDeserializeAchievement() {
-    val timestamp = Timestamp.now()
+    val timestamp = Timestamp(System.currentTimeMillis())
 
     // Create achievement activity
     val activity =
         ActivityAchievement(
             userId = "user456",
             pseudo = "AchievementUser",
-            timestamp = timestamp,
+            createdAt = timestamp,
             achievementName = "Gained Badge")
 
     // Serialize
@@ -115,24 +114,24 @@ class ActivityMapperTest {
 
   @Test
   fun testActivityTypesMatch() {
-    val timestamp = Timestamp.now()
+    val timestamp = Timestamp(System.currentTimeMillis())
 
     val activityAddedPlant =
         ActivityAddedPlant(
             userId = "user1",
             pseudo = "User1",
-            timestamp = timestamp,
+            createdAt = timestamp,
             ownedPlant =
                 OwnedPlant(
                     id = "p1",
                     plant = Plant(name = "Rose", latinName = "Rosa"),
-                    lastWatered = SqlTimestamp(System.currentTimeMillis())))
+                    lastWatered = Timestamp(System.currentTimeMillis())))
 
     val activityAchievement =
         ActivityAchievement(
             userId = "user2",
             pseudo = "User2",
-            timestamp = timestamp,
+            createdAt = timestamp,
             achievementName = "Gained Badge")
 
     assertEquals(ActivityType.ADDED_PLANT, activityAddedPlant.type)
@@ -141,14 +140,14 @@ class ActivityMapperTest {
 
   @Test
   fun testSerializeAndDeserializeAddFriend() {
-    val timestamp = Timestamp.now()
+    val timestamp = Timestamp(System.currentTimeMillis())
 
     val activity =
         ActivityAddFriend(
             userId = "userFriend",
             pseudo = "FriendUser",
-            timestamp = timestamp,
-            friendId = "friend123")
+            createdAt = timestamp,
+            friendUserId = "friend123")
 
     val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)
 
@@ -167,7 +166,7 @@ class ActivityMapperTest {
     assertEquals("userFriend", deserializedFriend.userId)
     assertEquals("FriendUser", deserializedFriend.pseudo)
     assertEquals(ActivityType.ADDED_FRIEND, deserializedFriend.type)
-    assertEquals("friend123", deserializedFriend.friendId)
+    assertEquals("friend123", deserializedFriend.friendUserId)
   }
 
   @Test
@@ -189,16 +188,16 @@ class ActivityMapperTest {
         OwnedPlant(
             id = "ownedWatered123",
             plant = plant,
-            lastWatered = SqlTimestamp(System.currentTimeMillis()),
-            previousLastWatered = SqlTimestamp(System.currentTimeMillis() - 3600000))
+            lastWatered = Timestamp(System.currentTimeMillis()),
+            previousLastWatered = Timestamp(System.currentTimeMillis() - 3600000))
 
-    val timestamp = Timestamp.now()
+    val timestamp = Timestamp(System.currentTimeMillis())
 
     val activity =
         ActivityWaterPlant(
             userId = "userWater",
             pseudo = "WaterUser",
-            timestamp = timestamp,
+            createdAt = timestamp,
             ownedPlant = ownedPlant)
 
     val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)

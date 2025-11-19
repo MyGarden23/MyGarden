@@ -1,8 +1,7 @@
 package com.android.mygarden.model.gardenactivity.activitiyclasses
 
 import com.android.mygarden.model.gardenactivity.ActivityType
-import com.google.firebase.Timestamp
-import java.time.Instant
+import java.sql.Timestamp
 
 /**
  * Activity emitted when a user adds another user as a friend.
@@ -12,14 +11,14 @@ import java.time.Instant
  *
  * @property userId Firebase Auth UID of the user who initiated the friend request or friendship.
  * @property pseudo Public‑facing username of the user who added the friend.
- * @property timestamp Moment at which the friend was added.
- * @property friendId Firebase Auth UID (or other unique identifier) of the friend that was added.
+ * @property createdAt Moment at which the friend was added.
+ * @property friendUserId Firebase Auth UID of the friend that was added.
  */
 data class ActivityAddFriend(
     override val userId: String,
     override val pseudo: String,
-    override val timestamp: Timestamp = Timestamp(Instant.now()),
-    val friendId: String,
+    override val createdAt: Timestamp = Timestamp(System.currentTimeMillis()),
+    val friendUserId: String,
 ) : GardenActivity() {
 
   /** Indicates that this activity represents an [ActivityType.ADDED_FRIEND] event. */

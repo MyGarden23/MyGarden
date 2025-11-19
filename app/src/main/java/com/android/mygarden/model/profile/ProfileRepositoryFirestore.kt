@@ -23,6 +23,12 @@ class ProfileRepositoryFirestore(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ProfileRepository {
 
+  companion object {
+    private const val COLLECTION_USERS = "users"
+    private const val COLLECTION_ACTIVITIES = "activities"
+    private const val ACTIVITIES_ORDER_BY = "createdAt"
+  }
+
   // Keep track of active listeners so we can clean them up
   private var activeListenerRegistration: ListenerRegistration? = null
   private val activeActivitiesListeners = mutableListOf<ListenerRegistration>()
@@ -33,12 +39,12 @@ class ProfileRepositoryFirestore(
   // Shortcut to the current user's document in the "users" collection
   private val userProfile
     get() =
-        db.collection("users")
+        db.collection(COLLECTION_USERS)
             .document(getCurrentUserId() ?: throw IllegalStateException("User not authenticated"))
 
   // Shortcut to the current user's activities subcollection
   private fun userActivities(userId: String) =
-      db.collection("users").document(userId).collection("activities")
+      db.collection(COLLECTION_USERS).document(userId).collection(COLLECTION_ACTIVITIES)
 
   // Listen to the user's profile in Firestore as a Flow (real-time updates)
   override fun getProfile(): Flow<Profile?> {
@@ -135,7 +141,7 @@ class ProfileRepositoryFirestore(
     return callbackFlow {
       val reg: ListenerRegistration =
           userActivities(userId)
-              .orderBy("timestamp", Query.Direction.DESCENDING)
+              .orderBy(ACTIVITIES_ORDER_BY, Query.Direction.DESCENDING)
               .addSnapshotListener { snapshots, err ->
                 if (err != null) {
                   Log.e("FirestoreProfile", "Failed to listen to activities for user $userId", err)
@@ -176,7 +182,7 @@ class ProfileRepositoryFirestore(
       userIds.forEach { userId ->
         val reg: ListenerRegistration =
             userActivities(userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .orderBy(ACTIVITIES_ORDER_BY, Query.Direction.DESCENDING)
                 .limit(limit.toLong())
                 .addSnapshotListener { snapshots, err ->
                   if (err != null) {
@@ -197,7 +203,7 @@ class ProfileRepositoryFirestore(
                   val allActivities =
                       activitiesMap.values
                           .flatten()
-                          .sortedByDescending { it.timestamp.seconds }
+                          .sortedByDescending { it.createdAt.seconds }
                           .take(limit)
 
                   trySend(allActivities)
