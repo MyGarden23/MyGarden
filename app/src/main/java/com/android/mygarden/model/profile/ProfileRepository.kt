@@ -1,5 +1,6 @@
 package com.android.mygarden.model.profile
 
+import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -45,6 +46,42 @@ interface ProfileRepository {
    * @return the token of the current user or null if there is none
    */
   suspend fun getFCMToken(): String?
+
+  /**
+   * Returns all activities for the current user's profile.
+   *
+   * For backward compatibility, this queries the global activities collection filtered by the
+   * current user's ID.
+   *
+   * @return A [Flow] emitting a list of [GardenActivity] objects whenever the activities change.
+   */
+  fun getActivities(): Flow<List<GardenActivity>>
+
+  /**
+   * Returns activities from a specific user.
+   *
+   * @param userId The Firebase Auth UID of the user whose activities to retrieve.
+   * @return A [Flow] emitting a list of [GardenActivity] objects for that user.
+   */
+  fun getActivitiesForUser(userId: String): Flow<List<GardenActivity>>
+
+  /**
+   * Returns a feed of activities from multiple users (e.g., friends feed).
+   *
+   * @param userIds List of Firebase Auth UIDs whose activities to include in the feed.
+   * @param limit Maximum number of activities to return (default 50).
+   * @return A [Flow] emitting a list of [GardenActivity] objects sorted by most recent.
+   */
+  fun getFeedActivities(userIds: List<String>, limit: Int = 50): Flow<List<GardenActivity>>
+
+  /**
+   * Adds a new activity to the current user's profile.
+   *
+   * This stores the activity in the global activities collection with the user's ID.
+   *
+   * @param activity The [GardenActivity] to add to the profile.
+   */
+  suspend fun addActivity(activity: GardenActivity)
 
   /**
    * Cleans up any active listeners or resources.

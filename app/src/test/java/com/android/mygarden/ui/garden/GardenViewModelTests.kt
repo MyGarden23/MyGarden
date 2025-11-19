@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.garden
 
 import com.android.mygarden.R
+import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
@@ -18,6 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -79,6 +81,20 @@ class GardenViewModelTests {
     override suspend fun getFCMToken(): String? {
       return null
     }
+
+    override fun getActivities(): Flow<List<GardenActivity>> {
+      return emptyFlow()
+    }
+
+    override fun getActivitiesForUser(userId: String): Flow<List<GardenActivity>> {
+      return emptyFlow()
+    }
+
+    override fun getFeedActivities(userIds: List<String>, limit: Int): Flow<List<GardenActivity>> {
+      return emptyFlow()
+    }
+
+    override suspend fun addActivity(activity: GardenActivity) {}
 
     override fun cleanup() {}
   }
