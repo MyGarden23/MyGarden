@@ -5,6 +5,8 @@
     <string name="edit_profile_screen_title">Edit Profile</string>
     <string name="new_profile_screen_title">New Profile</string>
     <string name="plant_info_screen_title">Plant Info</string>
+    <string name="plant_info_from_camera_screen_title">Plant Info From Camera</string>
+    <string name="plant_info_from_garden_screen_title">Plant Info From Garden</string>
     <string name="authentication_screen_title">Authentication</string>
     <string name="camera_screen_title">Camera</string>
     <string name="garden_screen_title">Garden</string>
@@ -62,9 +64,11 @@
     <!-- Plant Info Screen -->
     <string name="image_plant_description">Image of the plant</string>
     <string name="watering_frequency">Watering Frequency: Every %1$d days</string>
+    <string name="last_time_watered_plant_info">Last Time Watered: %1$d %2$s %3$d:%4$d</string>
     <string name="status_label">Status: %1$s</string>
     <string name="tab_health">Health</string>
     <string name="loading_plant_infos">Loading Plant Infos…</string>
+    <string name="error_failed_load_plant_info">Failed to load plant</string>
     <string name="tips_button_label">Tips</string>
     <string name="tips_loading_message">Loading…</string>
     <string name="tips_title">Care Tips</string>
@@ -116,6 +120,7 @@
     <string name="back_description">Back button</string>
     <string name="save">Save</string>
     <string name="next">Next</string>
+    <string name="edit">Edit</string>
     <string name="uploading">Uploading…</string>
 
     <!-- Form labels and placeholders-->

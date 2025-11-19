@@ -18,6 +18,16 @@ sealed class Screen(val route: String, val nameResId: Int, val isTopLevel: Boole
 
   object PlantInfo : Screen(route = "plant_info", nameResId = R.string.plant_info_screen_title)
 
+  object PlantInfoFromCamera :
+      Screen(
+          route = "plant_info_from_camera",
+          nameResId = R.string.plant_info_from_camera_screen_title)
+
+  object PlantInfoFromGarden :
+      Screen(
+          route = "plant_info_from_garden",
+          nameResId = R.string.plant_info_from_garden_screen_title)
+
   object NewProfile : Screen(route = "new_profile", nameResId = R.string.new_profile_screen_title)
 
   data class EditPlant(val ownedPlantId: String, val from: String? = null) :

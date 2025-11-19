@@ -36,8 +36,11 @@ data class PlantInfoUIState(
     val selectedTab: SelectedPlantInfoTab = SelectedPlantInfoTab.DESCRIPTION,
     val isRecognized: Boolean = false,
     val isSaving: Boolean = false,
+    val isFromGarden: Boolean = false,
+    val errorMsg: Int? = null,
     val showCareTipsDialog: Boolean = false,
-    val careTips: String = ""
+    val careTips: String = "",
+    val lastTimeWatered: Timestamp? = null,
 ) {
   fun savePlant(): Plant {
     return Plant(
@@ -65,30 +68,69 @@ class PlantInfoViewModel(
   val uiState: StateFlow<PlantInfoUIState> = _uiState.asStateFlow()
 
   /** Initialize the UI state with plant data. Called when the screen is first displayed. */
-  fun initializeUIState(plant: Plant, loadingText: String) {
+  fun initializeUIState(plant: Plant, loadingText: String, ownedPlantId: String? = null) {
     viewModelScope.launch {
-      _uiState.value = _uiState.value.copy(description = loadingText, image = plant.image)
-      // firewall to not regenerate is no picture taken
-      val generatedPlant =
-          if (!plant.image.isNullOrEmpty()) {
-            plantsRepository.identifyPlant(plant.image)
-          } else {
-            plant // Wee keep the plant as it is
-          }
-      _uiState.value =
-          PlantInfoUIState(
-              generatedPlant.name,
-              plant.image,
-              generatedPlant.latinName,
-              generatedPlant.description,
-              generatedPlant.location,
-              generatedPlant.lightExposure,
-              generatedPlant.healthStatus,
-              generatedPlant.healthStatusDescription,
-              generatedPlant.wateringFrequency,
-              isRecognized = generatedPlant.isRecognized,
-          )
+      // If the ownedPlantId is not null, the user is coming from the garden.
+      if (ownedPlantId != null) {
+        try {
+          val ownedPlant = plantsRepository.getOwnedPlant(ownedPlantId)
+          val plant = ownedPlant.plant
+          _uiState.value =
+              PlantInfoUIState(
+                  plant.name,
+                  plant.image,
+                  plant.latinName,
+                  plant.description,
+                  plant.location,
+                  plant.lightExposure,
+                  plant.healthStatus,
+                  plant.healthStatusDescription,
+                  plant.wateringFrequency,
+                  isRecognized = plant.isRecognized,
+                  isFromGarden = true,
+                  lastTimeWatered = ownedPlant.lastWatered,
+              )
+        } catch (e: Exception) {
+          Log.e("PlantInfoViewModel", "Error loading Plant from repository by ID. $ownedPlantId", e)
+          setErrorMsg(R.string.error_failed_load_plant_info)
+        }
+      } else {
+        _uiState.value = _uiState.value.copy(description = loadingText, image = plant.image)
+        // firewall to not regenerate is no picture taken
+        val generatedPlant =
+            if (!plant.image.isNullOrEmpty()) {
+              plantsRepository.identifyPlant(plant.image)
+            } else {
+              plant // Wee keep the plant as it is
+            }
+        _uiState.value =
+            PlantInfoUIState(
+                generatedPlant.name,
+                plant.image,
+                generatedPlant.latinName,
+                generatedPlant.description,
+                generatedPlant.location,
+                generatedPlant.lightExposure,
+                generatedPlant.healthStatus,
+                generatedPlant.healthStatusDescription,
+                generatedPlant.wateringFrequency,
+                isRecognized = generatedPlant.isRecognized,
+                isFromGarden = false,
+            )
+      }
     }
+  }
+  /**
+   * Sets an error message in the UI state.
+   *
+   * @param resId The resource ID of the error message to be set.
+   */
+  fun setErrorMsg(resId: Int) {
+    _uiState.value = _uiState.value.copy(errorMsg = resId)
+  }
+  /** Clears the error message in the UI state. */
+  fun clearErrorMsg() {
+    _uiState.value = _uiState.value.copy(errorMsg = null)
   }
 
   fun resetUIState() {

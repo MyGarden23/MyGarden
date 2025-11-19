@@ -64,7 +64,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
     composeTestRule.waitForIdle()
     // Go to PlantInfo because the objective of this test is not to verify the Camera → PlantInfo
     // navigation
-    composeTestRule.runOnUiThread { navController.navigate(Screen.PlantInfo.route) }
+    composeTestRule.runOnUiThread { navController.navigate(Screen.PlantInfoFromCamera.route) }
     composeTestRule.waitForIdle()
   }
 
