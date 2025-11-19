@@ -88,9 +88,12 @@ class EditPlantScreenTest {
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsDisplayed()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION).assertIsDisplayed()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD).assertIsDisplayed()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
+      EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).assertIsDisplayed()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.INPUT_LAST_WATERED).assertIsDisplayed()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).assertIsDisplayed()
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
+      composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
   }
 
   /**
@@ -103,6 +106,7 @@ class EditPlantScreenTest {
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertIsEnabled()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsEnabled()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD).assertIsEnabled()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).assertIsEnabled()
   }
   /**
    * Verifies that the plant's common name and Latin name fields are read-only and disabled for user
@@ -116,6 +120,7 @@ class EditPlantScreenTest {
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertIsNotEnabled()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsNotEnabled()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD).assertIsNotEnabled()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).assertIsNotEnabled()
   }
 
   /** Verifies that all the possible locations are shown when clicking the drop down menu. */
@@ -217,6 +222,8 @@ class EditPlantScreenTest {
     saveNode.assertIsEnabled()
 
     // Click save -> calls VM.editPlant and onSaved
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
+      EditPlantScreenTestTags.PLANT_DELETE))
     saveNode.performClick()
     composeRule.waitForIdle()
 
@@ -234,6 +241,8 @@ class EditPlantScreenTest {
     val onDeleted = mutableListOf<Boolean>()
     setContentWith(vm = vm, onDeletedCalled = onDeleted)
 
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
+      EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
 
     // Assert that the deletion popup displays and confirm deleting the plant
@@ -289,6 +298,27 @@ class EditPlantScreenTest {
   }
 
   /**
+   * Tests that the validation error for a blank light exposure field only appears after the user has
+   * interacted with (focused on) the input field and not before.
+   */
+  @Test
+  fun lightExposure_errorAppears_onlyAfterUserFocus_whenBlank() {
+    setContentWith()
+
+    // Error not shown before interaction
+    composeRule
+      .onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_LIGHT_EXPOSURE)
+      .assertDoesNotExist()
+
+    // Focus into light exposure -> mark as touched
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).performClick()
+    composeRule.waitForIdle()
+
+    // Now an error helper text should appear as the input is by default empty
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_LIGHT_EXPOSURE).isDisplayed()
+  }
+
+  /**
    * Verifies that the validation error message for the "last watered" date is only displayed after
    * the user has interacted with the date picker icon, not on initial screen load.
    */
@@ -319,6 +349,8 @@ class EditPlantScreenTest {
   fun deletionPopup_isDisplayed_whenPressDelete() {
     setContentWith()
 
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
+      EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
 
     // Assert all nodes are correctly displayed
@@ -345,6 +377,8 @@ class EditPlantScreenTest {
   fun deletionPopup_isNoMoreDisplayed_whenGoingBackToEdit() {
     setContentWith()
 
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
+      EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
     // Keep plant in garden
     composeRule
@@ -362,13 +396,15 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Asserts that the popup is not displayed anymore when the de lete button is pressed, then going
+   * Asserts that the popup is not displayed anymore when the delete button is pressed, then going
    * back in the Garden screen by deleting the plant.
    */
   @Test
   fun deletionPopup_isNoMoreDisplayed_whenGoingBackToGarden() {
     setContentWith()
 
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
+      EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
     // Delete plant
     composeRule
@@ -396,6 +432,8 @@ class EditPlantScreenTest {
   @Test
   fun deleteButton_isVisible_whenFromGarden() {
     setContentWith(fromRoute = Screen.Garden.route)
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
+      EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
   }
 }
