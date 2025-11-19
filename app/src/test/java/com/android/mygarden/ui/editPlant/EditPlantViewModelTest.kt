@@ -110,6 +110,13 @@ class EditPlantViewModelTest {
     }
   }
 
+  /** Test setting the light exposure. */
+  @Test
+  fun setLightExposure_updates_state() {
+    viewModel.setLightExposure("New light exposure")
+    assertEquals("New light exposure", viewModel.uiState.value.lightExposure)
+  }
+
   /** Test deleting a plant from the repository. */
   @Test
   fun deletePlant_success_removes_from_repository() = runTest {

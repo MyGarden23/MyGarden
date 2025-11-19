@@ -88,12 +88,13 @@ class EditPlantScreenTest {
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsDisplayed()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION).assertIsDisplayed()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD).assertIsDisplayed()
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
-      EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).assertIsDisplayed()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.INPUT_LAST_WATERED).assertIsDisplayed()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).assertIsDisplayed()
-      composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
   }
 
   /**
@@ -222,8 +223,9 @@ class EditPlantScreenTest {
     saveNode.assertIsEnabled()
 
     // Click save -> calls VM.editPlant and onSaved
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
-      EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     saveNode.performClick()
     composeRule.waitForIdle()
 
@@ -241,8 +243,9 @@ class EditPlantScreenTest {
     val onDeleted = mutableListOf<Boolean>()
     setContentWith(vm = vm, onDeletedCalled = onDeleted)
 
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
-      EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
 
     // Assert that the deletion popup displays and confirm deleting the plant
@@ -298,8 +301,8 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Tests that the validation error for a blank light exposure field only appears after the user has
-   * interacted with (focused on) the input field and not before.
+   * Tests that the validation error for a blank light exposure field only appears after the user
+   * has interacted with (focused on) the input field and not before.
    */
   @Test
   fun lightExposure_errorAppears_onlyAfterUserFocus_whenBlank() {
@@ -307,8 +310,8 @@ class EditPlantScreenTest {
 
     // Error not shown before interaction
     composeRule
-      .onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_LIGHT_EXPOSURE)
-      .assertDoesNotExist()
+        .onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_LIGHT_EXPOSURE)
+        .assertDoesNotExist()
 
     // Focus into light exposure -> mark as touched
     composeRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).performClick()
@@ -349,8 +352,9 @@ class EditPlantScreenTest {
   fun deletionPopup_isDisplayed_whenPressDelete() {
     setContentWith()
 
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
-      EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
 
     // Assert all nodes are correctly displayed
@@ -377,8 +381,9 @@ class EditPlantScreenTest {
   fun deletionPopup_isNoMoreDisplayed_whenGoingBackToEdit() {
     setContentWith()
 
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
-      EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
     // Keep plant in garden
     composeRule
@@ -403,8 +408,9 @@ class EditPlantScreenTest {
   fun deletionPopup_isNoMoreDisplayed_whenGoingBackToGarden() {
     setContentWith()
 
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
-      EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
     // Delete plant
     composeRule
@@ -432,8 +438,9 @@ class EditPlantScreenTest {
   @Test
   fun deleteButton_isVisible_whenFromGarden() {
     setContentWith(fromRoute = Screen.Garden.route)
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN).performScrollToNode(hasTestTag(
-      EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
   }
 }
