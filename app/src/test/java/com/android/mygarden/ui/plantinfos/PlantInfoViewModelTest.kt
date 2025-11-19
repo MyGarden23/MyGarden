@@ -133,6 +133,30 @@ class PlantInfoViewModelTest {
     }
   }
 
+  /**
+   * Check that the right error is set when initializeUIState() fails to getOwnedPlant from the
+   * repository and the error is cleared when clearErrorMsg() is called.
+   */
+  @Test
+  fun initializeUIState_setErrorMessageWhenWrongPlantIdThenClearError() = runTest {
+    val plant = createTestPlant()
+    val id1 = "id of a stored Plant. But there is no stored plant."
+
+    // Initialize the UIState with an OwnedPlantId but there is not plant in the repository so it
+    // will throw an exception and should call setErrorMsg
+    viewModel.initializeUIState(plant, context.getString(R.string.loading_plant_infos), id1)
+    advanceUntilIdle()
+    val errorMsg = viewModel.uiState.value.errorMsg
+    // Check that the right error message has been set.
+    assertEquals(R.string.error_failed_load_plant_info, errorMsg)
+
+    // Clear the error message
+    viewModel.clearErrorMsg()
+    val errorMsgAfterClear = viewModel.uiState.value.errorMsg
+    // Check that the error message has been cleaned
+    assertNull(errorMsgAfterClear)
+  }
+
   @Test
   fun setTab_updatesSelectedTabToDescription() = runTest {
     // Tab switching should correctly update the selected tab
