@@ -68,92 +68,90 @@ fun SignInScreen(
     isDarkTheme: Boolean = isSystemInDarkTheme()
 ) {
 
-    val context = LocalContext.current
-    val uiState by authViewModel.uiState.collectAsState()
-    val isEndToEndTest = System.getProperty("mygarden.e2e") == "true"
+  val context = LocalContext.current
+  val uiState by authViewModel.uiState.collectAsState()
+  val isEndToEndTest = System.getProperty("mygarden.e2e") == "true"
 
-    // Show error message if login fails
-    LaunchedEffect(uiState.errorMsg) {
-        handleLoginError(uiState.errorMsg, context, authViewModel)
-    }
+  // Show error message if login fails
+  LaunchedEffect(uiState.errorMsg) { handleLoginError(uiState.errorMsg, context, authViewModel) }
 
-    // Navigate to the next screen on successful login
-    LaunchedEffect(uiState.user) {
-        handleLoginSuccess(
-            user = uiState.user,
-            isNewUser = uiState.isNewUser,
-            context = context,
-            onSignedIn = onSignedIn,
-            onLogIn = onLogIn)
-    }
+  // Navigate to the next screen on successful login
+  LaunchedEffect(uiState.user) {
+    handleLoginSuccess(
+        user = uiState.user,
+        isNewUser = uiState.isNewUser,
+        context = context,
+        onSignedIn = onSignedIn,
+        onLogIn = onLogIn)
+  }
 
-    val logoRes =
-        if (isDarkTheme) {
-            R.drawable.app_logo_dark
-        } else {
-            R.drawable.app_logo_light
-        }
-    // For testing
-    val resName = context.resources.getResourceEntryName(logoRes)
-    Box(
-        modifier =
-            Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_BACKGROUND)) {
+  val logoRes =
+      if (isDarkTheme) {
+        R.drawable.app_logo_dark
+      } else {
+        R.drawable.app_logo_light
+      }
+  // For testing
+  val resName = context.resources.getResourceEntryName(logoRes)
+  Box(
+      modifier =
+          Modifier.fillMaxSize()
+              .background(MaterialTheme.colorScheme.background)
+              .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_BACKGROUND)) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             // verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Spacer(modifier = Modifier.weight(0.3f))
-            Image(
-                painter = painterResource(id = logoRes),
-                contentDescription = context.getString(R.string.description_logo),
-                contentScale = ContentScale.Fit,
+          Spacer(modifier = Modifier.weight(0.3f))
+          Image(
+              painter = painterResource(id = logoRes),
+              contentDescription = context.getString(R.string.description_logo),
+              contentScale = ContentScale.Fit,
+              modifier =
+                  Modifier.fillMaxWidth(0.9f)
+                      .aspectRatio(1f)
+                      .heightIn(max = 180.dp)
+                      .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
+                      .semantics { this.logoRes = resName })
+
+          Spacer(modifier = Modifier.fillMaxHeight(0.35f))
+
+          // Authenticate With Google Button
+          if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.size(48.dp))
+          } else {
+            OutlinedButton(
+                onClick = {
+                  if (isEndToEndTest) {
+                    handleEndToEndSignIn(onSignedIn, onLogIn)
+                  } else {
+                    authViewModel.signIn(context, credentialManager)
+                  }
+                },
                 modifier =
-                    Modifier.fillMaxWidth(0.9f)
-                        .aspectRatio(1f)
-                        .heightIn(max = 180.dp)
-                        .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
-                        .semantics { this.logoRes = resName })
+                    Modifier.height(60.dp)
+                        .fillMaxWidth(0.75f)
+                        .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON),
+                shape = RoundedCornerShape(50),
+                colors =
+                    ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                  Icon(
+                      painter = painterResource(R.drawable.google_logo),
+                      contentDescription = context.getString(R.string.description_google_icon),
+                      tint = Color.Unspecified, // To keep the reel colors of the logo
+                      modifier = Modifier.size(20.dp))
 
-            Spacer(modifier = Modifier.fillMaxHeight(0.35f))
-
-            // Authenticate With Google Button
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(48.dp))
-            } else {
-                OutlinedButton(
-                    onClick = {
-                        if (isEndToEndTest) {
-                            handleEndToEndSignIn(onSignedIn, onLogIn)
-                        } else {
-                            authViewModel.signIn(context, credentialManager)
-                        }
-                    },
-                    modifier =
-                        Modifier.height(60.dp)
-                            .fillMaxWidth(0.75f)
-                            .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON),
-                    shape = RoundedCornerShape(50),
-                    colors =
-                        ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                    Icon(
-                        painter = painterResource(R.drawable.google_logo),
-                        contentDescription = context.getString(R.string.description_google_icon),
-                        tint = Color.Unspecified, // To keep the reel colors of the logo
-                        modifier = Modifier.size(20.dp))
-
-                    Text(
-                        text = context.getString(R.string.sign_in_with_google),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                  Text(
+                      text = context.getString(R.string.sign_in_with_google),
+                      color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
-                Spacer(modifier = Modifier.fillMaxHeight(0.35f))
-            }
+            Spacer(modifier = Modifier.fillMaxHeight(0.35f))
+          }
         }
-    }
+      }
 }
 
 private fun handleLoginError(
@@ -161,10 +159,10 @@ private fun handleLoginError(
     context: Context,
     authViewModel: SignInViewModel,
 ) {
-    errorMsg?.let {
-        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-        authViewModel.clearErrorMsg()
-    }
+  errorMsg?.let {
+    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+    authViewModel.clearErrorMsg()
+  }
 }
 
 private fun handleLoginSuccess(
@@ -174,20 +172,19 @@ private fun handleLoginSuccess(
     onSignedIn: () -> Unit,
     onLogIn: () -> Unit,
 ) {
-    user?.let {
-        Toast.makeText(context, context.getString(R.string.login_successful), Toast.LENGTH_SHORT)
-            .show()
-        if (isNewUser) onSignedIn() else onLogIn()
-    }
+  user?.let {
+    Toast.makeText(context, context.getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
+    if (isNewUser) onSignedIn() else onLogIn()
+  }
 }
 
 private fun handleEndToEndSignIn(
     onSignedIn: () -> Unit,
     onLogIn: () -> Unit,
 ) {
-    if (FirebaseAuth.getInstance().currentUser == null) {
-        onSignedIn()
-    } else {
-        onLogIn()
-    }
+  if (FirebaseAuth.getInstance().currentUser == null) {
+    onSignedIn()
+  } else {
+    onLogIn()
+  }
 }

@@ -67,169 +67,167 @@ fun EditPlantScreen(
     onDeleted: (() -> Unit)? = null,
     goBack: () -> Unit = {},
 ) {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-    // Load the plant when the id changes
-    LaunchedEffect(ownedPlantId) { editPlantViewModel.loadPlant(ownedPlantId) }
+  // Load the plant when the id changes
+  LaunchedEffect(ownedPlantId) { editPlantViewModel.loadPlant(ownedPlantId) }
 
-    val plantUIState by editPlantViewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+  val plantUIState by editPlantViewModel.uiState.collectAsState()
+  val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(plantUIState.errorMsg) {
-        plantUIState.errorMsg?.let { resId ->
-            snackbarHostState.showSnackbar(
-                message = context.getString(resId),
-                withDismissAction = true,
-                duration = SnackbarDuration.Short,
-            )
-            editPlantViewModel.clearErrorMsg()
-        }
+  LaunchedEffect(plantUIState.errorMsg) {
+    plantUIState.errorMsg?.let { resId ->
+      snackbarHostState.showSnackbar(
+          message = context.getString(resId),
+          withDismissAction = true,
+          duration = SnackbarDuration.Short,
+      )
+      editPlantViewModel.clearErrorMsg()
     }
+  }
 
-    // Mutable states needed for the UI
-    var showDeletePopup by remember { mutableStateOf(false) }
-    var touchedDesc by remember { mutableStateOf(false) }
-    var touchedName by remember { mutableStateOf(false) }
-    var touchedLatinName by remember { mutableStateOf(false) }
-    var touchedLastWatered by remember { mutableStateOf(false) }
-    var showDatePicker by remember { mutableStateOf(false) }
-    val dateFmt = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
+  // Mutable states needed for the UI
+  var showDeletePopup by remember { mutableStateOf(false) }
+  var touchedDesc by remember { mutableStateOf(false) }
+  var touchedName by remember { mutableStateOf(false) }
+  var touchedLatinName by remember { mutableStateOf(false) }
+  var touchedLastWatered by remember { mutableStateOf(false) }
+  var showDatePicker by remember { mutableStateOf(false) }
+  val dateFmt = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
 
-    // Regroupe les erreurs dans un seul objet (moins de logique dans le composable)
-    val errorFlags =
-        remember(plantUIState, touchedName, touchedLatinName, touchedDesc, touchedLastWatered) {
-            computeEditPlantErrorFlags(
-                uiState = plantUIState,
-                touchedName = touchedName,
-                touchedLatinName = touchedLatinName,
-                touchedDesc = touchedDesc,
-                touchedLastWatered = touchedLastWatered,
-            )
-        }
-
-    if (showDatePicker) {
-        EditPlantDatePickerDialog(
-            initialMillis = plantUIState.lastWatered?.time,
-            onConfirm = { millis ->
-                if (millis != null) {
-                    editPlantViewModel.setLastWatered(Timestamp(millis))
-                }
-                showDatePicker = false
-            },
-            onDismiss = { showDatePicker = false },
+  // Regroupe les erreurs dans un seul objet (moins de logique dans le composable)
+  val errorFlags =
+      remember(plantUIState, touchedName, touchedLatinName, touchedDesc, touchedLastWatered) {
+        computeEditPlantErrorFlags(
+            uiState = plantUIState,
+            touchedName = touchedName,
+            touchedLatinName = touchedLatinName,
+            touchedDesc = touchedDesc,
+            touchedLastWatered = touchedLastWatered,
         )
-    }
+      }
 
-    // Enable the Save button if the plant has been recognized by the API and the
-    // lastWatered field is set and description is not blank or if the fields are all
-    // filled if the plant is not recognized.
-    val isSaveEnabled =
-        remember(plantUIState) { computeIsSaveEnabled(plantUIState) }
-
-    Scaffold(
-        modifier = Modifier.testTag(NavigationTestTags.EDIT_PLANT_SCREEN),
-        topBar = {
-            TopBar(
-                title = context.getString(R.string.edit_plant_screen_title),
-                hasGoBackButton = true,
-                onGoBack = goBack,
-            )
+  if (showDatePicker) {
+    EditPlantDatePickerDialog(
+        initialMillis = plantUIState.lastWatered?.time,
+        onConfirm = { millis ->
+          if (millis != null) {
+            editPlantViewModel.setLastWatered(Timestamp(millis))
+          }
+          showDatePicker = false
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { padding ->
-        Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            // ------- Image -------
-            PlantImageSection(imageUrl = plantUIState.image)
+        onDismiss = { showDatePicker = false },
+    )
+  }
 
-            // ------- Name -------
-            NameFieldSection(
-                name = plantUIState.name,
-                isRecognized = plantUIState.isRecognized,
-                isNameError = errorFlags.isNameError,
-                onTouchedName = { touchedName = true },
-                onNameChange = { newName ->
-                    if (!plantUIState.isRecognized) {
-                        editPlantViewModel.setName(newName)
-                    }
-                },
-            )
+  // Enable the Save button if the plant has been recognized by the API and the
+  // lastWatered field is set and description is not blank or if the fields are all
+  // filled if the plant is not recognized.
+  val isSaveEnabled = remember(plantUIState) { computeIsSaveEnabled(plantUIState) }
 
-            // ------- Latin name -------
-            LatinNameFieldSection(
-                latinName = plantUIState.latinName,
-                isRecognized = plantUIState.isRecognized,
-                isLatinNameError = errorFlags.isLatinNameError,
-                onTouchedLatinName = { touchedLatinName = true },
-                onLatinNameChange = { newLatinName ->
-                    if (!plantUIState.isRecognized) {
-                        editPlantViewModel.setLatinName(newLatinName)
-                    }
-                },
-            )
+  Scaffold(
+      modifier = Modifier.testTag(NavigationTestTags.EDIT_PLANT_SCREEN),
+      topBar = {
+        TopBar(
+            title = context.getString(R.string.edit_plant_screen_title),
+            hasGoBackButton = true,
+            onGoBack = goBack,
+        )
+      },
+      snackbarHost = { SnackbarHost(snackbarHostState) },
+  ) { padding ->
+    Column(
+        modifier =
+            Modifier.fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      // ------- Image -------
+      PlantImageSection(imageUrl = plantUIState.image)
 
-            // ------- Description -------
-            DescriptionFieldSection(
-                description = plantUIState.description,
-                isDescriptionError = errorFlags.isDescriptionError,
-                onTouchedDesc = { touchedDesc = true },
-                onDescriptionChange = { newDesc ->
-                    editPlantViewModel.setDescription(newDesc)
-                },
-            )
+      // ------- Name -------
+      NameFieldSection(
+          name = plantUIState.name,
+          isRecognized = plantUIState.isRecognized,
+          isNameError = errorFlags.isNameError,
+          onTouchedName = { touchedName = true },
+          onNameChange = { newName ->
+            if (!plantUIState.isRecognized) {
+              editPlantViewModel.setName(newName)
+            }
+          },
+      )
 
-            // ------- Last watered -------
-            LastWateredSection(
-                lastWatered = plantUIState.lastWatered,
-                isDateError = errorFlags.isDateError,
-                dateFmt = dateFmt,
-                onTouchedLastWatered = { touchedLastWatered = true },
-                onOpenDatePicker = {
-                    touchedLastWatered = true
-                    showDatePicker = true
-                },
-            )
+      // ------- Latin name -------
+      LatinNameFieldSection(
+          latinName = plantUIState.latinName,
+          isRecognized = plantUIState.isRecognized,
+          isLatinNameError = errorFlags.isLatinNameError,
+          onTouchedLatinName = { touchedLatinName = true },
+          onLatinNameChange = { newLatinName ->
+            if (!plantUIState.isRecognized) {
+              editPlantViewModel.setLatinName(newLatinName)
+            }
+          },
+      )
 
-            Spacer(Modifier.height(8.dp))
+      // ------- Description -------
+      DescriptionFieldSection(
+          description = plantUIState.description,
+          isDescriptionError = errorFlags.isDescriptionError,
+          onTouchedDesc = { touchedDesc = true },
+          onDescriptionChange = { newDesc -> editPlantViewModel.setDescription(newDesc) },
+      )
 
-            // ------- Save -------
-            SaveButtonSection(
-                isSaveEnabled = isSaveEnabled,
-                onValidate = {
-                    val touched =
-                        computeTouchedAfterValidate(plantUIState, touchedName, touchedLatinName, touchedDesc, touchedLastWatered)
-                    touchedName = touched.touchedName
-                    touchedLatinName = touched.touchedLatinName
-                    touchedDesc = touched.touchedDesc
-                    touchedLastWatered = touched.touchedLastWatered
-                },
-                onSave = {
-                    if (isSaveEnabled) {
-                        editPlantViewModel.editPlant(ownedPlantId)
-                        onSaved()
-                    }
-                },
-            )
+      // ------- Last watered -------
+      LastWateredSection(
+          lastWatered = plantUIState.lastWatered,
+          isDateError = errorFlags.isDateError,
+          dateFmt = dateFmt,
+          onTouchedLastWatered = { touchedLastWatered = true },
+          onOpenDatePicker = {
+            touchedLastWatered = true
+            showDatePicker = true
+          },
+      )
 
-            // ------- Delete -------
-            DeleteSection(
-                onDeleted = onDeleted,
-                showDeletePopup = showDeletePopup,
-                onShowDeletePopupChange = { showDeletePopup = it },
-                onConfirmDelete = {
-                    editPlantViewModel.deletePlant(ownedPlantId)
-                    showDeletePopup = false
-                    onDeleted?.invoke()
-                },
-            )
-        }
+      Spacer(Modifier.height(8.dp))
+
+      // ------- Save -------
+      SaveButtonSection(
+          isSaveEnabled = isSaveEnabled,
+          onValidate = {
+            val touched =
+                computeTouchedAfterValidate(
+                    plantUIState, touchedName, touchedLatinName, touchedDesc, touchedLastWatered)
+            touchedName = touched.touchedName
+            touchedLatinName = touched.touchedLatinName
+            touchedDesc = touched.touchedDesc
+            touchedLastWatered = touched.touchedLastWatered
+          },
+          onSave = {
+            if (isSaveEnabled) {
+              editPlantViewModel.editPlant(ownedPlantId)
+              onSaved()
+            }
+          },
+      )
+
+      // ------- Delete -------
+      DeleteSection(
+          onDeleted = onDeleted,
+          showDeletePopup = showDeletePopup,
+          onShowDeletePopupChange = { showDeletePopup = it },
+          onConfirmDelete = {
+            editPlantViewModel.deletePlant(ownedPlantId)
+            showDeletePopup = false
+            onDeleted?.invoke()
+          },
+      )
     }
+  }
 }
 
 // Adapte le nom du type si nécessaire (EditPlantUiState est le nom probable)
@@ -254,30 +252,29 @@ private fun computeEditPlantErrorFlags(
     touchedDesc: Boolean,
     touchedLastWatered: Boolean,
 ): EditPlantErrorFlags {
-    val isNameError = !uiState.isRecognized && uiState.name.isBlank() && touchedName
-    val isLatinNameError =
-        !uiState.isRecognized && uiState.latinName.isBlank() && touchedLatinName
-    val isDescriptionError = uiState.description.isBlank() && touchedDesc
-    val isDateError = uiState.lastWatered == null && touchedLastWatered
+  val isNameError = !uiState.isRecognized && uiState.name.isBlank() && touchedName
+  val isLatinNameError = !uiState.isRecognized && uiState.latinName.isBlank() && touchedLatinName
+  val isDescriptionError = uiState.description.isBlank() && touchedDesc
+  val isDateError = uiState.lastWatered == null && touchedLastWatered
 
-    return EditPlantErrorFlags(
-        isNameError = isNameError,
-        isLatinNameError = isLatinNameError,
-        isDescriptionError = isDescriptionError,
-        isDateError = isDateError,
-    )
+  return EditPlantErrorFlags(
+      isNameError = isNameError,
+      isLatinNameError = isLatinNameError,
+      isDescriptionError = isDescriptionError,
+      isDateError = isDateError,
+  )
 }
 
 // Même condition que dans ton code original, juste sortie dans une fonction pure
 private fun computeIsSaveEnabled(uiState: EditPlantUIState): Boolean {
-    return if (uiState.isRecognized) {
-        uiState.description.isNotBlank() && uiState.lastWatered != null
-    } else {
-        uiState.description.isNotBlank() &&
-                uiState.name.isNotBlank() &&
-                uiState.latinName.isNotBlank() &&
-                uiState.lastWatered != null
-    }
+  return if (uiState.isRecognized) {
+    uiState.description.isNotBlank() && uiState.lastWatered != null
+  } else {
+    uiState.description.isNotBlank() &&
+        uiState.name.isNotBlank() &&
+        uiState.latinName.isNotBlank() &&
+        uiState.lastWatered != null
+  }
 }
 
 // Remplace l'ancienne validateFieldsBeforeSave() mais sans if dans le composable
@@ -288,17 +285,17 @@ private fun computeTouchedAfterValidate(
     touchedDesc: Boolean,
     touchedLastWatered: Boolean,
 ): TouchedFlags {
-    val newTouchedName = touchedName || uiState.name.isBlank()
-    val newTouchedLatin = touchedLatinName || uiState.latinName.isBlank()
-    val newTouchedDesc = touchedDesc || uiState.description.isBlank()
-    val newTouchedLastWatered = touchedLastWatered || (uiState.lastWatered == null)
+  val newTouchedName = touchedName || uiState.name.isBlank()
+  val newTouchedLatin = touchedLatinName || uiState.latinName.isBlank()
+  val newTouchedDesc = touchedDesc || uiState.description.isBlank()
+  val newTouchedLastWatered = touchedLastWatered || (uiState.lastWatered == null)
 
-    return TouchedFlags(
-        touchedName = newTouchedName,
-        touchedLatinName = newTouchedLatin,
-        touchedDesc = newTouchedDesc,
-        touchedLastWatered = newTouchedLastWatered,
-    )
+  return TouchedFlags(
+      touchedName = newTouchedName,
+      touchedLatinName = newTouchedLatin,
+      touchedDesc = newTouchedDesc,
+      touchedLastWatered = newTouchedLastWatered,
+  )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -308,64 +305,62 @@ private fun EditPlantDatePickerDialog(
     onConfirm: (Long?) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val pickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
-    val context = LocalContext.current
+  val pickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
+  val context = LocalContext.current
 
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = { onConfirm(pickerState.selectedDateMillis) }) {
-                Text(context.getString(R.string.ok))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(context.getString(R.string.cancel))
-            }
-        },
-    ) {
-        DatePicker(state = pickerState)
-    }
+  DatePickerDialog(
+      onDismissRequest = onDismiss,
+      confirmButton = {
+        TextButton(onClick = { onConfirm(pickerState.selectedDateMillis) }) {
+          Text(context.getString(R.string.ok))
+        }
+      },
+      dismissButton = {
+        TextButton(onClick = onDismiss) { Text(context.getString(R.string.cancel)) }
+      },
+  ) {
+    DatePicker(state = pickerState)
+  }
 }
 
 /** Plant image section (keeps original logic & tags). */
 @Composable
 private fun PlantImageSection(imageUrl: String?) {
-    val context = LocalContext.current
-    if (imageUrl != null) {
-        AsyncImage(
-            model =
-                ImageRequest.Builder(context)
-                    .data(imageUrl)
-                    .error(R.drawable.error_image_download)
-                    .build(),
-            contentDescription = context.getString(R.string.plant_image_description),
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(220.dp)
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .testTag(EditPlantScreenTestTags.PLANT_IMAGE),
-            contentScale = ContentScale.Crop,
-        )
-    } else {
-        // Placeholder if no image available
-        Box(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(220.dp)
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .testTag(EditPlantScreenTestTags.PLANT_IMAGE),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = context.getString(R.string.plant_image_no_image_available),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+  val context = LocalContext.current
+  if (imageUrl != null) {
+    AsyncImage(
+        model =
+            ImageRequest.Builder(context)
+                .data(imageUrl)
+                .error(R.drawable.error_image_download)
+                .build(),
+        contentDescription = context.getString(R.string.plant_image_description),
+        modifier =
+            Modifier.fillMaxWidth()
+                .height(220.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .testTag(EditPlantScreenTestTags.PLANT_IMAGE),
+        contentScale = ContentScale.Crop,
+    )
+  } else {
+    // Placeholder if no image available
+    Box(
+        modifier =
+            Modifier.fillMaxWidth()
+                .height(220.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .testTag(EditPlantScreenTestTags.PLANT_IMAGE),
+        contentAlignment = Alignment.Center,
+    ) {
+      Text(
+          text = context.getString(R.string.plant_image_no_image_available),
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
     }
+  }
 }
 
 /** Name field (keeps original behaviour). */
@@ -377,29 +372,29 @@ private fun NameFieldSection(
     onTouchedName: () -> Unit,
     onNameChange: (String) -> Unit,
 ) {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-    OutlinedTextField(
-        value = name,
-        onValueChange = { if (!isRecognized) onNameChange(it) },
-        label = { Text(context.getString(R.string.name)) },
-        singleLine = true,
-        readOnly = isRecognized,
-        enabled = !isRecognized,
-        isError = isNameError,
-        modifier =
-            Modifier.fillMaxWidth()
-                .testTag(EditPlantScreenTestTags.PLANT_NAME)
-                .onFocusChanged { if (it.isFocused) onTouchedName() },
+  OutlinedTextField(
+      value = name,
+      onValueChange = { if (!isRecognized) onNameChange(it) },
+      label = { Text(context.getString(R.string.name)) },
+      singleLine = true,
+      readOnly = isRecognized,
+      enabled = !isRecognized,
+      isError = isNameError,
+      modifier =
+          Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.PLANT_NAME).onFocusChanged {
+            if (it.isFocused) onTouchedName()
+          },
+  )
+  if (isNameError) {
+    Text(
+        text = context.getString(R.string.name_error),
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_NAME),
     )
-    if (isNameError) {
-        Text(
-            text = context.getString(R.string.name_error),
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_NAME),
-        )
-    }
+  }
 }
 
 /** Latin name field. */
@@ -411,29 +406,29 @@ private fun LatinNameFieldSection(
     onTouchedLatinName: () -> Unit,
     onLatinNameChange: (String) -> Unit,
 ) {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-    OutlinedTextField(
-        value = latinName,
-        onValueChange = { if (!isRecognized) onLatinNameChange(it) },
-        label = { Text(context.getString(R.string.latin_name)) },
-        singleLine = true,
-        readOnly = isRecognized,
-        enabled = !isRecognized,
-        isError = isLatinNameError,
-        modifier =
-            Modifier.fillMaxWidth()
-                .testTag(EditPlantScreenTestTags.PLANT_LATIN)
-                .onFocusChanged { if (it.isFocused) onTouchedLatinName() },
+  OutlinedTextField(
+      value = latinName,
+      onValueChange = { if (!isRecognized) onLatinNameChange(it) },
+      label = { Text(context.getString(R.string.latin_name)) },
+      singleLine = true,
+      readOnly = isRecognized,
+      enabled = !isRecognized,
+      isError = isLatinNameError,
+      modifier =
+          Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.PLANT_LATIN).onFocusChanged {
+            if (it.isFocused) onTouchedLatinName()
+          },
+  )
+  if (isLatinNameError) {
+    Text(
+        text = context.getString(R.string.latin_name_error),
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_LATIN_NAME),
     )
-    if (isLatinNameError) {
-        Text(
-            text = context.getString(R.string.latin_name_error),
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_LATIN_NAME),
-        )
-    }
+  }
 }
 
 /** Description field. */
@@ -444,28 +439,28 @@ private fun DescriptionFieldSection(
     onTouchedDesc: () -> Unit,
     onDescriptionChange: (String) -> Unit,
 ) {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-    OutlinedTextField(
-        value = description,
-        onValueChange = { onDescriptionChange(it) },
-        label = { Text(context.getString(R.string.description)) },
-        minLines = 3,
-        isError = isDescriptionError,
-        modifier =
-            Modifier.fillMaxWidth()
-                .heightIn(min = 100.dp)
-                .testTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
-                .onFocusChanged { if (it.isFocused) onTouchedDesc() },
+  OutlinedTextField(
+      value = description,
+      onValueChange = { onDescriptionChange(it) },
+      label = { Text(context.getString(R.string.description)) },
+      minLines = 3,
+      isError = isDescriptionError,
+      modifier =
+          Modifier.fillMaxWidth()
+              .heightIn(min = 100.dp)
+              .testTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
+              .onFocusChanged { if (it.isFocused) onTouchedDesc() },
+  )
+  if (isDescriptionError) {
+    Text(
+        text = context.getString(R.string.description_error),
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_DESCRIPTION),
     )
-    if (isDescriptionError) {
-        Text(
-            text = context.getString(R.string.description_error),
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_DESCRIPTION),
-        )
-    }
+  }
 }
 
 /** Last watered field + date picker trigger. */
@@ -477,54 +472,50 @@ private fun LastWateredSection(
     onTouchedLastWatered: () -> Unit,
     onOpenDatePicker: () -> Unit,
 ) {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(
-            context.getString(R.string.last_time_watered),
-            style = MaterialTheme.typography.labelLarge,
-        )
+  Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Text(
+        context.getString(R.string.last_time_watered),
+        style = MaterialTheme.typography.labelLarge,
+    )
 
-        val dateText =
-            lastWatered?.let { ts ->
-                Instant.ofEpochMilli(ts.time)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate()
-                    .format(dateFmt)
-            } ?: ""
+    val dateText =
+        lastWatered?.let { ts ->
+          Instant.ofEpochMilli(ts.time).atZone(ZoneId.systemDefault()).toLocalDate().format(dateFmt)
+        } ?: ""
 
-        OutlinedTextField(
-            value = dateText,
-            onValueChange = {},
-            readOnly = true,
-            isError = isDateError,
-            placeholder = { Text(context.getString(R.string.select_date)) },
-            trailingIcon = {
-                IconButton(
-                    onClick = { onOpenDatePicker() },
-                    modifier = Modifier.testTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON),
-                ) {
-                    Icon(
-                        Icons.Filled.CalendarMonth,
-                        contentDescription =
-                            context.getString(R.string.pick_date_icon_description),
-                    )
-                }
-            },
-            modifier =
-                Modifier.fillMaxWidth()
-                    .testTag(EditPlantScreenTestTags.INPUT_LAST_WATERED)
-                    .onFocusChanged { if (it.isFocused) onTouchedLastWatered() },
-        )
-        if (isDateError) {
-            Text(
-                text = context.getString(R.string.last_time_watered_error),
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_DATE),
+    OutlinedTextField(
+        value = dateText,
+        onValueChange = {},
+        readOnly = true,
+        isError = isDateError,
+        placeholder = { Text(context.getString(R.string.select_date)) },
+        trailingIcon = {
+          IconButton(
+              onClick = { onOpenDatePicker() },
+              modifier = Modifier.testTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON),
+          ) {
+            Icon(
+                Icons.Filled.CalendarMonth,
+                contentDescription = context.getString(R.string.pick_date_icon_description),
             )
-        }
+          }
+        },
+        modifier =
+            Modifier.fillMaxWidth()
+                .testTag(EditPlantScreenTestTags.INPUT_LAST_WATERED)
+                .onFocusChanged { if (it.isFocused) onTouchedLastWatered() },
+    )
+    if (isDateError) {
+      Text(
+          text = context.getString(R.string.last_time_watered_error),
+          color = MaterialTheme.colorScheme.error,
+          style = MaterialTheme.typography.bodySmall,
+          modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_DATE),
+      )
     }
+  }
 }
 
 /** Save button with same enable logic. */
@@ -534,20 +525,17 @@ private fun SaveButtonSection(
     onValidate: () -> Unit,
     onSave: () -> Unit,
 ) {
-    val context = LocalContext.current
-    Button(
-        onClick = {
-            onValidate()
-            onSave()
-        },
-        enabled = isSaveEnabled,
-        modifier =
-            Modifier.fillMaxWidth()
-                .height(56.dp)
-                .testTag(EditPlantScreenTestTags.PLANT_SAVE),
-    ) {
-        Text(context.getString(R.string.save))
-    }
+  val context = LocalContext.current
+  Button(
+      onClick = {
+        onValidate()
+        onSave()
+      },
+      enabled = isSaveEnabled,
+      modifier = Modifier.fillMaxWidth().height(56.dp).testTag(EditPlantScreenTestTags.PLANT_SAVE),
+  ) {
+    Text(context.getString(R.string.save))
+  }
 }
 
 /** Delete button + popup. */
@@ -558,32 +546,30 @@ private fun DeleteSection(
     onShowDeletePopupChange: (Boolean) -> Unit,
     onConfirmDelete: () -> Unit,
 ) {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-    if (onDeleted != null) {
-        TextButton(
-            onClick = { onShowDeletePopupChange(true) },
-            modifier =
-                Modifier.fillMaxWidth()
-                    .testTag(EditPlantScreenTestTags.PLANT_DELETE),
-        ) {
-            Icon(
-                Icons.Filled.Delete,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                context.getString(R.string.delete),
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
-
-        if (showDeletePopup) {
-            DeletePlantPopup(
-                onDelete = onConfirmDelete,
-                onCancel = { onShowDeletePopupChange(false) },
-            )
-        }
+  if (onDeleted != null) {
+    TextButton(
+        onClick = { onShowDeletePopupChange(true) },
+        modifier = Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.PLANT_DELETE),
+    ) {
+      Icon(
+          Icons.Filled.Delete,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.error,
+      )
+      Spacer(Modifier.width(8.dp))
+      Text(
+          context.getString(R.string.delete),
+          color = MaterialTheme.colorScheme.error,
+      )
     }
+
+    if (showDeletePopup) {
+      DeletePlantPopup(
+          onDelete = onConfirmDelete,
+          onCancel = { onShowDeletePopupChange(false) },
+      )
+    }
+  }
 }

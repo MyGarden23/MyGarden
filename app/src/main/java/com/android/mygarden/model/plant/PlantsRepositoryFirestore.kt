@@ -45,220 +45,219 @@ class PlantsRepositoryFirestore(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 ) : PlantsRepositoryBase() {
-    private val healthCalculator = PlantHealthCalculator()
+  private val healthCalculator = PlantHealthCalculator()
 
-    override val tickDelay: Duration = 30.minutes
+  override val tickDelay: Duration = 30.minutes
 
-    // This flow emit something (a boolean here) each time a list update could make the list contain a
-    // thirsty plant
-    private val _plantsUpdate = MutableSharedFlow<Boolean>()
+  // This flow emit something (a boolean here) each time a list update could make the list contain a
+  // thirsty plant
+  private val _plantsUpdate = MutableSharedFlow<Boolean>()
 
-    private var scope = CoroutineScope(Job())
+  private var scope = CoroutineScope(Job())
 
-    /**
-     * This flow collects the user's plant list from Firebase with updated health status either when
-     * 1) the list of plants is updated and this could trigger a plant to be thirsty
-     * 2) a tick is emitted then emit the updated list ; to be collected by the pop-up VM
-     */
-    private var _plantsFlow: StateFlow<List<OwnedPlant>> = createPlantsFlow()
+  /**
+   * This flow collects the user's plant list from Firebase with updated health status either when
+   * 1) the list of plants is updated and this could trigger a plant to be thirsty
+   * 2) a tick is emitted then emit the updated list ; to be collected by the pop-up VM
+   */
+  private var _plantsFlow: StateFlow<List<OwnedPlant>> = createPlantsFlow()
 
-    override val plantsFlow: StateFlow<List<OwnedPlant>>
-        get() = _plantsFlow
+  override val plantsFlow: StateFlow<List<OwnedPlant>>
+    get() = _plantsFlow
 
-    private fun createPlantsFlow(): StateFlow<List<OwnedPlant>> {
-        return combine(_plantsUpdate, ticks) { _, _ ->
-            // ensures that a user is authenticated to get all of his plants
-            if (auth.currentUser != null) {
-                getAllOwnedPlants()
-            } else emptyList()
+  private fun createPlantsFlow(): StateFlow<List<OwnedPlant>> {
+    return combine(_plantsUpdate, ticks) { _, _ ->
+          // ensures that a user is authenticated to get all of his plants
+          if (auth.currentUser != null) {
+            getAllOwnedPlants()
+          } else emptyList()
         }
-            .distinctUntilChanged()
-            .stateIn(
-                scope, SharingStarted.WhileSubscribed(plantsFlowTimeoutWhenNoSubscribers), emptyList())
+        .distinctUntilChanged()
+        .stateIn(
+            scope, SharingStarted.WhileSubscribed(plantsFlowTimeoutWhenNoSubscribers), emptyList())
+  }
+
+  /** The list of plants owned by the user, in the repository of the user. */
+  private fun userPlantsCollection() =
+      firestore.collection(usersCollection).document(currentUserId()).collection(plantsCollection)
+
+  /**
+   * Gives the reference to the image associated to the id given in argument in the current user's
+   * plants collection in Cloud Storage. All the images are stored in JPG format : plantId.jpg
+   *
+   * @param plantId the name of the plant associated to the image
+   * @return the storage reference in Cloud Storage of the image
+   */
+  private fun storageRef(plantId: String): StorageReference {
+    return storage.reference.child(
+        "$usersCollection/${currentUserId()}/$plantsCollection/$plantId.jpg")
+  }
+
+  /** The id of the current user. Throw IllegalStateException if the user is not authenticated. */
+  private fun currentUserId(): String {
+    return auth.currentUser?.uid ?: throw IllegalStateException(AUTH_ERR_MSG)
+  }
+
+  override fun getNewId(): String {
+    // We create a new empty document and it automatically creates an id associated to it.
+    return userPlantsCollection().document().id
+  }
+
+  override suspend fun saveToGarden(plant: Plant, id: String, lastWatered: Timestamp): OwnedPlant {
+    // Upload the image to Cloud Storage
+    val imageUrl: String? = uploadLocalImageToCloudStorageAndDeleteImageLocally(plant.image, id)
+
+    // Creates an OwnedPlant with the arguments and change the image field of the plant to store the
+    // URL in Cloud Storage or null if there is no image.
+    val ownedPlant = OwnedPlant(id, plant.copy(image = imageUrl), lastWatered)
+    val serializedOwnedPlant = fromOwnedPlantToSerializedOwnedPlant(ownedPlant)
+
+    userPlantsCollection().document(id).set(serializedOwnedPlant).await()
+    // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
+    // thirsty
+    _plantsUpdate.emit(true)
+    return ownedPlant
+  }
+
+  override suspend fun getAllOwnedPlants(): List<OwnedPlant> {
+    val snapshot = userPlantsCollection().get().await()
+    val serializedList = snapshot.toObjects(SerializedOwnedPlant::class.java)
+    val ownedPlantList = serializedList.map(FirestoreMapper::fromSerializedOwnedPlantToOwnedPlant)
+
+    // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
+    // thirsty
+    _plantsUpdate.emit(true)
+    return ownedPlantList.map { p -> updatePlantHealthStatus(p) }
+  }
+
+  override suspend fun getOwnedPlant(id: String): OwnedPlant {
+    val document = userPlantsCollection().document(id).get().await()
+    require(document.exists()) { plantNotFoundErrMsg(id) }
+
+    val serializedOwnedPlant =
+        document.toObject(SerializedOwnedPlant::class.java)
+            ?: throw IllegalArgumentException(parsingFailedErrMsg(id))
+
+    val ownedPlant = fromSerializedOwnedPlantToOwnedPlant(serializedOwnedPlant)
+
+    // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
+    // thirsty
+    _plantsUpdate.emit(true)
+    return updatePlantHealthStatus(ownedPlant)
+  }
+
+  override suspend fun deleteFromGarden(id: String) {
+    // Delete the data in Firestore
+    val document = userPlantsCollection().document(id).get().await()
+    require(document.exists()) { plantNotFoundErrMsg(id) }
+
+    userPlantsCollection().document(id).delete().await()
+    // Delete the image in Cloud Storage
+    deleteImageInCloudStorage(id)
+  }
+
+  override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
+    require(id == newOwnedPlant.id) { differentIdsErrMsg(id, newOwnedPlant.id) }
+
+    userPlantsCollection()
+        .document(id)
+        .set(fromOwnedPlantToSerializedOwnedPlant(newOwnedPlant), SetOptions.merge())
+        .await()
+    // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
+    // thirsty
+    _plantsUpdate.emit(true)
+  }
+
+  override suspend fun waterPlant(id: String, wateringTime: Timestamp) {
+    val docRef = userPlantsCollection().document(id)
+    val document = docRef.get().await()
+    require(document.exists()) { plantNotFoundErrMsg(id) }
+
+    val serializedOwnedPlant: SerializedOwnedPlant =
+        document.toObject(SerializedOwnedPlant::class.java)
+            ?: throw IllegalArgumentException(parsingFailedErrMsg(id))
+
+    val ownedPlant = fromSerializedOwnedPlantToOwnedPlant(serializedOwnedPlant)
+    val newOwnedPlant =
+        ownedPlant.copy(previousLastWatered = ownedPlant.lastWatered, lastWatered = wateringTime)
+    docRef.set(fromOwnedPlantToSerializedOwnedPlant(newOwnedPlant), SetOptions.merge()).await()
+  }
+
+  /**
+   * Uploads the image of the plant (stored locally) to Cloud Storage for Firestore and delete the
+   * image stored locally. return the URL of where this image is stored or null if there was no
+   * image to store.
+   *
+   * @param imagePath the path of the image stored locally or null if there is no image to store
+   * @param plantId the id of the plant associated to the image to know where to store the image in
+   *   Cloud Storage
+   * @return the URL of where the image is stored in Cloud Storage or null if there was no image to
+   *   store.
+   */
+  private suspend fun uploadLocalImageToCloudStorageAndDeleteImageLocally(
+      imagePath: String?,
+      plantId: String
+  ): String? {
+    if (imagePath == null) return null
+    val imageFile = File(imagePath)
+    // Create a reference in Cloud Storage
+    val storageReference = storageRef(plantId)
+    val fileUri = Uri.fromFile(imageFile)
+
+    // Upload the File
+    storageReference.putFile(fileUri).await()
+
+    // Delete the image locally
+    if (imageFile.exists()) {
+      val deleted = imageFile.delete()
+      if (!deleted) {
+        Log.e(
+            "PlantsRepositoryFirestore",
+            "Failed to delete the local file image: ${imageFile.path} ")
+      }
     }
 
-    /** The list of plants owned by the user, in the repository of the user. */
-    private fun userPlantsCollection() =
-        firestore.collection(usersCollection).document(currentUserId()).collection(plantsCollection)
+    // Get the URL
+    return storageReference.downloadUrl.await().toString()
+  }
 
-    /**
-     * Gives the reference to the image associated to the id given in argument in the current user's
-     * plants collection in Cloud Storage. All the images are stored in JPG format : plantId.jpg
-     *
-     * @param plantId the name of the plant associated to the image
-     * @return the storage reference in Cloud Storage of the image
-     */
-    private fun storageRef(plantId: String): StorageReference {
-        return storage.reference.child(
-            "$usersCollection/${currentUserId()}/$plantsCollection/$plantId.jpg")
+  /**
+   * Delete an image referred by the id of the plant it is associated to from Cloud Storage
+   *
+   * @param plantId the name of the image in Cloud Storage
+   */
+  private suspend fun deleteImageInCloudStorage(plantId: String) {
+    val storageReference = storageRef(plantId)
+    try {
+      storageReference.delete().await()
+    } catch (e: Exception) {
+      Log.e("Cloud Storage", "Image not found or already deleted: ${e.message}")
     }
+  }
 
-    /** The id of the current user. Throw IllegalStateException if the user is not authenticated. */
-    private fun currentUserId(): String {
-        return auth.currentUser?.uid ?: throw IllegalStateException(AUTH_ERR_MSG)
-    }
+  /**
+   * Updates the health status of a plant based on current watering cycle.
+   *
+   * @param ownedPlant The plant to update
+   * @return A copy of the plant with updated health status
+   */
+  private fun updatePlantHealthStatus(ownedPlant: OwnedPlant): OwnedPlant {
+    val calculatedStatus =
+        healthCalculator.calculateHealthStatus(
+            lastWatered = ownedPlant.lastWatered,
+            wateringFrequency = ownedPlant.plant.wateringFrequency,
+            previousLastWatered = ownedPlant.previousLastWatered)
+    val updatedPlant = ownedPlant.plant.copy(healthStatus = calculatedStatus)
+    return ownedPlant.copy(plant = updatedPlant)
+  }
 
-    override fun getNewId(): String {
-        // We create a new empty document and it automatically creates an id associated to it.
-        return userPlantsCollection().document().id
-    }
-
-    override suspend fun saveToGarden(plant: Plant, id: String, lastWatered: Timestamp): OwnedPlant {
-        // Upload the image to Cloud Storage
-        val imageUrl: String? = uploadLocalImageToCloudStorageAndDeleteImageLocally(plant.image, id)
-
-        // Creates an OwnedPlant with the arguments and change the image field of the plant to store the
-        // URL in Cloud Storage or null if there is no image.
-        val ownedPlant = OwnedPlant(id, plant.copy(image = imageUrl), lastWatered)
-        val serializedOwnedPlant = fromOwnedPlantToSerializedOwnedPlant(ownedPlant)
-
-        userPlantsCollection().document(id).set(serializedOwnedPlant).await()
-        // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
-        // thirsty
-        _plantsUpdate.emit(true)
-        return ownedPlant
-    }
-
-    override suspend fun getAllOwnedPlants(): List<OwnedPlant> {
-        val snapshot = userPlantsCollection().get().await()
-        val serializedList = snapshot.toObjects(SerializedOwnedPlant::class.java)
-        val ownedPlantList = serializedList.map(FirestoreMapper::fromSerializedOwnedPlantToOwnedPlant)
-
-        // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
-        // thirsty
-        _plantsUpdate.emit(true)
-        return ownedPlantList.map { p -> updatePlantHealthStatus(p) }
-    }
-
-    override suspend fun getOwnedPlant(id: String): OwnedPlant {
-        val document = userPlantsCollection().document(id).get().await()
-        require(document.exists()) {plantNotFoundErrMsg(id)}
-
-        val serializedOwnedPlant =
-            document.toObject(SerializedOwnedPlant::class.java)
-                ?: throw IllegalArgumentException(parsingFailedErrMsg(id))
-
-        val ownedPlant = fromSerializedOwnedPlantToOwnedPlant(serializedOwnedPlant)
-
-        // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
-        // thirsty
-        _plantsUpdate.emit(true)
-        return updatePlantHealthStatus(ownedPlant)
-    }
-
-    override suspend fun deleteFromGarden(id: String) {
-        // Delete the data in Firestore
-        val document = userPlantsCollection().document(id).get().await()
-        require(document.exists()) {  plantNotFoundErrMsg(id)}
-
-        userPlantsCollection().document(id).delete().await()
-        // Delete the image in Cloud Storage
-        deleteImageInCloudStorage(id)
-    }
-
-    override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
-        require(id == newOwnedPlant.id){
-            differentIdsErrMsg(id, newOwnedPlant.id)}
-
-        userPlantsCollection()
-            .document(id)
-            .set(fromOwnedPlantToSerializedOwnedPlant(newOwnedPlant), SetOptions.merge())
-            .await()
-        // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
-        // thirsty
-        _plantsUpdate.emit(true)
-    }
-
-    override suspend fun waterPlant(id: String, wateringTime: Timestamp) {
-        val docRef = userPlantsCollection().document(id)
-        val document = docRef.get().await()
-        require(document.exists()) {plantNotFoundErrMsg(id)}
-
-        val serializedOwnedPlant: SerializedOwnedPlant =
-            document.toObject(SerializedOwnedPlant::class.java)
-                ?: throw IllegalArgumentException(parsingFailedErrMsg(id))
-
-        val ownedPlant = fromSerializedOwnedPlantToOwnedPlant(serializedOwnedPlant)
-        val newOwnedPlant =
-            ownedPlant.copy(previousLastWatered = ownedPlant.lastWatered, lastWatered = wateringTime)
-        docRef.set(fromOwnedPlantToSerializedOwnedPlant(newOwnedPlant), SetOptions.merge()).await()
-    }
-
-    /**
-     * Uploads the image of the plant (stored locally) to Cloud Storage for Firestore and delete the
-     * image stored locally. return the URL of where this image is stored or null if there was no
-     * image to store.
-     *
-     * @param imagePath the path of the image stored locally or null if there is no image to store
-     * @param plantId the id of the plant associated to the image to know where to store the image in
-     *   Cloud Storage
-     * @return the URL of where the image is stored in Cloud Storage or null if there was no image to
-     *   store.
-     */
-    private suspend fun uploadLocalImageToCloudStorageAndDeleteImageLocally(
-        imagePath: String?,
-        plantId: String
-    ): String? {
-        if (imagePath == null) return null
-        val imageFile = File(imagePath)
-        // Create a reference in Cloud Storage
-        val storageReference = storageRef(plantId)
-        val fileUri = Uri.fromFile(imageFile)
-
-        // Upload the File
-        storageReference.putFile(fileUri).await()
-
-        // Delete the image locally
-        if (imageFile.exists()) {
-            val deleted = imageFile.delete()
-            if (!deleted) {
-                Log.e(
-                    "PlantsRepositoryFirestore",
-                    "Failed to delete the local file image: ${imageFile.path} ")
-            }
-        }
-
-        // Get the URL
-        return storageReference.downloadUrl.await().toString()
-    }
-
-    /**
-     * Delete an image referred by the id of the plant it is associated to from Cloud Storage
-     *
-     * @param plantId the name of the image in Cloud Storage
-     */
-    private suspend fun deleteImageInCloudStorage(plantId: String) {
-        val storageReference = storageRef(plantId)
-        try {
-            storageReference.delete().await()
-        } catch (e: Exception) {
-            Log.e("Cloud Storage", "Image not found or already deleted: ${e.message}")
-        }
-    }
-
-    /**
-     * Updates the health status of a plant based on current watering cycle.
-     *
-     * @param ownedPlant The plant to update
-     * @return A copy of the plant with updated health status
-     */
-    private fun updatePlantHealthStatus(ownedPlant: OwnedPlant): OwnedPlant {
-        val calculatedStatus =
-            healthCalculator.calculateHealthStatus(
-                lastWatered = ownedPlant.lastWatered,
-                wateringFrequency = ownedPlant.plant.wateringFrequency,
-                previousLastWatered = ownedPlant.previousLastWatered)
-        val updatedPlant = ownedPlant.plant.copy(healthStatus = calculatedStatus)
-        return ownedPlant.copy(plant = updatedPlant)
-    }
-
-    /**
-     * Cleans up resources before logout. Cancels the coroutine scope to stop all flows and prevent
-     * PERMISSION_DENIED errors.
-     */
-    override fun cleanup() {
-        scope.cancel()
-        scope = CoroutineScope(Job())
-        _plantsFlow = createPlantsFlow()
-    }
+  /**
+   * Cleans up resources before logout. Cancels the coroutine scope to stop all flows and prevent
+   * PERMISSION_DENIED errors.
+   */
+  override fun cleanup() {
+    scope.cancel()
+    scope = CoroutineScope(Job())
+    _plantsFlow = createPlantsFlow()
+  }
 }

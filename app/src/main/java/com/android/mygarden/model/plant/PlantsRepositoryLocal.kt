@@ -56,24 +56,26 @@ class PlantsRepositoryLocal(
   }
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
-      val ownedPlant =
-          requireNotNull(_plants.value.firstOrNull { it.id == id }) {
-              "PlantsRepositoryLocal: OwnedPlant with id $id not found"
-          }
+    val ownedPlant =
+        requireNotNull(_plants.value.firstOrNull { it.id == id }) {
+          "PlantsRepositoryLocal: OwnedPlant with id $id not found"
+        }
 
-      return updatePlantHealthStatus(ownedPlant)
+    return updatePlantHealthStatus(ownedPlant)
   }
 
   override suspend fun deleteFromGarden(id: String) {
     val previousListSize = _plants.value.size
     _plants.update { plants -> plants.filterNot { it.id == id } }
-    require (previousListSize != _plants.value.size) {
-        "PlantsRepositoryLocal: OwnedPlant with id $id not found" }
+    require(previousListSize != _plants.value.size) {
+      "PlantsRepositoryLocal: OwnedPlant with id $id not found"
+    }
   }
 
   override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
     require(id == newOwnedPlant.id) {
-        "PlantsRepositoryLocal: ID mismatch - parameter id '$id' does not match newOwnedPlant.id '${newOwnedPlant.id}'" }
+      "PlantsRepositoryLocal: ID mismatch - parameter id '$id' does not match newOwnedPlant.id '${newOwnedPlant.id}'"
+    }
     var found = false
 
     _plants.update { plants ->

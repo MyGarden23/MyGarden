@@ -33,94 +33,82 @@ private const val CHOSEN_AVATAR_KEY = "chosen_avatar"
 private const val IMAGE_PATH_KEY = "imagePath"
 private const val FROM_KEY = "from"
 private const val OWNED_PLANT_ID_KEY = "ownedPlantId"
-private const val OWNED_PLANT_ID_TO_PLANT_INFO_KEY = "ownedPlantId_to_plantInfo"
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     startDestination: String,
     credentialManagerProvider: () -> CredentialManager = {
-        CredentialManager.create(navController.context)
+      CredentialManager.create(navController.context)
     }
 ) {
-    NavHost(navController = navController, startDestination = startDestination) {
+  NavHost(navController = navController, startDestination = startDestination) {
+    val navigationActions = NavigationActions(navController)
 
-        val navigationActions = NavigationActions(navController)
+    /**
+     * Small helper to avoid duplication: Handles reading AVATAR from savedStateHandle + applying it
+     * in the ViewModel Used by NewProfile and EditProfile (which had duplicated code).
+     */
+    @Composable
+    fun HandleAvatarSelection(backStackEntry: NavBackStackEntry, vm: ProfileViewModel) {
+      val chosenName by
+          backStackEntry.savedStateHandle.getStateFlow(CHOSEN_AVATAR_KEY, "").collectAsState()
 
-        /**
-         * Small helper to avoid duplication:
-         * Handles reading AVATAR from savedStateHandle + applying it in the ViewModel
-         * Used by NewProfile and EditProfile (which had duplicated code).
-         */
-        @Composable
-        fun HandleAvatarSelection(backStackEntry: NavBackStackEntry, vm: ProfileViewModel) {
-            val chosenName by backStackEntry
-                .savedStateHandle
-                .getStateFlow(CHOSEN_AVATAR_KEY, "")
-                .collectAsState()
+      val chosenAvatar =
+          chosenName
+              .takeIf { it.isNotBlank() }
+              ?.let { runCatching { Avatar.valueOf(it) }.getOrNull() }
 
-            val chosenAvatar =
-                chosenName
-                    .takeIf { it.isNotBlank() }
-                    ?.let { runCatching { Avatar.valueOf(it) }.getOrNull() }
-
-            LaunchedEffect(chosenAvatar) {
-                if (chosenAvatar != null) {
-                    vm.setAvatar(chosenAvatar)
-                    backStackEntry.savedStateHandle[CHOSEN_AVATAR_KEY] = ""
-                }
-            }
+      LaunchedEffect(chosenAvatar) {
+        if (chosenAvatar != null) {
+          vm.setAvatar(chosenAvatar)
+          backStackEntry.savedStateHandle[CHOSEN_AVATAR_KEY] = ""
         }
+      }
+    }
 
-        // Auth
-        composable(Screen.Auth.route) {
-            SignInScreen(
-                credentialManager = credentialManagerProvider(),
-                onSignedIn = { navigationActions.navTo(Screen.NewProfile) },
-                onLogIn = { navigationActions.navTo(Screen.Camera) }
-            )
-        }
+    // Auth
+    composable(Screen.Auth.route) {
+      SignInScreen(
+          credentialManager = credentialManagerProvider(),
+          onSignedIn = { navigationActions.navTo(Screen.NewProfile) },
+          onLogIn = { navigationActions.navTo(Screen.Camera) })
+    }
 
-        // New Profile
-        composable(Screen.NewProfile.route) { backStackEntry ->
-            val vm: ProfileViewModel = viewModel()
-            HandleAvatarSelection(backStackEntry, vm)
+    // New Profile
+    composable(Screen.NewProfile.route) { backStackEntry ->
+      val vm: ProfileViewModel = viewModel()
+      HandleAvatarSelection(backStackEntry, vm)
 
-            NewProfileScreen(
-                profileViewModel = vm,
-                onSavePressed = { navigationActions.navTo(Screen.Camera) },
-                onAvatarClick = { navigationActions.navTo(Screen.ChooseAvatar) }
-            )
-        }
+      NewProfileScreen(
+          profileViewModel = vm,
+          onSavePressed = { navigationActions.navTo(Screen.Camera) },
+          onAvatarClick = { navigationActions.navTo(Screen.ChooseAvatar) })
+    }
 
-        // Edit Profile
-        composable(Screen.EditProfile.route) { backStackEntry ->
-            val vm: ProfileViewModel = viewModel()
-            HandleAvatarSelection(backStackEntry, vm)
+    // Edit Profile
+    composable(Screen.EditProfile.route) { backStackEntry ->
+      val vm: ProfileViewModel = viewModel()
+      HandleAvatarSelection(backStackEntry, vm)
 
       EditProfileScreen(
           profileViewModel = vm,
           onSavePressed = { navigationActions.navBack() },
           onBackPressed = { navigationActions.navBack() },
-          onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
+          onAvatarClick = { navigationActions.navTo(Screen.ChooseAvatar) })
     }
 
-        // Camera
-        composable(Screen.Camera.route) {
-            CameraScreen(
-                onPictureTaken = { imagePath ->
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.remove<String>(IMAGE_PATH_KEY)
+    // Camera
+    composable(Screen.Camera.route) {
+      CameraScreen(
+          onPictureTaken = { imagePath ->
+            navController.currentBackStackEntry?.savedStateHandle?.remove<String>(IMAGE_PATH_KEY)
 
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.set(IMAGE_PATH_KEY, imagePath)
+            navController.currentBackStackEntry?.savedStateHandle?.set(IMAGE_PATH_KEY, imagePath)
 
-                    navigationActions.navTo(Screen.PlantInfo)
-                }
-            )
-        }
+            navigationActions.navTo(Screen.PlantInfo)
+          })
+    }
 
     // Garden
     composable(Screen.Garden.route) {
@@ -128,13 +116,9 @@ fun AppNavHost(
           onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
           onAddPlant = { navigationActions.navTo(Screen.Camera) },
           onPlantClick = { ownedPlant ->
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
-            navigationActions.navTo(Screen.PlantInfoFromGarden)
+            navigationActions.navTo(Screen.EditPlant(ownedPlant.id, Screen.Garden.route))
           },
           onSignOut = {
-            // Clean up repositories before signing out to prevent PERMISSION_DENIED errors
             PlantsRepositoryProvider.repository.cleanup()
             ProfileRepositoryProvider.repository.cleanup()
             FirebaseAuth.getInstance().signOut()
@@ -142,98 +126,64 @@ fun AppNavHost(
           })
     }
 
-    // Plant Info From Garden
-    composable(Screen.PlantInfoFromGarden.route) { _ ->
-      val plantInfoViewModel: PlantInfoViewModel = viewModel()
-      val ownedPlantId: String? =
-          navController.previousBackStackEntry
-              ?.savedStateHandle
-              ?.get<String>(OWNED_PLANT_ID_TO_PLANT_INFO_KEY)
-
-      PlantInfosScreen(
-          plant = Plant(),
-          ownedPlantId = ownedPlantId,
-          plantInfoViewModel = plantInfoViewModel,
-          onBackPressed = { navigationActions.navBack() },
-          onNextPlant = { plantId ->
-            navigationActions.navTo(Screen.EditPlant(plantId, Screen.Garden.route))
-          },
-      )
-    }
-
     // Plant Info
-    composable(Screen.PlantInfo.route) { backStackEntry ->
+    composable(Screen.PlantInfo.route) {
       val plantInfoViewModel: PlantInfoViewModel = viewModel()
       val imagePath =
           navController.previousBackStackEntry?.savedStateHandle?.get<String>(IMAGE_PATH_KEY)
 
-      // Shows plant details after a photo is taken
-      // Right now it just uses a mock Plant object for demo purposes
-        // Plant Info
-        composable(Screen.PlantInfo.route) {
-            val plantInfoViewModel: PlantInfoViewModel = viewModel()
-            val imagePath =
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.get<String>(IMAGE_PATH_KEY)
+      val plant = Plant(image = imagePath)
 
-            val plant = Plant(image = imagePath)
-
-            PlantInfosScreen(
-                plant = plant,
-                plantInfoViewModel = plantInfoViewModel,
-                onBackPressed = { navigationActions.navBack() },
-                onNextPlant = { plantId ->
-                    navController.navigate(Screen.EditPlant.buildRoute(plantId, Screen.PlantInfo.route)) {
-                        popUpTo(Screen.Camera.route) { inclusive = false }
-                    }
-                }
-            )
-        }
-
-        // Choose Avatar
-        composable(Screen.ChooseAvatar.route) {
-            ChooseProfilePictureScreen(
-                onAvatarChosen = { avatar ->
-                    navController.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set(CHOSEN_AVATAR_KEY, avatar.name)
-                    navigationActions.navBack()
-                },
-                onBack = { navigationActions.navBack() }
-            )
-        }
-
-        // EditPlant
-        composable(
-            route = Screen.EditPlant.route,
-            arguments =
-                listOf(
-                    navArgument(OWNED_PLANT_ID_KEY) { type = NavType.StringType },
-                    navArgument(FROM_KEY) {
-                        type = NavType.StringType
-                        nullable = true
-                    }
-                )
-        ) { entry ->
-            val vm: EditPlantViewModel = viewModel()
-            val ownedPlantId = entry.arguments?.getString(OWNED_PLANT_ID_KEY) ?: return@composable
-
-            EditPlantScreen(
-                ownedPlantId = ownedPlantId,
-                editPlantViewModel = vm,
-                onSaved = { navigationActions.navTo(Screen.Garden) },
-                onDeleted =
-                    if (entry.arguments?.getString(FROM_KEY) != Screen.PlantInfo.route) {
-                        { navigationActions.navTo(Screen.Garden) }
-                    } else null,
-                goBack = {
-                    if (entry.arguments?.getString(FROM_KEY) == Screen.PlantInfo.route) {
-                        vm.deletePlant(ownedPlantId)
-                    }
-                    navigationActions.navBack()
-                }
-            )
-        }
+      PlantInfosScreen(
+          plant = plant,
+          plantInfoViewModel = plantInfoViewModel,
+          onBackPressed = { navigationActions.navBack() },
+          onNextPlant = { plantId ->
+            navController.navigate(Screen.EditPlant.buildRoute(plantId, Screen.PlantInfo.route)) {
+              popUpTo(Screen.Camera.route) { inclusive = false }
+            }
+          })
     }
+
+    // Choose Avatar
+    composable(Screen.ChooseAvatar.route) {
+      ChooseProfilePictureScreen(
+          onAvatarChosen = { avatar ->
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(CHOSEN_AVATAR_KEY, avatar.name)
+            navigationActions.navBack()
+          },
+          onBack = { navigationActions.navBack() })
+    }
+
+    // EditPlant
+    composable(
+        route = Screen.EditPlant.route,
+        arguments =
+            listOf(
+                navArgument(OWNED_PLANT_ID_KEY) { type = NavType.StringType },
+                navArgument(FROM_KEY) {
+                  type = NavType.StringType
+                  nullable = true
+                })) { entry ->
+          val vm: EditPlantViewModel = viewModel()
+          val ownedPlantId = entry.arguments?.getString(OWNED_PLANT_ID_KEY) ?: return@composable
+
+          EditPlantScreen(
+              ownedPlantId = ownedPlantId,
+              editPlantViewModel = vm,
+              onSaved = { navigationActions.navTo(Screen.Garden) },
+              onDeleted =
+                  if (entry.arguments?.getString(FROM_KEY) != Screen.PlantInfo.route) {
+                    { navigationActions.navTo(Screen.Garden) }
+                  } else null,
+              goBack = {
+                if (entry.arguments?.getString(FROM_KEY) == Screen.PlantInfo.route) {
+                  vm.deletePlant(ownedPlantId)
+                }
+                navigationActions.navBack()
+              })
+        }
+  }
 }
