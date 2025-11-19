@@ -132,7 +132,7 @@ class PlantsRepositoryFirestore(
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
     val document = userPlantsCollection().document(id).get().await()
-    if (!document.exists()) throw IllegalArgumentException(plantNotFoundErrMsg(id))
+    require(!document.exists()) {plantNotFoundErrMsg(id)}
 
     val serializedOwnedPlant =
         document.toObject(SerializedOwnedPlant::class.java)
@@ -149,7 +149,7 @@ class PlantsRepositoryFirestore(
   override suspend fun deleteFromGarden(id: String) {
     // Delete the data in Firestore
     val document = userPlantsCollection().document(id).get().await()
-    if (!document.exists()) throw IllegalArgumentException(plantNotFoundErrMsg(id))
+    require(!document.exists()) {plantNotFoundErrMsg(id)}
 
     userPlantsCollection().document(id).delete().await()
     // Delete the image in Cloud Storage
@@ -157,8 +157,7 @@ class PlantsRepositoryFirestore(
   }
 
   override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
-    if (id != newOwnedPlant.id)
-        throw IllegalArgumentException(differentIdsErrMsg(id, newOwnedPlant.id))
+    require(id != newOwnedPlant.id) {differentIdsErrMsg(id, newOwnedPlant.id)}
 
     userPlantsCollection()
         .document(id)
@@ -172,7 +171,7 @@ class PlantsRepositoryFirestore(
   override suspend fun waterPlant(id: String, wateringTime: Timestamp) {
     val docRef = userPlantsCollection().document(id)
     val document = docRef.get().await()
-    if (!document.exists()) throw IllegalArgumentException(plantNotFoundErrMsg(id))
+    require(!document.exists()) { plantNotFoundErrMsg(id) }
 
     val serializedOwnedPlant: SerializedOwnedPlant =
         document.toObject(SerializedOwnedPlant::class.java)
