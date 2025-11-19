@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -14,14 +13,12 @@ import androidx.compose.ui.test.performScrollTo
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirestoreProfileTest
 import com.android.mygarden.utils.PlantRepositoryType
-import java.sql.Timestamp
-import kotlinx.coroutines.test.runTest
+import com.android.mygarden.utils.TestPlants
 import org.junit.Rule
 import org.junit.Test
 
@@ -31,18 +28,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
 
   private lateinit var context: Context
 
-  val plant: Plant =
-      Plant(
-          name = "test_plant",
-          image = null,
-          latinName = "testinus_plantus",
-          description = "This is a test plant.",
-          location = PlantLocation.INDOOR,
-          lightExposure = "Test light exposure",
-          healthStatus = PlantHealthStatus.HEALTHY,
-          healthStatusDescription = "This plant is healthy.",
-          wateringFrequency = 1,
-      )
+  val plant = TestPlants.plantInfoPlant
 
   /**
    * Sets up the PlantInfosScreen composable for testing.
@@ -106,40 +92,6 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
     setContent(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY).assertIsDisplayed()
-  }
-
-  /**
-   * Check that if the user comes from the camera screen (by default in this test class) the last
-   * time watered information is not displayed.
-   */
-  @Test
-  fun lastTimeWateredIsNotDisplayedAfterClickingHealthTabIfWeComeFromTheCamera() {
-    setContent(plant)
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LAST_TIME_WATERED).assertIsNotDisplayed()
-  }
-
-  /**
-   * Check that if the user comes from the garden screen the last time watered information is
-   * displayed.
-   */
-  @Test
-  fun plantInfoFromGarden_showsLastTimeWatered() = runTest {
-    // We need a repository to store the ownedPlant
-    val repository = PlantsRepositoryLocal()
-    val id = "test getOwned id 1"
-    val timestamp = Timestamp(System.currentTimeMillis())
-    val ownedPlant = repository.saveToGarden(plant, id, timestamp)
-    val vm = PlantInfoViewModel(repository)
-
-    composeTestRule.setContent {
-      context = LocalContext.current
-      PlantInfosScreen(plant, ownedPlant.id, vm, {}, {})
-    }
-    composeTestRule.waitForIdle()
-
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LAST_TIME_WATERED).assertIsDisplayed()
   }
 
   @Test

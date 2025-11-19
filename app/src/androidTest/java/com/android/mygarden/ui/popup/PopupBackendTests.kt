@@ -9,13 +9,13 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.MyGardenApp
 import com.android.mygarden.model.plant.Plant
-import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.runTest
@@ -31,24 +31,8 @@ class PopupBackendTests {
   @get:Rule val rule = createComposeRule()
 
   // Some fictional plants to use for the tests
-  val almostThirstyPlant =
-      Plant(
-          name = "Water?",
-          image = null,
-          latinName = "laurem ipsum",
-          description = "edge plant that will soon be thirsty",
-          healthStatus = PlantHealthStatus.UNKNOWN,
-          healthStatusDescription = "we don't care about the initial, will be recomputed soon",
-          wateringFrequency = 1)
-  val thirstyPlant =
-      Plant(
-          name = "WATER!",
-          image = null,
-          latinName = "laurem ipsum",
-          description = "already thirsty plant!",
-          healthStatus = PlantHealthStatus.NEEDS_WATER,
-          healthStatusDescription = "already ?!",
-          wateringFrequency = 1)
+  val almostThirstyPlant = TestPlants.popUpalmostThirstyPlant
+  val thirstyPlant = TestPlants.popUpThirstyPlant
 
   private lateinit var repo: PlantsRepository
 

@@ -15,7 +15,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
@@ -28,6 +27,7 @@ import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.Flow
@@ -48,50 +48,10 @@ class GardenScreenTests {
   @get:Rule val composeTestRule = createComposeRule()
 
   // Some fictional plants to play with
-  val plant1 =
-      Plant(
-          "hello",
-          null,
-          "laurem ipsum",
-          "beautiful plant",
-          PlantLocation.INDOOR,
-          "Direct light",
-          PlantHealthStatus.HEALTHY,
-          "is healthy",
-          10)
-  val plant2 =
-      Plant(
-          "world",
-          null,
-          "laurem ipsum",
-          "even more beautiful plant",
-          PlantLocation.INDOOR,
-          "Undirect light",
-          PlantHealthStatus.NEEDS_WATER,
-          "is thirsty",
-          10)
-  val plant3 =
-      Plant(
-          "Poseidon",
-          null,
-          "laurem ipsum",
-          "water ++ plant",
-          PlantLocation.OUTDOOR,
-          "Morning light",
-          PlantHealthStatus.OVERWATERED,
-          "is full",
-          10)
-  val plant4 =
-      Plant(
-          "Anonymous",
-          null,
-          "laurem ipsum",
-          "who is this guy",
-          PlantLocation.INDOOR,
-          "Afternoon light",
-          PlantHealthStatus.UNKNOWN,
-          "is ?",
-          10)
+  val plant1 = TestPlants.samplePlant1
+  val plant2 = TestPlants.samplePlant2
+  val plant3 = TestPlants.samplePlant3
+  val plant4 = TestPlants.samplePlant4
 
   /** Fake profile local repository used to test the viewModel/profile interactions */
   private class FakeProfileRepository(
