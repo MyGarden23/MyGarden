@@ -159,7 +159,7 @@ fun AppNavHost(
     }
 
     // Plant Info From Garden
-    composable(Screen.PlantInfoFromGarden.route) { entry ->
+    composable(Screen.PlantInfoFromGarden.route) { _ ->
       val plantInfoViewModel: PlantInfoViewModel = viewModel()
       val ownedPlantId: String? =
           navController.previousBackStackEntry
