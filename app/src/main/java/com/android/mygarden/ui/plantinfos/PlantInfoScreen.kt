@@ -96,7 +96,7 @@ fun PlantInfosScreen(
   // Initialize UI state when plant changes
   LaunchedEffect(plant) {
     val loadingText = context.getString(R.string.loading_plant_infos)
-    plantInfoViewModel.initializeUIState(plant, ownedPlantId, loadingText)
+    plantInfoViewModel.initializeUIState(plant, loadingText, ownedPlantId)
   }
 
   // Display the error message if fetching the ownedPlant from the repository failed

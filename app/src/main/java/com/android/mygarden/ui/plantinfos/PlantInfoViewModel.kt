@@ -67,7 +67,7 @@ class PlantInfoViewModel(
   val uiState: StateFlow<PlantInfoUIState> = _uiState.asStateFlow()
 
   /** Initialize the UI state with plant data. Called when the screen is first displayed. */
-  fun initializeUIState(plant: Plant, ownedPlantId: String?, loadingText: String) {
+  fun initializeUIState(plant: Plant, loadingText: String, ownedPlantId: String? = null) {
     viewModelScope.launch {
       val isFromGarden = ownedPlantId != null
       if (isFromGarden) {
