@@ -32,7 +32,7 @@ class PlantsRepositoryLocal(
    * 2) a tick is emitted then emit the updated list ; to be collected by the pop-up VM
    */
   override val plantsFlow: StateFlow<List<OwnedPlant>> =
-      combine(_plants, ticks) { plants, time -> plants.map { updatePlantHealthStatus(it) } }
+      combine(_plants, ticks) { plants, _ -> plants.map { updatePlantHealthStatus(it) } }
           .distinctUntilChanged()
           .stateIn(
               scope,
@@ -57,27 +57,23 @@ class PlantsRepositoryLocal(
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
     val ownedPlant = _plants.value.firstOrNull { it.id == id }
-    if (ownedPlant == null) {
-      throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
-    } else {
-      // Update the status of the plant because we need a refresh the status
+      requireNotNull(ownedPlant) {
+          "PlantsRepositoryLocal: OwnedPlant with id $id not found"
+      }
+
       return updatePlantHealthStatus(ownedPlant)
-    }
   }
 
   override suspend fun deleteFromGarden(id: String) {
     val previousListSize = _plants.value.size
     _plants.update { plants -> plants.filterNot { it.id == id } }
-    if (previousListSize == _plants.value.size) {
-      throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
-    }
+    require (previousListSize == _plants.value.size) {
+        "PlantsRepositoryLocal: OwnedPlant with id $id not found" }
   }
 
   override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
-    if (id != newOwnedPlant.id) {
-      throw IllegalArgumentException(
-          "PlantsRepositoryLocal: ID mismatch - parameter id '$id' does not match newOwnedPlant.id '${newOwnedPlant.id}'")
-    }
+    require(id != newOwnedPlant.id) {
+        "PlantsRepositoryLocal: ID mismatch - parameter id '$id' does not match newOwnedPlant.id '${newOwnedPlant.id}'" }
     var found = false
 
     _plants.update { plants ->
@@ -89,9 +85,7 @@ class PlantsRepositoryLocal(
       }
     }
 
-    if (!found) {
-      throw IllegalArgumentException("PlantsRepositoryLocal: OwnedPlant with id $id not found")
-    }
+    require(!found) { "PlantsRepositoryLocal: OwnedPlant with id $id not found" }
   }
 
   override suspend fun waterPlant(id: String, wateringTime: Timestamp) {
