@@ -17,33 +17,50 @@ class AuthRepositoryFirebase(
   fun getGoogleSignInOption(serverClientId: String) =
       GetSignInWithGoogleOption.Builder(serverClientId = serverClientId).build()
 
-  override suspend fun signInWithGoogle(
-      credential: Credential
-  ): Result<AuthRepository.SignInResult> {
-    return try {
-      if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-        val idToken = helper.extractIdTokenCredential(credential.data).idToken
-        val firebaseCredential = helper.toFirebaseCredential(idToken)
+    override suspend fun signInWithGoogle(
+        credential: Credential
+    ): Result<AuthRepository.SignInResult> {
 
-        val authResult = auth.signInWithCredential(firebaseCredential).await()
+        return try {
+            val result =
+                if (credential is CustomCredential &&
+                    credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                ) {
 
-        val user =
-            authResult.user
-                ?: return Result.failure(
-                    IllegalStateException("Login failed : Could not retrieve user information"))
+                    val idToken = helper.extractIdTokenCredential(credential.data).idToken
+                    val firebaseCredential = helper.toFirebaseCredential(idToken)
 
-        val isNewUser = (authResult.additionalUserInfo?.isNewUser == true)
+                    val authResult = auth.signInWithCredential(firebaseCredential).await()
 
-        return Result.success(AuthRepository.SignInResult(user, isNewUser))
-      } else {
-        return Result.failure(
-            IllegalStateException("Login failed: Credential is not of type Google ID\""))
-      }
-    } catch (e: Exception) {
-      Result.failure(
-          IllegalStateException("Login failed: ${e.localizedMessage ?: "Unexpected error."}"))
+                    val user =
+                        authResult.user
+                            ?: return Result.failure(
+                                IllegalStateException(
+                                    "Login failed : Could not retrieve user information"
+                                )
+                            )
+
+                    val isNewUser = authResult.additionalUserInfo?.isNewUser == true
+
+                    Result.success(AuthRepository.SignInResult(user, isNewUser))
+
+                } else {
+                    Result.failure(
+                        IllegalStateException(
+                            "Login failed: Credential is not of type Google ID\""
+                        )
+                    )
+                }
+
+            result
+        } catch (e: Exception) {
+            Result.failure(
+                IllegalStateException(
+                    "Login failed: ${e.localizedMessage ?: "Unexpected error."}"
+                )
+            )
+        }
     }
-  }
 
   override fun signOut(): Result<Unit> {
     return try {
