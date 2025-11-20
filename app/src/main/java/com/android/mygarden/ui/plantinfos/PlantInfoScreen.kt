@@ -43,6 +43,7 @@ object PlantInfoScreenTestTags {
   const val BACK_BUTTON = "back_button"
   const val PLANT_NAME = "plant_name"
   const val PLANT_LATIN_NAME = "plant_latin_name"
+  const val PLANT_DATE_OF_CREATION = "plant_date_of_creation"
   const val TAB_ROW = "tab_row"
   const val DESCRIPTION_TAB = "description_tab"
   const val HEALTH_TAB = "health_tab"
@@ -169,10 +170,10 @@ fun PlantInfosScreen(
                                     .getDisplayName(TextStyle.SHORT, Locale.getDefault()))
                             .add(dateTime.year.toString())
                     Text(
-                        text = "Added the $dateString",
+                        text = context.getString(R.string.date_of_creation_prefix) + " $dateString",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.outline,
-                        modifier = Modifier)
+                        modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_DATE_OF_CREATION))
                   }
                 }
 
