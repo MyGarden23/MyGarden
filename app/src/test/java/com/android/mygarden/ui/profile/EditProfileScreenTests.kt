@@ -1,14 +1,25 @@
 package com.android.mygarden.ui.profile
 
 import android.content.Context
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.mygarden.R
+import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FakePseudoRepository
+import org.junit.Assert.assertEquals
 import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /**
  * Comprehensive test suite for the EditProfileScreen composable.
@@ -21,6 +32,8 @@ import org.junit.Rule
  * - Back button navigation functionality
  * - Editing existing profile values
  */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class EditProfileScreenTests : ProfileScreenTestBase() {
 
   @get:Rule override val composeTestRule = createComposeRule()
@@ -89,7 +102,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
   }
 
   // ========== EDIT PROFILE SPECIFIC TESTS ==========
-  /*
+
   @Test
   fun fieldsArePrefilledWithExistingProfile() {
     // Given: an existing profile
@@ -188,5 +201,5 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
 
     // Then: the save callback should be triggered
     assertEquals(true, onSavePressedCalled)
-  }*/
+  }
 }
