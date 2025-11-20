@@ -318,7 +318,9 @@ class EditPlantScreenTest {
     composeRule.waitForIdle()
 
     // Now an error helper text should appear as the input is by default empty
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_LIGHT_EXPOSURE).isDisplayed()
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_LIGHT_EXPOSURE)
+        .assertIsDisplayed()
   }
 
   /**
