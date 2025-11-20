@@ -1,5 +1,8 @@
 package com.android.mygarden.ui.plantinfos
 
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -26,6 +29,11 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.ZoneId
+import java.time.format.TextStyle
+import java.util.Locale
 
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
@@ -42,11 +50,13 @@ object PlantInfoScreenTestTags {
   const val DESCRIPTION_TEXT = "description_text"
   const val HEALTH_STATUS_DESCRIPTION = "health_status_description"
   const val HEALTH_STATUS = "health_status"
+  const val LAST_TIME_WATERED = "last_time_watered"
   const val LOCATION_TEXT = "location_text"
   const val LIGHT_EXPOSURE_TEXT = "light_exposure_text"
   const val WATERING_FREQUENCY = "watering_frequency"
   const val NEXT_BUTTON = "next_button"
   const val NEXT_BUTTON_LOADING = "next_button_loading"
+  const val EDIT_BUTTON = "edit_button"
 
   const val TIPS_BUTTON = "tips_button"
   const val TIPS_DIALOG = "tips_dialog"
@@ -68,6 +78,8 @@ private val PLANT_NAME_SECTION_VERTICAL_PADDING = 16.dp
  * - Save button to add the plant to user's garden
  *
  * @param plant The plant to display information for
+ * @param ownedPlantId the id of the OwnedPlant to display if we come from the garden or null if we
+ *   come from the camera
  * @param plantInfoViewModel ViewModel managing the UI state
  * @param onBackPressed Callback when the back button is pressed
  * @param onNextPlant Callback when the Save Plant button is clicked, receives the plant ID
@@ -76,6 +88,7 @@ private val PLANT_NAME_SECTION_VERTICAL_PADDING = 16.dp
 @Composable
 fun PlantInfosScreen(
     plant: Plant,
+    ownedPlantId: String? = null,
     plantInfoViewModel: PlantInfoViewModel = viewModel(),
     onBackPressed: () -> Unit,
     onNextPlant: (String) -> Unit = {}
@@ -92,61 +105,30 @@ fun PlantInfosScreen(
   // Initialize UI state when plant changes
   LaunchedEffect(plant) {
     val loadingText = context.getString(R.string.loading_plant_infos)
-    plantInfoViewModel.initializeUIState(plant, loadingText)
+    plantInfoViewModel.initializeUIState(plant, loadingText, ownedPlantId)
+  }
+
+  // Display the error message if fetching the ownedPlant from the repository failed
+  LaunchedEffect(uiState.errorMsg) {
+    uiState.errorMsg?.let { resId ->
+      Toast.makeText(context, context.getString(resId), Toast.LENGTH_SHORT).show()
+      plantInfoViewModel.clearErrorMsg()
+    }
   }
 
   Scaffold(
       modifier = Modifier.testTag(PlantInfoScreenTestTags.SCREEN),
       containerColor = MaterialTheme.colorScheme.background,
       bottomBar = {
-        SavePlantBottomBar(
+        PlantInfoBottomBar(
             uiState = uiState,
-            onSavePlant = {
-              val plantToSave = uiState.savePlant()
-              plantInfoViewModel.savePlant(
-                  plantToSave,
-                  onPlantSaved = { plantId ->
-                    plantInfoViewModel.resetUIState()
-                    onNextPlant(plantId)
-                  })
-            })
+            ownedPlantId = ownedPlantId,
+            plantInfoViewModel = plantInfoViewModel,
+            onNextPlant = onNextPlant)
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           // --- Plant Image Header ---
-          Box(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .height(280.dp)
-                      .background(MaterialTheme.colorScheme.primary)
-                      .testTag(PlantInfoScreenTestTags.PLANT_IMAGE)) {
-                // Placeholder for plant image
-                Box(modifier = Modifier.fillMaxSize()) {
-                  AsyncImage(
-                      model = ImageRequest.Builder(context).data(plant.image ?: "").build(),
-                      contentDescription = context.getString(R.string.image_plant_description),
-                      modifier =
-                          Modifier.fillMaxWidth()
-                              .background(MaterialTheme.colorScheme.surfaceVariant),
-                      contentScale = ContentScale.Crop)
-                }
-
-                // Back button overlaid on top-left corner of image
-                IconButton(
-                    onClick = {
-                      plantInfoViewModel.resetUIState()
-                      onBackPressed()
-                    },
-                    enabled = !uiState.isSaving,
-                    modifier =
-                        Modifier.align(Alignment.TopStart)
-                            .padding(8.dp)
-                            .testTag(PlantInfoScreenTestTags.BACK_BUTTON)) {
-                      Icon(
-                          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                          contentDescription = context.getString(R.string.back_description),
-                          tint = MaterialTheme.colorScheme.onPrimary)
-                    }
-              }
+          PlantInfoHeader(uiState, plantInfoViewModel, onBackPressed, context)
 
           // --- Name, Latin Name and Tips Section ---
           Row(
@@ -197,85 +179,7 @@ fun PlantInfosScreen(
                       .weight(1f) // Takes remaining space between tabs and bottom button
                       .background(MaterialTheme.colorScheme.background)
                       .testTag(PlantInfoScreenTestTags.CONTENT_CONTAINER)) {
-                Column(
-                    modifier =
-                        Modifier.fillMaxSize()
-                            // Use different scroll state for each tab to preserve scroll position
-                            .verticalScroll(
-                                if (uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION)
-                                    descriptionScrollState
-                                else healthScrollState)
-                            .padding(20.dp)) {
-                      when (uiState.selectedTab) {
-                        // --- Description Tab Content ---
-                        SelectedPlantInfoTab.DESCRIPTION -> {
-                          Text(
-                              text = uiState.description,
-                              fontSize = 14.sp,
-                              color = MaterialTheme.colorScheme.onBackground,
-                              lineHeight = 20.sp,
-                              modifier = Modifier.testTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT))
-                        }
-
-                        // --- Health Tab Content ---
-                        SelectedPlantInfoTab.HEALTH_STATUS -> {
-                          // Health status description
-                          Text(
-                              text = uiState.healthStatusDescription,
-                              fontSize = 14.sp,
-                              color = MaterialTheme.colorScheme.onBackground,
-                              lineHeight = 20.sp,
-                              modifier =
-                                  Modifier.testTag(
-                                      PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION))
-                          Spacer(modifier = Modifier.height(16.dp))
-
-                          // Current health status with emoji
-                          Text(
-                              // text = "Status: ${uiState.healthStatus.description}"
-                              text =
-                                  stringResource(
-                                      R.string.status_label,
-                                      stringResource(id = uiState.healthStatus.descriptionRes)),
-                              fontSize = 16.sp,
-                              fontWeight = FontWeight.Medium,
-                              color = MaterialTheme.colorScheme.onBackground,
-                              modifier = Modifier.testTag(PlantInfoScreenTestTags.HEALTH_STATUS))
-                          Spacer(modifier = Modifier.height(8.dp))
-
-                          // Watering frequency information
-                          Text(
-                              text =
-                                  context.getString(
-                                      R.string.watering_frequency, uiState.wateringFrequency),
-                              fontSize = 14.sp,
-                              color = MaterialTheme.colorScheme.onBackground,
-                              modifier =
-                                  Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
-                        }
-                        // --- Location Tab Content ---
-                        SelectedPlantInfoTab.LOCATION -> {
-                          // Location text, INDOOR or OUTDOOR
-                          Text(
-                              text = uiState.location.name,
-                              fontSize = 16.sp,
-                              fontWeight = FontWeight.Medium,
-                              color = MaterialTheme.colorScheme.onBackground,
-                              lineHeight = 20.sp,
-                              modifier = Modifier.testTag(PlantInfoScreenTestTags.LOCATION_TEXT))
-
-                          Spacer(modifier = Modifier.height(8.dp))
-                          // Light exposure description
-                          Text(
-                              text = uiState.lightExposure,
-                              fontSize = 14.sp,
-                              color = MaterialTheme.colorScheme.onBackground,
-                              lineHeight = 20.sp,
-                              modifier =
-                                  Modifier.testTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT))
-                        }
-                      }
-                    }
+                PlantInfoTabContent(uiState, descriptionScrollState, healthScrollState, context)
               }
         }
         // PopUp Tips dialog
@@ -355,11 +259,13 @@ private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
 @Composable
 private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Unit) {
   val context = LocalContext.current
+  val testTagButton =
+      if (uiState.isFromGarden) PlantInfoScreenTestTags.EDIT_BUTTON
+      else PlantInfoScreenTestTags.NEXT_BUTTON
   Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
     Button(
         onClick = onSavePlant,
-        modifier =
-            Modifier.fillMaxWidth().height(56.dp).testTag(PlantInfoScreenTestTags.NEXT_BUTTON),
+        modifier = Modifier.fillMaxWidth().height(56.dp).testTag(testTagButton),
         shape = RoundedCornerShape(28.dp),
         enabled = !uiState.isSaving,
         colors =
@@ -382,6 +288,11 @@ private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Uni
                       fontWeight = FontWeight.Medium,
                       color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+          } else if (uiState.isFromGarden) {
+            Text(
+                text = context.getString(R.string.edit),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium)
           } else {
             Text(
                 text = context.getString(R.string.next),
@@ -390,4 +301,233 @@ private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Uni
           }
         }
   }
+}
+
+/**
+ * Displays the plant image header with the back button overlaid.
+ *
+ * This section shows the plant image (or a placeholder), and includes a navigation back button that
+ * resets the UI state before leaving.
+ *
+ * @param uiState The current UI state.
+ * @param plantInfoViewModel The ViewModel used to update and reset UI state.
+ * @param onBackPressed Callback executed when the user presses the back button.
+ * @param context Android context used for loading resources.
+ */
+@Composable
+private fun PlantInfoHeader(
+    uiState: PlantInfoUIState,
+    plantInfoViewModel: PlantInfoViewModel,
+    onBackPressed: () -> Unit,
+    context: Context
+) {
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(280.dp)
+              .background(MaterialTheme.colorScheme.primary)
+              .testTag(PlantInfoScreenTestTags.PLANT_IMAGE)) {
+        // Placeholder for plant image
+        Box(modifier = Modifier.fillMaxSize()) {
+          AsyncImage(
+              model = ImageRequest.Builder(context).data(uiState.image ?: "").build(),
+              contentDescription = context.getString(R.string.image_plant_description),
+              modifier =
+                  Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant),
+              contentScale = ContentScale.Crop)
+        }
+
+        // Back button overlaid on top-left corner of image
+        IconButton(
+            onClick = {
+              plantInfoViewModel.resetUIState()
+              onBackPressed()
+            },
+            enabled = !uiState.isSaving,
+            modifier =
+                Modifier.align(Alignment.TopStart)
+                    .padding(8.dp)
+                    .testTag(PlantInfoScreenTestTags.BACK_BUTTON)) {
+              Icon(
+                  imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                  contentDescription = context.getString(R.string.back_description),
+                  tint = MaterialTheme.colorScheme.onPrimary)
+            }
+      }
+}
+
+/**
+ * Displays the bottom action bar used to save or proceed to the next plant.
+ *
+ * The behavior depends on the navigation origin :
+ * - If the user comes from the camera, the plant is saved before navigating.
+ * - If the user comes from the garden, the existing ownedPlantId is used.
+ *
+ * @param uiState The current UI state.
+ * @param ownedPlantId The ID of the owned plant when coming from the garden.
+ * @param plantInfoViewModel ViewModel used to save plants and reset state.
+ * @param onNextPlant Callback triggered after saving or when continuing.
+ */
+@Composable
+private fun PlantInfoBottomBar(
+    uiState: PlantInfoUIState,
+    ownedPlantId: String?,
+    plantInfoViewModel: PlantInfoViewModel,
+    onNextPlant: (String) -> Unit
+) {
+  SavePlantBottomBar(
+      uiState = uiState,
+      onSavePlant = {
+        if (!uiState.isFromGarden) {
+          // If the user doesn't come from the Garden (so from the Camera) it needs to save
+          // the plant in the repository
+          val plantToSave = uiState.savePlant()
+          plantInfoViewModel.savePlant(
+              plantToSave,
+              onPlantSaved = { plantId ->
+                plantInfoViewModel.resetUIState()
+                onNextPlant(plantId)
+              })
+        } else {
+          // If the user comes from the Garden the ownedPlantId field is not null
+          onNextPlant(requireNotNull(ownedPlantId))
+        }
+      })
+}
+
+/**
+ * Displays the scrollable content of the currently selected tab (Description, Health, or Location).
+ *
+ * Each tab preserves its own scroll state to avoid jumping when switching tabs.
+ *
+ * @param uiState The current UI state containing selected tab and data.
+ * @param descriptionScrollState Scroll state used for the Description tab.
+ * @param healthScrollState Scroll state used for the Health tab.
+ * @param context Android context used for string formatting.
+ */
+@Composable
+private fun PlantInfoTabContent(
+    uiState: PlantInfoUIState,
+    descriptionScrollState: ScrollState,
+    healthScrollState: ScrollState,
+    context: Context
+) {
+  Column(
+      modifier =
+          Modifier.fillMaxSize()
+              // Use different scroll state for each tab to preserve scroll position
+              .verticalScroll(
+                  if (uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION)
+                      descriptionScrollState
+                  else healthScrollState)
+              .padding(20.dp)) {
+        when (uiState.selectedTab) {
+          SelectedPlantInfoTab.DESCRIPTION -> PlantDescriptionTab(uiState)
+          SelectedPlantInfoTab.HEALTH_STATUS -> PlantHealthTab(uiState, context)
+          SelectedPlantInfoTab.LOCATION -> PlantLocationTab(uiState)
+        }
+      }
+}
+
+/**
+ * Displays the plant's description text.
+ *
+ * @param uiState The current UI state containing the plant description.
+ */
+@Composable
+private fun PlantDescriptionTab(uiState: PlantInfoUIState) {
+  Text(
+      text = uiState.description,
+      fontSize = 14.sp,
+      color = MaterialTheme.colorScheme.onBackground,
+      lineHeight = 20.sp,
+      modifier = Modifier.testTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT))
+}
+
+/**
+ * Displays all information related to plant health:
+ * - Health description
+ * - Health status
+ * - Watering frequency
+ * - Last time the plant was watered (if coming from the garden)
+ *
+ * @param uiState The current UI state containing all health-related data.
+ * @param context Android context used for formatting string resources.
+ */
+@Composable
+private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
+  // Health status description
+  Text(
+      text = uiState.healthStatusDescription,
+      fontSize = 14.sp,
+      color = MaterialTheme.colorScheme.onBackground,
+      lineHeight = 20.sp,
+      modifier = Modifier.testTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION))
+  Spacer(modifier = Modifier.height(16.dp))
+
+  // Current health status with emoji
+  Text(
+      // text = "Status: ${uiState.healthStatus.description}"
+      text =
+          stringResource(
+              R.string.status_label, stringResource(id = uiState.healthStatus.descriptionRes)),
+      fontSize = 16.sp,
+      fontWeight = FontWeight.Medium,
+      color = MaterialTheme.colorScheme.onBackground,
+      modifier = Modifier.testTag(PlantInfoScreenTestTags.HEALTH_STATUS))
+  Spacer(modifier = Modifier.height(8.dp))
+
+  // Watering frequency information
+  Text(
+      text = context.getString(R.string.watering_frequency, uiState.wateringFrequency),
+      fontSize = 14.sp,
+      color = MaterialTheme.colorScheme.onBackground,
+      modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
+
+  // Last time watered information
+  if (uiState.isFromGarden) {
+    // Get the TimeStamp of the last time watered it is not null because the
+    // user comes from the garden.
+    val timestamp = requireNotNull(uiState.lastTimeWatered)
+    val dateTime = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault())
+    Text(
+        text =
+            context.getString(
+                R.string.last_time_watered_plant_info,
+                dateTime.dayOfMonth,
+                Month.of(dateTime.monthValue).getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                dateTime.hour,
+                dateTime.minute),
+        fontSize = 14.sp,
+        color = MaterialTheme.colorScheme.onBackground,
+        modifier = Modifier.testTag(PlantInfoScreenTestTags.LAST_TIME_WATERED))
+  }
+}
+
+/**
+ * Displays the plant's location information, such as:
+ * - INDOOR / OUTDOOR
+ * - Light exposure description
+ *
+ * @param uiState The current UI state containing location and light data.
+ */
+@Composable
+private fun PlantLocationTab(uiState: PlantInfoUIState) {
+  // Location text, INDOOR or OUTDOOR
+  Text(
+      text = uiState.location.name,
+      fontSize = 16.sp,
+      fontWeight = FontWeight.Medium,
+      color = MaterialTheme.colorScheme.onBackground,
+      lineHeight = 20.sp,
+      modifier = Modifier.testTag(PlantInfoScreenTestTags.LOCATION_TEXT))
+
+  Spacer(modifier = Modifier.height(8.dp))
+  // Light exposure description
+  Text(
+      text = uiState.lightExposure,
+      fontSize = 14.sp,
+      color = MaterialTheme.colorScheme.onBackground,
+      lineHeight = 20.sp,
+      modifier = Modifier.testTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT))
 }
