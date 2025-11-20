@@ -4,9 +4,13 @@ import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
 
+/**
+ * Utility object providing factory methods to easily create consistent and customizable Plant
+ * instances for tests.
+ */
 object TestPlants {
 
-  // Factory commune pour créer des plantes de test
+  // creates a plant instance
   fun createTestPlant(
       name: String = "Test Plant",
       latinName: String = "Testus Plantus",
@@ -26,7 +30,7 @@ object TestPlants {
   }
 
   /*-------------------------- FICTIONAL PLANTS -------------------*/
-
+  // use one of those if you don't need specific ones
   val plant1: Plant =
       createTestPlant(
           name = "test plant 1",
@@ -163,7 +167,7 @@ object TestPlants {
           healthStatusDescription = "already ?!",
           wateringFrequency = 1)
 
-  val popUpalmostThirstyPlant: Plant =
+  val popUpAlmostThirstyPlant: Plant =
       Plant(
           name = "Water?",
           image = null,
