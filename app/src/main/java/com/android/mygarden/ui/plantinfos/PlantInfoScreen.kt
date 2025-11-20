@@ -34,6 +34,7 @@ import java.time.Month
 import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
+import java.util.StringJoiner
 
 /** Test tags for PlantInfoScreen components */
 object PlantInfoScreenTestTags {
@@ -130,13 +131,15 @@ fun PlantInfosScreen(
           // --- Plant Image Header ---
           PlantInfoHeader(uiState, plantInfoViewModel, onBackPressed, context)
 
-          // --- Name, Latin Name and Tips Section ---
+          // --- Name, Latin Name, Added Date and Tips Section ---
           Row(
               modifier =
                   Modifier.fillMaxWidth()
                       .padding(
-                          horizontal = PLANT_NAME_SECTION_HORIZONTAL_PADDING,
-                          vertical = PLANT_NAME_SECTION_VERTICAL_PADDING),
+                          start = PLANT_NAME_SECTION_HORIZONTAL_PADDING,
+                          end = PLANT_NAME_SECTION_HORIZONTAL_PADDING,
+                          top = PLANT_NAME_SECTION_VERTICAL_PADDING,
+                          bottom = 0.dp),
               verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                   // Common name (e.g., "Rose")
@@ -152,6 +155,25 @@ fun PlantInfosScreen(
                       fontSize = 16.sp,
                       color = MaterialTheme.colorScheme.onSurfaceVariant,
                       modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME))
+
+                  // Date of when the plant has been added to the garden
+                  if (ownedPlantId != null && uiState.dateOfCreation != null) {
+                    val dateTime =
+                        LocalDateTime.ofInstant(
+                            uiState.dateOfCreation?.toInstant(), ZoneId.systemDefault())
+                    val dateString =
+                        StringJoiner(" ")
+                            .add(dateTime.dayOfMonth.toString())
+                            .add(
+                                Month.of(dateTime.monthValue)
+                                    .getDisplayName(TextStyle.SHORT, Locale.getDefault()))
+                            .add(dateTime.year.toString())
+                    Text(
+                        text = "Added the $dateString",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier)
+                  }
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))

@@ -76,8 +76,7 @@ object FirestoreMapper {
         plant = fromPlantToSerializedPlant(ownedPlant.plant),
         lastWatered = ownedPlant.lastWatered.time,
         previousLastWatered = ownedPlant.previousLastWatered?.time ?: 0L,
-        dateOfCreation = ownedPlant.dateOfCreation.time
-    )
+        dateOfCreation = ownedPlant.dateOfCreation.time)
   }
 
   /**
@@ -94,8 +93,7 @@ object FirestoreMapper {
         previousLastWatered =
             if (sOwnedPlant.previousLastWatered != 0L) Timestamp(sOwnedPlant.previousLastWatered)
             else null,
-        dateOfCreation = Timestamp(sOwnedPlant.dateOfCreation)
-    )
+        dateOfCreation = Timestamp(sOwnedPlant.dateOfCreation))
   }
 
   /**

@@ -51,7 +51,8 @@ data class Plant(
  * @property plant The plant information (species, care requirements, etc.)
  * @property lastWatered Timestamp of when the plant was most recently watered
  * @property previousLastWatered Optional timestamp of the watering before lastWatered
- * @property dateOfCreation Timestamp of when the plant was added to the garden by the user (the user's current time by default)
+ * @property dateOfCreation Timestamp of when the plant was added to the garden by the user (the
+ *   user's current time by default)
  */
 data class OwnedPlant(
     val id: String,
