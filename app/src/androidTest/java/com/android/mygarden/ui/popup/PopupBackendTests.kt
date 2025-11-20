@@ -31,7 +31,7 @@ class PopupBackendTests {
   @get:Rule val rule = createComposeRule()
 
   // Some fictional plants to use for the tests
-  val almostThirstyPlant = TestPlants.popUpalmostThirstyPlant
+  val almostThirstyPlant = TestPlants.popUpAlmostThirstyPlant
   val thirstyPlant = TestPlants.popUpThirstyPlant
 
   private lateinit var repo: PlantsRepository
