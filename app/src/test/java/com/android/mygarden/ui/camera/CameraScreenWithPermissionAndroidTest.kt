@@ -1,23 +1,34 @@
 package com.android.mygarden.ui.camera
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.Manifest
+import android.content.Context
+import androidx.camera.core.CameraSelector
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.rule.GrantPermissionRule
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequiresCamera
 
 @RequiresCamera
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class CameraScreenWithPermissionAndroidTest {
-  @Test
-  fun trueIsTrue() {
-    assertTrue(true)
-  }
 
-  /*
   @get:Rule val composeTestRule = createComposeRule()
 
   // Grant camera access to avoid requesting access during test which is not possible
@@ -149,5 +160,5 @@ class CameraScreenWithPermissionAndroidTest {
 
     // Should return a boolean value (either true or false)
     assertTrue("Permission check should return true", hasPermission)
-  }*/
+  }
 }

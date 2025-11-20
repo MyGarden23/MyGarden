@@ -1,18 +1,25 @@
 package com.android.mygarden.ui.camera
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.test.core.app.ApplicationProvider
+import com.android.mygarden.R
+import java.io.File
+import java.io.FileOutputStream
 import org.junit.Assert.*
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class ImageHandlingTest {
-  @Test
-  fun trueIsTrue() {
-    assertTrue(true)
-  }
 
-  /*
   @get:Rule val composeTestRule = createComposeRule()
 
   /**
@@ -94,5 +101,5 @@ class ImageHandlingTest {
     composeTestRule
         .onNodeWithContentDescription(context.getString(R.string.plant_image_description))
         .assertExists()
-  }*/
+  }
 }

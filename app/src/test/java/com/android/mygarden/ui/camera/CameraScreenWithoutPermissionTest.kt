@@ -1,18 +1,32 @@
 package com.android.mygarden.ui.camera
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.content.Context
+import android.provider.Settings
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
+import androidx.test.platform.app.InstrumentationRegistry
+import org.hamcrest.Matchers.allOf
+import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class CameraScreenWithoutPermissionTest {
-  @Test
-  fun trueIsTrue() {
-    assertTrue(true)
-  }
 
-  /*
   @get:Rule val composeTestRule = createComposeRule()
 
   lateinit var viewModel: CameraViewModel
@@ -121,9 +135,12 @@ class CameraScreenWithoutPermissionTest {
 
   @Test
   fun noCameraAccessScreenElementsAreVisibleWhenPermissionDenied() {
+    println("== ENTER TEST ==")
+
     // Only run this test if we successfully revoked permission OR in controlled environment
     if (!viewModel.hasCameraPermission(context) || isControlledTestEnvironment()) {
       setupNoCameraAccessScreen()
+      println("== AFTER SETUP ==")
 
       // Try to find the no-camera-access elements
       try {
@@ -131,6 +148,7 @@ class CameraScreenWithoutPermissionTest {
             .onNodeWithTag(CameraScreenTestTags.ENABLE_CAMERA_PERMISSION)
             .assertExists()
             .assertIsDisplayed()
+        println("== FOUND ENABLE_CAMERA_PERMISSION ==")
 
         composeTestRule
             .onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON)
@@ -139,7 +157,10 @@ class CameraScreenWithoutPermissionTest {
 
         // Ensure camera preview is not shown
         composeTestRule.onNodeWithTag(CameraScreenTestTags.PREVIEW_VIEW).assertDoesNotExist()
+        println("== FOUND ENABLE_CAMERA_PERMISSION END==")
       } catch (e: AssertionError) {
+        println("ASSERTION ERROR PATH TAKEN")
+
         // If UI elements aren't found, it might be because permission wasn't properly revoked
         // In this case, we should still verify the ViewModel state
         assertTrue(
@@ -147,62 +168,95 @@ class CameraScreenWithoutPermissionTest {
             viewModel.hasAlreadyDeniedCameraPermission(context) ||
                 !viewModel.hasCameraPermission(context))
       }
+      println("== END OF IF ==")
     }
+    println("== END OF TEST ==")
   }
 
   @Test
   fun cameraScreenNoAccessButtonsAreEnabledWhenVisible() {
+    println("== ENTER TEST ==")
+
     if (!viewModel.hasCameraPermission(context) || isControlledTestEnvironment()) {
+      println("== AFTER SETUP ==")
+
       setupNoCameraAccessScreen()
 
       try {
+        println("== FOUND ENABLE_CAMERA_PERMISSION ==")
+
         composeTestRule
             .onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON)
             .assertIsEnabled()
+        println("== FOUND ENABLE_CAMERA_PERMISSION END==")
       } catch (e: AssertionError) {
+        println("ASSERTION ERROR PATH TAKEN")
+
         // Fallback: just verify that we're in the correct test state
         assertTrue(
             "Should be in no-permission test state",
             !viewModel.hasCameraPermission(context) ||
                 viewModel.hasAlreadyDeniedCameraPermission(context))
       }
+      println("== END OF IF ==")
     }
+    println("== END OF TEST ==")
   }
 
   @Test
   fun reAskForPermissionLaunchesCorrectIntent() {
+    println("== ENTER TEST ==")
+
     if (!viewModel.hasCameraPermission(context) || isControlledTestEnvironment()) {
       setupNoCameraAccessScreen()
+      println("== AFTER SETUP ==")
 
       try {
+        println("== FOUND ENABLE_CAMERA_PERMISSION ==")
+
         composeTestRule.onNodeWithTag(CameraScreenTestTags.ENABLE_CAMERA_PERMISSION).performClick()
         intended(allOf(hasAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)))
+        println("== FOUND ENABLE_CAMERA_PERMISSION END==")
       } catch (e: Exception) {
+        println("ASSERTION ERROR PATH TAKEN")
+
         // If we can't test the UI interaction, at least verify the ViewModel handles the state
         assertTrue(
             "Should handle permission denied state",
             viewModel.hasAlreadyDeniedCameraPermission(context) ||
                 !viewModel.hasCameraPermission(context))
       }
+      println("== END OF IF ==")
     }
+    println("== END OF TEST ==")
   }
 
   @Test
   fun pressingGalleryAccessButtonDoesNotCrash() {
+    println("== ENTER TEST ==")
+
     if (!viewModel.hasCameraPermission(context) || isControlledTestEnvironment()) {
       setupNoCameraAccessScreen()
+      println("== AFTER SETUP ==")
 
       try {
+        println("== FOUND ENABLE_CAMERA_PERMISSION ==")
+
         composeTestRule
             .onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON)
             .performClick()
         // Should not crash - test passes if we reach this line
         assertTrue("Gallery access should not crash", true)
+        println("== FOUND ENABLE_CAMERA_PERMISSION END==")
       } catch (e: Exception) {
+        println("ASSERTION ERROR PATH TAKEN")
+
         // Even if UI interaction fails, the test shouldn't crash
         assertTrue("Test should not crash even if UI interaction fails", true)
       }
+      println("== END OF IF ==")
     }
+    println("== END OF TEST ==")
   }
 
   @Test
@@ -229,5 +283,5 @@ class CameraScreenWithoutPermissionTest {
     // Check if we're in a CI environment or can control permissions
     return System.getenv("CI") != null ||
         InstrumentationRegistry.getArguments().getString("testMode") == "controlled"
-  }*/
+  }
 }
