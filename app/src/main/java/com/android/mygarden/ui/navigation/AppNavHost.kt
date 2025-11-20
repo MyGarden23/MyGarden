@@ -201,7 +201,7 @@ fun AppNavHost(
               editPlantViewModel = vm,
               onSaved = { navigationActions.navTo(Screen.Garden) },
               onDeleted =
-                  if (entry.arguments?.getString(FROM_KEY) != Screen.PlantInfoFromGarden.route) {
+                  if (entry.arguments?.getString(FROM_KEY) != Screen.PlantInfoFromCamera.route) {
                     { navigationActions.navTo(Screen.Garden) }
                   } else null,
               goBack = {
