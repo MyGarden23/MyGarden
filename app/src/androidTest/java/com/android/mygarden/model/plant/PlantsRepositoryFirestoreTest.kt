@@ -182,6 +182,8 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     assertEquals(id, ownedPlant.id)
     assertEquals(plant1, ownedPlant.plant)
     assertEquals(timestamp, ownedPlant.lastWatered)
+    // Assert that the plant has a valid date of creation
+    assertTrue(ownedPlant.dateOfCreation < Timestamp(System.currentTimeMillis()))
   }
 
   @Test

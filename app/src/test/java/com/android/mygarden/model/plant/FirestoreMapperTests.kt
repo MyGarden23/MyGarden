@@ -1,8 +1,8 @@
 package com.android.mygarden.model.plant
 
 import java.sql.Timestamp
-import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**

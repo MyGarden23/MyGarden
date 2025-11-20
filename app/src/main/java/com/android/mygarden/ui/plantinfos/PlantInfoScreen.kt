@@ -29,6 +29,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
+import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.ZoneId
@@ -159,18 +160,10 @@ fun PlantInfosScreen(
 
                   // Date of when the plant has been added to the garden
                   if (ownedPlantId != null && uiState.dateOfCreation != null) {
-                    val dateTime =
-                        LocalDateTime.ofInstant(
-                            uiState.dateOfCreation?.toInstant(), ZoneId.systemDefault())
-                    val dateString =
-                        StringJoiner(" ")
-                            .add(dateTime.dayOfMonth.toString())
-                            .add(
-                                Month.of(dateTime.monthValue)
-                                    .getDisplayName(TextStyle.SHORT, Locale.getDefault()))
-                            .add(dateTime.year.toString())
                     Text(
-                        text = context.getString(R.string.date_of_creation_prefix) + " $dateString",
+                        text =
+                            context.getString(R.string.date_of_creation_prefix) +
+                                " ${formatTimeStampForDateOfCreation(uiState.dateOfCreation!!)}",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.outline,
                         modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_DATE_OF_CREATION))
@@ -553,4 +546,19 @@ private fun PlantLocationTab(uiState: PlantInfoUIState) {
       color = MaterialTheme.colorScheme.onBackground,
       lineHeight = 20.sp,
       modifier = Modifier.testTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT))
+}
+
+/**
+ * Format the given Timestamp to make it ready to be displayed in the date of creation space.
+ *
+ * @param dateOfCreation the given Timestamp
+ * @return the formatted Timestamp (day, short month and year)
+ */
+fun formatTimeStampForDateOfCreation(dateOfCreation: Timestamp): String {
+  val dateTime = LocalDateTime.ofInstant(dateOfCreation.toInstant(), ZoneId.systemDefault())
+  return StringJoiner(" ")
+      .add(dateTime.dayOfMonth.toString())
+      .add(Month.of(dateTime.monthValue).getDisplayName(TextStyle.SHORT, Locale.getDefault()))
+      .add(dateTime.year.toString())
+      .toString()
 }
