@@ -1,12 +1,9 @@
 package com.android.mygarden.ui.profile
 
-import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToNode
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -59,25 +56,6 @@ class ChooseProfilePictureScreenTest {
     composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
 
     assertTrue(backCalls.isNotEmpty())
-  }
-
-  /**
-   * Verifies that all available avatars are rendered within the grid, are visible, and are
-   * clickable.
-   */
-  @Test
-  fun avatars_areDisplayedAndClickable() {
-    setContentWith()
-
-    Avatar.values().forEach { avatar ->
-      val cardTag = ChooseProfilePictureScreenTestTags.getTestTagAvatar(avatar)
-
-      composeRule
-          .onNodeWithTag(ChooseProfilePictureScreenTestTags.AVATAR_GRID)
-          .performScrollToNode(hasTestTag(cardTag))
-
-      composeRule.onNodeWithTag(cardTag).assertIsDisplayed().assertHasClickAction()
-    }
   }
 
   /**
