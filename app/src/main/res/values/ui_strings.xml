@@ -11,6 +11,7 @@
     <string name="camera_screen_title">Camera</string>
     <string name="garden_screen_title">Garden</string>
     <string name="choose_avatar_screen_title">Choose Avatar</string>
+    <string name="feed_screen_title">My Feed</string>
 
 
     <!-- Sign In Screen -->
@@ -135,6 +136,15 @@
     <string name="last_time_watered_error">Last time watered is required</string>
     <string name="select_date">Select a date</string>
 
+    <!-- Feed activities strings -->
+    <string name="added_plant_activity">%1$s just added a new %2$s to their garden!</string>
+    <string name="added_friend_activity">The activity type %1$s is not implemented yet</string>
+    <string name="got_achievement_activity">The activity type %1$s is not implemented yet</string>
+    <string name="watered_plant_activity">The activity type %1$s is not implemented yet</string>
+    <string name="in_card_added_activity_title">ADDED</string>
 
+    <!-- Feed Screen -->
+    <string name="add_friend_button">Add a friend</string>
+    <string name="no_activity_message">There is no recent activity yet. Add more friends to see their activities!</string>
 
 </resources>

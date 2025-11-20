@@ -8,7 +8,9 @@ object NavigationTestTags {
   const val BOTTOM_BAR = "BottomBar"
   const val CAMERA_BUTTON = "CameraButton"
   const val GARDEN_BUTTON = "GardenButton"
+  const val FEED_BUTTON = "FeedButton"
   const val CAMERA_SCREEN = "CameraScreen"
   const val GARDEN_SCREEN = "GardenScreen"
+  const val FEED_SCREEN = "FeedScreen"
   const val EDIT_PLANT_SCREEN = "EditPlantScreen"
 }
