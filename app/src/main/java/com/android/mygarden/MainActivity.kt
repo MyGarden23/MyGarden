@@ -134,8 +134,10 @@ fun MyGardenApp(intent: Intent? = null) {
 
   Scaffold(
       bottomBar = {
-        // Show bottom bar for main screens: Camera and Garden
-        if (currentScreen == Screen.Camera || currentScreen == Screen.Garden) {
+        // Show bottom bar for main screens: Camera, Feed and Garden
+        if (currentScreen == Screen.Camera ||
+            currentScreen == Screen.Garden ||
+            currentScreen == Screen.Feed) {
           // Determine selected page more carefully - don't default to Camera
           // if we're coming from a non-top-level screen
           val pageToSelect =
@@ -143,6 +145,7 @@ fun MyGardenApp(intent: Intent? = null) {
                   ?: when (currentScreen) {
                     Screen.Garden -> Page.Garden
                     Screen.Camera -> Page.Camera
+                    Screen.Feed -> Page.Feed
                     else -> Page.Camera
                   }
           BottomBar(selectedPage = pageToSelect, onSelect = { actions.navTo(it.destination) })
@@ -180,6 +183,7 @@ private fun routeToScreen(route: String): Screen? =
       Screen.PlantInfo.route -> Screen.PlantInfo
       Screen.NewProfile.route -> Screen.NewProfile
       Screen.Garden.route -> Screen.Garden
+      Screen.Feed.route -> Screen.Feed
       Screen.ChooseAvatar.route -> Screen.ChooseAvatar
       else -> {
         if (route.startsWith(EDIT_PLANT_BASE)) {
@@ -195,6 +199,7 @@ private fun routeToPage(route: String): Page? =
     when (route) {
       Screen.Camera.route -> Page.Camera
       Screen.Garden.route -> Page.Garden
+      Screen.Feed.route -> Page.Feed
       else -> null
     }
 

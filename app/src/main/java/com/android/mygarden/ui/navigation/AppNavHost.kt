@@ -18,6 +18,7 @@ import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.editPlant.EditPlantScreen
 import com.android.mygarden.ui.editPlant.EditPlantViewModel
+import com.android.mygarden.ui.feed.FeedScreen
 import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
@@ -131,6 +132,11 @@ fun AppNavHost(
             FirebaseAuth.getInstance().signOut()
             navigationActions.navTo(Screen.Auth)
           })
+    }
+
+    // Feed
+    composable(Screen.Feed.route) {
+      FeedScreen() // Add the OnAddFriend callback when implemented!
     }
 
     // Plant Info
