@@ -409,11 +409,7 @@ private fun CountryDropdownMenu(
  * @param onRegisterPressed Callback when registration is successful
  */
 @Composable
-private fun SaveButton(
-    uiState: ProfileUIState,
-    profileViewModel: ProfileViewModel,
-    onRegisterPressed: () -> Unit
-) {
+private fun SaveButton(profileViewModel: ProfileViewModel, onRegisterPressed: () -> Unit) {
   val context = LocalContext.current
   Button(
       onClick = {
@@ -491,10 +487,7 @@ fun ProfileScreenBase(
       },
       bottomBar = {
         Box(Modifier.offset(y = SPACE_SAVE_BUTTON_BOTTOM_SCREEN)) {
-          SaveButton(
-              uiState = uiState,
-              profileViewModel = profileViewModel,
-              onRegisterPressed = onSavePressed)
+          SaveButton(profileViewModel = profileViewModel, onRegisterPressed = onSavePressed)
         }
       }) { paddingValues ->
         Column(
