@@ -5,8 +5,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.ui.navigation.NavigationTestTags
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,7 +36,7 @@ class ChooseProfilePictureScreenTest {
           onAvatarChosen = { onChosen += it }, onBack = { onBackCalled += true })
     }
   }
-  /*
+
   /** Verifies that the essential UI components of the screen are displayed. */
   @Test
   fun screen_displaysTopAppBarAndAvatarGrid() {
@@ -53,7 +57,7 @@ class ChooseProfilePictureScreenTest {
     composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
 
     assertTrue(backCalls.isNotEmpty())
-  }*/
+  }
 
   /**
    * Verifies that all available avatars are rendered within the grid, are visible, and are
@@ -73,7 +77,7 @@ class ChooseProfilePictureScreenTest {
       composeRule.onNodeWithTag(cardTag).assertIsDisplayed().assertHasClickAction()
     }
   }
-  /*
+
   /**
    * Verifies that clicking on an avatar triggers the `onAvatarChosen` callback with the correct
    * [Avatar] instance.
@@ -89,5 +93,5 @@ class ChooseProfilePictureScreenTest {
     composeRule.onNodeWithTag(cardTag).performClick()
 
     assertEquals(listOf(first), chosen)
-  }*/
+  }
 }
