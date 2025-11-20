@@ -1,19 +1,26 @@
 package com.android.mygarden.ui.profile
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
+import com.android.mygarden.ui.navigation.NavigationTestTags
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /** Tests for [ChooseProfilePictureScreenTest]. */
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class ChooseProfilePictureScreenTest {
-  @Test
-  fun trueIsTrue() {
-    assertTrue(true)
-  }
 
-  /*
   @get:Rule val composeRule = createComposeRule()
 
   /**
@@ -88,5 +95,5 @@ class ChooseProfilePictureScreenTest {
     composeRule.onNodeWithTag(cardTag).performClick()
 
     assertEquals(listOf(first), chosen)
-  }*/
+  }
 }

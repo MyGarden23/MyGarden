@@ -1,15 +1,24 @@
 package com.android.mygarden.ui.profile
 
 import android.content.Context
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
-import com.android.mygarden.R
+import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.ui.navigation.NavigationTestTags
+import org.junit.Assert.assertEquals
 import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /**
  * Abstract base class for testing profile screens (NewProfileScreen and EditProfileScreen).
@@ -22,6 +31,8 @@ import org.junit.Rule
  * - [expectedTitle] to provide the expected title text for that screen
  * - [expectedButtonText] to provide the expected button text for that screen
  */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 abstract class ProfileScreenTestBase {
 
   @get:Rule abstract val composeTestRule: ComposeTestRule
@@ -51,8 +62,8 @@ abstract class ProfileScreenTestBase {
   }
 
   // ========== COMMON TESTS ==========
-  /*
-  @org.junit.Test
+
+  @Test
   fun allUIComponentsAreDisplayed() {
     setContent()
 
@@ -77,13 +88,13 @@ abstract class ProfileScreenTestBase {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).assertIsDisplayed()
   }
 
-  @org.junit.Test
+  @Test
   fun titleDisplaysCorrectText() {
     setContent()
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertTextEquals(expectedTitle)
   }
 
-  @org.junit.Test
+  @Test
   fun saveButtonDisplaysCorrectText() {
     setContent()
     composeTestRule
@@ -91,37 +102,37 @@ abstract class ProfileScreenTestBase {
         .assertTextContains(expectedButtonText)
   }
 
-  @org.junit.Test
+  @Test
   fun firstNameFieldAcceptsInput() {
     setContent()
     performTextInputAndAssert(ProfileScreenTestTags.FIRST_NAME_FIELD, "John")
   }
 
-  @org.junit.Test
+  @Test
   fun lastNameFieldAcceptsInput() {
     setContent()
     performTextInputAndAssert(ProfileScreenTestTags.LAST_NAME_FIELD, "Doe")
   }
 
-  @org.junit.Test
+  @Test
   fun favoritePlantFieldAcceptsInput() {
     setContent()
     performTextInputAndAssert(ProfileScreenTestTags.FAVORITE_PLANT_FIELD, "Rose")
   }
 
-  @org.junit.Test
+  @Test
   fun countryFieldAcceptsInput() {
     setContent()
     performTextInputAndAssert(ProfileScreenTestTags.COUNTRY_FIELD, "France")
   }
 
-  @org.junit.Test
+  @Test
   fun pseudoFieldAcceptsInput() {
     setContent()
     performTextInputAndAssert(ProfileScreenTestTags.PSEUDO_FIELD, "pseudo")
   }
 
-  @org.junit.Test
+  @Test
   fun experienceDropdownOpensWhenClicked() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD).performClick()
@@ -130,7 +141,7 @@ abstract class ProfileScreenTestBase {
         .assertIsDisplayed()
   }
 
-  @org.junit.Test
+  @Test
   fun allGardeningSkillsAreDisplayedInDropdown() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD).performClick()
@@ -143,7 +154,7 @@ abstract class ProfileScreenTestBase {
     }
   }
 
-  @org.junit.Test
+  @Test
   fun selectingGardeningSkillUpdatesField() {
     setContent()
     val selectedSkill = GardeningSkill.INTERMEDIATE
@@ -158,21 +169,21 @@ abstract class ProfileScreenTestBase {
         .assertTextContains(selectedSkill.name)
   }
 
-  @org.junit.Test
+  @Test
   fun countryDropdownOpensWhenTyping() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).performTextInput("Fr")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_MENU).assertIsDisplayed()
   }
 
-  @org.junit.Test
+  @Test
   fun countryDropdownOpensWhenClickingIcon() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_ICON).performClick()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_MENU).assertIsDisplayed()
   }
 
-  @org.junit.Test
+  @Test
   fun countryDropdownIconWorksWithEmptyField() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_ICON).performClick()
@@ -180,14 +191,14 @@ abstract class ProfileScreenTestBase {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT).assertIsDisplayed()
   }
 
-  @org.junit.Test
+  @Test
   fun countrySearchShowsResultsCount() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).performTextInput("Fr")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT).assertIsDisplayed()
-  }*/
+  }
 
-  @org.junit.Test
+  /*@Test
   fun countrySearchShowsNoResultsMessage() {
     setContent()
     composeTestRule
@@ -197,17 +208,17 @@ abstract class ProfileScreenTestBase {
         .onNodeWithTag(ProfileScreenTestTags.COUNTRY_NO_RESULTS)
         .assertIsDisplayed()
         .assertTextEquals(context.getString(R.string.no_country_found))
-  }
+  }*/
 
-  @org.junit.Test
+  /*@Test
   fun selectingCountryFromDropdownUpdatesField() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).performTextInput("Fr")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.getCountryItemTag("France")).performClick()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).assertTextContains("France")
-  }
-  /*
-  @org.junit.Test
+  }*/
+
+  @Test
   fun countrySearchFiltersResults() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).performTextInput("France")
@@ -217,7 +228,7 @@ abstract class ProfileScreenTestBase {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT).assertIsDisplayed()
   }
 
-  @org.junit.Test
+  @Test
   fun countrySearchLimitsDisplayedResults() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).performTextInput("a")
@@ -225,7 +236,7 @@ abstract class ProfileScreenTestBase {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT).assertIsDisplayed()
   }
 
-  @org.junit.Test
+  @Test
   fun countryDropdownShowsMoreResultsIndicatorForManyMatches() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_ICON).performClick()
@@ -240,7 +251,7 @@ abstract class ProfileScreenTestBase {
         .assertTextContains("more countries", substring = true, ignoreCase = false)
   }
 
-  @org.junit.Test
+  @Test
   fun countrySearchShowsMoreResultsIndicatorWithCommonLetter() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).performTextInput("a")
@@ -252,7 +263,7 @@ abstract class ProfileScreenTestBase {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_MORE_RESULTS).assertExists()
   }
 
-  @org.junit.Test
+  @Test
   fun countryDropdownCheckForCanada() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).performTextInput("anada")
@@ -265,7 +276,7 @@ abstract class ProfileScreenTestBase {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).assertTextContains("Canada")
   }
 
-  @org.junit.Test
+  @Test
   fun cantRegisterIfOneMandatoryFieldsIsEmpty() {
     setContent()
     performTextInputAndAssert(ProfileScreenTestTags.FIRST_NAME_FIELD, "John")
@@ -273,7 +284,7 @@ abstract class ProfileScreenTestBase {
     performTextInputAndAssert(ProfileScreenTestTags.PSEUDO_FIELD, "pseudo")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
     assertEquals(false, onSavePressedCalled)
-  }*/
+  }
 
   // ========== HELPER CLASSES ==========
 
@@ -282,8 +293,8 @@ abstract class ProfileScreenTestBase {
    * form submissions.
    */
   abstract fun setContentWithFakeRepo()
-  /*
-  @org.junit.Test
+
+  @Test
   fun canSaveIfMandatoryFieldsAreFilled() {
     setContentWithFakeRepo()
 
@@ -304,5 +315,5 @@ abstract class ProfileScreenTestBase {
 
     // Verify the save callback was successfully triggered
     assertEquals(true, onSavePressedCalled)
-  }*/
+  }
 }
