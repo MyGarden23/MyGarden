@@ -1,18 +1,20 @@
 package com.android.mygarden.ui.popup
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Assert.assertTrue
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class PopupScreenTests {
-  @Test
-  fun trueIsTrue() {
-    assertTrue(true)
-  }
 
-  /*
   @get:Rule val testRule = createComposeRule()
 
   /** Create the Pop-up Screen with default [plantName] and lambdas */
@@ -35,5 +37,5 @@ class PopupScreenTests {
   fun buttonsAreEnabled() {
     testRule.onNodeWithTag(PopupScreenTestTags.CONFIRM_BUTTON).assertIsEnabled()
     testRule.onNodeWithTag(PopupScreenTestTags.DISMISS_BUTTON).assertIsEnabled()
-  }*/
+  }
 }
