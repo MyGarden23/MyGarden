@@ -187,7 +187,8 @@ class EditPlantScreenTest {
 
     composeRule.waitForIdle()
 
-    // Still disabled because no date set, and description, name, latin name are blank
+    // Still disabled because no date set, and description, name, latin name and light exposure are
+    // blank
     saveNode.assertIsNotEnabled()
 
     // Provide valid description first
@@ -196,7 +197,7 @@ class EditPlantScreenTest {
         .performClick()
         .performTextInput("OK")
     composeRule.waitForIdle()
-    // Still disabled because date is missing and name, latin name are blank
+    // Still disabled because date is missing and name, latin name and light exposure are blank
     saveNode.assertIsNotEnabled()
 
     // Now set the date via VM (what the dialog would do)
@@ -209,7 +210,7 @@ class EditPlantScreenTest {
         .performClick()
         .performTextInput("OK")
     composeRule.waitForIdle()
-    // Still disabled because latin name is blank
+    // Still disabled because latin name and light exposure is blank
     saveNode.assertIsNotEnabled()
 
     // Provide valid latin name
@@ -218,6 +219,18 @@ class EditPlantScreenTest {
         .performClick()
         .performTextInput("OK")
     composeRule.waitForIdle()
+
+    // Still disabled because light exposure
+    saveNode.assertIsNotEnabled()
+
+    // Scroll to the light exposure and fill it
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.LIGHT_EXPOSURE))
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE)
+        .performClick()
+        .performTextInput("OK")
 
     // Enabled once all fields are valid
     saveNode.assertIsEnabled()
