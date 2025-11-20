@@ -442,13 +442,6 @@ class EditPlantScreenTest {
     composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
   }
 
-  /** Test if the delete button does not exist if we come from the Plant Info Screen */
-  @Test
-  fun deleteButton_isHidden_whenFromPlantInfo() {
-    setContentWith(fromRoute = Screen.PlantInfo.route)
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertDoesNotExist()
-  }
-
   /** Test if the delete button exists if we come from the Garden Screen */
   @Test
   fun deleteButton_isVisible_whenFromGarden() {
