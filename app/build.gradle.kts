@@ -213,7 +213,7 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
-    // Mockito (gardé en implementation comme dans ta version)
+    // Mockito
     implementation(libs.mockito.core)
     implementation(libs.mockito.kotlin)
 
@@ -236,7 +236,7 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.robolectric)
 
-    // Déps partagées test + androidTest
+    // shared deps test + androidTest
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
     globalTestImplementation(libs.androidx.espresso.intents)
