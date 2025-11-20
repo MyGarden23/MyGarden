@@ -130,7 +130,7 @@ class FeedViewModelTests {
 
   /** Tests that initially the correct list (non empty) is collected */
   @Test
-  fun initialNonEmtpyCorrectlyCollected() = runTest {
+  fun initialNonEmptyCorrectlyCollected() = runTest {
     profileRepo.addActivity(addedPlantActivity)
     // new instance created after the activity is added to the repository
     val newVM = FeedViewModel(profileRepo)
@@ -138,7 +138,7 @@ class FeedViewModelTests {
     assertEquals(listOf(addedPlantActivity), newVM.uiState.value.activities)
   }
 
-  /** Tests that the list is correctly udpated after a modification from the repo */
+  /** Tests that the list is correctly updated after a modification from the repo */
   @Test
   fun correctCollectionAfterAddedActivity() = runTest {
     profileRepo.addActivity(addedPlantActivity)

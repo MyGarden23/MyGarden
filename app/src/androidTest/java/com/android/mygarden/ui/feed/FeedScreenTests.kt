@@ -154,6 +154,7 @@ class FeedScreenTests {
     composeRule.onNodeWithTag(FeedScreenTestTags.ADD_FRIEND_BUTTON).assertIsDisplayed()
     profileRepo.addActivity(addedPlantActivity)
     composeRule.allActivitiesAreDisplayed(listOf(addedPlantActivity))
+    composeRule.onNodeWithTag(FeedScreenTestTags.ADDED_PLANT_DESCRIPTION).assertIsDisplayed()
   }
 
   /** Tests the correct display when an added friend activity is added to the profile repo */
@@ -163,6 +164,7 @@ class FeedScreenTests {
     composeRule.onNodeWithTag(FeedScreenTestTags.ADD_FRIEND_BUTTON).assertIsDisplayed()
     profileRepo.addActivity(addedFriendActivity)
     composeRule.allActivitiesAreDisplayed(listOf(addedFriendActivity))
+    composeRule.onNodeWithTag(FeedScreenTestTags.ADDED_FRIEND_DESCRIPTION).assertIsDisplayed()
   }
 
   /** Tests the correct display when a watered plant activity is added to the profile repo */
@@ -172,6 +174,7 @@ class FeedScreenTests {
     composeRule.onNodeWithTag(FeedScreenTestTags.ADD_FRIEND_BUTTON).assertIsDisplayed()
     profileRepo.addActivity(wateredPlantActivity)
     composeRule.allActivitiesAreDisplayed(listOf(wateredPlantActivity))
+    composeRule.onNodeWithTag(FeedScreenTestTags.WATERED_PLANT_DESCRIPTION).assertIsDisplayed()
   }
 
   /** Tests the correct display when a got achievement activity is added to the profile repo */
@@ -181,5 +184,6 @@ class FeedScreenTests {
     composeRule.onNodeWithTag(FeedScreenTestTags.ADD_FRIEND_BUTTON).assertIsDisplayed()
     profileRepo.addActivity(gotAchievementActivity)
     composeRule.allActivitiesAreDisplayed(listOf(gotAchievementActivity))
+    composeRule.onNodeWithTag(FeedScreenTestTags.GOT_ACHIEVEMENT_DESCRIPTION).assertIsDisplayed()
   }
 }

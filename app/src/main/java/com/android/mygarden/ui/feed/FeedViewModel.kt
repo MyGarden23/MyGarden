@@ -36,7 +36,7 @@ class FeedViewModel(
   }
 
   /**
-   * Collects (continuously) the list of activites from the repo to update the list to display by
+   * Collects (continuously) the list of activities from the repo to update the list to display by
    * the UI
    */
   fun refreshUIState() {

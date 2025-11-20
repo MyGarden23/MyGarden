@@ -137,10 +137,11 @@
     <string name="select_date">Select a date</string>
 
     <!-- Feed activities strings -->
-    <string name="added_plant">%1$s just added a new %2$s to their garden!</string>
-    <string name="added_friend">The activity type %1$s is not implemented yet</string>
-    <string name="got_achievement">The activity type %1$s is not implemented yet</string>
-    <string name="watered_plant">The activity type %1$s is not implemented yet</string>
+    <string name="added_plant_activity">%1$s just added a new %2$s to their garden!</string>
+    <string name="added_friend_activity">The activity type %1$s is not implemented yet</string>
+    <string name="got_achievement_activity">The activity type %1$s is not implemented yet</string>
+    <string name="watered_plant_activity">The activity type %1$s is not implemented yet</string>
+    <string name="in_card_added_activity_title">ADDED</string>
 
     <!-- Feed Screen -->
     <string name="add_friend_button">Add a friend</string>

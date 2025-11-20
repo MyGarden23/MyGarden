@@ -39,18 +39,8 @@ import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFri
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
-import com.android.mygarden.model.plant.OwnedPlant
-import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
-import java.sql.Timestamp
-
-val act1 =
-    ActivityAddedPlant(
-        "fab",
-        "fabioconti",
-        ownedPlant = OwnedPlant("04", Plant(), Timestamp(System.currentTimeMillis())))
-val act2 = ActivityAddFriend("fab", "fabioconti", friendUserId = "ulysse")
 
 /*----------------- PADDING / SIZE / OPACITY CONSTANTS ------------------*/
 private val BUTTON_ROW_HORIZONTAL_PADDING = 24.dp
@@ -212,7 +202,7 @@ fun AddedAPlantCard(
                   fontSize = IN_CARD_ACTIVITY_TITLE_SIZE,
                   fontWeight = FontWeight.ExtraBold,
                   color = colorPalette.textColor.copy(alpha = IN_CARD_ACTIVITY_TITLE_OPACITY),
-                  text = "ADDED")
+                  text = stringResource(R.string.in_card_added_activity_title))
               Icon(
                   painter = painterResource(R.drawable.potted_plant_icon),
                   contentDescription = null,
@@ -227,7 +217,7 @@ fun AddedAPlantCard(
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             text =
                 stringResource(
-                    R.string.added_plant, activity.pseudo, activity.ownedPlant.plant.name))
+                    R.string.added_plant_activity, activity.pseudo, activity.ownedPlant.plant.name))
       }
 }
 
@@ -247,7 +237,7 @@ fun AddedAFriendCard(
   Text(
       modifier = modifier.testTag(FeedScreenTestTags.ADDED_FRIEND_DESCRIPTION),
       color = colorPalette.textColor,
-      text = stringResource(R.string.added_friend, activity.type))
+      text = stringResource(R.string.added_friend_activity, activity.type))
 }
 
 /**
@@ -266,7 +256,7 @@ fun GotAnAchievementCard(
   Text(
       modifier = modifier.testTag(FeedScreenTestTags.GOT_ACHIEVEMENT_DESCRIPTION),
       color = colorPalette.textColor,
-      text = stringResource(R.string.got_achievement, activity.type))
+      text = stringResource(R.string.got_achievement_activity, activity.type))
 }
 
 /**
@@ -285,7 +275,7 @@ fun WateredAPlantCard(
   Text(
       modifier = modifier.testTag(FeedScreenTestTags.WATERED_PLANT_DESCRIPTION),
       color = colorPalette.textColor,
-      text = stringResource(R.string.watered_plant, activity.type))
+      text = stringResource(R.string.watered_plant_activity, activity.type))
 }
 
 /**
