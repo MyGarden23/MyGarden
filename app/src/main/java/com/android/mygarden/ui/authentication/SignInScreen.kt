@@ -153,7 +153,17 @@ fun SignInScreen(
         }
       }
 }
-
+/**
+ * Handles login-related error messages by displaying them in a Toast and clearing the error state
+ * in the ViewModel.
+ *
+ * This prevents the same error from being shown multiple times and keeps the UI logic clean by
+ * centralizing how authentication errors are presented.
+ *
+ * @param errorMsg The error message to display, or null if no error.
+ * @param context The context required to show the Toast.
+ * @param authViewModel The ViewModel used to clear the stored error message.
+ */
 private fun handleLoginError(
     errorMsg: String?,
     context: Context,
@@ -165,6 +175,18 @@ private fun handleLoginError(
   }
 }
 
+/**
+ * Handles a successful login or registration event.
+ * - Shows a success toast
+ * - Invokes `onSignedIn` if the user is new
+ * - Invokes `onLogIn` if the user is returning
+ *
+ * @param user The authenticated Firebase user, or null if authentication failed.
+ * @param isNewUser Whether the user has just created an account.
+ * @param context Context for displaying a toast.
+ * @param onSignedIn Callback called after successful registration.
+ * @param onLogIn Callback called after successful login.
+ */
 private fun handleLoginSuccess(
     user: FirebaseUser?,
     isNewUser: Boolean,
@@ -178,6 +200,16 @@ private fun handleLoginSuccess(
   }
 }
 
+/**
+ * Determines which post-login action to trigger in end-to-end sign-in flows.
+ * - If no Firebase user is currently authenticated, calls `onSignedIn`
+ * - Otherwise, triggers `onLogIn`
+ *
+ * This is used to simulate a full login flow during automated UI tests.
+ *
+ * @param onSignedIn Callback invoked when treating the user as newly signed in.
+ * @param onLogIn Callback invoked when treating the user as already logged in.
+ */
 private fun handleEndToEndSignIn(
     onSignedIn: () -> Unit,
     onLogIn: () -> Unit,

@@ -228,6 +228,17 @@ fun EditPlantScreen(
   }
 }
 
+/**
+ * Aggregates all validation error states for the Edit Plant screen.
+ *
+ * Each flag indicates whether a specific field currently displays an error based on the UI state
+ * and the user's interaction with the field.
+ *
+ * @property isNameError True when the name is invalid and should show an error.
+ * @property isLatinNameError True when the Latin name is invalid and should show an error.
+ * @property isDescriptionError True when the description is blank and marked as touched.
+ * @property isDateError True when the last watered date is missing and marked as touched.
+ */
 private data class EditPlantErrorFlags(
     val isNameError: Boolean,
     val isLatinNameError: Boolean,
@@ -235,6 +246,17 @@ private data class EditPlantErrorFlags(
     val isDateError: Boolean,
 )
 
+/**
+ * Tracks which input fields the user has interacted with.
+ *
+ * These flags allow error messages to be shown only after the user focuses a field, matching the
+ * expected UX behavior of the Edit Plant screen.
+ *
+ * @property touchedName Whether the name field has been focused.
+ * @property touchedLatinName Whether the Latin name field has been focused.
+ * @property touchedDesc Whether the description field has been focused.
+ * @property touchedLastWatered Whether the last watered date picker has been interacted with.
+ */
 private data class TouchedFlags(
     val touchedName: Boolean,
     val touchedLatinName: Boolean,
@@ -242,12 +264,33 @@ private data class TouchedFlags(
     val touchedLastWatered: Boolean,
 )
 
+/**
+ * Handles the result returned by the date picker.
+ *
+ * Updates the ViewModel only when the user confirms a valid date.
+ *
+ * @param millis The selected date in epoch milliseconds, or null if no date was chosen.
+ * @param editPlantViewModel ViewModel responsible for updating the last watered timestamp.
+ */
 private fun handleDatePicked(millis: Long?, editPlantViewModel: EditPlantViewModelInterface) {
   if (millis != null) {
     editPlantViewModel.setLastWatered(Timestamp(millis))
   }
 }
 
+/**
+ * Computes all validation error states for the Edit Plant form.
+ *
+ * Each error flag is evaluated based on the current UI state and whether the corresponding field
+ * has been touched. This centralizes the validation logic to keep the composable clean.
+ *
+ * @param uiState The current UI state of the Edit Plant screen.
+ * @param touchedName Whether the name field has been interacted with.
+ * @param touchedLatinName Whether the Latin name field has been interacted with.
+ * @param touchedDesc Whether the description field has been interacted with.
+ * @param touchedLastWatered Whether the date picker has been interacted with.
+ * @return A populated [EditPlantErrorFlags] instance representing current validation errors.
+ */
 private fun computeEditPlantErrorFlags(
     uiState: EditPlantUIState,
     touchedName: Boolean,
@@ -268,6 +311,16 @@ private fun computeEditPlantErrorFlags(
   )
 }
 
+/**
+ * Determines whether the "Save" button should be enabled.
+ *
+ * Validation rules:
+ * - If the plant was recognized by the API: only description and last watered date are required.
+ * - If not recognized: name, Latin name, description, and last watered date must all be provided.
+ *
+ * @param uiState The current UI state of the Edit Plant screen.
+ * @return True if all required fields are valid, false otherwise.
+ */
 private fun computeIsSaveEnabled(uiState: EditPlantUIState): Boolean {
   return if (uiState.isRecognized) {
     uiState.description.isNotBlank() && uiState.lastWatered != null
@@ -279,6 +332,19 @@ private fun computeIsSaveEnabled(uiState: EditPlantUIState): Boolean {
   }
 }
 
+/**
+ * Updates the "touched" state of all input fields after the user presses Save.
+ *
+ * If a field is blank, it is automatically marked as touched so its error message becomes visible.
+ * This ensures consistent UX: pressing Save reveals all missing fields.
+ *
+ * @param uiState The current UI state containing the input values.
+ * @param touchedName Whether the name field has been previously touched.
+ * @param touchedLatinName Whether the Latin name field has been previously touched.
+ * @param touchedDesc Whether the description field has been previously touched.
+ * @param touchedLastWatered Whether the last watered field has been previously touched.
+ * @return A [TouchedFlags] instance with updated touched states for all fields.
+ */
 private fun computeTouchedAfterValidate(
     uiState: EditPlantUIState,
     touchedName: Boolean,
@@ -299,6 +365,16 @@ private fun computeTouchedAfterValidate(
   )
 }
 
+/**
+ * Displays a Material 3 date picker dialog for selecting the plant's last watered date.
+ *
+ * The dialog is pre-initialized with the given timestamp, and returns the user’s selection when the
+ * confirm button is pressed.
+ *
+ * @param initialMillis The initially selected date in epoch milliseconds, or null if none.
+ * @param onConfirm Callback invoked with the selected date (in millis) when the user confirms.
+ * @param onDismiss Callback invoked when the dialog is dismissed without selecting a date.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditPlantDatePickerDialog(

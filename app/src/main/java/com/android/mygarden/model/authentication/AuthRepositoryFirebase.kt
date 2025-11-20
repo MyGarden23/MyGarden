@@ -41,7 +41,7 @@ class AuthRepositoryFirebase(
             Result.success(AuthRepository.SignInResult(user, isNewUser))
           } else {
             Result.failure(
-                IllegalStateException("Login failed: Credential is not of type Google ID\""))
+                IllegalStateException("Login failed: Credential is not of type Google ID"))
           }
 
       result

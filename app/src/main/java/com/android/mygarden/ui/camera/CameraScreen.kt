@@ -75,8 +75,6 @@ private val BUTTONS_COLOR = Color.White
  * picture can then be processed to a LLM api to extract the wanted information: description,
  * watering, health status, etc.
  *
- * Currently: the screen previews the camera and display the action buttons that do nothing
- *
  * @param modifier the optional modifier of the composable
  * @param cameraViewModel the optional View Model of the camera screen
  * @param onPictureTaken the optional lambda called whenever the user takes a picture
@@ -193,6 +191,17 @@ fun CameraScreen(
       })
 }
 
+/**
+ * Refreshes the current camera permission state and requests it if needed.
+ * - Updates the `cameraPermission` state based on the current permission status
+ * - If the user has not previously denied the permission and it is still missing, triggers a
+ *   permission request and marks that the request has been shown.
+ *
+ * @param cameraViewModel ViewModel used to check and update permission states.
+ * @param context Android context for permission checks.
+ * @param cameraPermission Mutable state storing whether the camera permission is granted.
+ * @param launchPermissionRequest Callback to trigger the system permission dialog.
+ */
 private fun refreshAndRequestCameraPermission(
     cameraViewModel: CameraViewModel,
     context: android.content.Context,
@@ -208,6 +217,18 @@ private fun refreshAndRequestCameraPermission(
   }
 }
 
+/**
+ * Creates a lifecycle observer that refreshes the camera permission state on resume.
+ *
+ * This ensures that when the user comes back from the system permission settings, the UI correctly
+ * reflects whether the camera can be used.
+ *
+ * @param lifecycleOwner The lifecycle owner to attach the observer to.
+ * @param cameraViewModel ViewModel providing permission checking logic.
+ * @param context Android context for permission checks.
+ * @param cameraPermission Mutable state storing whether the camera permission is granted.
+ * @return A [LifecycleEventObserver] that updates the permission on `ON_RESUME`.
+ */
 private fun createCameraPermissionObserver(
     lifecycleOwner: androidx.lifecycle.LifecycleOwner,
     cameraViewModel: CameraViewModel,
@@ -224,6 +245,19 @@ private fun createCameraPermissionObserver(
   return observer
 }
 
+/**
+ * UI displayed when camera permission has been granted.
+ * - Shows the camera preview
+ * - Provides buttons to switch camera (front/back), take a picture, and open the gallery
+ * - Configures a [LifecycleCameraController] for image capture
+ *
+ * @param modifier Modifier applied to the whole layout.
+ * @param context Android context for camera controller and strings.
+ * @param cameraSelector Selector for choosing front or back camera.
+ * @param cameraViewModel ViewModel handling camera actions (switch, capture).
+ * @param onPictureTaken Callback invoked with the saved image path after a successful capture.
+ * @param onOpenGallery Callback invoked when the gallery button is pressed.
+ */
 @Composable
 private fun CameraGrantedContent(
     modifier: Modifier,
@@ -249,7 +283,7 @@ private fun CameraGrantedContent(
           }
         }
       }
-  Box(modifier = Modifier.fillMaxSize()) {
+  Box(modifier = modifier.fillMaxSize()) {
     CameraPreview(controller = controller, modifier = modifier.fillMaxSize())
 
     // Button for switching between back camera and front camera

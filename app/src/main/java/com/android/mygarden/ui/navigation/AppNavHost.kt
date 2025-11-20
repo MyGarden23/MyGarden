@@ -215,23 +215,21 @@ fun AppNavHost(
 }
 
 /**
- * Small helper to avoid duplication: Handles reading AVATAR from savedStateHandle + applying it
- * in the ViewModel Used by NewProfile and EditProfile (which had duplicated code).
+ * Small helper to avoid duplication: Handles reading AVATAR from savedStateHandle + applying it in
+ * the ViewModel Used by NewProfile and EditProfile (which had duplicated code).
  */
 @Composable
 fun HandleAvatarSelection(backStackEntry: NavBackStackEntry, vm: ProfileViewModel) {
-    val chosenName by
-    backStackEntry.savedStateHandle.getStateFlow(CHOSEN_AVATAR_KEY, "").collectAsState()
+  val chosenName by
+      backStackEntry.savedStateHandle.getStateFlow(CHOSEN_AVATAR_KEY, "").collectAsState()
 
-    val chosenAvatar =
-        chosenName
-            .takeIf { it.isNotBlank() }
-            ?.let { runCatching { Avatar.valueOf(it) }.getOrNull() }
+  val chosenAvatar =
+      chosenName.takeIf { it.isNotBlank() }?.let { runCatching { Avatar.valueOf(it) }.getOrNull() }
 
-    LaunchedEffect(chosenAvatar) {
-        if (chosenAvatar != null) {
-            vm.setAvatar(chosenAvatar)
-            backStackEntry.savedStateHandle[CHOSEN_AVATAR_KEY] = ""
-        }
+  LaunchedEffect(chosenAvatar) {
+    if (chosenAvatar != null) {
+      vm.setAvatar(chosenAvatar)
+      backStackEntry.savedStateHandle[CHOSEN_AVATAR_KEY] = ""
     }
+  }
 }
