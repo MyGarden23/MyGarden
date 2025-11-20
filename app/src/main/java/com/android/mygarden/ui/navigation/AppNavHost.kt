@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -42,10 +43,7 @@ fun AppNavHost(
       CredentialManager.create(navController.context)
     }
 ) {
-  // This NavHost is basically the "map" of all screens in the app.
-  // Each composable() below defines one destination (screen) and what to do when navigating there.
   NavHost(navController = navController, startDestination = startDestination) {
-    // handy wrapper so we don't call navController.navigate() directly everywhere
     val navigationActions = NavigationActions(navController)
 
     // Auth
@@ -59,64 +57,37 @@ fun AppNavHost(
     // New Profile
     composable(Screen.NewProfile.route) { backStackEntry ->
       val vm: ProfileViewModel = viewModel()
-      val chosenName by
-          backStackEntry.savedStateHandle.getStateFlow(CHOSEN_AVATAR_KEY, "").collectAsState()
-
-      val chosenAvatar =
-          chosenName
-              .takeIf { it.isNotBlank() }
-              ?.let { runCatching { Avatar.valueOf(it) }.getOrNull() }
-
-      LaunchedEffect(chosenAvatar) {
-        if (chosenAvatar != null) {
-          vm.setAvatar(chosenAvatar)
-          backStackEntry.savedStateHandle.set(CHOSEN_AVATAR_KEY, "")
-        }
-      }
+      HandleAvatarSelection(backStackEntry, vm)
 
       NewProfileScreen(
           profileViewModel = vm,
-          onSavePressed = { navigationActions.navTo(destination = Screen.Camera) },
-          onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
+          onSavePressed = { navigationActions.navTo(Screen.Camera) },
+          onAvatarClick = { navigationActions.navTo(Screen.ChooseAvatar) })
     }
 
     // Edit Profile
     composable(Screen.EditProfile.route) { backStackEntry ->
       val vm: ProfileViewModel = viewModel()
-      val chosenName by
-          backStackEntry.savedStateHandle.getStateFlow(CHOSEN_AVATAR_KEY, "").collectAsState()
-
-      val chosenAvatar =
-          chosenName
-              .takeIf { it.isNotBlank() }
-              ?.let { runCatching { Avatar.valueOf(it) }.getOrNull() }
-
-      LaunchedEffect(chosenAvatar) {
-        if (chosenAvatar != null) {
-          vm.setAvatar(chosenAvatar)
-          backStackEntry.savedStateHandle.set(CHOSEN_AVATAR_KEY, "")
-        }
-      }
+      HandleAvatarSelection(backStackEntry, vm)
 
       EditProfileScreen(
           profileViewModel = vm,
           onSavePressed = { navigationActions.navBack() },
           onBackPressed = { navigationActions.navBack() },
-          onAvatarClick = { navigationActions.navTo(destination = Screen.ChooseAvatar) })
+          onAvatarClick = { navigationActions.navTo(Screen.ChooseAvatar) })
     }
 
     // Camera
     composable(Screen.Camera.route) {
       CameraScreen(
           onPictureTaken = { imagePath ->
-            // Clean up any previous image path before storing the new one
             navController.currentBackStackEntry?.savedStateHandle?.remove<String>(IMAGE_PATH_KEY)
-            // Store image path in saved state and navigate to PlantView
+
             navController.currentBackStackEntry?.savedStateHandle?.set(IMAGE_PATH_KEY, imagePath)
+
             navigationActions.navTo(Screen.PlantInfoFromCamera)
           })
     }
-
     // Plant Info From Camera
     composable(Screen.PlantInfoFromCamera.route) {
       val imagePath =
@@ -150,7 +121,6 @@ fun AppNavHost(
             navigationActions.navTo(Screen.PlantInfoFromGarden)
           },
           onSignOut = {
-            // Clean up repositories before signing out to prevent PERMISSION_DENIED errors
             PlantsRepositoryProvider.repository.cleanup()
             ProfileRepositoryProvider.repository.cleanup()
             FirebaseAuth.getInstance().signOut()
@@ -178,27 +148,23 @@ fun AppNavHost(
     }
 
     // Plant Info
-    composable(Screen.PlantInfo.route) { backStackEntry ->
+    composable(Screen.PlantInfo.route) {
       val plantInfoViewModel: PlantInfoViewModel = viewModel()
       val imagePath =
           navController.previousBackStackEntry?.savedStateHandle?.get<String>(IMAGE_PATH_KEY)
-
-      // Shows plant details after a photo is taken
-      // Right now it just uses a mock Plant object for demo purposes
 
       val plant = Plant(image = imagePath)
       val ownedPlantId: String? =
           navController.previousBackStackEntry
               ?.savedStateHandle
               ?.get<String>(OWNED_PLANT_ID_TO_PLANT_INFO_KEY)
+
       PlantInfosScreen(
           plant = plant,
           ownedPlantId = ownedPlantId,
           plantInfoViewModel = plantInfoViewModel,
           onBackPressed = { navigationActions.navBack() },
           onNextPlant = { plantId ->
-            // Navigate to EditPlant and remove PlantInfo from backstack
-            // This prevents going back to PlantInfo after saving (local image is deleted)
             navController.navigate(Screen.EditPlant.buildRoute(plantId, Screen.PlantInfo.route)) {
               popUpTo(Screen.Camera.route) { inclusive = false }
             }
@@ -209,7 +175,6 @@ fun AppNavHost(
     composable(Screen.ChooseAvatar.route) {
       ChooseProfilePictureScreen(
           onAvatarChosen = { avatar ->
-            // Return the selection to the previous screen (Profile/NewProfile)
             navController.previousBackStackEntry
                 ?.savedStateHandle
                 ?.set(CHOSEN_AVATAR_KEY, avatar.name)
@@ -230,6 +195,7 @@ fun AppNavHost(
                 })) { entry ->
           val vm: EditPlantViewModel = viewModel()
           val ownedPlantId = entry.arguments?.getString(OWNED_PLANT_ID_KEY) ?: return@composable
+
           EditPlantScreen(
               ownedPlantId = ownedPlantId,
               editPlantViewModel = vm,
@@ -237,20 +203,33 @@ fun AppNavHost(
               onDeleted =
                   if (entry.arguments?.getString(FROM_KEY) != Screen.PlantInfoFromCamera.route) {
                     { navigationActions.navTo(Screen.Garden) }
-                  } else {
-                    null
-                  },
+                  } else null,
               goBack = {
                 if (entry.arguments?.getString(FROM_KEY) == Screen.PlantInfoFromCamera.route) {
-                  // Need to delete manually due to our implementation of Screen.PlantInfo.route (we
-                  // add by default the plant to our garden but delete it if the user don't want to
-                  // add the plant to the garden)
                   vm.deletePlant(ownedPlantId)
-                  navigationActions.navBack()
-                } else {
-                  navigationActions.navBack()
                 }
+                navigationActions.navBack()
               })
         }
+  }
+}
+
+/**
+ * Small helper to avoid duplication: Handles reading AVATAR from savedStateHandle + applying it in
+ * the ViewModel Used by NewProfile and EditProfile (which had duplicated code).
+ */
+@Composable
+fun HandleAvatarSelection(backStackEntry: NavBackStackEntry, vm: ProfileViewModel) {
+  val chosenName by
+      backStackEntry.savedStateHandle.getStateFlow(CHOSEN_AVATAR_KEY, "").collectAsState()
+
+  val chosenAvatar =
+      chosenName.takeIf { it.isNotBlank() }?.let { runCatching { Avatar.valueOf(it) }.getOrNull() }
+
+  LaunchedEffect(chosenAvatar) {
+    if (chosenAvatar != null) {
+      vm.setAvatar(chosenAvatar)
+      backStackEntry.savedStateHandle[CHOSEN_AVATAR_KEY] = ""
+    }
   }
 }

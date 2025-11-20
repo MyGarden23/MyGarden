@@ -67,61 +67,21 @@ fun MyGardenApp(intent: Intent? = null) {
   val actions = remember(navController) { NavigationActions(navController) }
 
   // Check if we're in any test environment
-  val isInTestEnvironment = remember {
-    System.getProperty("mygarden.e2e") == "true" ||
-        System.getProperty("java.class.path")?.contains("androidTest") == true ||
-        try {
-          Class.forName("androidx.test.ext.junit.runners.AndroidJUnit4")
-          true
-        } catch (e: ClassNotFoundException) {
-          false
-        }
-  }
-
-  // This view model will be used to collect the plants whose status transitioned to NEEDS_WATER in
-  // order to display the pop-up
-  val popupVM: PopupViewModel = viewModel()
-  // This var is used to know when to display the pop-up and for which plant ; it is reset to [null]
-  // everytime a pop-up is not displayed anymore
-  var currentThirstyPlant by remember { mutableStateOf<OwnedPlant?>(null) }
-
-  LaunchedEffect(Unit) {
-    // Collect all the plants that became thirsty from the view model to display the popup
-    popupVM.thirstyPlants.collect { ownedPlant -> currentThirstyPlant = ownedPlant }
-  }
+  val isInTestEnvironment = rememberIsInTestEnvironment()
 
   // Ask for notification permission
   /* For Sprint 5, assume that the user will accept to receive notifications.
   Permission handling will be done in a separate task in Sprint 6 */
   // Skip notification permission in test environments to avoid interference
-  if (!isInTestEnvironment) {
-    AskForNotificationsPermission()
-  }
+  AskForNotificationsPermissionIfNeeded(isInTestEnvironment)
 
   // If the app is launched by a notification, go to the garden
   // Only create the LaunchedEffect if there's an intent and not in test mode
-  if (intent != null && !isInTestEnvironment) {
-    LaunchedEffect(intent) {
-      val notificationType =
-          intent.getStringExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
-      if (notificationType == PushNotificationsService.NOTIFICATIONS_TYPE_WATER_PLANT) {
-        actions.navTo(Screen.Garden)
-        intent.removeExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
-      }
-    }
-  }
+  HandleNotificationNavigation(intent, isInTestEnvironment, actions)
 
   // Determine where to start: if the user is logged in, skip Sign-In
   // For end-to-end tests, we can force starting on camera
-  val startDestination = remember {
-    val user =
-        runCatching { FirebaseAuth.getInstance().currentUser }
-            .onFailure {
-              android.util.Log.w("MyGarden", "FirebaseAuth unavailable; defaulting to Auth", it)
-            }
-            .getOrNull()
-    if (user == null) Screen.Auth.route else Screen.Camera.route
-  }
+  val startDestination = rememberStartDestination()
 
   // Observe the current destination so we can update UI accordingly
   val backStackEntry by navController.currentBackStackEntryAsState()
@@ -155,22 +115,158 @@ fun MyGardenApp(intent: Intent? = null) {
           )
 
           // Display a pop-up whenever a newly thirsty plant is collected from the view model
-          currentThirstyPlant?.let {
-            WaterPlantPopup(
-                plantName = it.plant.name,
-                // Reset the var when quitting the pop-up to let a future one be displayed
-                onDismiss = { currentThirstyPlant = null },
-                // Navigate to garden when using this button and reset the var
-                onConfirm = {
-                  actions.navTo(Screen.Garden)
-                  currentThirstyPlant = null
-                })
-          }
+          ThirstyPlantsPopup(actions = actions)
         }
       }
 }
 
 private const val EDIT_PLANT_BASE = "edit_plant"
+
+/**
+ * Determines whether the app is running in a test environment.
+ *
+ * This checks several indicators:
+ * - A custom system property `"mygarden.e2e"` used for end-to-end tests
+ * - The Java classpath containing `"androidTest"` (instrumented tests)
+ * - The presence of the AndroidJUnit4 test runner
+ *
+ * The result is remembered so it is computed only once per composition.
+ *
+ * @return `true` if running under a test environment, otherwise `false`.
+ */
+@Composable
+private fun rememberIsInTestEnvironment(): Boolean = remember {
+  System.getProperty("mygarden.e2e") == "true" ||
+      System.getProperty("java.class.path")?.contains("androidTest") == true ||
+      try {
+        Class.forName("androidx.test.ext.junit.runners.AndroidJUnit4")
+        true
+      } catch (e: ClassNotFoundException) {
+        false
+      }
+}
+
+/**
+ * Computes the initial navigation destination of the app based on authentication state.
+ *
+ * Logic:
+ * - If a Firebase user is already logged in → start at the Camera screen.
+ * - Otherwise → start at the Auth screen.
+ *
+ * FirebaseAuth access is wrapped in `runCatching` to avoid crashes on devices or tests where
+ * Firebase may not be available.
+ *
+ * The result is remembered so it runs only once per composition.
+ *
+ * @return The route string of the start destination.
+ */
+@Composable
+private fun rememberStartDestination(): String = remember {
+  val user =
+      runCatching { FirebaseAuth.getInstance().currentUser }
+          .onFailure {
+            android.util.Log.w("MyGarden", "FirebaseAuth unavailable; defaulting to Auth", it)
+          }
+          .getOrNull()
+  if (user == null) Screen.Auth.route else Screen.Camera.route
+}
+
+/**
+ * Handles app navigation triggered by a received push notification.
+ *
+ * Behavior:
+ * - If running in a test environment, this is disabled to avoid flaky navigation.
+ * - If the intent contains a `"NOTIFICATIONS_TYPE_IDENTIFIER"`:
+ *     - For WATER_PLANT → navigate to the Garden screen.
+ *     - The intent key is removed afterward to avoid repeated triggers.
+ *
+ * Navigation occurs inside a `LaunchedEffect` tied to the intent.
+ *
+ * @param intent The activity intent that may contain notification data.
+ * @param isInTestEnvironment Whether the app is currently running under tests.
+ * @param actions Helper object for navigation operations.
+ */
+@Composable
+private fun HandleNotificationNavigation(
+    intent: Intent?,
+    isInTestEnvironment: Boolean,
+    actions: NavigationActions,
+) {
+  if (intent == null || isInTestEnvironment) return
+
+  LaunchedEffect(intent) {
+    val notificationType =
+        intent.getStringExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
+    if (notificationType == PushNotificationsService.NOTIFICATIONS_TYPE_WATER_PLANT) {
+      actions.navTo(Screen.Garden)
+      intent.removeExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
+    }
+  }
+}
+
+/**
+ * Requests notification permissions when appropriate.
+ *
+ * Behavior:
+ * - In normal app execution → asks for notification permission using
+ *   `AskForNotificationsPermission()`.
+ * - In test environments → permission dialog is skipped to avoid blocking tests.
+ *
+ * @param isInTestEnvironment Indicates whether the current execution is part of a test suite.
+ */
+@Composable
+private fun AskForNotificationsPermissionIfNeeded(isInTestEnvironment: Boolean) {
+  if (!isInTestEnvironment) {
+    AskForNotificationsPermission()
+  }
+}
+
+/**
+ * Observes the list of plants that have just transitioned to a "needs water" state and displays a
+ * popup to notify the user.
+ *
+ * Behavior:
+ * - Subscribes to `PopupViewModel.thirstyPlants`, which emits an `OwnedPlant` whenever its status
+ *   becomes `NEEDS_WATER`.
+ * - When a new plant is received, it is stored in a local state (`currentThirstyPlant`) and a
+ *   `WaterPlantPopup` is shown.
+ * - Dismissing or confirming the popup resets `currentThirstyPlant` to `null`, allowing future
+ *   popups to be shown.
+ * - Confirming the popup also navigates the user to the Garden screen.
+ *
+ * @param actions Navigation helper used to redirect the user when confirming the popup.
+ * @param popupVM ViewModel that emits plants needing water. Defaults to a local ViewModel instance.
+ */
+@Composable
+private fun ThirstyPlantsPopup(
+    actions: NavigationActions,
+    popupVM: PopupViewModel = viewModel(),
+) {
+  // This view model will be used to collect the plants whose status transitioned to NEEDS_WATER in
+  // order to display the pop-up
+  // This var is used to know when to display the pop-up and for which plant ; it is reset to [null]
+  // everytime a pop-up is not displayed anymore
+  val viewModel = popupVM
+  var currentThirstyPlant by remember { mutableStateOf<OwnedPlant?>(null) }
+
+  LaunchedEffect(Unit) {
+    // Collect all the plants that became thirsty from the view model to display the popup
+    viewModel.thirstyPlants.collect { ownedPlant -> currentThirstyPlant = ownedPlant }
+  }
+
+  // Display a pop-up whenever a newly thirsty plant is collected from the view model
+  currentThirstyPlant?.let {
+    WaterPlantPopup(
+        plantName = it.plant.name,
+        // Reset the var when quitting the pop-up to let a future one be displayed
+        onDismiss = { currentThirstyPlant = null },
+        // Navigate to garden when using this button and reset the var
+        onConfirm = {
+          actions.navTo(Screen.Garden)
+          currentThirstyPlant = null
+        })
+  }
+}
 
 // Maps the current route (String) to its Screen object
 private fun routeToScreen(route: String): Screen? =
@@ -192,6 +288,7 @@ private fun routeToScreen(route: String): Screen? =
         }
       }
     }
+
 // Maps the current route (String) to its Page (used for bottom bar selection)
 private fun routeToPage(route: String): Page? =
     when (route) {

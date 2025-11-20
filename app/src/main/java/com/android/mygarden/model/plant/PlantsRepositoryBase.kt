@@ -7,6 +7,7 @@ import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerateContentResponse
 import com.google.firebase.ai.type.GenerativeBackend
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +32,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
  *
  * All original comments and method bodies are preserved.
  */
-abstract class PlantsRepositoryBase : PlantsRepository {
+abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) :
+    PlantsRepository {
 
   // This is defined here to let View Models that use the repository Provider to have access to the
   // plantsFlow
@@ -223,7 +225,7 @@ abstract class PlantsRepositoryBase : PlantsRepository {
    */
   override suspend fun identifyLatinNameWithPlantNet(path: String?): Plant {
 
-    return withContext(Dispatchers.IO) {
+    return withContext(dispatcher) {
 
       // Read image file into byte array
       val imageBytes = imageFileToByteArray(path)

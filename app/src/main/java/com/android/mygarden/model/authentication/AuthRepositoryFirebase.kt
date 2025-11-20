@@ -20,25 +20,31 @@ class AuthRepositoryFirebase(
   override suspend fun signInWithGoogle(
       credential: Credential
   ): Result<AuthRepository.SignInResult> {
+
     return try {
-      if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-        val idToken = helper.extractIdTokenCredential(credential.data).idToken
-        val firebaseCredential = helper.toFirebaseCredential(idToken)
+      val result =
+          if (credential is CustomCredential &&
+              credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
 
-        val authResult = auth.signInWithCredential(firebaseCredential).await()
+            val idToken = helper.extractIdTokenCredential(credential.data).idToken
+            val firebaseCredential = helper.toFirebaseCredential(idToken)
 
-        val user =
-            authResult.user
-                ?: return Result.failure(
-                    IllegalStateException("Login failed : Could not retrieve user information"))
+            val authResult = auth.signInWithCredential(firebaseCredential).await()
 
-        val isNewUser = (authResult.additionalUserInfo?.isNewUser == true)
+            val user =
+                authResult.user
+                    ?: return Result.failure(
+                        IllegalStateException("Login failed : Could not retrieve user information"))
 
-        return Result.success(AuthRepository.SignInResult(user, isNewUser))
-      } else {
-        return Result.failure(
-            IllegalStateException("Login failed: Credential is not of type Google ID\""))
-      }
+            val isNewUser = authResult.additionalUserInfo?.isNewUser == true
+
+            Result.success(AuthRepository.SignInResult(user, isNewUser))
+          } else {
+            Result.failure(
+                IllegalStateException("Login failed: Credential is not of type Google ID"))
+          }
+
+      result
     } catch (e: Exception) {
       Result.failure(
           IllegalStateException("Login failed: ${e.localizedMessage ?: "Unexpected error."}"))

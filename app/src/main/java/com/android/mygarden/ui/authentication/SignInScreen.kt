@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.authentication
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -40,6 +41,7 @@ import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 /** Semantic for testing */
 val LogoResNameKey = SemanticsPropertyKey<String>("LogoResName")
@@ -71,20 +73,18 @@ fun SignInScreen(
   val isEndToEndTest = System.getProperty("mygarden.e2e") == "true"
 
   // Show error message if login fails
-  LaunchedEffect(uiState.errorMsg) {
-    uiState.errorMsg?.let {
-      Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-      authViewModel.clearErrorMsg()
-    }
-  }
+  LaunchedEffect(uiState.errorMsg) { handleLoginError(uiState.errorMsg, context, authViewModel) }
+
   // Navigate to the next screen on successful login
   LaunchedEffect(uiState.user) {
-    uiState.user?.let {
-      Toast.makeText(context, context.getString(R.string.login_successful), Toast.LENGTH_SHORT)
-          .show()
-      if (uiState.isNewUser) onSignedIn() else onLogIn()
-    }
+    handleLoginSuccess(
+        user = uiState.user,
+        isNewUser = uiState.isNewUser,
+        context = context,
+        onSignedIn = onSignedIn,
+        onLogIn = onLogIn)
   }
+
   val logoRes =
       if (isDarkTheme) {
         R.drawable.app_logo_dark
@@ -124,11 +124,7 @@ fun SignInScreen(
             OutlinedButton(
                 onClick = {
                   if (isEndToEndTest) {
-                    if (FirebaseAuth.getInstance().currentUser == null) {
-                      onSignedIn()
-                    } else {
-                      onLogIn()
-                    }
+                    handleEndToEndSignIn(onSignedIn, onLogIn)
                   } else {
                     authViewModel.signIn(context, credentialManager)
                   }
@@ -156,4 +152,71 @@ fun SignInScreen(
           }
         }
       }
+}
+/**
+ * Handles login-related error messages by displaying them in a Toast and clearing the error state
+ * in the ViewModel.
+ *
+ * This prevents the same error from being shown multiple times and keeps the UI logic clean by
+ * centralizing how authentication errors are presented.
+ *
+ * @param errorMsg The error message to display, or null if no error.
+ * @param context The context required to show the Toast.
+ * @param authViewModel The ViewModel used to clear the stored error message.
+ */
+private fun handleLoginError(
+    errorMsg: String?,
+    context: Context,
+    authViewModel: SignInViewModel,
+) {
+  errorMsg?.let {
+    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+    authViewModel.clearErrorMsg()
+  }
+}
+
+/**
+ * Handles a successful login or registration event.
+ * - Shows a success toast
+ * - Invokes `onSignedIn` if the user is new
+ * - Invokes `onLogIn` if the user is returning
+ *
+ * @param user The authenticated Firebase user, or null if authentication failed.
+ * @param isNewUser Whether the user has just created an account.
+ * @param context Context for displaying a toast.
+ * @param onSignedIn Callback called after successful registration.
+ * @param onLogIn Callback called after successful login.
+ */
+private fun handleLoginSuccess(
+    user: FirebaseUser?,
+    isNewUser: Boolean,
+    context: Context,
+    onSignedIn: () -> Unit,
+    onLogIn: () -> Unit,
+) {
+  user?.let {
+    Toast.makeText(context, context.getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
+    if (isNewUser) onSignedIn() else onLogIn()
+  }
+}
+
+/**
+ * Determines which post-login action to trigger in end-to-end sign-in flows.
+ * - If no Firebase user is currently authenticated, calls `onSignedIn`
+ * - Otherwise, triggers `onLogIn`
+ *
+ * This is used to simulate a full login flow during automated UI tests.
+ *
+ * @param onSignedIn Callback invoked when treating the user as newly signed in.
+ * @param onLogIn Callback invoked when treating the user as already logged in.
+ */
+private fun handleEndToEndSignIn(
+    onSignedIn: () -> Unit,
+    onLogIn: () -> Unit,
+) {
+  if (FirebaseAuth.getInstance().currentUser == null) {
+    onSignedIn()
+  } else {
+    onLogIn()
+  }
 }

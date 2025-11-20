@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.navigation
 
-import android.util.Log
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
@@ -17,10 +16,6 @@ class NavigationActions(private val controller: NavHostController) {
    * - Otherwise, performs a simple navigate with singleTop and optional restoreState.
    */
   fun navTo(destination: Screen) {
-    if (destination == null) {
-      Log.w("NavigationActions", "navTo() called with null destination — ignored")
-      return
-    }
     if (destination.isTopLevel) {
       navToTopLevel(destination)
       return
