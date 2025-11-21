@@ -14,12 +14,12 @@ import androidx.compose.ui.test.performScrollTo
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirestoreProfileTest
 import com.android.mygarden.utils.PlantRepositoryType
+import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -31,18 +31,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
 
   private lateinit var context: Context
 
-  val plant: Plant =
-      Plant(
-          name = "test_plant",
-          image = null,
-          latinName = "testinus_plantus",
-          description = "This is a test plant.",
-          location = PlantLocation.INDOOR,
-          lightExposure = "Test light exposure",
-          healthStatus = PlantHealthStatus.HEALTHY,
-          healthStatusDescription = "This plant is healthy.",
-          wateringFrequency = 1,
-      )
+  val plant = TestPlants.plantInfoPlant
 
   /**
    * Sets up the PlantInfosScreen composable for testing.

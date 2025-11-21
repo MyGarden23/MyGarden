@@ -8,8 +8,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
-import com.android.mygarden.model.plant.Plant
-import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
@@ -20,6 +18,7 @@ import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.Flow
@@ -105,34 +104,19 @@ class GardenFilterSortScreenTests {
       // Healthy plant
       repo.saveToGarden(
           id = "test-healthy-1",
-          plant =
-              Plant(
-                  name = "Aloe Vera",
-                  latinName = "Aloe barbadensis",
-                  wateringFrequency = 14,
-                  healthStatus = PlantHealthStatus.HEALTHY),
+          plant = TestPlants.healthyAloeVera,
           lastWatered = Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3)))
 
       // Dry plant
       repo.saveToGarden(
           id = "test-dry-1",
-          plant =
-              Plant(
-                  name = "Cactus",
-                  latinName = "Cactaceae",
-                  wateringFrequency = 7,
-                  healthStatus = PlantHealthStatus.NEEDS_WATER),
+          plant = TestPlants.dryCactus,
           lastWatered = Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(8)))
 
       // Another healthy plant
       repo.saveToGarden(
           id = "test-healthy-2",
-          plant =
-              Plant(
-                  name = "Bamboo",
-                  latinName = "Bambusoideae",
-                  wateringFrequency = 5,
-                  healthStatus = PlantHealthStatus.HEALTHY),
+          plant = TestPlants.healthyBamboo,
           lastWatered = Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)))
     }
 

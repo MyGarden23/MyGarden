@@ -6,12 +6,10 @@ import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFri
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.OwnedPlant
-import com.android.mygarden.model.plant.Plant
-import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.utils.FirebaseUtils
+import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
@@ -42,18 +40,7 @@ class GardenActivityTests {
   }
 
   private fun createTestOwnedPlant(): OwnedPlant {
-    val plant =
-        Plant(
-            name = "Test Rose",
-            latinName = "Rosa test",
-            description = "A test rose",
-            location = PlantLocation.OUTDOOR,
-            lightExposure = "Full sun",
-            healthStatus = PlantHealthStatus.HEALTHY,
-            healthStatusDescription = "Healthy",
-            wateringFrequency = 3,
-            isRecognized = true,
-            image = "https://example.com/rose.jpg")
+    val plant = TestPlants.gardenActivityPlant
 
     return OwnedPlant(
         id = "plant123",

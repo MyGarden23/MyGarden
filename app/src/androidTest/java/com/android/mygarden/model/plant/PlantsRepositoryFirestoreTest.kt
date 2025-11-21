@@ -11,6 +11,7 @@ import app.cash.turbine.test
 import com.android.mygarden.R
 import com.android.mygarden.ui.camera.LocalImageDisplay
 import com.android.mygarden.utils.FirestoreProfileTest
+import com.android.mygarden.utils.TestPlants
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import java.io.File
@@ -57,24 +58,6 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   /*------------------------ HELPER FUNCTIONS -------------------------*/
 
   // Helper function to create a test plant without needing a real Image
-  private fun createTestPlant(
-      name: String = "Test Plant",
-      latinName: String = "Testus Plantus",
-      healthStatus: PlantHealthStatus = PlantHealthStatus.HEALTHY,
-      location: PlantLocation = PlantLocation.UNKNOWN
-  ): Plant {
-
-    return Plant(
-        name = name,
-        image = null,
-        latinName = latinName,
-        description = "A test plant description",
-        location = location,
-        lightExposure = "A light exposure description",
-        healthStatus = healthStatus,
-        healthStatusDescription = healthStatus.description,
-        wateringFrequency = 7)
-  }
 
   /**
    * Saves a plant in the repo that will have its status become NEEDS_WATER if it's recalculated at
@@ -119,48 +102,16 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
 
   /*-------------------------- FICTIONAL PLANTS -------------------*/
 
-  private val plant1 =
-      createTestPlant(
-          name = "test plant 1",
-          latinName = "test in latin plant 1",
-          healthStatus = PlantHealthStatus.SEVERELY_OVERWATERED,
-          location = PlantLocation.OUTDOOR)
+  private val plant1 = TestPlants.plant1
 
-  private val plant2 =
-      createTestPlant(
-          name = "test plant 2",
-          latinName = "test in latin plant 2",
-          healthStatus = PlantHealthStatus.SEVERELY_DRY,
-          location = PlantLocation.INDOOR)
+  private val plant2 = TestPlants.plant2
 
-  private val plant3 =
-      createTestPlant(
-          name = "test plant 3",
-          latinName = "test in latin plant 3",
-          healthStatus = PlantHealthStatus.SLIGHTLY_DRY)
+  private val plant3 = TestPlants.plant3
 
-  private val plant4 =
-      createTestPlant(
-          name = "test plant 4",
-          latinName = "test in latin plant 4",
-          healthStatus = PlantHealthStatus.NEEDS_WATER)
+  private val plant4 = TestPlants.plant4
 
-  private val healthyPlant =
-      Plant(
-          name = "I'm okay",
-          image = null,
-          latinName = "laurem ispum",
-          description = "all good for now",
-          healthStatus = PlantHealthStatus.HEALTHY,
-          wateringFrequency = 1)
-  private val almostThirstyPlant =
-      Plant(
-          name = "Water?",
-          image = null,
-          latinName = "laurem ipsum",
-          description = "edge plant that will soon be thirsty",
-          healthStatus = PlantHealthStatus.UNKNOWN,
-          wateringFrequency = 1)
+  private val healthyPlant = TestPlants.healthyPlant
+  private val almostThirstyPlant = TestPlants.almostThirstyPlant
 
   /*---------------------- REPOSITORY TESTS --------------------*/
 
@@ -199,7 +150,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   @Test
   fun getOwnedPlant_returnsTheSamePlantSavedToGarden2() = runTest {
     val plant =
-        createTestPlant(
+        TestPlants.createTestPlant(
             name = "test getOwned 2",
             latinName = "test getOwned 2 in latin",
             healthStatus = PlantHealthStatus.OVERWATERED)
@@ -216,7 +167,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   @Test
   fun getOwnedPlant_returnsTheSamePlantSavedToGarden3() = runTest {
     val plant =
-        createTestPlant(
+        TestPlants.createTestPlant(
             name = "test getOwned 3",
             latinName = "test getOwned 3 in latin",
             healthStatus = PlantHealthStatus.UNKNOWN)
