@@ -131,6 +131,41 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LAST_TIME_WATERED).assertIsDisplayed()
   }
 
+  /**
+   * Verifies that when coming from the garden (i.e the ownedPlant id is not null), the node that
+   * contains the date of creation is displayed.
+   */
+  @Test
+  fun plantInfoFromGarden_showDateOfCreation() = runTest {
+    // We need a repository to store the ownedPlant
+    val repository = PlantsRepositoryLocal()
+    val id = "test getOwned id 1"
+    val timestamp = Timestamp(System.currentTimeMillis())
+    val ownedPlant = repository.saveToGarden(plant, id, timestamp)
+    val vm = PlantInfoViewModel(repository)
+
+    composeTestRule.setContent {
+      context = LocalContext.current
+      PlantInfosScreen(plant, ownedPlant.id, vm, {}, {})
+    }
+    composeTestRule.waitForIdle()
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.PLANT_DATE_OF_CREATION)
+        .assertIsDisplayed()
+  }
+
+  /**
+   * Check that if the user comes from the camera screen (by default in this test class) the date of
+   * creation information is not displayed.
+   */
+  @Test
+  fun plantInfoFromCamera_doesNotShowDateOfCreation() {
+    setContent(plant)
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.PLANT_DATE_OF_CREATION)
+        .assertIsNotDisplayed()
+  }
+
   @Test
   fun locationTextIsDisplayedAfterClickingLocationTab() {
     setContent(plant)

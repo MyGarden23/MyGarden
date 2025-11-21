@@ -133,6 +133,8 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     assertEquals(id, ownedPlant.id)
     assertEquals(plant1, ownedPlant.plant)
     assertEquals(timestamp, ownedPlant.lastWatered)
+    // Assert that the plant has a valid date of creation
+    assertTrue(ownedPlant.dateOfCreation < Timestamp(System.currentTimeMillis()))
   }
 
   @Test
@@ -424,7 +426,6 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
   fun noFlowEmissionWhenEditPlantDoesntChangeIt() = runTest {
     val id = repository.getNewId()
     val randomDate = Timestamp(1737273600) // 19th of January 2025 at 9am
-    val newPlant = OwnedPlant(id, healthyPlant, lastWatered = randomDate)
 
     repository.plantsFlow.test {
       // initial emission from stateIn
@@ -433,8 +434,10 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
       repository.saveToGarden(healthyPlant, id, randomDate)
       awaitItem()
 
+      val plant = repository.getOwnedPlant(id)
+
       // edit the owned plant with the same values should not emit
-      repository.editOwnedPlant(id, newPlant)
+      repository.editOwnedPlant(id, plant)
       expectNoEvents()
 
       cancelAndIgnoreRemainingEvents()

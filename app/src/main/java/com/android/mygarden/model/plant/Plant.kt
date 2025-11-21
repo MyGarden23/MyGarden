@@ -13,7 +13,7 @@ import java.sql.Timestamp
  *
  * @property name The common name of the plant (e.g., "Rose", "Tomato")
  * @property image The visual representation of the plant, in String? because it is either a path in
- *   local or an URL to find the actual image.
+ *   local or an URL to find the actual image
  * @property latinName The scientific/botanical name of the plant (e.g., "Rosa rubiginosa")
  * @property description A detailed text description of the plant, including care instructions
  * @property location The best location for the plant to grow, indoor or outdoor
@@ -50,13 +50,16 @@ data class Plant(
  * @property id A unique identifier for this owned plant instance
  * @property plant The plant information (species, care requirements, etc.)
  * @property lastWatered Timestamp of when the plant was most recently watered
- * @property previousLastWatered Optional timestamp of the watering before lastWatered.
+ * @property previousLastWatered Optional timestamp of the watering before lastWatered
+ * @property dateOfCreation Timestamp of when the plant was added to the garden by the user (the
+ *   user's current time by default)
  */
 data class OwnedPlant(
     val id: String,
     val plant: Plant,
     val lastWatered: Timestamp,
-    val previousLastWatered: Timestamp? = null
+    val previousLastWatered: Timestamp? = null,
+    val dateOfCreation: Timestamp = Timestamp(System.currentTimeMillis())
 )
 
 /**

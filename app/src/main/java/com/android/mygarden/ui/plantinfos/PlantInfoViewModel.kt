@@ -41,6 +41,7 @@ data class PlantInfoUIState(
     val showCareTipsDialog: Boolean = false,
     val careTips: String = "",
     val lastTimeWatered: Timestamp? = null,
+    val dateOfCreation: Timestamp? = null
 ) {
   fun savePlant(): Plant {
     return Plant(
@@ -89,7 +90,7 @@ class PlantInfoViewModel(
                   isRecognized = plant.isRecognized,
                   isFromGarden = true,
                   lastTimeWatered = ownedPlant.lastWatered,
-              )
+                  dateOfCreation = ownedPlant.dateOfCreation)
         } catch (e: Exception) {
           Log.e("PlantInfoViewModel", "Error loading Plant from repository by ID. $ownedPlantId", e)
           setErrorMsg(R.string.error_failed_load_plant_info)
