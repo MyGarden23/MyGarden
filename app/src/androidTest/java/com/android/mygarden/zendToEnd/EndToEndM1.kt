@@ -117,6 +117,7 @@ class EndToEndM1 {
         .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
         .performTextInput("Switzerland")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
     }
@@ -239,6 +240,9 @@ class EndToEndM1 {
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
         .performTextInput("Just a test plant")
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE)
+        .performTextInput("Light exposure")
 
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
@@ -248,6 +252,7 @@ class EndToEndM1 {
 
     // === GARDEN SCREEN ===
     // Verify navigation to garden after saving from EditPlant
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
     }

@@ -141,9 +141,6 @@ class EndToEndM2 {
     }
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextClearance()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("Ada")
-    composeTestRule
-        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
-        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_SAVE))
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
