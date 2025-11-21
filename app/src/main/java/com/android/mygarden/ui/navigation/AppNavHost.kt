@@ -12,6 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
@@ -124,6 +125,7 @@ fun AppNavHost(
           onSignOut = {
             PlantsRepositoryProvider.repository.cleanup()
             ProfileRepositoryProvider.repository.cleanup()
+            ActivityRepositoryProvider.repository.cleanup()
             FirebaseAuth.getInstance().signOut()
             navigationActions.navTo(Screen.Auth)
           })
