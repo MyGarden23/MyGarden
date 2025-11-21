@@ -2,9 +2,9 @@ package com.android.mygarden.ui.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.model.gardenactivity.ActivityRepository
+import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
-import com.android.mygarden.model.profile.ProfileRepository
-import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,16 +21,16 @@ data class FeedUIState(val activities: List<GardenActivity> = emptyList())
 /**
  * The view model of the feed that handles UI interactions and repository updates
  *
- * @property profileRepo the profile repository used to collect the list of activities
+ * @property activityRepo the activity repository used to collect the list of activities
  */
 class FeedViewModel(
-    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository
+    private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FeedUIState())
   val uiState: StateFlow<FeedUIState> = _uiState.asStateFlow()
 
-  /** Initially call refreshUIState to fetch the infos needed from the profile repository */
+  /** Initially call refreshUIState to fetch the infos needed from the activity repository */
   init {
     refreshUIState()
   }
@@ -41,8 +41,8 @@ class FeedViewModel(
    */
   fun refreshUIState() {
     viewModelScope.launch {
-      profileRepo.getActivities().collect { updatedList ->
-        // Here no need to sort it by createdAt timestamp because it's already done in the profile
+      activityRepo.getActivities().collect { updatedList ->
+        // Here no need to sort it by createdAt timestamp because it's already done in the activity
         // repository
         _uiState.value = _uiState.value.copy(activities = updatedList)
       }
