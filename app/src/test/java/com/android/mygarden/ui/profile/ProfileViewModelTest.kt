@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.profile
 
-import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
@@ -9,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -54,20 +52,6 @@ class ProfileViewModelTest {
     override suspend fun getFCMToken(): String? {
       return null
     }
-
-    override fun getActivities(): Flow<List<GardenActivity>> {
-      return emptyFlow()
-    }
-
-    override fun getActivitiesForUser(userId: String): Flow<List<GardenActivity>> {
-      return emptyFlow()
-    }
-
-    override fun getFeedActivities(userIds: List<String>, limit: Int): Flow<List<GardenActivity>> {
-      return emptyFlow()
-    }
-
-    override suspend fun addActivity(activity: GardenActivity) {}
 
     override fun cleanup() {}
   }

@@ -1,15 +1,12 @@
 package com.android.mygarden.ui.feed
 
+import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
-import com.android.mygarden.model.profile.GardeningSkill
-import com.android.mygarden.model.profile.Profile
-import com.android.mygarden.model.profile.ProfileRepository
-import com.android.mygarden.ui.profile.Avatar
 import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,37 +45,12 @@ class FeedViewModelTests {
   val addedPlantActivity =
       ActivityAddedPlant("uid", "gregory", Timestamp(System.currentTimeMillis()), ownedPlant1)
 
-  /*---------------- FAKE PROFILE REPOSITORY TO USE FOR TESTING ----------------*/
-  private class FakeProfileRepository(
-      initProfile: Profile? =
-          Profile(
-              firstName = "Test",
-              lastName = "User",
-              gardeningSkill = GardeningSkill.BEGINNER,
-              favoritePlant = "Rose",
-              country = "Switzerland",
-              hasSignedIn = true,
-              avatar = Avatar.A1)
-  ) : ProfileRepository {
+  /*---------------- FAKE ACTIVITY REPOSITORY TO USE FOR TESTING ----------------*/
+  private class FakeActivityRepository : ActivityRepository {
 
-    private val flow = MutableStateFlow(initProfile)
     val activitiesFlow = MutableStateFlow<List<GardenActivity>>(emptyList())
 
     override fun getCurrentUserId(): String = "fake-uid"
-
-    override fun getProfile(): Flow<Profile?> = flow
-
-    override suspend fun saveProfile(profile: Profile) {
-      flow.value = profile
-    }
-
-    override suspend fun attachFCMToken(token: String): Boolean {
-      return false
-    }
-
-    override suspend fun getFCMToken(): String? {
-      return null
-    }
 
     override fun getActivities(): Flow<List<GardenActivity>> = activitiesFlow
 
@@ -103,7 +75,7 @@ class FeedViewModelTests {
   private val testDispatcher = StandardTestDispatcher()
 
   private lateinit var repositoryScope: TestScope
-  private lateinit var profileRepo: ProfileRepository
+  private lateinit var activityRepo: ActivityRepository
   private lateinit var vm: FeedViewModel
 
   /** Sets up the correct scopes, the repository and the view model */
@@ -111,14 +83,14 @@ class FeedViewModelTests {
   fun setup() {
     Dispatchers.setMain(testDispatcher)
     repositoryScope = TestScope(SupervisorJob() + testDispatcher)
-    profileRepo = FakeProfileRepository()
-    vm = FeedViewModel(profileRepo)
+    activityRepo = FakeActivityRepository()
+    vm = FeedViewModel(activityRepo)
   }
 
   /** Resets the scopes and ensures the clear of the list of activities */
   @After
   fun clean() {
-    profileRepo.cleanup()
+    activityRepo.cleanup()
     Dispatchers.resetMain()
   }
 
@@ -131,9 +103,9 @@ class FeedViewModelTests {
   /** Tests that initially the correct list (non empty) is collected */
   @Test
   fun initialNonEmptyCorrectlyCollected() = runTest {
-    profileRepo.addActivity(addedPlantActivity)
+    activityRepo.addActivity(addedPlantActivity)
     // new instance created after the activity is added to the repository
-    val newVM = FeedViewModel(profileRepo)
+    val newVM = FeedViewModel(activityRepo)
     runCurrent()
     assertEquals(listOf(addedPlantActivity), newVM.uiState.value.activities)
   }
@@ -141,7 +113,7 @@ class FeedViewModelTests {
   /** Tests that the list is correctly updated after a modification from the repo */
   @Test
   fun correctCollectionAfterAddedActivity() = runTest {
-    profileRepo.addActivity(addedPlantActivity)
+    activityRepo.addActivity(addedPlantActivity)
     runCurrent()
     vm.refreshUIState()
     runCurrent()
