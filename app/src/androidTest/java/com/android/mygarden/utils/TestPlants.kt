@@ -10,7 +10,20 @@ import com.android.mygarden.model.plant.PlantLocation
  */
 object TestPlants {
 
-  // creates a plant instance
+  /**
+   * Creates a `Plant` instance pre-filled with consistent test data.
+   *
+   * This helper is intended for unit tests to avoid duplicating boilerplate when constructing
+   * `Plant` objects. Default values are provided for all fields, and the most commonly varied
+   * parameters can be overridden.
+   *
+   * @param name The display name of the plant. Defaults to `"Test Plant"`.
+   * @param latinName The botanical/latin name of the plant. Defaults to `"Testus Plantus"`.
+   * @param healthStatus The health status to assign to the plant. Defaults to `HEALTHY`.
+   * @param location The location category of the plant (indoor/outdoor/unknown). Defaults to
+   *   `UNKNOWN`.
+   * @return A fully constructed [Plant] instance suitable for use in tests.
+   */
   fun createTestPlant(
       name: String = "Test Plant",
       latinName: String = "Testus Plantus",
