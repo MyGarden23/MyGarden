@@ -95,3 +95,6 @@ enum class PlantLocation {
   OUTDOOR,
   UNKNOWN
 }
+
+val PlantLocation.testTag: String
+  get() = "plantLocation_${this.name}"

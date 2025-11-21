@@ -2,9 +2,12 @@ package com.android.mygarden.ui.editPlant
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -21,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
+import com.android.mygarden.model.plant.*
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
 import java.sql.Timestamp
@@ -30,15 +34,20 @@ import java.time.format.DateTimeFormatter
 
 /** Test tags for [EditPlantScreen]. */
 object EditPlantScreenTestTags {
+  const val SCROLLABLE_COLUMN = "scrollableColumn"
   const val PLANT_IMAGE = "plantImage"
   const val PLANT_NAME = "plantName"
   const val PLANT_LATIN = "plantLatin"
+  const val LIGHT_EXPOSURE = "plantLightExposure"
   const val INPUT_PLANT_DESCRIPTION = "inputPlantDescription"
+  const val LOCATION_TEXTFIELD = "plantLocation"
+  const val LOCATION_DROPDOWN = "plantLocation"
   const val INPUT_LAST_WATERED = "inputLastWatered"
   const val ERROR_MESSAGE_DATE = "errorMessageDate"
   const val ERROR_MESSAGE_DESCRIPTION = "errorMessageDescription"
   const val ERROR_MESSAGE_NAME = "errorMessageName"
   const val ERROR_MESSAGE_LATIN_NAME = "errorMessageLatinName"
+  const val ERROR_MESSAGE_LIGHT_EXPOSURE = "errorMessageLightExposure"
 
   const val PLANT_SAVE = "plantSave"
   const val PLANT_DELETE = "plantDelete"
@@ -91,21 +100,28 @@ fun EditPlantScreen(
   var touchedDesc by remember { mutableStateOf(false) }
   var touchedName by remember { mutableStateOf(false) }
   var touchedLatinName by remember { mutableStateOf(false) }
+  var touchedLight by remember { mutableStateOf(false) }
   var touchedLastWatered by remember { mutableStateOf(false) }
   var showDatePicker by remember { mutableStateOf(false) }
   val dateFmt = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
 
   // groups the errors in only one place
   val errorFlags =
-      remember(plantUIState, touchedName, touchedLatinName, touchedDesc, touchedLastWatered) {
-        computeEditPlantErrorFlags(
-            uiState = plantUIState,
-            touchedName = touchedName,
-            touchedLatinName = touchedLatinName,
-            touchedDesc = touchedDesc,
-            touchedLastWatered = touchedLastWatered,
-        )
-      }
+      remember(
+          plantUIState,
+          touchedName,
+          touchedLatinName,
+          touchedDesc,
+          touchedLastWatered,
+          touchedLight) {
+            computeEditPlantErrorFlags(
+                uiState = plantUIState,
+                touchedName = touchedName,
+                touchedLatinName = touchedLatinName,
+                touchedDesc = touchedDesc,
+                touchedLastWatered = touchedLastWatered,
+                touchedLight = touchedLight)
+          }
 
   if (showDatePicker) {
     EditPlantDatePickerDialog(
@@ -139,7 +155,8 @@ fun EditPlantScreen(
             Modifier.fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .testTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       // ------- Image -------
@@ -179,6 +196,22 @@ fun EditPlantScreen(
           onDescriptionChange = { newDesc -> editPlantViewModel.setDescription(newDesc) },
       )
 
+      // ------- Location -------
+      LocationDropDownSelection(
+          value = plantUIState.location.name,
+          isPlantRecognized = plantUIState.isRecognized,
+          onClickLocation = { editPlantViewModel.setLocation(it) })
+
+      // ------- Light exposure -------
+      LightExposureFieldSection(
+          value = plantUIState.lightExposure,
+          isLightError = errorFlags.isLightError,
+          isPlantRecognized = plantUIState.isRecognized,
+          onTouchedLight = { touchedLight = true },
+          onLightExposureChange = {
+            if (!plantUIState.isRecognized) editPlantViewModel.setLightExposure(it)
+          })
+
       // ------- Last watered -------
       LastWateredSection(
           lastWatered = plantUIState.lastWatered,
@@ -199,11 +232,17 @@ fun EditPlantScreen(
           onValidate = {
             val touched =
                 computeTouchedAfterValidate(
-                    plantUIState, touchedName, touchedLatinName, touchedDesc, touchedLastWatered)
+                    plantUIState,
+                    touchedName,
+                    touchedLatinName,
+                    touchedDesc,
+                    touchedLastWatered,
+                    touchedLight)
             touchedName = touched.touchedName
             touchedLatinName = touched.touchedLatinName
             touchedDesc = touched.touchedDesc
             touchedLastWatered = touched.touchedLastWatered
+            touchedLight = touched.touchedLight
           },
           onSave = {
             if (isSaveEnabled) {
@@ -238,12 +277,14 @@ fun EditPlantScreen(
  * @property isLatinNameError True when the Latin name is invalid and should show an error.
  * @property isDescriptionError True when the description is blank and marked as touched.
  * @property isDateError True when the last watered date is missing and marked as touched.
+ * @property isLightError True when the light exposure is missing and marked as touched.
  */
 private data class EditPlantErrorFlags(
     val isNameError: Boolean,
     val isLatinNameError: Boolean,
     val isDescriptionError: Boolean,
     val isDateError: Boolean,
+    val isLightError: Boolean
 )
 
 /**
@@ -256,12 +297,14 @@ private data class EditPlantErrorFlags(
  * @property touchedLatinName Whether the Latin name field has been focused.
  * @property touchedDesc Whether the description field has been focused.
  * @property touchedLastWatered Whether the last watered date picker has been interacted with.
+ * @property touchedLight Whether the light exposure field has been interacted with.
  */
 private data class TouchedFlags(
     val touchedName: Boolean,
     val touchedLatinName: Boolean,
     val touchedDesc: Boolean,
     val touchedLastWatered: Boolean,
+    val touchedLight: Boolean
 )
 
 /**
@@ -289,6 +332,7 @@ private fun handleDatePicked(millis: Long?, editPlantViewModel: EditPlantViewMod
  * @param touchedLatinName Whether the Latin name field has been interacted with.
  * @param touchedDesc Whether the description field has been interacted with.
  * @param touchedLastWatered Whether the date picker has been interacted with.
+ * @param touchedLight Whether the light exposure has been interacted with.
  * @return A populated [EditPlantErrorFlags] instance representing current validation errors.
  */
 private fun computeEditPlantErrorFlags(
@@ -297,18 +341,20 @@ private fun computeEditPlantErrorFlags(
     touchedLatinName: Boolean,
     touchedDesc: Boolean,
     touchedLastWatered: Boolean,
+    touchedLight: Boolean
 ): EditPlantErrorFlags {
   val isNameError = !uiState.isRecognized && uiState.name.isBlank() && touchedName
   val isLatinNameError = !uiState.isRecognized && uiState.latinName.isBlank() && touchedLatinName
   val isDescriptionError = uiState.description.isBlank() && touchedDesc
   val isDateError = uiState.lastWatered == null && touchedLastWatered
+  val isLightError = !uiState.isRecognized && uiState.lightExposure.isBlank() && touchedLight
 
   return EditPlantErrorFlags(
       isNameError = isNameError,
       isLatinNameError = isLatinNameError,
       isDescriptionError = isDescriptionError,
       isDateError = isDateError,
-  )
+      isLightError = isLightError)
 }
 
 /**
@@ -328,6 +374,7 @@ private fun computeIsSaveEnabled(uiState: EditPlantUIState): Boolean {
     uiState.description.isNotBlank() &&
         uiState.name.isNotBlank() &&
         uiState.latinName.isNotBlank() &&
+        uiState.lightExposure.isNotBlank() &&
         uiState.lastWatered != null
   }
 }
@@ -343,6 +390,7 @@ private fun computeIsSaveEnabled(uiState: EditPlantUIState): Boolean {
  * @param touchedLatinName Whether the Latin name field has been previously touched.
  * @param touchedDesc Whether the description field has been previously touched.
  * @param touchedLastWatered Whether the last watered field has been previously touched.
+ * @param touchedLight Whether the light exposure been previously touched.
  * @return A [TouchedFlags] instance with updated touched states for all fields.
  */
 private fun computeTouchedAfterValidate(
@@ -351,18 +399,20 @@ private fun computeTouchedAfterValidate(
     touchedLatinName: Boolean,
     touchedDesc: Boolean,
     touchedLastWatered: Boolean,
+    touchedLight: Boolean
 ): TouchedFlags {
   val newTouchedName = touchedName || uiState.name.isBlank()
   val newTouchedLatin = touchedLatinName || uiState.latinName.isBlank()
   val newTouchedDesc = touchedDesc || uiState.description.isBlank()
   val newTouchedLastWatered = touchedLastWatered || (uiState.lastWatered == null)
+  val newTouchedLight = touchedLight || uiState.lightExposure.isBlank()
 
   return TouchedFlags(
       touchedName = newTouchedName,
       touchedLatinName = newTouchedLatin,
       touchedDesc = newTouchedDesc,
       touchedLastWatered = newTouchedLastWatered,
-  )
+      touchedLight = newTouchedLight)
 }
 
 /**
@@ -537,6 +587,91 @@ private fun DescriptionFieldSection(
         style = MaterialTheme.typography.bodySmall,
         modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_DESCRIPTION),
     )
+  }
+}
+
+// Location drop down menu
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LocationDropDownSelection(
+    value: String,
+    isPlantRecognized: Boolean,
+    onClickLocation: (PlantLocation) -> Unit
+) {
+  var isLocationExpanded by remember { mutableStateOf(false) }
+  val context = LocalContext.current
+
+  ExposedDropdownMenuBox(
+      expanded = isLocationExpanded,
+      onExpandedChange = { isLocationExpanded = it },
+      modifier = Modifier,
+      content = {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {},
+            readOnly = true,
+            enabled = !isPlantRecognized,
+            label = { Text(context.getString(R.string.location)) },
+            trailingIcon = {
+              val iconIV =
+                  if (isLocationExpanded && !isPlantRecognized) Icons.Default.ArrowDropUp
+                  else Icons.Default.ArrowDropDown
+              Icon(iconIV, contentDescription = null)
+            },
+            maxLines = 1,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .width(IntrinsicSize.Min)
+                    .menuAnchor()
+                    .testTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD))
+
+        DropdownMenu(
+            expanded = isLocationExpanded,
+            onDismissRequest = { isLocationExpanded = false },
+            modifier = Modifier.testTag(EditPlantScreenTestTags.LOCATION_DROPDOWN)) {
+              if (!isPlantRecognized) {
+                PlantLocation.entries.forEach { location ->
+                  DropdownMenuItem(
+                      text = { Text(location.name) },
+                      onClick = {
+                        onClickLocation(location)
+                        isLocationExpanded = false
+                      },
+                      modifier = Modifier.testTag(location.testTag))
+                }
+              }
+            }
+      })
+}
+
+// Light exposure field
+@Composable
+private fun LightExposureFieldSection(
+    value: String,
+    isLightError: Boolean,
+    isPlantRecognized: Boolean,
+    onTouchedLight: () -> Unit,
+    onLightExposureChange: (String) -> Unit,
+) {
+  val context = LocalContext.current
+
+  OutlinedTextField(
+      value = value,
+      onValueChange = { onLightExposureChange(it) },
+      label = { Text(context.getString(R.string.light_exposure)) },
+      singleLine = true,
+      enabled = !isPlantRecognized,
+      isError = isLightError,
+      modifier =
+          Modifier.fillMaxWidth().testTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).onFocusChanged {
+            if (it.isFocused) onTouchedLight()
+          })
+  if (isLightError) {
+    Text(
+        text = context.getString(R.string.light_exposure_error),
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.testTag(EditPlantScreenTestTags.ERROR_MESSAGE_LIGHT_EXPOSURE))
   }
 }
 

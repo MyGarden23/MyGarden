@@ -1,9 +1,11 @@
 package com.android.mygarden.ui.navigation.navS3
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -105,6 +107,9 @@ class NavigationS3TestsGardenAndEditPlant {
     // Verify that navigation happened to the EditPlant screen
     composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
 
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_SAVE))
     // Save the plant to the garden
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE)
@@ -132,6 +137,9 @@ class NavigationS3TestsGardenAndEditPlant {
     // Verify that navigation happened to the EditPlant screen
     composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
 
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     // Delete the plant
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE)
@@ -203,6 +211,10 @@ class NavigationS3TestsGardenAndEditPlant {
 
     // Verify that navigation happened to the EditPlant screen
     composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).assertIsDisplayed()
+
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
 
     // Keep the plant
     composeTestRule

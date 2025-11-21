@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
+import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import java.sql.Timestamp
@@ -28,6 +29,7 @@ import kotlinx.coroutines.launch
  * @property image The visual representation of the plant, in String? because it is either a path in
  *     * local or an URL to find the actual image.
  *
+ * @property location The location of the plant in the house (inside/outside).
  * @property isRecognized Whether the plant was recognized by the AI or not.
  */
 data class EditPlantUIState(
@@ -38,6 +40,8 @@ data class EditPlantUIState(
     val lastWatered: Timestamp? = null,
     val image: String? = null,
     val isRecognized: Boolean = false,
+    val location: PlantLocation = PlantLocation.UNKNOWN,
+    val lightExposure: String = ""
 )
 
 /**
@@ -77,7 +81,9 @@ class EditPlantViewModel(
                 description = plant.description,
                 lastWatered = owned.lastWatered,
                 image = plant.image,
-                isRecognized = plant.isRecognized)
+                isRecognized = plant.isRecognized,
+                location = plant.location,
+                lightExposure = plant.lightExposure)
       } catch (e: Exception) {
         Log.e("EditPlantViewModel", "Error loading Plant by ID. $ownedPlantId", e)
         setErrorMsg(R.string.error_failed_load_plant_edit)
@@ -101,10 +107,17 @@ class EditPlantViewModel(
     _uiState.value = _uiState.value.copy(description = newDescription)
   }
 
+  override fun setLocation(newLocation: PlantLocation) {
+    _uiState.value = _uiState.value.copy(location = newLocation)
+  }
+
+  override fun setLightExposure(newExposure: String) {
+    _uiState.value = _uiState.value.copy(lightExposure = newExposure)
+  }
+
   override fun deletePlant(ownedPlantId: String) {
     viewModelScope.launch {
       try {
-
         repository.deleteFromGarden(ownedPlantId)
       } catch (e: Exception) {
         Log.e("EditPlantViewModel", "Failed to delete plant.", e)
@@ -114,11 +127,15 @@ class EditPlantViewModel(
   }
 
   override fun editPlant(ownedPlantId: String) {
+    val state = _uiState.value
+
     val newPlant = newOwnedPlant
-    val watered = _uiState.value.lastWatered
-    val description = _uiState.value.description
-    val name = _uiState.value.name
-    val latinName = _uiState.value.latinName
+    val watered = state.lastWatered
+    val description = state.description
+    val name = state.name
+    val latinName = state.latinName
+    val location = state.location
+    val exposure = state.lightExposure
 
     if (newPlant == null) {
       Log.e("EditPlantViewModel", "Failed to edit plant (Plant not loaded).")
@@ -158,7 +175,12 @@ class EditPlantViewModel(
         newPlant.copy(
             lastWatered = watered,
             plant =
-                newPlant.plant.copy(description = description, name = name, latinName = latinName))
+                newPlant.plant.copy(
+                    description = description,
+                    name = name,
+                    latinName = latinName,
+                    location = location,
+                    lightExposure = exposure))
 
     viewModelScope.launch {
       try {

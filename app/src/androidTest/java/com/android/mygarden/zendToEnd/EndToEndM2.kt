@@ -4,11 +4,13 @@ import android.Manifest
 import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
@@ -187,6 +189,10 @@ class EndToEndM2 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
     }
+
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_SAVE))
 
     // === EDIT PLANT SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
