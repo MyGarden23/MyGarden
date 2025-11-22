@@ -85,7 +85,6 @@ class EndToEndM1 {
   @Before
   fun setUp() = runTest {
     firebaseUtils.initialize()
-    firebaseUtils.injectProfileRepository()
     // Wait for the app to be fully loaded
     composeTestRule.waitForIdle()
     waitForAppToLoad()

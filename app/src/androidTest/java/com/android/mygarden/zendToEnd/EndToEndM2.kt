@@ -76,8 +76,6 @@ class EndToEndM2 {
     Log.d("EndToEndM2", "setUpEntry")
     firebaseUtils.initialize()
     Log.d("EndToEndM2", "Initialized and signed out")
-    firebaseUtils.injectProfileRepository()
-    Log.d("EndToEndM2", "Injected profile repository")
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     fakePlantRepoUtils.setUpMockRepo()
     Log.d("EndToEndM2", "Set up mock repo")
