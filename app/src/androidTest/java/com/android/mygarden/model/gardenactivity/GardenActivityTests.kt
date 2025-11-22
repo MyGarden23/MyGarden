@@ -30,7 +30,6 @@ class GardenActivityTests {
   fun setup() = runTest {
     firebaseUtils = FirebaseUtils()
     firebaseUtils.initialize()
-    firebaseUtils.injectActivityRepository()
 
     // Sign in and wait until auth + Firestore are ready
     firebaseUtils.signIn()
