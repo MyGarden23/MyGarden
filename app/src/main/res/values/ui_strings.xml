@@ -29,8 +29,9 @@
     <string name="flip_camera_icon_description">Flip Camera Icon</string>
     <string name="take_picture_icon_description">Take picture Icon</string>
     <string name="open_gallery_icon_description">Open Gallery Icon</string>
+    <string name="open_settings_icon_description">Open Settings Icon</string>
     <string name="upload_picture_gallery_text">Upload Plant from Gallery</string>
-    <string name="give_camera_access_text">Give camera access</string>
+    <string name="give_camera_access_text">Open camera settings</string>
     <string name="error_accessing_settings_user">"Error accessing the settings app :("</string>
     <string name="error_fail_take_picture">"Failed to take picture."</string>
     <string name="error_fail_gallery_picture">"Failed to import gallery image."</string>
