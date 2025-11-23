@@ -3,6 +3,8 @@ package com.android.mygarden.ui.editPlant
 import android.os.Bundle
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import com.android.mygarden.model.plant.PlantLocation
+import com.android.mygarden.model.plant.testTag
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import java.sql.Timestamp
@@ -83,10 +85,31 @@ class EditPlantScreenTest {
    * edit screen when the image is not recognized.
    */
   @Test
-  fun nameAndLatin_areNotReadOnlyDisabledWhenImageNotRecognized() {
+  fun name_latinName_location_areNotReadOnlyDisabledWhenImageNotRecognized() {
     setContentWith()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertIsEnabled()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsEnabled()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD).assertIsEnabled()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).assertIsEnabled()
+  }
+
+  /** Verifies that every text fields, image and buttons are displayed when composing the screen. */
+  @Test
+  fun allComponents_areDisplayed() {
+    setContentWith()
+
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_IMAGE).assertIsDisplayed()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertIsDisplayed()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsDisplayed()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD).assertIsDisplayed()
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).assertIsDisplayed()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.INPUT_LAST_WATERED).assertIsDisplayed()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).assertIsDisplayed()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
   }
 
   /**
@@ -101,6 +124,8 @@ class EditPlantScreenTest {
 
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).assertIsNotEnabled()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).assertIsNotEnabled()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD).assertIsNotEnabled()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).assertIsNotEnabled()
   }
 
   /**
@@ -112,6 +137,30 @@ class EditPlantScreenTest {
   fun image_placeholderIsShown_whenNoImage() {
     setContentWith()
     composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_IMAGE).assertIsDisplayed()
+  }
+
+  /** Verifies that all the possible locations are shown when clicking the drop down menu. */
+  @Test
+  fun allLocations_areVisible_whenMenuDropDown() {
+    setContentWith()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD).performClick()
+    composeRule.waitForIdle()
+    for (loc in PlantLocation.entries) {
+      composeRule.onNodeWithTag(loc.testTag).assertIsDisplayed()
+    }
+  }
+
+  /** Verifies that the location drop down menu hides when one is selected. */
+  @Test
+  fun clickingOnALocation_hide_dropDownMenu() {
+    setContentWith()
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_TEXTFIELD).performClick()
+    composeRule.waitForIdle()
+    composeRule.onNodeWithTag(PlantLocation.INDOOR.testTag).performClick()
+    composeRule.waitForIdle()
+    for (loc in PlantLocation.entries) {
+      composeRule.onNodeWithTag(loc.testTag).assertIsNotDisplayed()
+    }
   }
 
   /**
@@ -174,10 +223,25 @@ class EditPlantScreenTest {
         .performTextInput("OK")
     composeRule.waitForIdle()
 
+    // Still disabled because light exposure
+    saveNode.assertIsNotEnabled()
+
+    // Scroll to the light exposure and fill it
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.LIGHT_EXPOSURE))
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE)
+        .performClick()
+        .performTextInput("OK")
+
     // Enabled once all fields are valid
     saveNode.assertIsEnabled()
 
     // Click save -> calls VM.editPlant and onSaved
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     saveNode.performClick()
     composeRule.waitForIdle()
 
@@ -305,6 +369,14 @@ class EditPlantScreenTest {
 
     override fun clearErrorMsg() {
       _ui.value = _ui.value.copy(errorMsg = null)
+    }
+
+    override fun setLocation(newLocation: PlantLocation) {
+      _ui.value = _ui.value.copy(location = newLocation)
+    }
+
+    override fun setLightExposure(newExposure: String) {
+      _ui.value = _ui.value.copy(lightExposure = newExposure)
     }
 
     fun setLastWateredNull(ts: Timestamp?) {
