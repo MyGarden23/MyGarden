@@ -12,7 +12,14 @@ object ProfileRepositoryProvider {
     ProfileRepositoryFirestore(Firebase.firestore)
   }
 
+  // Repository that we can override in tests
+  private var _overrideTesting: ProfileRepository? = null
+
   // Public reference to the current repository.
   // Can be swapped out in tests if needed (e.g., replaced with a fake repo).
-  var repository: ProfileRepository = _repository
+  var repository: ProfileRepository
+    get() = _overrideTesting ?: _repository
+    set(value) {
+      _overrideTesting = value
+    }
 }
