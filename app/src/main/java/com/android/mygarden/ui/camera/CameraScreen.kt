@@ -14,7 +14,6 @@ import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +25,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -41,7 +41,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -53,6 +52,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
 import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.theme.ExtendedTheme
 
 /** Test tags used for testing the camera screen */
 object CameraScreenTestTags {
@@ -64,11 +64,19 @@ object CameraScreenTestTags {
   const val ENABLE_CAMERA_PERMISSION = "enable_camera_permission"
 }
 
-/**
- * Represents the color that the buttons of the camera screen take. It must not change depending on
- * the light or dark theme.
- */
-private val BUTTONS_COLOR = Color.White
+// Icon sizes
+private val FLIP_CAMERA_ICON_SIZE = 30.dp
+private val SMALL_ICON_GALLERY_SIZE = 30.dp
+private val LARGE_ICON_GALLERY_SIZE = 40.dp
+private val ICON_SETTINGS_SIZE = 20.dp
+private val LARGE_ICON_SIZE = 70.dp
+
+// Paddings
+private val FLIP_CAMERA_PADDING = 20.dp
+private val PICTURE_PADDING = 60.dp
+private val GALLERY_ACCESS_OFFSET = 100.dp
+private val TEXT_ICON_HORIZONTAL_PADDING = 5.dp
+private val SETTINGS_ACCESS_BUTTON_PADDING = 15.dp
 
 /**
  * Screen that allows the user to take a picture of a plant or load one from the gallery. The
@@ -290,12 +298,14 @@ private fun CameraGrantedContent(
     IconButton(
         onClick = { cameraViewModel.switchOrientation() },
         modifier =
-            modifier.padding(20.dp, 20.dp).testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
+            modifier
+                .padding(FLIP_CAMERA_PADDING, FLIP_CAMERA_PADDING)
+                .testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
           Icon(
               Icons.Default.FlipCameraAndroid,
               contentDescription = context.getString(R.string.flip_camera_icon_description),
-              modifier = modifier.size(30.dp),
-              tint = BUTTONS_COLOR)
+              modifier = modifier.size(FLIP_CAMERA_ICON_SIZE),
+              tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
         }
 
     // Button for taking picture
@@ -303,8 +313,8 @@ private fun CameraGrantedContent(
         modifier =
             modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 60.dp)
-                .size(70.dp)
+                .padding(bottom = PICTURE_PADDING)
+                .size(LARGE_ICON_SIZE)
                 .testTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON),
         onClick = {
           cameraViewModel.takePicture(
@@ -322,8 +332,8 @@ private fun CameraGrantedContent(
           Icon(
               painter = painterResource(R.drawable.ic_photo_button_mygarden),
               contentDescription = context.getString(R.string.take_picture_icon_description),
-              modifier = modifier.size(70.dp),
-              tint = BUTTONS_COLOR)
+              modifier = modifier.size(LARGE_ICON_SIZE),
+              tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
         }
 
     // Button for accessing the gallery
@@ -331,16 +341,16 @@ private fun CameraGrantedContent(
         modifier =
             modifier
                 .align(Alignment.BottomCenter)
-                .offset(x = 100.dp)
-                .padding(bottom = 60.dp)
-                .size(70.dp)
+                .offset(x = GALLERY_ACCESS_OFFSET)
+                .padding(bottom = PICTURE_PADDING)
+                .size(LARGE_ICON_SIZE)
                 .testTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON),
         onClick = { onOpenGallery() }) {
           Icon(
               Icons.Default.Photo,
               contentDescription = context.getString(R.string.open_gallery_icon_description),
-              modifier = modifier.size(40.dp),
-              tint = BUTTONS_COLOR)
+              modifier = modifier.size(LARGE_ICON_GALLERY_SIZE),
+              tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
         }
   }
 }
@@ -391,26 +401,35 @@ private fun NoCameraAccessScreen(
       horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             modifier =
-                modifier
-                    .padding(bottom = 20.dp)
-                    .testTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON),
+                modifier.testTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer),
             onClick = { onGalleryAccess() }) {
               Icon(
                   Icons.Default.Photo,
                   contentDescription = context.getString(R.string.open_gallery_icon_description),
-                  modifier = modifier.size(30.dp),
-                  tint = BUTTONS_COLOR)
+                  modifier = modifier.size(SMALL_ICON_GALLERY_SIZE),
+                  tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
               Text(
                   context.getString(R.string.upload_picture_gallery_text),
-                  modifier = modifier.padding(horizontal = 5.dp))
+                  modifier = modifier.padding(horizontal = TEXT_ICON_HORIZONTAL_PADDING))
             }
-        Text(
-            context.getString(R.string.give_camera_access_text),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+
+        Button(
             modifier =
                 modifier
                     .testTag(CameraScreenTestTags.ENABLE_CAMERA_PERMISSION)
-                    .clickable(onClick = { onReaskCameraAccess() }))
+                    .padding(top = SETTINGS_ACCESS_BUTTON_PADDING),
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.tertiaryContainer),
+            onClick = { onReaskCameraAccess() }) {
+              Icon(
+                  Icons.Default.Settings,
+                  contentDescription = context.getString(R.string.open_settings_icon_description),
+                  modifier = modifier.size(ICON_SETTINGS_SIZE),
+                  tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
+              Text(
+                  text = context.getString(R.string.give_camera_access_text),
+                  color = MaterialTheme.colorScheme.onTertiaryContainer,
+                  modifier = modifier.padding(horizontal = TEXT_ICON_HORIZONTAL_PADDING))
+            }
       }
 }

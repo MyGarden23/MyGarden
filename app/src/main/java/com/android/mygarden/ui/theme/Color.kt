@@ -71,9 +71,12 @@ val md_theme_dark_scrim = Color(0xFF000000)
  * @param wateringOrange the orange color used on the watering button and bar in multiple state
  * @param redPlantCardBackground the red color used on the background on plant cards with critical
  *   state
+ * @param iconsAndButtonWhiteColor the white color that is used to put some icons and buttons in
+ *   white for better UI (fixed to be the same in the light and dark mode)
  */
 data class CustomColors(
     val wateringBlue: Color,
     val wateringOrange: Color,
-    val redPlantCardBackground: Color
+    val redPlantCardBackground: Color,
+    val iconsAndButtonWhiteColor: Color
 )
