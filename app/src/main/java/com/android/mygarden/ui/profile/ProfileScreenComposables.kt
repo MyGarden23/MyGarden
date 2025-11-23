@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -317,7 +318,8 @@ private fun CountryDropdown(
           onCountrySelected = { country ->
             profileViewModel.setCountry(country)
             onExpandedChange(false)
-          })
+          },
+          onClose = { onExpandedChange(false) })
     }
   }
 }
@@ -327,11 +329,13 @@ private fun CountryDropdown(
  *
  * @param filteredCountries List of countries matching the search criteria
  * @param onCountrySelected Callback when a country is selected
+ * @param onClose Callback when the dropdown is closed
  */
 @Composable
 private fun CountryDropdownMenu(
     filteredCountries: List<String>,
-    onCountrySelected: (String) -> Unit
+    onCountrySelected: (String) -> Unit,
+    onClose: () -> Unit
 ) {
   val context = LocalContext.current
 
@@ -346,14 +350,31 @@ private fun CountryDropdownMenu(
         LazyColumn(modifier = Modifier.testTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)) {
           // Search results count
           item {
-            Text(
-                text = context.getString(R.string.number_countries_found, filteredCountries.size),
+            Row(
                 modifier =
-                    Modifier.padding(STANDARD_PADDING)
-                        .testTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT),
-                fontSize = CAPTION_FONT_SIZE,
-                fontStyle = FontStyle.Italic,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Modifier.fillMaxWidth()
+                        .padding(horizontal = STANDARD_PADDING, vertical = VERTICAL_PADDING),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                      text =
+                          context.getString(
+                              R.string.number_countries_found, filteredCountries.size),
+                      modifier = Modifier.testTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT),
+                      fontSize = CAPTION_FONT_SIZE,
+                      fontStyle = FontStyle.Italic,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                  Text(
+                      text = context.getString(R.string.close_country_dropdown),
+                      modifier =
+                          Modifier.clickable { onClose() }
+                              .padding(start = VERTICAL_PADDING)
+                              .testTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_CLOSE),
+                      fontSize = CAPTION_FONT_SIZE,
+                      fontWeight = FontWeight.Bold,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
           }
 
           // Country list (limited for performance)
