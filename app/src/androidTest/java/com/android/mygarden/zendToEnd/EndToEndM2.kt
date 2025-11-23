@@ -59,7 +59,7 @@ class EndToEndM2 {
 
   @get:Rule
   val permissionNotifsRule: GrantPermissionRule =
-    GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
+      GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
   private val TIMEOUT = 10_000L
 
@@ -101,9 +101,9 @@ class EndToEndM2 {
   @Test
   fun test_end_to_end_m2() {
     composeTestRule
-      .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
-      .assertIsDisplayed()
-      .performClick()
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
     runBlocking {
       firebaseUtils.signIn()
       firebaseUtils.waitForAuthReady()
@@ -114,8 +114,8 @@ class EndToEndM2 {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput("Doe")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.PSEUDO_FIELD).performTextInput("pseudo")
     composeTestRule
-      .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
-      .performTextInput("Switzerland")
+        .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
+        .performTextInput("Switzerland")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
@@ -128,9 +128,9 @@ class EndToEndM2 {
       composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).isDisplayed()
     }
     composeTestRule
-      .onNodeWithTag(GardenScreenTestTags.USERNAME)
-      .assertIsDisplayed()
-      .assertTextContains("pseudo")
+        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .assertIsDisplayed()
+        .assertTextContains("pseudo")
 
     // goto edit profile screen
     composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).performClick()
@@ -147,9 +147,9 @@ class EndToEndM2 {
       composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).isDisplayed()
     }
     composeTestRule
-      .onNodeWithTag(GardenScreenTestTags.USERNAME)
-      .assertIsDisplayed()
-      .assertTextContains("pseudo")
+        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .assertIsDisplayed()
+        .assertTextContains("pseudo")
 
     // goto camera screen
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
@@ -176,8 +176,8 @@ class EndToEndM2 {
     // See plant location
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
     composeTestRule
-      .onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT)
-      .assertTextContains("OUTDOOR")
+        .onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT)
+        .assertTextContains("OUTDOOR")
 
     // click on next
     composeTestRule.waitUntil(TIMEOUT) {
@@ -189,8 +189,8 @@ class EndToEndM2 {
     }
 
     composeTestRule
-      .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
-      .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_SAVE))
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_SAVE))
 
     // === EDIT PLANT SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
