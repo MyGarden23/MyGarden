@@ -172,7 +172,7 @@ jobs:
             
             # Run tests and capture exit code
             set +e
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.ui.camera.RequiresCamera --stacktrace
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.utils.RequiresCamera --stacktrace
             TEST_EXIT_CODE=$?
             set -e
             
@@ -213,7 +213,7 @@ jobs:
             
             # Run tests and capture exit code
             set +e
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.ui.camera.RequiresCamera --stacktrace
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.utils.RequiresCamera --stacktrace
             TEST_EXIT_CODE=$?
             set -e
             
