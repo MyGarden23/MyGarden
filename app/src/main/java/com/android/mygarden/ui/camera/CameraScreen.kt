@@ -64,6 +64,20 @@ object CameraScreenTestTags {
   const val ENABLE_CAMERA_PERMISSION = "enable_camera_permission"
 }
 
+// Icon sizes
+private val FLIP_CAMERA_ICON_SIZE = 30.dp
+private val SMALL_ICON_GALLERY_SIZE = 30.dp
+private val LARGE_ICON_GALLERY_SIZE = 40.dp
+private val ICON_SETTINGS_SIZE = 20.dp
+private val LARGE_ICON_SIZE = 70.dp
+
+// Paddings
+private val FLIP_CAMERA_PADDING = 20.dp
+private val PICTURE_PADDING = 60.dp
+private val GALLERY_ACCESS_OFFSET = 100.dp
+private val TEXT_ICON_HORIZONTAL_PADDING = 5.dp
+private val SETTINGS_ACCESS_BUTTON_PADDING = 15.dp
+
 /**
  * Screen that allows the user to take a picture of a plant or load one from the gallery. The
  * picture can then be processed to a LLM api to extract the wanted information: description,
@@ -284,11 +298,13 @@ private fun CameraGrantedContent(
     IconButton(
         onClick = { cameraViewModel.switchOrientation() },
         modifier =
-            modifier.padding(20.dp, 20.dp).testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
+            modifier
+                .padding(FLIP_CAMERA_PADDING, FLIP_CAMERA_PADDING)
+                .testTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON)) {
           Icon(
               Icons.Default.FlipCameraAndroid,
               contentDescription = context.getString(R.string.flip_camera_icon_description),
-              modifier = modifier.size(30.dp),
+              modifier = modifier.size(FLIP_CAMERA_ICON_SIZE),
               tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
         }
 
@@ -297,8 +313,8 @@ private fun CameraGrantedContent(
         modifier =
             modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 60.dp)
-                .size(70.dp)
+                .padding(bottom = PICTURE_PADDING)
+                .size(LARGE_ICON_SIZE)
                 .testTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON),
         onClick = {
           cameraViewModel.takePicture(
@@ -316,7 +332,7 @@ private fun CameraGrantedContent(
           Icon(
               painter = painterResource(R.drawable.ic_photo_button_mygarden),
               contentDescription = context.getString(R.string.take_picture_icon_description),
-              modifier = modifier.size(70.dp),
+              modifier = modifier.size(LARGE_ICON_SIZE),
               tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
         }
 
@@ -325,15 +341,15 @@ private fun CameraGrantedContent(
         modifier =
             modifier
                 .align(Alignment.BottomCenter)
-                .offset(x = 100.dp)
-                .padding(bottom = 60.dp)
-                .size(70.dp)
+                .offset(x = GALLERY_ACCESS_OFFSET)
+                .padding(bottom = PICTURE_PADDING)
+                .size(LARGE_ICON_SIZE)
                 .testTag(CameraScreenTestTags.ACCESS_GALLERY_BUTTON),
         onClick = { onOpenGallery() }) {
           Icon(
               Icons.Default.Photo,
               contentDescription = context.getString(R.string.open_gallery_icon_description),
-              modifier = modifier.size(40.dp),
+              modifier = modifier.size(LARGE_ICON_GALLERY_SIZE),
               tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
         }
   }
@@ -391,29 +407,29 @@ private fun NoCameraAccessScreen(
               Icon(
                   Icons.Default.Photo,
                   contentDescription = context.getString(R.string.open_gallery_icon_description),
-                  modifier = modifier.size(30.dp),
+                  modifier = modifier.size(SMALL_ICON_GALLERY_SIZE),
                   tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
               Text(
                   context.getString(R.string.upload_picture_gallery_text),
-                  modifier = modifier.padding(horizontal = 5.dp))
+                  modifier = modifier.padding(horizontal = TEXT_ICON_HORIZONTAL_PADDING))
             }
 
         Button(
             modifier =
                 modifier
                     .testTag(CameraScreenTestTags.ENABLE_CAMERA_PERMISSION)
-                    .padding(top = 15.dp),
+                    .padding(top = SETTINGS_ACCESS_BUTTON_PADDING),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.tertiaryContainer),
             onClick = { onReaskCameraAccess() }) {
               Icon(
                   Icons.Default.Settings,
                   contentDescription = context.getString(R.string.open_settings_icon_description),
-                  modifier = modifier.size(20.dp),
+                  modifier = modifier.size(ICON_SETTINGS_SIZE),
                   tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
               Text(
                   text = context.getString(R.string.give_camera_access_text),
-                  color = MaterialTheme.colorScheme.onPrimaryContainer,
-                  modifier = modifier.padding(horizontal = 5.dp))
+                  color = MaterialTheme.colorScheme.onTertiaryContainer,
+                  modifier = modifier.padding(horizontal = TEXT_ICON_HORIZONTAL_PADDING))
             }
       }
 }
