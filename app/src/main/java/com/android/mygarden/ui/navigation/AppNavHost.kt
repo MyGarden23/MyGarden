@@ -52,8 +52,23 @@ fun AppNavHost(
     composable(Screen.Auth.route) {
       SignInScreen(
           credentialManager = credentialManagerProvider(),
-          onSignedIn = { navigationActions.navTo(Screen.NewProfile) },
-          onLogIn = { navigationActions.navTo(Screen.Camera) })
+          onSignedIn = {
+            // New user: go to NewProfile and remove Auth from back stack so that
+            // pressing system back does not return to the sign-in screen.
+            navController.navigate(Screen.NewProfile.route) {
+              popUpTo(Screen.Auth.route) { inclusive = true }
+              launchSingleTop = true
+            }
+          },
+          onLogIn = {
+            // Existing user: go directly to Camera and also remove Auth from back stack.
+            // This prevents returning to the sign-in screen from Camera via the
+            // system back button.
+            navController.navigate(Screen.Camera.route) {
+              popUpTo(Screen.Auth.route) { inclusive = true }
+              launchSingleTop = true
+            }
+          })
     }
 
     // New Profile
@@ -63,7 +78,15 @@ fun AppNavHost(
 
       NewProfileScreen(
           profileViewModel = vm,
-          onSavePressed = { navigationActions.navTo(Screen.Camera) },
+          onSavePressed = {
+            // When the user finishes creating a profile, navigate to Camera and
+            // clear Auth (and NewProfile) from the back stack so the sign-in
+            // screen cannot be reached via back.
+            navController.navigate(Screen.Camera.route) {
+              popUpTo(Screen.Auth.route) { inclusive = true }
+              launchSingleTop = true
+            }
+          },
           onAvatarClick = { navigationActions.navTo(Screen.ChooseAvatar) })
     }
 
@@ -127,7 +150,14 @@ fun AppNavHost(
             ProfileRepositoryProvider.repository.cleanup()
             ActivityRepositoryProvider.repository.cleanup()
             FirebaseAuth.getInstance().signOut()
-            navigationActions.navTo(Screen.Auth)
+            // Clear the whole back stack so that after signing out we cannot
+            // navigate back to authenticated screens (Camera, Garden, etc.).
+            // This is what prevents coming back to Garden from the
+            // NewProfile flow via the system back button.
+            navController.navigate(Screen.Auth.route) {
+              popUpTo(navController.graph.startDestinationId) { inclusive = true }
+              launchSingleTop = true
+            }
           })
     }
 
