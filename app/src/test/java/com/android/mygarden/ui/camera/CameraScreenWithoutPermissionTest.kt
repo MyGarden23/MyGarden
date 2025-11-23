@@ -64,12 +64,12 @@ class CameraScreenWithoutPermissionTest {
       Thread.sleep(1500)
 
       // Ensure SharedPreferences state is correct
-      viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+      viewModel.setHasAlreadyDeniedCameraPermission(context, true)
 
       // Additional wait for system to process the permission change
     } catch (e: Exception) {
       // If shell command fails, just ensure SharedPreferences state
-      viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+      viewModel.setHasAlreadyDeniedCameraPermission(context, true)
     }
   }
 
@@ -87,7 +87,7 @@ class CameraScreenWithoutPermissionTest {
     if (viewModel.hasCameraPermission(context)) {
       // This is a fallback for CI environments where permission revocation might not work
       // We'll test the ViewModel logic directly instead
-      viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+      viewModel.setHasAlreadyDeniedCameraPermission(context, true)
     }
   }
 
@@ -112,7 +112,7 @@ class CameraScreenWithoutPermissionTest {
       assertFalse("Camera permission should be revoked", viewModel.hasCameraPermission(context))
     } else {
       // CI fallback: test that we can detect lack of permission through other means
-      viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+      viewModel.setHasAlreadyDeniedCameraPermission(context, true)
       assertTrue(
           "Should be able to track denial state",
           viewModel.hasAlreadyDeniedCameraPermission(context))
@@ -124,11 +124,11 @@ class CameraScreenWithoutPermissionTest {
     // Test the ViewModel's permission tracking logic regardless of actual system permission
     val initialDeniedState = viewModel.hasAlreadyDeniedCameraPermission(context)
 
-    viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, true)
     assertTrue(
         "Should track permission denial", viewModel.hasAlreadyDeniedCameraPermission(context))
 
-    viewModel.sethasAlreadyDeniedCameraPermission(context, false)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, false)
     assertFalse(
         "Should track permission grant", viewModel.hasAlreadyDeniedCameraPermission(context))
   }
@@ -228,7 +228,7 @@ class CameraScreenWithoutPermissionTest {
       composeTestRule.onNodeWithTag(CameraScreenTestTags.PREVIEW_VIEW).assertDoesNotExist()
     } else {
       // Fallback test: verify ViewModel can track permission state
-      viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+      viewModel.setHasAlreadyDeniedCameraPermission(context, true)
       assertTrue(
           "Should be able to track permission denial",
           viewModel.hasAlreadyDeniedCameraPermission(context))

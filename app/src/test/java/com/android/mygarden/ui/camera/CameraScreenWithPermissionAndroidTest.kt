@@ -113,9 +113,9 @@ class CameraScreenWithPermissionAndroidTest {
   @Test
   fun hasAlreadDeniedPermissionIsTrueWhenSet() {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, true)
     assertTrue(viewModel.hasAlreadyDeniedCameraPermission(context))
-    viewModel.sethasAlreadyDeniedCameraPermission(context, false)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, false)
     assertFalse(viewModel.hasAlreadyDeniedCameraPermission(context))
   }
 
@@ -142,15 +142,15 @@ class CameraScreenWithPermissionAndroidTest {
     val initialState = viewModel.hasAlreadyDeniedCameraPermission(context)
 
     // Set to true and verify
-    viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, true)
     assertTrue(viewModel.hasAlreadyDeniedCameraPermission(context))
 
     // Set to false and verify
-    viewModel.sethasAlreadyDeniedCameraPermission(context, false)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, false)
     assertFalse(viewModel.hasAlreadyDeniedCameraPermission(context))
 
     // Reset to original state
-    viewModel.sethasAlreadyDeniedCameraPermission(context, initialState)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, initialState)
   }
 
   @Test

@@ -53,25 +53,25 @@ class CameraUnitTests {
   @Test
   fun `sethasAlreadyDeniedCameraPermission stores and retrieves value correctly`() {
     // Test setting to true
-    viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, true)
     assertTrue(viewModel.hasAlreadyDeniedCameraPermission(context))
 
     // Test setting to false
-    viewModel.sethasAlreadyDeniedCameraPermission(context, false)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, false)
     assertFalse(viewModel.hasAlreadyDeniedCameraPermission(context))
   }
 
   @Test
   fun `sethasAlreadyDeniedCameraPermission persists across ViewModel instances`() {
     // Set value with first ViewModel instance
-    viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, true)
 
     // Create new ViewModel instance and verify value persists
     val newViewModel = CameraViewModel()
     assertTrue(newViewModel.hasAlreadyDeniedCameraPermission(context))
 
     // Clean up
-    newViewModel.sethasAlreadyDeniedCameraPermission(context, false)
+    newViewModel.setHasAlreadyDeniedCameraPermission(context, false)
   }
 
   @Test
@@ -160,10 +160,10 @@ class CameraUnitTests {
     // Test with different contexts (though in Robolectric they'll be the same)
     val appContext = context.applicationContext
 
-    viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, true)
     assertTrue(viewModel.hasAlreadyDeniedCameraPermission(appContext))
 
-    viewModel.sethasAlreadyDeniedCameraPermission(appContext, false)
+    viewModel.setHasAlreadyDeniedCameraPermission(appContext, false)
     assertFalse(viewModel.hasAlreadyDeniedCameraPermission(context))
   }
 
@@ -186,7 +186,7 @@ class CameraUnitTests {
   fun `SharedPreferences key constant is correct`() {
     // Verify the internal key matches what's expected
     // This test ensures consistency if the key ever changes
-    viewModel.sethasAlreadyDeniedCameraPermission(context, true)
+    viewModel.setHasAlreadyDeniedCameraPermission(context, true)
 
     val prefs = context.getSharedPreferences("camera_prefs", Context.MODE_PRIVATE)
     assertTrue("Key should be 'has_denied_camera'", prefs.getBoolean("has_denied_camera", false))
