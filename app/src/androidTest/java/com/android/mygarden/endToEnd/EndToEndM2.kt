@@ -1,4 +1,4 @@
-package com.android.mygarden.zendToEnd
+package com.android.mygarden.endToEnd
 
 import android.Manifest
 import android.util.Log
