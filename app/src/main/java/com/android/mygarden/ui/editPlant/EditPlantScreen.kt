@@ -31,6 +31,7 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.min
 
 /** Test tags for [EditPlantScreen]. */
 object EditPlantScreenTestTags {
@@ -317,7 +318,10 @@ private data class TouchedFlags(
  */
 private fun handleDatePicked(millis: Long?, editPlantViewModel: EditPlantViewModelInterface) {
   if (millis != null) {
-    editPlantViewModel.setLastWatered(Timestamp(millis))
+    // Prevent storing a future date: clamp the selected millis to the current time
+    val now = System.currentTimeMillis()
+    val safeMillis = min(millis, now)
+    editPlantViewModel.setLastWatered(Timestamp(safeMillis))
   }
 }
 
