@@ -1,16 +1,13 @@
 package com.android.mygarden
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,12 +15,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.android.mygarden.model.notifications.AppLifecycleObserver
+import com.android.mygarden.model.notifications.NotificationsPermissionHandler.hasAlreadyDeniedNotificationsPermission
+import com.android.mygarden.model.notifications.NotificationsPermissionHandler.hasNotificationsPermission
+import com.android.mygarden.model.notifications.NotificationsPermissionHandler.setHasAlreadyDeniedNotificationsPermission
 import com.android.mygarden.model.notifications.PushNotificationsService
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.ui.navigation.AppNavHost
@@ -69,10 +68,8 @@ fun MyGardenApp(intent: Intent? = null) {
   // Check if we're in any test environment
   val isInTestEnvironment = rememberIsInTestEnvironment()
 
-  // Ask for notification permission
-  /* For Sprint 5, assume that the user will accept to receive notifications.
-  Permission handling will be done in a separate task in Sprint 6 */
-  // Skip notification permission in test environments to avoid interference
+  // Ask for notification permission and skip it if currently in test environments to avoid
+  // interference
   AskForNotificationsPermissionIfNeeded(isInTestEnvironment)
 
   // If the app is launched by a notification, go to the garden
@@ -320,22 +317,13 @@ private fun AskForNotificationsPermission() {
           contract = ActivityResultContracts.RequestPermission(),
           onResult = { notificationPermission.value = it })
 
-  // Side-effect: only trigger once, not on every recomposition
   LaunchedEffect(Unit) {
-    if (!hasNotificationsPermission(context)) {
+    // Refresh the permission on new app launch
+    notificationPermission.value = hasNotificationsPermission(context)
+    // Notification permission request only trigger when the user has not already denied it
+    if (!hasNotificationsPermission(context) && !hasAlreadyDeniedNotificationsPermission(context)) {
       notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+      setHasAlreadyDeniedNotificationsPermission(context, true)
     }
   }
-}
-
-/**
- * Returns true or false depending on whether the user has granted notifications permission
- *
- * @param context the context used to access permission state
- * @return true if the user has granted the app notifications permission, false otherwise
- */
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-private fun hasNotificationsPermission(context: Context): Boolean {
-  return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-      PackageManager.PERMISSION_GRANTED
 }
