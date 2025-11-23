@@ -31,6 +31,8 @@ import com.android.mygarden.ui.navigation.BottomBar
 import com.android.mygarden.ui.navigation.NavigationActions
 import com.android.mygarden.ui.navigation.Page
 import com.android.mygarden.ui.navigation.Screen
+import com.android.mygarden.ui.navigation.routeToPage
+import com.android.mygarden.ui.navigation.routeToScreen
 import com.android.mygarden.ui.popup.PopupViewModel
 import com.android.mygarden.ui.popup.WaterPlantPopup
 import com.android.mygarden.ui.theme.MyGardenTheme
@@ -122,8 +124,6 @@ fun MyGardenApp(intent: Intent? = null) {
         }
       }
 }
-
-private const val EDIT_PLANT_BASE = "edit_plant"
 
 /**
  * Determines whether the app is running in a test environment.
@@ -270,37 +270,6 @@ private fun ThirstyPlantsPopup(
         })
   }
 }
-
-// Maps the current route (String) to its Screen object
-private fun routeToScreen(route: String): Screen? =
-    when (route) {
-      Screen.Auth.route -> Screen.Auth
-      Screen.Camera.route -> Screen.Camera
-      Screen.PlantInfo.route -> Screen.PlantInfo
-      Screen.PlantInfoFromGarden.route -> Screen.PlantInfoFromGarden
-      Screen.PlantInfoFromCamera.route -> Screen.PlantInfoFromCamera
-      Screen.NewProfile.route -> Screen.NewProfile
-      Screen.Garden.route -> Screen.Garden
-      Screen.Feed.route -> Screen.Feed
-      Screen.ChooseAvatar.route -> Screen.ChooseAvatar
-      else -> {
-        if (route.startsWith(EDIT_PLANT_BASE)) {
-          val ownedPlantId = route.removePrefix("$EDIT_PLANT_BASE/")
-          Screen.EditPlant(ownedPlantId)
-        } else {
-          null
-        }
-      }
-    }
-
-// Maps the current route (String) to its Page (used for bottom bar selection)
-private fun routeToPage(route: String): Page? =
-    when (route) {
-      Screen.Camera.route -> Page.Camera
-      Screen.Garden.route -> Page.Garden
-      Screen.Feed.route -> Page.Feed
-      else -> null
-    }
 
 /**
  * Ask the user for notification permission if the API is greater of equal to 33.
