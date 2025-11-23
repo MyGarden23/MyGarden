@@ -6,7 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
@@ -22,6 +22,7 @@ import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -29,16 +30,15 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /**
  * Navigation tests for verifying that sort and filter options work correctly on the Garden screen.
  */
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class GardenFilterSortScreenTests {
-  @Test
-  fun isTrue() {
-    assertTrue(true)
-  }
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -74,6 +74,20 @@ class GardenFilterSortScreenTests {
     override suspend fun getFCMToken(): String? {
       return null
     }
+
+    override fun getActivities(): Flow<List<GardenActivity>> {
+      return emptyFlow()
+    }
+
+    override fun getActivitiesForUser(userId: String): Flow<List<GardenActivity>> {
+      return emptyFlow()
+    }
+
+    override fun getFeedActivities(userIds: List<String>, limit: Int): Flow<List<GardenActivity>> {
+      return emptyFlow()
+    }
+
+    override suspend fun addActivity(activity: GardenActivity) {}
 
     override fun cleanup() {}
   }
