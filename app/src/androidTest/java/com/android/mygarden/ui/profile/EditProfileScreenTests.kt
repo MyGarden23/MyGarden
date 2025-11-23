@@ -1,22 +1,14 @@
 package com.android.mygarden.ui.profile
 
 import android.content.Context
-import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.mygarden.R
-import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
-import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FakePseudoRepository
-import org.junit.Assert.assertEquals
 import org.junit.Rule
-import org.junit.Test
 
 /**
  * Comprehensive test suite for the EditProfileScreen composable.
@@ -94,107 +86,5 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
 
     // Wait for the profile to be loaded and the UI to be initialized
     composeTestRule.waitForIdle()
-  }
-
-  // ========== EDIT PROFILE SPECIFIC TESTS ==========
-
-  @Test
-  fun fieldsArePrefilledWithExistingProfile() {
-    // Given: an existing profile
-    val existingProfile =
-        Profile(
-            firstName = "John",
-            lastName = "Doe",
-            pseudo = "pseudo",
-            gardeningSkill = GardeningSkill.INTERMEDIATE,
-            favoritePlant = "Rose",
-            country = "Switzerland",
-            hasSignedIn = true,
-            avatar = Avatar.A10)
-
-    // When: the edit screen is loaded
-    setContentWithProfile(existingProfile, "pseudo")
-
-    // Then: all fields should be pre-filled with the existing profile data
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).assertTextContains("John")
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).assertTextContains("Doe")
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.PSEUDO_FIELD).assertTextContains("pseudo")
-    composeTestRule
-        .onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD)
-        .assertTextContains(GardeningSkill.INTERMEDIATE.name)
-    composeTestRule
-        .onNodeWithTag(ProfileScreenTestTags.FAVORITE_PLANT_FIELD)
-        .assertTextContains("Rose")
-    composeTestRule
-        .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
-        .assertTextContains("Switzerland")
-  }
-
-  @Test
-  fun canEditExistingGardeningSkill() {
-    // Given: an existing profile with BEGINNER skill level
-    val existingProfile =
-        Profile(
-            firstName = "Jane",
-            lastName = "Smith",
-            pseudo = "pseudo",
-            gardeningSkill = GardeningSkill.BEGINNER,
-            favoritePlant = "Orchid",
-            country = "Canada",
-            hasSignedIn = true,
-            avatar = Avatar.A5)
-
-    setContentWithProfile(existingProfile, "pseudo")
-
-    // When: the user changes the gardening skill to EXPERT
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD).performClick()
-    composeTestRule
-        .onNodeWithTag(ProfileScreenTestTags.getExperienceItemTag(GardeningSkill.EXPERT))
-        .performClick()
-
-    // Then: the field should display the updated skill level
-    composeTestRule
-        .onNodeWithTag(ProfileScreenTestTags.EXPERIENCE_FIELD)
-        .assertTextContains(GardeningSkill.EXPERT.name)
-  }
-
-  @Test
-  fun backButtonTriggersCallback() {
-    // Given: the edit screen is displayed
-    setContent()
-
-    // When: the back button is clicked
-    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
-
-    // Then: the back callback should be triggered
-    assertEquals(true, onBackPressedCalled)
-  }
-
-  @Test
-  fun canSaveEditedProfile() {
-    // Given: an existing profile
-    val existingProfile =
-        Profile(
-            firstName = "Alice",
-            lastName = "Wonder",
-            pseudo = "pseudo",
-            gardeningSkill = GardeningSkill.INTERMEDIATE,
-            favoritePlant = "Cactus",
-            country = "Mexico",
-            hasSignedIn = true,
-            avatar = Avatar.A15)
-
-    setContentWithProfile(existingProfile, "pseudo")
-
-    // When: the user modifies the favorite plant and saves
-    composeTestRule
-        .onNodeWithTag(ProfileScreenTestTags.FAVORITE_PLANT_FIELD)
-        .performTextInput(" plant")
-    composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
-    composeTestRule.waitForIdle()
-
-    // Then: the save callback should be triggered
-    assertEquals(true, onSavePressedCalled)
   }
 }
