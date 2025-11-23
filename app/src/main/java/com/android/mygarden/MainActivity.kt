@@ -299,14 +299,9 @@ private fun routeToPage(route: String): Page? =
       else -> null
     }
 
-/**
- * Ask the user for notification permission if the API is greater of equal to 33.
- *
- * Note: this function is really basic and assumes that the user allows the app to send
- * notifications. The complete permission workflow will be implemented in the future.
- */
+/** Ask the user for notification permission if the API is greater of equal to 33. */
 @Composable
-private fun AskForNotificationsPermission() {
+internal fun AskForNotificationsPermission() {
   // Notification permission request if API is >= 33
   if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
   val context = LocalContext.current

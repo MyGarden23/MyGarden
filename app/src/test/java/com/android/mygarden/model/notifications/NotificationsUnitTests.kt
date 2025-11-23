@@ -7,7 +7,9 @@ import android.os.Build
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
+import com.android.mygarden.AskForNotificationsPermission
 import com.android.mygarden.MainActivity
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
@@ -79,6 +81,39 @@ class NotificationsUnitTests {
       MainActivity()
       context = LocalContext.current
     }
+    composeRule.waitForIdle()
+    val shadowActivity = Shadows.shadowOf(context as Activity)
+
+    // Get the last requested permission (should be null)
+    assertNull(shadowActivity.lastRequestedPermission)
+  }
+
+  /** Checks that AskForNotificationsPermission() does actually launches an Intent if API >= 33 */
+  @Test
+  @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+  fun `AskForNotificationsPermission does ask for notification permission when API bigger than 32`() {
+    composeRule.setContent {
+      AskForNotificationsPermission()
+      context = LocalContext.current
+    }
+
+    composeRule.waitForIdle()
+    val shadowActivity = Shadows.shadowOf(context as Activity)
+
+    val expected = Manifest.permission.POST_NOTIFICATIONS
+    val actual = shadowActivity.lastRequestedPermission.requestedPermissions[0]
+    assertEquals(expected, actual)
+  }
+
+  /** Checks that AskForNotificationsPermission() does not launch an Intent if API < 33 */
+  @Test
+  @Config(sdk = [32])
+  fun `AskForNotificationsPermission does not ask for notification permission when API smaller than 33`() {
+    composeRule.setContent {
+      AskForNotificationsPermission()
+      context = LocalContext.current
+    }
+
     composeRule.waitForIdle()
     val shadowActivity = Shadows.shadowOf(context as Activity)
 
