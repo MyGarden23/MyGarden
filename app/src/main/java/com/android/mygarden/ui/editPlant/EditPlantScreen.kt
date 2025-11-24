@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.editPlant
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -78,6 +79,8 @@ fun EditPlantScreen(
     goBack: () -> Unit = {},
 ) {
   val context = LocalContext.current
+  // Manage back button of device like back button of the screen
+  BackHandler() { goBack() }
 
   // Load the plant when the id changes
   LaunchedEffect(ownedPlantId) { editPlantViewModel.loadPlant(ownedPlantId) }
