@@ -55,10 +55,6 @@ class ActivityRepositoryFirestore(
               .orderBy(ACTIVITIES_ORDER_BY, Query.Direction.DESCENDING)
               .addSnapshotListener { snapshots, err ->
                 if (err != null) {
-                  Log.e(
-                      "ActivityRepositoryFirestore",
-                      "Failed to listen to activities for user $userId",
-                      err)
                   trySend(emptyList())
                   return@addSnapshotListener
                 }
@@ -100,10 +96,6 @@ class ActivityRepositoryFirestore(
                 .limit(limit.toLong())
                 .addSnapshotListener { snapshots, err ->
                   if (err != null) {
-                    Log.e(
-                        "ActivityRepositoryFirestore",
-                        "Failed to listen to activities for user $userId",
-                        err)
                     activitiesMap[userId] = emptyList()
                   } else {
                     val activities: List<GardenActivity> =
