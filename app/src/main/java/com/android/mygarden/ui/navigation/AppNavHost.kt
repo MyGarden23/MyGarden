@@ -150,14 +150,13 @@ fun AppNavHost(
             ProfileRepositoryProvider.repository.cleanup()
             ActivityRepositoryProvider.repository.cleanup()
             FirebaseAuth.getInstance().signOut()
-            // Clear the whole back stack so that after signing out we cannot
-            // navigate back to authenticated screens (Camera, Garden, etc.).
-            // This is what prevents coming back to Garden from the
-            // NewProfile flow via the system back button.
-            navController.navigate(Screen.Auth.route) {
-              popUpTo(navController.graph.startDestinationId) { inclusive = true }
-              launchSingleTop = true
+            // Clear the entire back stack so saved states can't be
+            // restored after logout while keeping `saveState` enabled for normal
+            // tab switching.
+            while (navController.popBackStack()) {
+              // pop until empty
             }
+            navController.navigate(Screen.Auth.route) { launchSingleTop = true }
           })
     }
 
