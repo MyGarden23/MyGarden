@@ -1,4 +1,4 @@
-package com.android.mygarden.endToEnd
+package com.android.mygarden.ui.endToEnd
 
 import android.Manifest
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -133,15 +133,6 @@ class EndToEndM1 {
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).assertIsDisplayed()
 
-    // Wait for preview to be ready before taking picture (avoid CameraX not initialized on CI)
-    composeTestRule.waitUntil(TIMEOUT) {
-      try {
-        composeTestRule.onNodeWithTag(CameraScreenTestTags.PREVIEW_VIEW).isDisplayed()
-        true
-      } catch (_: Throwable) {
-        false
-      }
-    }
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
 
     // === PLANT INFO SCREEN ===
@@ -222,15 +213,7 @@ class EndToEndM1 {
     }
 
     // === PLANT INFO AGAIN ===
-    // Ensure preview is ready after navigation back to camera
-    composeTestRule.waitUntil(TIMEOUT) {
-      try {
-        composeTestRule.onNodeWithTag(CameraScreenTestTags.PREVIEW_VIEW).isDisplayed()
-        true
-      } catch (_: Throwable) {
-        false
-      }
-    }
+
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()

@@ -1,4 +1,4 @@
-package com.android.mygarden.endToEnd
+package com.android.mygarden.ui.endToEnd
 
 import android.Manifest
 import android.util.Log
