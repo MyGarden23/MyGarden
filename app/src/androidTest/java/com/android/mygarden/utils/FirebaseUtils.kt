@@ -1,7 +1,5 @@
 package com.android.mygarden.utils
 
-import com.android.mygarden.model.profile.ProfileRepositoryFirestore
-import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -40,10 +38,6 @@ class FirebaseUtils {
     db.collection("users").document(uid!!).delete().await()
 
     signOut()
-  }
-
-  fun injectProfileRepository() {
-    ProfileRepositoryProvider.repository = ProfileRepositoryFirestore(db, auth)
   }
 
   suspend fun signIn() {

@@ -6,8 +6,6 @@ import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFri
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.OwnedPlant
-import com.android.mygarden.model.profile.ProfileRepository
-import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
@@ -25,14 +23,13 @@ import org.junit.runner.RunWith
 class GardenActivityTests {
 
   private lateinit var firebaseUtils: FirebaseUtils
-  private val profileRepo: ProfileRepository
-    get() = ProfileRepositoryProvider.repository
+  private val activityRepo: ActivityRepository
+    get() = ActivityRepositoryProvider.repository
 
   @Before
   fun setup() = runTest {
     firebaseUtils = FirebaseUtils()
     firebaseUtils.initialize()
-    firebaseUtils.injectProfileRepository()
 
     // Sign in and wait until auth + Firestore are ready
     firebaseUtils.signIn()
@@ -61,10 +58,10 @@ class GardenActivityTests {
             ownedPlant = createTestOwnedPlant())
 
     // Add activity
-    profileRepo.addActivity(activityAddedPlantActivity)
+    activityRepo.addActivity(activityAddedPlantActivity)
 
     // Read back via getActivities() (current user)
-    val activities = profileRepo.getActivities().first()
+    val activities = activityRepo.getActivities().first()
     assertTrue(activities.isNotEmpty())
 
     val first = activities.first() as ActivityAddedPlant
@@ -88,10 +85,10 @@ class GardenActivityTests {
             achievementName = "Gained Badge")
 
     // Add activity
-    profileRepo.addActivity(activityAchievement)
+    activityRepo.addActivity(activityAchievement)
 
     // Read back via getActivitiesForUser(uid)
-    val activities = profileRepo.getActivitiesForUser(uid).first()
+    val activities = activityRepo.getActivitiesForUser(uid).first()
     assertTrue(activities.isNotEmpty())
 
     val first = activities.first() as ActivityAchievement
@@ -118,11 +115,11 @@ class GardenActivityTests {
             createdAt = Timestamp(System.currentTimeMillis()),
             ownedPlant = createTestOwnedPlant())
 
-    profileRepo.addActivity(activity1)
-    profileRepo.addActivity(activity2)
+    activityRepo.addActivity(activity1)
+    activityRepo.addActivity(activity2)
 
     // For now, test feed with a single user id (logic is the same for multiple)
-    val feed = profileRepo.getFeedActivities(listOf(uid), limit = 10).first()
+    val feed = activityRepo.getFeedActivities(listOf(uid), limit = 10).first()
     assertTrue(feed.size >= 2)
 
     val types = feed.map { it.type }.toSet()
@@ -141,9 +138,9 @@ class GardenActivityTests {
             createdAt = Timestamp(System.currentTimeMillis()),
             friendUserId = "friend123")
 
-    profileRepo.addActivity(activityAddFriend)
+    activityRepo.addActivity(activityAddFriend)
 
-    val activities = profileRepo.getActivities().first()
+    val activities = activityRepo.getActivities().first()
     assertTrue(activities.isNotEmpty())
 
     val first = activities.first { it is ActivityAddFriend } as ActivityAddFriend
@@ -164,9 +161,9 @@ class GardenActivityTests {
             createdAt = Timestamp(System.currentTimeMillis()),
             ownedPlant = createTestOwnedPlant())
 
-    profileRepo.addActivity(activityWaterPlant)
+    activityRepo.addActivity(activityWaterPlant)
 
-    val activities = profileRepo.getActivities().first()
+    val activities = activityRepo.getActivities().first()
     assertTrue(activities.isNotEmpty())
 
     val first = activities.first { it is ActivityWaterPlant } as ActivityWaterPlant
@@ -209,12 +206,12 @@ class GardenActivityTests {
             createdAt = Timestamp(System.currentTimeMillis()),
             ownedPlant = createTestOwnedPlant())
 
-    profileRepo.addActivity(achievement)
-    profileRepo.addActivity(addedPlant)
-    profileRepo.addActivity(addFriend)
-    profileRepo.addActivity(waterPlant)
+    activityRepo.addActivity(achievement)
+    activityRepo.addActivity(addedPlant)
+    activityRepo.addActivity(addFriend)
+    activityRepo.addActivity(waterPlant)
 
-    val feed = profileRepo.getFeedActivities(listOf(uid), limit = 10).first()
+    val feed = activityRepo.getFeedActivities(listOf(uid), limit = 10).first()
     assertTrue(feed.size >= 4)
 
     val types = feed.map { it.type }.toSet()
@@ -244,7 +241,7 @@ class GardenActivityTests {
             ownedPlant = createTestOwnedPlant())
 
     // Add activity for current user through the repo
-    profileRepo.addActivity(activityCurrentUser)
+    activityRepo.addActivity(activityCurrentUser)
 
     val serializedOtherActivity = ActivityMapper.fromActivityToSerializedActivity(activityOtherUser)
 
@@ -255,7 +252,7 @@ class GardenActivityTests {
         .add(serializedOtherActivity)
         .await()
 
-    val flow = profileRepo.getFeedActivities(listOf(currentUserId, otherUserId), limit = 10)
+    val flow = activityRepo.getFeedActivities(listOf(currentUserId, otherUserId), limit = 10)
     // drop the first because the flow emits per user so we have to wait for the activities of the
     // second user to be added
     val feed = flow.drop(1).first()
