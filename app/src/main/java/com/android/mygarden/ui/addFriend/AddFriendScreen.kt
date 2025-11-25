@@ -39,9 +39,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.mygarden.R
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
 
 object AddFriendTestTags {
+
   // Test tags that are Friend Card specific
   fun getTestTagForFriendCard(pseudo: String): String = "friendCardTestTag/${pseudo}"
 
@@ -59,6 +61,7 @@ fun AddFriendScreen(
   // val addFriendUIState by addFriendViewModel.uiState.collectAsState()
   Scaffold(
       topBar = { TopBar(title = "Add friend", hasGoBackButton = true, onGoBack = onBackPressed) },
+      modifier = Modifier.testTag(NavigationTestTags.ADD_FRIEND_SCREEN),
       content = { paddingValues ->
         Column(
             modifier =

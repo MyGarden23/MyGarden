@@ -13,4 +13,5 @@ object NavigationTestTags {
   const val GARDEN_SCREEN = "GardenScreen"
   const val FEED_SCREEN = "FeedScreen"
   const val EDIT_PLANT_SCREEN = "EditPlantScreen"
+  const val ADD_FRIEND_SCREEN = "AddFriendScreen"
 }
