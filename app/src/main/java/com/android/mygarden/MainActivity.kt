@@ -316,7 +316,7 @@ internal fun AskForNotificationsPermission() {
     // Refresh the permission on new app launch
     notificationPermission.value = hasNotificationsPermission(context)
     // Notification permission request only trigger when the user has not already denied it
-    if (!hasNotificationsPermission(context) && !hasAlreadyDeniedNotificationsPermission(context)) {
+    if (!notificationPermission.value && !hasAlreadyDeniedNotificationsPermission(context)) {
       notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
       setHasAlreadyDeniedNotificationsPermission(context, true)
     }
