@@ -80,10 +80,7 @@ class AddFriendViewModel(
     }
   }
 
-    fun onMessageShown() {
-        _uiState.value = _uiState.value.copy(
-            errorMessage = null,
-            infoMessage = null
-        )
-    }
+  fun onMessageShown() {
+    _uiState.value = _uiState.value.copy(errorMessage = null, infoMessage = null)
+  }
 }
