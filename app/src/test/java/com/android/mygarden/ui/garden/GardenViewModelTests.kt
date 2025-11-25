@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.garden
 
 import com.android.mygarden.R
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
@@ -10,14 +11,14 @@ import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.utils.FakeActivityRepository
+import com.android.mygarden.utils.FakeProfileRepository
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -34,6 +35,7 @@ class GardenViewModelTests {
 
   private lateinit var plantsRepo: PlantsRepository
   private lateinit var profileRepo: ProfileRepository
+  private lateinit var activityRepo: FakeActivityRepository
   private lateinit var vm: GardenViewModel
   val plant1 =
       Plant(
@@ -48,41 +50,6 @@ class GardenViewModelTests {
           2)
   private val testDispatcher = StandardTestDispatcher()
 
-  /** Fake profile local repository used to test the viewModel/profile interactions */
-  private class FakeProfileRepository(
-      initialProfile: Profile? =
-          Profile(
-              firstName = "Test",
-              lastName = "User",
-              pseudo = "pseudo",
-              gardeningSkill = GardeningSkill.BEGINNER,
-              favoritePlant = "Rose",
-              country = "Switzerland",
-              hasSignedIn = true,
-              avatar = Avatar.A1)
-  ) : ProfileRepository {
-
-    private val flow = MutableStateFlow(initialProfile)
-
-    override fun getCurrentUserId(): String = "fake-uid"
-
-    override fun getProfile(): Flow<Profile?> = flow
-
-    override suspend fun saveProfile(profile: Profile) {
-      flow.value = profile
-    }
-
-    override suspend fun attachFCMToken(token: String): Boolean {
-      return false
-    }
-
-    override suspend fun getFCMToken(): String? {
-      return null
-    }
-
-    override fun cleanup() {}
-  }
-
   private lateinit var repositoryScope: TestScope
   /** Sets up the repository and the view model and the test dispatcher to simulate the app */
   @Before
@@ -91,7 +58,10 @@ class GardenViewModelTests {
     repositoryScope = TestScope(SupervisorJob() + testDispatcher)
     plantsRepo = PlantsRepositoryLocal(repositoryScope)
     profileRepo = FakeProfileRepository()
-    vm = GardenViewModel(plantsRepo = plantsRepo, profileRepo = profileRepo)
+    activityRepo = FakeActivityRepository()
+    vm =
+        GardenViewModel(
+            plantsRepo = plantsRepo, profileRepo = profileRepo, activityRepo = activityRepo)
   }
 
   /** Ensures the reset of the dispatcher at each end of test */
@@ -161,6 +131,41 @@ class GardenViewModelTests {
     assertEquals(before.id, after.id)
     assertEquals(after.plant.healthStatus, PlantHealthStatus.HEALTHY)
     assertTrue(after.lastWatered.time >= before.lastWatered.time)
+
+    repositoryScope.cancel()
+  }
+
+  @Test
+  fun waterPlantCreatesActivity() = runTest {
+    // Last watered = 4 days ago
+    val initialLastWatered = Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(4))
+    val saved = plantsRepo.saveToGarden(plant1, plantsRepo.getNewId(), initialLastWatered)
+
+    runCurrent()
+    vm.refreshUIState()
+    runCurrent()
+
+    val before = vm.uiState.value.plants.single()
+    assertEquals(saved.id, before.id)
+    assertEquals(before.plant.healthStatus, PlantHealthStatus.SEVERELY_DRY)
+    assertEquals(initialLastWatered.time, before.lastWatered.time)
+
+    // Ensure no activities exist before watering
+    assertEquals(0, activityRepo.addedActivities.size)
+
+    vm.waterPlant(before)
+    runCurrent()
+
+    // Verify activity was created
+    assertEquals(1, activityRepo.addedActivities.size)
+    val activity = activityRepo.addedActivities[0]
+    assertTrue(activity is ActivityWaterPlant)
+
+    val waterActivity = activity as ActivityWaterPlant
+    assertEquals("fake-uid", waterActivity.userId)
+    assertEquals("pseudo", waterActivity.pseudo)
+    assertEquals(before.id, waterActivity.ownedPlant.id)
+    assertEquals(before.plant.name, waterActivity.ownedPlant.plant.name)
 
     repositoryScope.cancel()
   }
