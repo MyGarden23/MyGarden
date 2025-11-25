@@ -16,6 +16,7 @@ import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.ui.addFriend.AddFriendScreen
 import com.android.mygarden.ui.authentication.SignInScreen
 import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.editPlant.EditPlantScreen
@@ -162,7 +163,12 @@ fun AppNavHost(
 
     // Feed
     composable(Screen.Feed.route) {
-      FeedScreen() // Add the OnAddFriend callback when implemented!
+      FeedScreen(onAddFriend = { navigationActions.navTo(Screen.AddFriend) })
+    }
+
+    // Add Friends
+    composable(Screen.AddFriend.route) {
+      AddFriendScreen(onBackPressed = { navigationActions.navBack() })
     }
 
     // Plant Info From Garden

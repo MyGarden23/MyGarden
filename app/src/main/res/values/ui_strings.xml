@@ -12,6 +12,7 @@
     <string name="garden_screen_title">Garden</string>
     <string name="choose_avatar_screen_title">Choose Avatar</string>
     <string name="feed_screen_title">My Feed</string>
+    <string name="add_friend_screen">Add Friend</string>
 
 
     <!-- Sign In Screen -->
@@ -159,5 +160,8 @@
     <!-- Feed Screen -->
     <string name="add_friend_button">Add a friend</string>
     <string name="no_activity_message">There is no recent activity yet. Add more friends to see their activities!</string>
+
+    <!-- Add Friend Screen -->
+    <string name="avatar_description_friend_screen">Avatar %1$s</string>
 
 </resources>
