@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.endToEnd
+package com.android.mygarden.ui.TestsEndToEnd
 
 import android.Manifest
 import androidx.compose.ui.semantics.SemanticsProperties
