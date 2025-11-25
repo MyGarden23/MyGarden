@@ -128,9 +128,7 @@ class EndToEndM1 {
     // camera had time to initialize on the CI device.
     composeTestRule.waitUntil(TIMEOUT) {
       try {
-        composeTestRule
-            .onNodeWithTag(CameraScreenTestTags.CAMERA_READY)
-            .fetchSemanticsNode()
+        composeTestRule.onNodeWithTag(CameraScreenTestTags.CAMERA_READY).fetchSemanticsNode()
         true
       } catch (_: Throwable) {
         false
