@@ -81,6 +81,8 @@ class ProfileViewModel(
     }
   }
 
+  // ======== SETTERS to update the state =========
+
   /**
    * Updates the list of valid countries
    *
@@ -180,6 +182,8 @@ class ProfileViewModel(
     _pseudoAvailable.value = pseudoRepository.isPseudoAvailable(pseudo)
   }
 
+  // ======== VALIDATORS to validate all the filed of the profile =========
+
   /**
    * Validates that the first name is not blank
    *
@@ -225,6 +229,8 @@ class ProfileViewModel(
     return firstNameValid() && lastNameValid() && countryValid() && pseudoValid()
   }
 
+  // ======== IS ERROR to pass to the UI if it is an error =========
+
   /**
    * Determines if the first name field should show an error
    *
@@ -250,7 +256,7 @@ class ProfileViewModel(
    * @return true if register was pressed and pseudo is invalid
    */
   fun pseudoIsError(pseudoAvailable: Boolean): Boolean {
-    return !pseudoValid() || !pseudoAvailable
+    return !pseudoValid() && _uiState.value.registerPressed
   }
 
   /**
@@ -261,6 +267,8 @@ class ProfileViewModel(
   fun countryIsError(): Boolean {
     return _uiState.value.registerPressed && !countryValid()
   }
+
+  // ======== SUBMISSION to update firebase repositories =========
 
   /**
    * Validate and save the profile in firestore through the repository.
