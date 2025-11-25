@@ -7,7 +7,14 @@ object ActivityRepositoryProvider {
   // Lazily create the Firestore-backed repository when first used.
   private val _repository: ActivityRepository by lazy { ActivityRepositoryFirestore() }
 
+  // Container that allowed overriding the repository for testing purposes.
+  private var _overrideTesting: ActivityRepository? = null
+
   // Public reference to the current repository.
   // Can be swapped out in tests if needed (e.g., replaced with a fake repo).
-  var repository: ActivityRepository = _repository
+  var repository: ActivityRepository
+    get() = _overrideTesting ?: _repository
+    set(value) {
+      _overrideTesting = value
+    }
 }
