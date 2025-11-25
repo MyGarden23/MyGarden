@@ -6,7 +6,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
@@ -22,7 +21,6 @@ import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -74,20 +72,6 @@ class GardenFilterSortScreenTests {
     override suspend fun getFCMToken(): String? {
       return null
     }
-
-    override fun getActivities(): Flow<List<GardenActivity>> {
-      return emptyFlow()
-    }
-
-    override fun getActivitiesForUser(userId: String): Flow<List<GardenActivity>> {
-      return emptyFlow()
-    }
-
-    override fun getFeedActivities(userIds: List<String>, limit: Int): Flow<List<GardenActivity>> {
-      return emptyFlow()
-    }
-
-    override suspend fun addActivity(activity: GardenActivity) {}
 
     override fun cleanup() {}
   }

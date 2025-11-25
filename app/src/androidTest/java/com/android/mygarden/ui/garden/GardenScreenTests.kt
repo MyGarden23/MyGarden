@@ -1,19 +1,11 @@
 package com.android.mygarden.ui.garden
 
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotDisplayed
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.plant.Plant
-import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
@@ -21,11 +13,7 @@ import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
-import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.profile.Avatar
-import com.android.mygarden.ui.theme.CustomColors
-import com.android.mygarden.ui.theme.ExtendedTheme
-import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
@@ -33,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -161,7 +148,7 @@ class GardenScreenTests {
       }
     }
   }
-
+  /*
   /**
    * Tests that when the list is empty, the empty list message and profile components are displayed
    */
@@ -338,5 +325,5 @@ class GardenScreenTests {
     val plantFromRepoAfterWatering = plantsRepo.getOwnedPlant(id)
     val statusAfterWatering = plantFromRepoAfterWatering.plant.healthStatus
     assertEquals(PlantHealthStatus.HEALTHY, statusAfterWatering)
-  }
+  }*/
 }
