@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.TestsEndToEnd
+package com.android.mygarden.zEndToEnd
 
 import android.Manifest
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -129,7 +129,7 @@ class EndToEndM1 {
     composeTestRule.waitUntil(TIMEOUT) {
       try {
         composeTestRule
-            .onNodeWithTag(com.android.mygarden.ui.camera.CameraScreenTestTags.CAMERA_READY)
+            .onNodeWithTag(CameraScreenTestTags.CAMERA_READY)
             .fetchSemanticsNode()
         true
       } catch (_: Throwable) {

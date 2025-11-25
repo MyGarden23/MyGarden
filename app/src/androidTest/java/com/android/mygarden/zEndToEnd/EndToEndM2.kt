@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.TestsEndToEnd
+package com.android.mygarden.zEndToEnd
 
 import android.Manifest
 import android.util.Log
