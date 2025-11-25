@@ -302,8 +302,11 @@ class ProfileViewModel(
               avatar = state.avatar)
 
       try {
-        if (state.previousPseudo != "") pseudoRepository.deletePseudo(state.previousPseudo)
-        pseudoRepository.savePseudo(state.pseudo.trim(), uid)
+        pseudoRepository.updatePseudoAtomic(
+            oldPseudo = state.previousPseudo.ifBlank { null },
+            newPseudo = state.pseudo.trim(),
+            userId = uid)
+
         profileRepository.saveProfile(profile)
         onResult(true)
       } catch (_: Exception) {

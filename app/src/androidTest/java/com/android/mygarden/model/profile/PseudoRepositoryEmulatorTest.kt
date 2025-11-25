@@ -140,4 +140,61 @@ class PseudoRepositoryEmulatorTest : FirestoreProfileTest() {
     assertTrue(results.contains("charlie"))
     assertTrue(results.contains("charlotte"))
   }
+
+  @Test
+  fun updatePseudoAtomic_creates_pseudo_when_no_previous() = runTest {
+    pseudoRepo.updatePseudoAtomic(oldPseudo = null, newPseudo = "newPseudo", userId = "uid123")
+
+    val doc = db.collection("pseudos").document("newpseudo").get().await()
+    assertTrue(doc.exists())
+    assertEquals("uid123", doc.getString("userID"))
+  }
+
+  @Test
+  fun updatePseudoAtomic_replaces_old_pseudo_atomically() = runTest {
+    pseudoRepo.savePseudo("oldpseudo", "uid1")
+
+    pseudoRepo.updatePseudoAtomic(oldPseudo = "oldpseudo", newPseudo = "newPseudo", userId = "uid1")
+
+    val oldDoc = db.collection("pseudos").document("oldpseudo").get().await()
+    val newDoc = db.collection("pseudos").document("newpseudo").get().await()
+
+    assertFalse(oldDoc.exists())
+    assertTrue(newDoc.exists())
+    assertEquals("uid1", newDoc.getString("userID"))
+  }
+
+  @Test
+  fun updatePseudoAtomic_aborts_if_new_pseudo_taken() = runTest {
+    pseudoRepo.savePseudo("taken", "uid123")
+    pseudoRepo.savePseudo("old", "uid1")
+
+    val error =
+        assertThrows(IllegalStateException::class.java) {
+          runBlocking {
+            pseudoRepo.updatePseudoAtomic(oldPseudo = "old", newPseudo = "taken", userId = "uid1")
+          }
+        }
+
+    assertEquals("Pseudo already taken", error.message)
+  }
+
+  @Test
+  fun updatePseudoAtomic_is_atomic_old_not_deleted_when_new_taken() = runTest {
+    pseudoRepo.savePseudo("oldPseudo", "uidA")
+    pseudoRepo.savePseudo("occupied", "uidB")
+
+    try {
+      pseudoRepo.updatePseudoAtomic(
+          oldPseudo = "oldPseudo", newPseudo = "occupied", userId = "uidA")
+      fail("Expected failure")
+    } catch (_: Exception) {}
+
+    val oldDoc = db.collection("pseudos").document("oldpseudo").get().await()
+    assertTrue(oldDoc.exists())
+
+    // new pseudo should remain owned by uidB
+    val newDoc = db.collection("pseudos").document("occupied").get().await()
+    assertEquals("uidB", newDoc.getString("userID"))
+  }
 }
