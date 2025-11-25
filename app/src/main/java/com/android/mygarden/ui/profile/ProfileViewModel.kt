@@ -49,6 +49,9 @@ class ProfileViewModel(
   private val _pseudoAvailable = MutableStateFlow(true)
   val pseudoAvailable: StateFlow<Boolean> = _pseudoAvailable.asStateFlow()
 
+  /** List of valid country names used for validation */
+  private var countries: List<String> = emptyList()
+
   var initialized: Boolean = false
 
   /**
@@ -78,9 +81,6 @@ class ProfileViewModel(
     }
   }
 
-  /** List of valid country names used for validation */
-  private var countries: List<String> = emptyList()
-
   /**
    * Updates the list of valid countries
    *
@@ -97,17 +97,6 @@ class ProfileViewModel(
    */
   fun setFirstName(firstName: String) {
     _uiState.value = _uiState.value.copy(firstName = firstName)
-  }
-
-  /** Checks if the pseudo is available and updates the UI state accordingly */
-  private suspend fun checkPseudoAvailability() {
-    val pseudo = _uiState.value.pseudo.trim()
-
-    if (pseudo.isBlank() || pseudo == _uiState.value.previousPseudo) {
-      _pseudoAvailable.value = true
-      return
-    }
-    _pseudoAvailable.value = pseudoRepository.isPseudoAvailable(pseudo)
   }
 
   /**
@@ -180,6 +169,99 @@ class ProfileViewModel(
     _uiState.value = _uiState.value.copy(registerPressed = registerPressed)
   }
 
+  /** Checks if the pseudo is available and updates the UI state accordingly */
+  private suspend fun checkPseudoAvailability() {
+    val pseudo = _uiState.value.pseudo.trim()
+
+    if (pseudo.isBlank() || pseudo == _uiState.value.previousPseudo) {
+      _pseudoAvailable.value = true
+      return
+    }
+    _pseudoAvailable.value = pseudoRepository.isPseudoAvailable(pseudo)
+  }
+
+  /**
+   * Validates that the first name is not blank
+   *
+   * @return true if first name is valid, false otherwise
+   */
+  private fun firstNameValid(): Boolean {
+    return _uiState.value.firstName.isNotBlank()
+  }
+
+  /**
+   * Validates that the last name is not blank
+   *
+   * @return true if last name is valid, false otherwise
+   */
+  private fun lastNameValid(): Boolean {
+    return _uiState.value.lastName.isNotBlank()
+  }
+
+  /**
+   * Validates that the selected country is in the list of valid countries
+   *
+   * @return true if country is valid, false otherwise
+   */
+  private fun countryValid(): Boolean {
+    return countries.contains(_uiState.value.country)
+  }
+
+  /**
+   * Validates that the pseudo is not blank
+   *
+   * @return true if pseudo is valid, false otherwise
+   */
+  private fun pseudoValid(): Boolean {
+    return _uiState.value.pseudo.isNotBlank() && _pseudoAvailable.value
+  }
+
+  /**
+   * Checks if all required fields are valid for registration
+   *
+   * @return true if all validation passes, false otherwise
+   */
+  fun canRegister(): Boolean {
+    return firstNameValid() && lastNameValid() && countryValid() && pseudoValid()
+  }
+
+  /**
+   * Determines if the first name field should show an error
+   *
+   * @return true if register was pressed and first name is invalid
+   */
+  fun firstNameIsError(): Boolean {
+    return _uiState.value.registerPressed && !firstNameValid()
+  }
+
+  /**
+   * Determines if the last name field should show an error
+   *
+   * @return true if register was pressed and last name is invalid
+   */
+  fun lastNameIsError(): Boolean {
+    return _uiState.value.registerPressed && !lastNameValid()
+  }
+
+  /**
+   * Determines if the pseudo field should show an error
+   *
+   * @param pseudoAvailable true if pseudo is available, false otherwise
+   * @return true if register was pressed and pseudo is invalid
+   */
+  fun pseudoIsError(pseudoAvailable: Boolean): Boolean {
+    return !pseudoValid() || !pseudoAvailable
+  }
+
+  /**
+   * Determines if the country field should show an error
+   *
+   * @return true if register was pressed and country is invalid
+   */
+  fun countryIsError(): Boolean {
+    return _uiState.value.registerPressed && !countryValid()
+  }
+
   /**
    * Validate and save the profile in firestore through the repository.
    *
@@ -231,87 +313,5 @@ class ProfileViewModel(
         }
       }
     }
-  }
-
-  /**
-   * Validates that the first name is not blank
-   *
-   * @return true if first name is valid, false otherwise
-   */
-  private fun firstNameValid(): Boolean {
-    return _uiState.value.firstName.isNotBlank()
-  }
-
-  /**
-   * Validates that the last name is not blank
-   *
-   * @return true if last name is valid, false otherwise
-   */
-  private fun lastNameValid(): Boolean {
-    return _uiState.value.lastName.isNotBlank()
-  }
-
-  /**
-   * Validates that the selected country is in the list of valid countries
-   *
-   * @return true if country is valid, false otherwise
-   */
-  private fun countryValid(): Boolean {
-    return countries.contains(_uiState.value.country)
-  }
-
-  /**
-   * Determines if the first name field should show an error
-   *
-   * @return true if register was pressed and first name is invalid
-   */
-  fun firstNameIsError(): Boolean {
-    return _uiState.value.registerPressed && !firstNameValid()
-  }
-
-  /**
-   * Determines if the last name field should show an error
-   *
-   * @return true if register was pressed and last name is invalid
-   */
-  fun lastNameIsError(): Boolean {
-    return _uiState.value.registerPressed && !lastNameValid()
-  }
-
-  /**
-   * Validates that the pseudo is not blank
-   *
-   * @return true if pseudo is valid, false otherwise
-   */
-  private fun pseudoValid(): Boolean {
-    return _uiState.value.pseudo.isNotBlank() && _pseudoAvailable.value
-  }
-
-  /**
-   * Determines if the pseudo field should show an error
-   *
-   * @param pseudoAvailable true if pseudo is available, false otherwise
-   * @return true if register was pressed and pseudo is invalid
-   */
-  fun pseudoIsError(pseudoAvailable: Boolean): Boolean {
-    return !pseudoValid() || !pseudoAvailable
-  }
-
-  /**
-   * Determines if the country field should show an error
-   *
-   * @return true if register was pressed and country is invalid
-   */
-  fun countryIsError(): Boolean {
-    return _uiState.value.registerPressed && !countryValid()
-  }
-
-  /**
-   * Checks if all required fields are valid for registration
-   *
-   * @return true if all validation passes, false otherwise
-   */
-  fun canRegister(): Boolean {
-    return firstNameValid() && lastNameValid() && countryValid() && pseudoValid()
   }
 }
