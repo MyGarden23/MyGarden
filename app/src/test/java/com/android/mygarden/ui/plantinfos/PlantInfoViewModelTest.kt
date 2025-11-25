@@ -7,6 +7,7 @@ import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedP
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
+import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.utils.FakeActivityRepository
 import com.android.mygarden.utils.FakeProfileRepository
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +45,9 @@ class PlantInfoViewModelTest {
     Dispatchers.setMain(testDispatcher)
     repository = PlantsRepositoryLocal()
     activityRepo = FakeActivityRepository()
-    profileRepo = FakeProfileRepository()
+    profileRepo =
+        FakeProfileRepository(
+            Profile(pseudo = "pseudo")) // Pass a profile with a pseudo to the FakeProfileRepository
     viewModel = PlantInfoViewModel(repository, activityRepo, profileRepo)
     context = ApplicationProvider.getApplicationContext()
   }

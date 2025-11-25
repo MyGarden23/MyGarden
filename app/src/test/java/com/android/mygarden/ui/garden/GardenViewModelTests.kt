@@ -57,7 +57,17 @@ class GardenViewModelTests {
     Dispatchers.setMain(testDispatcher)
     repositoryScope = TestScope(SupervisorJob() + testDispatcher)
     plantsRepo = PlantsRepositoryLocal(repositoryScope)
-    profileRepo = FakeProfileRepository()
+    profileRepo =
+        FakeProfileRepository(
+            Profile(
+                firstName = "Test",
+                lastName = "User",
+                pseudo = "pseudo",
+                gardeningSkill = GardeningSkill.BEGINNER,
+                favoritePlant = "Rose",
+                country = "Switzerland",
+                hasSignedIn = true,
+                avatar = Avatar.A1))
     activityRepo = FakeActivityRepository()
     vm =
         GardenViewModel(
