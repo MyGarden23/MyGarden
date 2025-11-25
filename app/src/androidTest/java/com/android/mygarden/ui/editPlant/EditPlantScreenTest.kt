@@ -63,49 +63,6 @@ class EditPlantScreenTest {
   }
 
   /**
-   * Verifies that when the [EditPlantScreen] is composed, it triggers the `loadPlant` function on
-   * the ViewModel with the correct `ownedPlantId`.
-   */
-  /*
-  @Test
-  fun loadPlant_calledOnComposition_withOwnedPlantId() {
-    val vm = FakeEditPlantViewModel()
-    setContentWith(vm = vm, ownedPlantId = "abc-xyz")
-    composeRule.waitForIdle()
-    assertEquals(listOf("abc-xyz"), vm.loadCalls)
-  }*/
-
-  /**
-   * Tests that clicking the delete button triggers the corresponding ViewModel method `deletePlant`
-   * with the correct plant ID, and also invokes the `onDeleted` callback.
-   */
-  /*
-  @Test
-  fun delete_callsVmAndCallback() {
-    val vm = FakeEditPlantViewModel()
-    val onDeleted = mutableListOf<Boolean>()
-    setContentWith(vm = vm, onDeletedCalled = onDeleted)
-
-    composeRule
-        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
-        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
-
-    // Assert that the deletion popup displays and confirm deleting the plant
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertIsDisplayed()
-    composeRule
-        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
-        .assertIsDisplayed()
-        .performClick()
-
-    composeRule.runOnIdle {}
-    composeRule.waitForIdle()
-
-    assertEquals(listOf("owned-123"), vm.deleteCalls)
-    assertTrue(onDeleted.isNotEmpty())
-  }*/
-
-  /**
    * Tests that the validation error for a blank light exposure field only appears after the user
    * has interacted with (focused on) the input field and not before.
    */
@@ -127,103 +84,6 @@ class EditPlantScreenTest {
         .onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_LIGHT_EXPOSURE)
         .assertIsDisplayed()
   }
-
-  // Under this comment: plant deletion popup tests
-
-  /**
-   * Asserts that the popup is displayed when the delete button is pressed in the EditPlant screen
-   */
-  /*
-  @Test
-  fun deletionPopup_isDisplayed_whenPressDelete() {
-    setContentWith()
-
-    composeRule
-        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
-        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
-
-    // Assert all nodes are correctly displayed
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertIsDisplayed()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertIsDisplayed()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertIsDisplayed()
-
-    // For buttons also assert they are clickable
-    composeRule
-        .onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON)
-        .assertIsDisplayed()
-        .assertIsEnabled()
-    composeRule
-        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
-        .assertIsDisplayed()
-        .assertIsEnabled()
-  }*/
-
-  /**
-   * Asserts that the popup is not displayed anymore when the delete button is pressed, then going
-   * back in the EditPlant screen by keeping the plant in the garden.
-   */
-  /*
-  @Test
-  fun deletionPopup_isNoMoreDisplayed_whenGoingBackToEdit() {
-    setContentWith()
-
-    composeRule
-        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
-        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
-    // Keep plant in garden
-    composeRule
-        .onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON)
-        .assertIsDisplayed()
-        .performClick()
-    composeRule.waitForIdle()
-
-    // Assert all nodes are correctly no more displayed
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
-  }*/
-
-  /**
-   * Asserts that the popup is not displayed anymore when the delete button is pressed, then going
-   * back in the Garden screen by deleting the plant.
-   */
-  /*
-  @Test
-  fun deletionPopup_isNoMoreDisplayed_whenGoingBackToGarden() {
-    setContentWith()
-
-    composeRule
-        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
-        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
-    // Delete plant
-    composeRule
-        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
-        .assertIsDisplayed()
-        .performClick()
-    composeRule.waitForIdle()
-
-    // Assert all nodes are correctly no more displayed
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON).assertDoesNotExist()
-    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
-  }*/
-
-  /** Test if the delete button exists if we come from the Garden Screen */
-  /*@Test
-  fun deleteButton_isVisible_whenFromGarden() {
-    setContentWith(fromRoute = Screen.Garden.route)
-    composeRule
-        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
-        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
-    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
-  }*/
 }
 
 /** Recording fake VM for UI tests (no mocking framework needed). */
@@ -288,13 +148,5 @@ private class FakeEditPlantViewModel : EditPlantViewModelInterface {
 
   override fun clearErrorMsg() {
     _ui.value = _ui.value.copy(errorMsg = null)
-  }
-
-  fun setLastWateredNull(ts: Timestamp?) {
-    _ui.value = _ui.value.copy(lastWatered = ts)
-  }
-
-  fun setIsRecognized() {
-    _ui.value = _ui.value.copy(isRecognized = true)
   }
 }
