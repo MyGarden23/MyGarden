@@ -69,6 +69,16 @@ abstract class ProfileScreenTestBase {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.getCountryItemTag("France")).performClick()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD).assertTextContains("France")
   }
+
+  @org.junit.Test
+  fun countryDropdownClosesWhenClickingCloseButton() {
+    setContent()
+
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_ICON).performClick()
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_MENU).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_CLOSE).performClick()
+  }
   /**
    * Subclasses should implement this to set content with a fake repository for testing successful
    * form submissions.

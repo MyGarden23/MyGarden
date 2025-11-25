@@ -9,6 +9,7 @@ import com.android.mygarden.ui.navigation.Screen
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -83,6 +84,38 @@ class EditPlantScreenTest {
     composeRule
         .onNodeWithTag(EditPlantScreenTestTags.ERROR_MESSAGE_LIGHT_EXPOSURE)
         .assertIsDisplayed()
+  }
+
+  /**
+   * Verifies that when the date picker contains a future date, confirming the dialog will result in
+   * the stored `lastWatered` being clamped to the current time (no future timestamps).
+   */
+  @Test
+  fun lastWatered_futureDate_isClampedOnConfirm() {
+    val vm = FakeEditPlantViewModel()
+
+    // Set the VM to a future date
+    val oneDayMs = 24L * 60L * 60L * 1000L
+    val futureMillis = System.currentTimeMillis() + oneDayMs
+    vm.setLastWatered(Timestamp(futureMillis))
+
+    setContentWith(vm = vm)
+
+    // Open the date picker dialog
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.DATE_PICKER_BUTTON).performClick()
+    composeRule.waitForIdle()
+
+    // Confirm the dialog (uses the localized OK string)
+    val okText = composeRule.activity.getString(com.android.mygarden.R.string.ok)
+    composeRule.onNodeWithText(okText).performClick()
+    composeRule.waitForIdle()
+
+    // The VM should have been updated with a timestamp <= now (clamped)
+    val now = System.currentTimeMillis()
+    val saved = vm.uiState.value.lastWatered
+    assertTrue(saved != null)
+    assertTrue(saved!!.time <= now)
+    assertTrue(saved.time < futureMillis)
   }
 }
 
