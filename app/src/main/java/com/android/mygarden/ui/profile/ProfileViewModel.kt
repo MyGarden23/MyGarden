@@ -301,16 +301,14 @@ class ProfileViewModel(
               hasSignedIn = true,
               avatar = state.avatar)
 
-      viewModelScope.launch {
-        try {
-          if (state.previousPseudo != "") pseudoRepository.deletePseudo(state.previousPseudo)
-          pseudoRepository.savePseudo(state.pseudo.trim(), uid)
-          profileRepository.saveProfile(profile)
-          onResult(true)
-        } catch (_: Exception) {
-          // log if needed
-          onResult(false)
-        }
+      try {
+        if (state.previousPseudo != "") pseudoRepository.deletePseudo(state.previousPseudo)
+        pseudoRepository.savePseudo(state.pseudo.trim(), uid)
+        profileRepository.saveProfile(profile)
+        onResult(true)
+      } catch (_: Exception) {
+        // log if needed
+        onResult(false)
       }
     }
   }
