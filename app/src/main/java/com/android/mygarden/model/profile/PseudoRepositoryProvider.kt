@@ -12,6 +12,13 @@ object PseudoRepositoryProvider {
     PseudoRepositoryFirestore(Firebase.firestore)
   }
 
+  // Repository that we can override in tests
+  private var _overrideRepositoryTest: PseudoRepository? = null
+
   // Public reference to the current repository.
-  var repository: PseudoRepository = _repository
+  var repository: PseudoRepository
+    get() = _overrideRepositoryTest ?: _repository
+    set(value) {
+      _overrideRepositoryTest = value
+    }
 }

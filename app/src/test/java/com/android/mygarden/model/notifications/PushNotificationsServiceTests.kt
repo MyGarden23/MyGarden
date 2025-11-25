@@ -2,7 +2,6 @@ package com.android.mygarden.model.notifications
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,9 +12,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.*
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class PushNotificationsServiceTest {
 
   private lateinit var mockProfileRepo: ProfileRepository
@@ -38,7 +40,7 @@ class PushNotificationsServiceTest {
 
     val prefs =
         context.getSharedPreferences(
-            PushNotificationsService.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
+            PushNotificationsService.Companion.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
     prefs.edit().clear().commit()
   }
 
@@ -58,8 +60,9 @@ class PushNotificationsServiceTest {
         verify(mockProfileRepo, times(1)).attachFCMToken(testToken)
         val prefs =
             context.getSharedPreferences(
-                PushNotificationsService.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
-        val token = prefs.getString(PushNotificationsService.SHARED_PREFS_FCM_TOKEN_ID, null)
+                PushNotificationsService.Companion.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
+        val token =
+            prefs.getString(PushNotificationsService.Companion.SHARED_PREFS_FCM_TOKEN_ID, null)
         assertTrue("Token should be saved: $token", token != null && token == "test_fcm_token")
       }
 
@@ -78,7 +81,7 @@ class PushNotificationsServiceTest {
         verify(mockProfileRepo, times(1)).attachFCMToken(testToken)
         val prefs =
             context.getSharedPreferences(
-                PushNotificationsService.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
+                PushNotificationsService.Companion.NOTIFICATIONS_SHARED_PREFS, Context.MODE_PRIVATE)
         assertTrue("SharedPreferences should remain empty", prefs.all.isEmpty())
       }
 }

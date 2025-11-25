@@ -65,7 +65,12 @@ import com.android.mygarden.ui.theme.md_theme_light_tertiaryContainer
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class MyGardenThemeColorTest {
 
   @get:Rule val composeRule = createComposeRule()
