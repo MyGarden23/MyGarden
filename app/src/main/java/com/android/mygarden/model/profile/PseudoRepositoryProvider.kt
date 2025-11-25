@@ -13,12 +13,12 @@ object PseudoRepositoryProvider {
   }
 
   // Repository that we can override in tests
-  private var _overrideTesting: PseudoRepository? = null
+  private var _overrideRepositoryTest: PseudoRepository? = null
 
   // Public reference to the current repository.
   var repository: PseudoRepository
-    get() = _overrideTesting ?: _repository
+    get() = _overrideRepositoryTest ?: _repository
     set(value) {
-      _overrideTesting = value
+      _overrideRepositoryTest = value
     }
 }

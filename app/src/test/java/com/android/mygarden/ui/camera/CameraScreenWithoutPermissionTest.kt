@@ -135,12 +135,9 @@ class CameraScreenWithoutPermissionTest {
 
   @Test
   fun noCameraAccessScreenElementsAreVisibleWhenPermissionDenied() {
-    println("== ENTER TEST ==")
-
     // Only run this test if we successfully revoked permission OR in controlled environment
     if (!viewModel.hasCameraPermission(context) || isControlledTestEnvironment()) {
       setupNoCameraAccessScreen()
-      println("== AFTER SETUP ==")
 
       // Try to find the no-camera-access elements
       try {
@@ -148,7 +145,6 @@ class CameraScreenWithoutPermissionTest {
             .onNodeWithTag(CameraScreenTestTags.ENABLE_CAMERA_PERMISSION)
             .assertExists()
             .assertIsDisplayed()
-        println("== FOUND ENABLE_CAMERA_PERMISSION ==")
 
         composeTestRule
             .onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON)
@@ -157,10 +153,7 @@ class CameraScreenWithoutPermissionTest {
 
         // Ensure camera preview is not shown
         composeTestRule.onNodeWithTag(CameraScreenTestTags.PREVIEW_VIEW).assertDoesNotExist()
-        println("== FOUND ENABLE_CAMERA_PERMISSION END==")
       } catch (e: AssertionError) {
-        println("ASSERTION ERROR PATH TAKEN")
-
         // If UI elements aren't found, it might be because permission wasn't properly revoked
         // In this case, we should still verify the ViewModel state
         assertTrue(
@@ -168,95 +161,62 @@ class CameraScreenWithoutPermissionTest {
             viewModel.hasAlreadyDeniedCameraPermission(context) ||
                 !viewModel.hasCameraPermission(context))
       }
-      println("== END OF IF ==")
     }
-    println("== END OF TEST ==")
   }
 
   @Test
   fun cameraScreenNoAccessButtonsAreEnabledWhenVisible() {
-    println("== ENTER TEST ==")
-
     if (!viewModel.hasCameraPermission(context) || isControlledTestEnvironment()) {
-      println("== AFTER SETUP ==")
-
       setupNoCameraAccessScreen()
 
       try {
-        println("== FOUND ENABLE_CAMERA_PERMISSION ==")
-
         composeTestRule
             .onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON)
             .assertIsEnabled()
-        println("== FOUND ENABLE_CAMERA_PERMISSION END==")
       } catch (e: AssertionError) {
-        println("ASSERTION ERROR PATH TAKEN")
-
         // Fallback: just verify that we're in the correct test state
         assertTrue(
             "Should be in no-permission test state",
             !viewModel.hasCameraPermission(context) ||
                 viewModel.hasAlreadyDeniedCameraPermission(context))
       }
-      println("== END OF IF ==")
     }
-    println("== END OF TEST ==")
   }
 
   @Test
   fun reAskForPermissionLaunchesCorrectIntent() {
-    println("== ENTER TEST ==")
-
     if (!viewModel.hasCameraPermission(context) || isControlledTestEnvironment()) {
       setupNoCameraAccessScreen()
-      println("== AFTER SETUP ==")
 
       try {
-        println("== FOUND ENABLE_CAMERA_PERMISSION ==")
-
         composeTestRule.onNodeWithTag(CameraScreenTestTags.ENABLE_CAMERA_PERMISSION).performClick()
         intended(allOf(hasAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)))
-        println("== FOUND ENABLE_CAMERA_PERMISSION END==")
       } catch (e: Exception) {
-        println("ASSERTION ERROR PATH TAKEN")
-
         // If we can't test the UI interaction, at least verify the ViewModel handles the state
         assertTrue(
             "Should handle permission denied state",
             viewModel.hasAlreadyDeniedCameraPermission(context) ||
                 !viewModel.hasCameraPermission(context))
       }
-      println("== END OF IF ==")
     }
-    println("== END OF TEST ==")
   }
 
   @Test
   fun pressingGalleryAccessButtonDoesNotCrash() {
-    println("== ENTER TEST ==")
-
     if (!viewModel.hasCameraPermission(context) || isControlledTestEnvironment()) {
       setupNoCameraAccessScreen()
-      println("== AFTER SETUP ==")
 
       try {
-        println("== FOUND ENABLE_CAMERA_PERMISSION ==")
-
         composeTestRule
             .onNodeWithTag(CameraScreenTestTags.ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON)
             .performClick()
         // Should not crash - test passes if we reach this line
         assertTrue("Gallery access should not crash", true)
-        println("== FOUND ENABLE_CAMERA_PERMISSION END==")
       } catch (e: Exception) {
-        println("ASSERTION ERROR PATH TAKEN")
-
         // Even if UI interaction fails, the test shouldn't crash
         assertTrue("Test should not crash even if UI interaction fails", true)
       }
-      println("== END OF IF ==")
     }
-    println("== END OF TEST ==")
   }
 
   @Test

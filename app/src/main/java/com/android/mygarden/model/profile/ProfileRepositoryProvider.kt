@@ -13,13 +13,13 @@ object ProfileRepositoryProvider {
   }
 
   // Repository that we can override in tests
-  private var _overrideTesting: ProfileRepository? = null
+  private var _overrideRepositoryTest: ProfileRepository? = null
 
   // Public reference to the current repository.
   // Can be swapped out in tests if needed (e.g., replaced with a fake repo).
   var repository: ProfileRepository
-    get() = _overrideTesting ?: _repository
+    get() = _overrideRepositoryTest ?: _repository
     set(value) {
-      _overrideTesting = value
+      _overrideRepositoryTest = value
     }
 }

@@ -8,13 +8,13 @@ object ActivityRepositoryProvider {
   private val _repository: ActivityRepository by lazy { ActivityRepositoryFirestore() }
 
   // Container that allowed overriding the repository for testing purposes.
-  private var _overrideTesting: ActivityRepository? = null
+  private var _overrideRepositoryTest: ActivityRepository? = null
 
   // Public reference to the current repository.
   // Can be swapped out in tests if needed (e.g., replaced with a fake repo).
   var repository: ActivityRepository
-    get() = _overrideTesting ?: _repository
+    get() = _overrideRepositoryTest ?: _repository
     set(value) {
-      _overrideTesting = value
+      _overrideRepositoryTest = value
     }
 }
