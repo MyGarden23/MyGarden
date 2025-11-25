@@ -81,6 +81,129 @@ class EditPlantScreenTest {
   }
 
   /**
+   * Tests that clicking the delete button triggers the corresponding ViewModel method `deletePlant`
+   * with the correct plant ID, and also invokes the `onDeleted` callback.
+   */
+  @Test
+  fun delete_callsVmAndCallback() {
+    val vm = FakeEditPlantViewModel()
+    val onDeleted = mutableListOf<Boolean>()
+    setContentWith(vm = vm, onDeletedCalled = onDeleted)
+
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+
+    // Assert that the deletion popup displays and confirm deleting the plant
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertIsDisplayed()
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+
+    composeRule.runOnIdle {}
+    composeRule.waitForIdle()
+
+    assertEquals(listOf("owned-123"), vm.deleteCalls)
+    assertTrue(onDeleted.isNotEmpty())
+  }
+
+  // Under this comment: plant deletion popup tests
+
+  /**
+   * Asserts that the popup is displayed when the delete button is pressed in the EditPlant screen
+   */
+  @Test
+  fun deletionPopup_isDisplayed_whenPressDelete() {
+    setContentWith()
+
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+
+    // Assert all nodes are correctly displayed
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertIsDisplayed()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertIsDisplayed()
+
+    // For buttons also assert they are clickable
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON)
+        .assertIsDisplayed()
+        .assertIsEnabled()
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
+        .assertIsDisplayed()
+        .assertIsEnabled()
+  }
+
+  /**
+   * Asserts that the popup is not displayed anymore when the delete button is pressed, then going
+   * back in the EditPlant screen by keeping the plant in the garden.
+   */
+  @Test
+  fun deletionPopup_isNoMoreDisplayed_whenGoingBackToEdit() {
+    setContentWith()
+
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+    // Keep plant in garden
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+    composeRule.waitForIdle()
+
+    // Assert all nodes are correctly no more displayed
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
+  }
+
+  /**
+   * Asserts that the popup is not displayed anymore when the delete button is pressed, then going
+   * back in the Garden screen by deleting the plant.
+   */
+  @Test
+  fun deletionPopup_isNoMoreDisplayed_whenGoingBackToGarden() {
+    setContentWith()
+
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+    // Delete plant
+    composeRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+    composeRule.waitForIdle()
+
+    // Assert all nodes are correctly no more displayed
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.QUESTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.DESCRIPTION).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CANCEL_BUTTON).assertDoesNotExist()
+    composeRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).assertDoesNotExist()
+  }
+
+  /** Test if the delete button exists if we come from the Garden Screen */
+  @Test
+  fun deleteButton_isVisible_whenFromGarden() {
+    setContentWith(fromRoute = Screen.Garden.route)
+    composeRule
+        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
+    composeRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).assertIsDisplayed()
+  }
+
+  /**
    * Verifies that the plant's common name and Latin name fields are enabled for user input on the
    * edit screen when the image is not recognized.
    */
