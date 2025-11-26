@@ -1,5 +1,6 @@
 package com.android.mygarden.model.users
 
+import com.android.mygarden.ui.addFriend.FriendRelation
 import com.android.mygarden.ui.profile.Avatar
 
 /**
@@ -7,6 +8,12 @@ import com.android.mygarden.ui.profile.Avatar
  *
  * @property id The unique Firestore user ID (document ID under `users/{id}`).
  * @property pseudo The display pseudo associated with the user.
- * @property avatar The avatar enum selected by the user. .
+ * @property avatar The avatar enum selected by the user.
+ * @property friendRelation The relation of the user, ADD or ADDED
  */
-data class UserProfile(val id: String, val pseudo: String, val avatar: Avatar)
+data class UserProfile(
+    val id: String,
+    val pseudo: String,
+    val avatar: Avatar,
+    val friendRelation: FriendRelation = FriendRelation.ADD
+)

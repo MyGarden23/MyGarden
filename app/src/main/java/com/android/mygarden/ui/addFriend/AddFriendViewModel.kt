@@ -51,14 +51,9 @@ class AddFriendViewModel(
   private val _uiState = MutableStateFlow(AddFriendUiState())
   val uiState: StateFlow<AddFriendUiState> = _uiState.asStateFlow()
 
-  /**
-   * Updates the search query typed by the user.
-   *
-   * This also clears any previous search results so that the UI can display an empty list until the
-   * user explicitly triggers [onSearch].
-   */
+  /** Updates the search query typed by the user. */
   fun onQueryChange(newQuery: String) {
-    _uiState.value = _uiState.value.copy(query = newQuery, searchResults = emptyList())
+    _uiState.value = _uiState.value.copy(query = newQuery)
   }
   /**
    * Searches for users whose pseudo starts with the current query.
@@ -97,7 +92,7 @@ class AddFriendViewModel(
   }
 
   /**
-   * Adds the user with the given [userId] to the current user's friend list.v
+   * Adds the user with the given [userId] to the current user's friend list.
    *
    * @param userId The Firestore ID of the user to add as a friend.
    * @param onError Invoked if the operation fails for any reason.
@@ -109,9 +104,29 @@ class AddFriendViewModel(
       try {
         friendsRepository.addFriend(userId)
         onSuccess() // create xml with "Friend added successfully."
+        _uiState.value =
+            _uiState.value.copy(
+                searchResults =
+                    _uiState.value.searchResults.updateRelation(userId, FriendRelation.ADDED))
       } catch (_: Exception) {
         onError() // create xml with "Failed to add friend."
       }
     }
+  }
+
+  /**
+   * Returns a new list where the [UserProfile] with the given [id] has its [friendRelation]
+   * replaced by [newRelation] if it was not already [newRelation].
+   *
+   * This function does not mutate the original list. If no element matches the provided [id], the
+   * original list is returned unchanged.
+   *
+   * @param id The identifier of the user whose relation should be updated.
+   * @param newRelation The new [FriendRelation] to assign to the matching user.
+   * @return A new `List<UserProfile>` with the updated relation applied.
+   */
+  fun List<UserProfile>.updateRelation(id: String, newRelation: FriendRelation) = map {
+    if (it.id == id && it.friendRelation != newRelation) it.copy(friendRelation = newRelation)
+    else it
   }
 }

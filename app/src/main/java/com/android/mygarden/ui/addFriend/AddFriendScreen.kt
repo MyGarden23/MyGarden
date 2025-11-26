@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,13 +38,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
+import com.android.mygarden.ui.profile.Avatar
 
+/** Contains all test tags used within the Add Friend screen UI. */
 object AddFriendTestTags {
 
   const val SEARCH_TEXT = "searchText"
@@ -62,15 +65,26 @@ object AddFriendTestTags {
   fun getTestTagForButtonOnFriendCard(pseudo: String) = "buttonOnFriendCardTestTag/${pseudo}"
 }
 
-@Preview
+/**
+ * Screen for adding friends.
+ *
+ * This screen allows the user to:
+ * - enter a search query,
+ * - trigger a search,
+ * - view the list of found user profiles,
+ * - send friend requests.
+ *
+ * @param onBackPressed Action triggered when the top bar back button is pressed.
+ * @param addFriendViewModel The [AddFriendViewModel] responsible for handling UI state and events.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFriendScreen(
     onBackPressed: () -> Unit = {},
-    // addFriendViewModel: EditPlantViewModel = viewModel(),
+    addFriendViewModel: AddFriendViewModel = viewModel(),
 ) {
   val context = LocalContext.current
-  // val addFriendUIState by addFriendViewModel.uiState.collectAsState()
+  val uiState by addFriendViewModel.uiState.collectAsState()
   Scaffold(
       topBar = { TopBar(title = "Add friend", hasGoBackButton = true, onGoBack = onBackPressed) },
       modifier = Modifier.testTag(NavigationTestTags.ADD_FRIEND_SCREEN),
@@ -83,22 +97,26 @@ fun AddFriendScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
           Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+
+          // Search bar row
           Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(0.6f).testTag(AddFriendTestTags.SEARCH_TEXT),
-                value = "Pseudo",
-                onValueChange = {},
+                value = uiState.query,
+                onValueChange = { addFriendViewModel.onQueryChange(it) },
             )
             Button(
                 modifier = Modifier.testTag(AddFriendTestTags.SEARCH_BUTTON),
-                onClick = {}, // Start the research
+                onClick = { addFriendViewModel.onSearch({}) }, // Start the research
             ) {
               Text(
                   text = "Search",
-                  // maxLines = 1,
+                  maxLines = 1,
               )
             }
           }
+
+          // List of user results
           Column(
               modifier =
                   Modifier.fillMaxSize()
@@ -107,24 +125,41 @@ fun AddFriendScreen(
                       .testTag(AddFriendTestTags.FRIEND_COLUMN),
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                //                FriendCard("Pseudo", context)
-                //                FriendCard("LONG long NAME YOOO", context)
-                //                FriendCard("Jean_wile ROdrigue", context)
-                //                FriendCard("Pseudo", context)
-                //                FriendCard("Pseudo", context)
-                //                FriendCard("Pseudo", context)
-                //                FriendCard("Pseudo", context)
-                //                FriendCard("Pseudo", context)
+                uiState.searchResults.forEach { u ->
+                  FriendCard(
+                      u.id, u.pseudo, u.avatar, u.friendRelation, addFriendViewModel, context)
+                }
               }
         }
       },
-      containerColor = MaterialTheme.colorScheme.background,
+      containerColor = colorScheme.background,
   )
 }
 
+/**
+ * Displays a card representing a user in the search results.
+ *
+ * The card includes:
+ * - the user's avatar,
+ * - their pseudo,
+ * - a button showing the current friend relation (e.g., "Add" or "Added").
+ *
+ * Clicking the button triggers a friend request action through the [viewModel].
+ *
+ * @param userId The ID of the user represented by this card.
+ * @param pseudo The username displayed on the card.
+ * @param avatar The user's avatar.
+ * @param friendRelation Current relationship status with the user.
+ * @param viewModel ViewModel handling friend request actions.
+ * @param context Android context used for localized strings.
+ */
 @Composable
 fun FriendCard(
+    userId: String,
     pseudo: String,
+    avatar: Avatar,
+    friendRelation: FriendRelation,
+    viewModel: AddFriendViewModel,
     context: Context,
 ) {
   Card(
@@ -139,17 +174,20 @@ fun FriendCard(
                       .testTag(AddFriendTestTags.getTestTagForRowOnFriendCard(pseudo)),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween) {
+                // Avatar
                 Card(
                     modifier =
                         Modifier.clip(CircleShape)
                             .size(80.dp)
                             .testTag(AddFriendTestTags.getTestTagForAvatarOnFriendCard(pseudo))) {
                       Image(
-                          painter = painterResource(R.drawable.avatar_a1),
+                          painter = painterResource(avatar.resId),
                           contentDescription =
                               context.getString(R.string.avatar_description_friend_screen, "test"),
                           modifier = Modifier.fillMaxSize())
                     }
+
+                // Pseudo
                 Box(
                     modifier = Modifier.fillMaxHeight().fillMaxWidth(0.6f),
                     contentAlignment = Alignment.Center,
@@ -165,28 +203,45 @@ fun FriendCard(
                       overflow = TextOverflow.Ellipsis,
                   )
                 }
+
+                // Relation button
                 Button(
                     modifier =
                         Modifier.testTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudo)),
-                    onClick = {}, // Update the UIstate to change the relation.
-                    colors = ButtonDefaults.buttonColors(RELATION.ADD.color),
-                    content = { Text("Add") })
+                    onClick = { viewModel.onAdd(userId, {}, {}) },
+                    colors = ButtonDefaults.buttonColors(friendRelation.color),
+                    content = { Text(friendRelation.toString()) })
               }
         }
       }
 }
 
-enum class RELATION {
+/**
+ * Represents the relationship status between the current user and another user's profile.
+ *
+ * Each relation provides:
+ * - A readable string representation via [toString], used for the button of a [FriendCard].
+ * - A [color] property that exposes the appropriate color for the given relation.
+ */
+enum class FriendRelation {
+  /** Indicates that the user can send a friend request. */
   ADD,
-  ADDED,
-  ASKED;
+  /** Indicates that the users are already connected. */
+  ADDED;
 
+  override fun toString(): String {
+    return when (this) {
+      FriendRelation.ADD -> "Add"
+      FriendRelation.ADDED -> "Added"
+    }
+  }
+
+  /** A color representing this friend relation. */
   val color: Color
     @Composable
     get() =
         when (this) {
           ADD -> colorScheme.primary
-          RELATION.ADDED -> colorScheme.primaryContainer
-          RELATION.ASKED -> colorScheme.onSurfaceVariant
+          ADDED -> colorScheme.outline
         }
 }

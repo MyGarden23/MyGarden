@@ -38,7 +38,7 @@ class AddFriendViewModelTest {
   // ---------- onQueryChange ----------
 
   @Test
-  fun onQueryChange_updates_query_and_clears_results() = runTest {
+  fun onQueryChange_updates_query_and_keep_result() = runTest {
     val dispatcher = StandardTestDispatcher(testScheduler)
     Dispatchers.setMain(dispatcher)
 
@@ -65,12 +65,12 @@ class AddFriendViewModelTest {
     advanceUntilIdle()
     assertTrue(vm.uiState.value.searchResults.isNotEmpty())
 
-    // Then: change query and ensure results are cleared
+    // Then: change query and ensure results are not changed
     vm.onQueryChange("newQuery")
 
     val state = vm.uiState.value
     assertEquals("newQuery", state.query)
-    assertTrue(state.searchResults.isEmpty())
+    assertTrue(vm.uiState.value.searchResults.isNotEmpty())
 
     Dispatchers.resetMain()
   }
