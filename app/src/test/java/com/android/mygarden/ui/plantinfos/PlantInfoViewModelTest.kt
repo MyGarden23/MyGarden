@@ -3,9 +3,13 @@ package com.android.mygarden.ui.plantinfos
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.android.mygarden.R
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
+import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.utils.FakeActivityRepository
+import com.android.mygarden.utils.FakeProfileRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -31,6 +35,8 @@ class PlantInfoViewModelTest {
 
   private lateinit var viewModel: PlantInfoViewModel
   private lateinit var repository: PlantsRepositoryLocal
+  private lateinit var activityRepo: FakeActivityRepository
+  private lateinit var profileRepo: FakeProfileRepository
   private val testDispatcher = StandardTestDispatcher()
   private lateinit var context: Context
 
@@ -38,7 +44,11 @@ class PlantInfoViewModelTest {
   fun setup() {
     Dispatchers.setMain(testDispatcher)
     repository = PlantsRepositoryLocal()
-    viewModel = PlantInfoViewModel(repository)
+    activityRepo = FakeActivityRepository()
+    profileRepo =
+        FakeProfileRepository(
+            Profile(pseudo = "pseudo")) // Pass a profile with a pseudo to the FakeProfileRepository
+    viewModel = PlantInfoViewModel(repository, activityRepo, profileRepo)
     context = ApplicationProvider.getApplicationContext()
   }
 
@@ -249,6 +259,70 @@ class PlantInfoViewModelTest {
   }
 
   @Test
+  fun savePlant_createsActivityAddedPlant() = runTest {
+    // Arrange: create a test plant
+    val plant = createTestPlant(name = "Orchid", latinName = "Orchidaceae")
+    var savedPlantId: String? = null
+
+    // Ensure no activities exist before saving
+    assertEquals(0, activityRepo.addedActivities.size)
+
+    // Act: save the plant
+    viewModel.savePlant(plant, onPlantSaved = { plantId -> savedPlantId = plantId })
+    advanceUntilIdle()
+
+    // Assert: verify activity was created
+    assertEquals(1, activityRepo.addedActivities.size)
+    val activity = activityRepo.addedActivities[0]
+    assertTrue(activity is ActivityAddedPlant)
+
+    val addedPlantActivity = activity as ActivityAddedPlant
+    assertEquals("fake-uid", addedPlantActivity.userId)
+    assertEquals("pseudo", addedPlantActivity.pseudo)
+    assertEquals(savedPlantId, addedPlantActivity.ownedPlant.id)
+    assertEquals("Orchid", addedPlantActivity.ownedPlant.plant.name)
+    assertEquals("Orchidaceae", addedPlantActivity.ownedPlant.plant.latinName)
+    assertNotNull(addedPlantActivity.createdAt)
+  }
+
+  @Test
+  fun savePlant_doesNotCreateActivity_whenProfileIsNull() = runTest {
+    // Arrange: create a profile repository that returns null
+    val nullProfileRepo = FakeProfileRepository()
+    val vm = PlantInfoViewModel(repository, activityRepo, nullProfileRepo)
+    val plant = createTestPlant(name = "Test Plant")
+
+    // Act: save the plant
+    vm.savePlant(plant, onPlantSaved = {})
+    advanceUntilIdle()
+
+    // Assert: no activity should be created
+    assertEquals(0, activityRepo.addedActivities.size)
+  }
+
+  @Test
+  fun savePlant_createsMultipleActivities_forMultiplePlants() = runTest {
+    // Arrange: create multiple test plants
+    val plant1 = createTestPlant(name = "Rose")
+    val plant2 = createTestPlant(name = "Tulip")
+
+    // Act: save both plants
+    viewModel.savePlant(plant1, onPlantSaved = {})
+    advanceUntilIdle()
+    viewModel.savePlant(plant2, onPlantSaved = {})
+    advanceUntilIdle()
+
+    // Assert: verify two activities were created
+    assertEquals(2, activityRepo.addedActivities.size)
+
+    val activity1 = activityRepo.addedActivities[0] as ActivityAddedPlant
+    val activity2 = activityRepo.addedActivities[1] as ActivityAddedPlant
+
+    assertEquals("Rose", activity1.ownedPlant.plant.name)
+    assertEquals("Tulip", activity2.ownedPlant.plant.name)
+  }
+
+  @Test
   fun initializeUIState_canBeCalledMultipleTimes() = runTest {
     // Re-initializing should replace the previous plant data
     val plant1 = createTestPlant(name = "First Plant")
@@ -269,7 +343,7 @@ class PlantInfoViewModelTest {
   fun showCareTips_setsDialogAndLoadsTips() = runTest {
     // Arrange: create a fake repository that returns a predictable tips string
     val fakeTips = "Water lightly every 3 days"
-    val fakeRepo =
+    val plantRepo =
         object : com.android.mygarden.model.plant.PlantsRepository by PlantsRepositoryLocal() {
           override suspend fun generateCareTips(
               latinName: String,
@@ -279,7 +353,7 @@ class PlantInfoViewModelTest {
           }
         }
 
-    val vm = PlantInfoViewModel(fakeRepo)
+    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo)
 
     // Act: call showCareTips and advance coroutines to completion
     vm.showCareTips("Testus plantus", PlantHealthStatus.HEALTHY)
@@ -294,7 +368,7 @@ class PlantInfoViewModelTest {
   @Test
   fun dismissCareTips_hidesDialogButPreservesText() = runTest {
     val fakeTips = "Keep soil moist"
-    val fakeRepo =
+    val plantRepo =
         object : com.android.mygarden.model.plant.PlantsRepository by PlantsRepositoryLocal() {
           override suspend fun generateCareTips(
               latinName: String,
@@ -304,7 +378,7 @@ class PlantInfoViewModelTest {
           }
         }
 
-    val vm = PlantInfoViewModel(fakeRepo)
+    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo)
     vm.showCareTips("Testus plantus", PlantHealthStatus.HEALTHY)
     advanceUntilIdle()
 
@@ -330,7 +404,7 @@ class PlantInfoViewModelTest {
             throw RuntimeException("AI backend down")
           }
         }
-    val vm = PlantInfoViewModel(throwingRepo)
+    val vm = PlantInfoViewModel(throwingRepo, activityRepo, profileRepo)
 
     // Act: call showCareTips and advance the coroutine
     vm.showCareTips("Testus plantus", PlantHealthStatus.UNKNOWN)
@@ -344,8 +418,8 @@ class PlantInfoViewModelTest {
 
   @Test
   fun showCareTips_showsUnknownPlaceholder() = runTest {
-    val fakeRepo = PlantsRepositoryLocal()
-    val vm = PlantInfoViewModel(fakeRepo)
+    val plantRepo = PlantsRepositoryLocal()
+    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo)
 
     // Case: latin name equals "unknown"
     vm.showCareTips("unknown", PlantHealthStatus.HEALTHY)
