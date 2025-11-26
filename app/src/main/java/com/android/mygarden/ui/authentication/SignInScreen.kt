@@ -144,7 +144,7 @@ fun SignInScreen(
                       tint = Color.Unspecified, // To keep the reel colors of the logo
                       modifier = Modifier.size(20.dp))
 
-                Spacer(modifier = Modifier.width(12.dp))
+                  Spacer(modifier = Modifier.width(12.dp))
 
                   Text(
                       text = context.getString(R.string.sign_in_with_google),
