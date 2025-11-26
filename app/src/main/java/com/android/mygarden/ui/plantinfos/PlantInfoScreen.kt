@@ -60,12 +60,14 @@ object PlantInfoScreenTestTags {
   const val HEALTH_TAB = "health_tab"
   const val LOCATION_TAB = "location_tab"
   const val CONTENT_CONTAINER = "content_container"
+  const val DESCRIPTION_HEADER = "description_header"
   const val DESCRIPTION_TEXT = "description_text"
-  const val HEALTH_STATUS_DESCRIPTION = "health_status_description"
   const val HEALTH_STATUS = "health_status"
+  const val LAST_TIME_WATERED_HEADER = "last_time_watered_header"
   const val LAST_TIME_WATERED = "last_time_watered"
   const val LOCATION_TEXT = "location_text"
   const val LIGHT_EXPOSURE_TEXT = "light_exposure_text"
+  const val WATERING_FREQUENCY_HEADER = "watering_frequency_header"
   const val WATERING_FREQUENCY = "watering_frequency"
   const val NEXT_BUTTON = "next_button"
   const val NEXT_BUTTON_LOADING = "next_button_loading"
@@ -480,7 +482,8 @@ private fun PlantDescriptionTab(uiState: PlantInfoUIState) {
               Text(
                   stringResource(R.string.description_header),
                   fontSize = 22.sp,
-                  fontWeight = FontWeight.Bold)
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag(PlantInfoScreenTestTags.DESCRIPTION_HEADER))
               Text(
                   text = uiState.description,
                   fontSize = 18.sp,
@@ -504,7 +507,6 @@ private fun PlantDescriptionTab(uiState: PlantInfoUIState) {
 private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
 
   Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-
     // Current health status
     val cardColor =
         colorsFromHealthStatus(
@@ -549,7 +551,7 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
+                modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY_HEADER))
 
             Text(
                 text = stringResource(R.string.watering_frequency_value, uiState.wateringFrequency),
@@ -588,7 +590,7 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
                       fontSize = 20.sp,
                       fontWeight = FontWeight.Medium,
                       color = MaterialTheme.colorScheme.onBackground,
-                      modifier = Modifier.testTag(PlantInfoScreenTestTags.LAST_TIME_WATERED))
+                      modifier = Modifier.testTag(PlantInfoScreenTestTags.LAST_TIME_WATERED_HEADER))
 
                   Text(
                       text = formattedText,
@@ -603,7 +605,7 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
 
 /**
  * Displays the plant's location information, such as:
- * - INDOOR / OUTDOOR
+ * - INDOOR / OUTDOOR (with the corresponding Icon)
  * - Light exposure description
  *
  * @param uiState The current UI state containing location and light data.

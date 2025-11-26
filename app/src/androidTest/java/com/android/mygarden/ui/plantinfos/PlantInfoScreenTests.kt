@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.printToLog
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
@@ -21,6 +22,7 @@ import com.android.mygarden.utils.FirestoreProfileTest
 import com.android.mygarden.utils.PlantRepositoryType
 import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -34,13 +36,17 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   val plant = TestPlants.plantInfoPlant
 
   /**
-   * Sets up the PlantInfosScreen composable for testing.
+   * Sets up the PlantInfosScreen composable for testing that comes from the camera screen.
    *
    * @param plant The Plant object to display
    * @param onSavePlant Callback for the "Next" button (default: empty lambda)
    * @param onBackPressed Callback for the back button (default: empty lambda)
    */
-  fun setContent(plant: Plant, onSavePlant: (String) -> Unit = {}, onBackPressed: () -> Unit = {}) {
+  fun setContentFromCamera(
+      plant: Plant,
+      onSavePlant: (String) -> Unit = {},
+      onBackPressed: () -> Unit = {}
+  ) {
     composeTestRule.setContent {
       context = LocalContext.current
       PlantInfosScreen(plant, onBackPressed = onBackPressed, onNextPlant = onSavePlant)
@@ -48,9 +54,50 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
     composeTestRule.waitForIdle()
   }
 
+  /**
+   * Sets up the PlantInfosScreen composable for testing that comes from the garden screen. This
+   * function actually stores the given plant to create a OwnedPlant.
+   *
+   * @param plant The Plant object to display
+   * @param onSavePlant Callback for the "Next" button (default: empty lambda)
+   * @param onBackPressed Callback for the back button (default: empty lambda)
+   */
+  suspend fun setContentFromGarden(
+      plant: Plant,
+      onSavePlant: (String) -> Unit = {},
+      onBackPressed: () -> Unit = {},
+      status: PlantHealthStatus = PlantHealthStatus.UNKNOWN
+  ) {
+    // Store the given plant as a OwnedPlant and give to the PlantInfoScreen a ID
+    val repository = PlantsRepositoryLocal()
+    val id = "test getOwned id 1"
+    val ratio =
+        when (status) {
+          PlantHealthStatus.SEVERELY_OVERWATERED -> 0.05
+          PlantHealthStatus.OVERWATERED -> 0.29
+          PlantHealthStatus.HEALTHY -> 0.69
+          PlantHealthStatus.SLIGHTLY_DRY -> 0.99
+          PlantHealthStatus.NEEDS_WATER -> 1.29
+          PlantHealthStatus.SEVERELY_DRY -> 3.0
+          PlantHealthStatus.UNKNOWN -> 0.0
+        }
+    val dayMillisLong = (plant.wateringFrequency * ratio).toLong()
+    val timestamp = Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(dayMillisLong))
+    val ownedPlant = repository.saveToGarden(plant, id, timestamp)
+    val vm = PlantInfoViewModel(repository)
+
+    composeTestRule.waitForIdle()
+    composeTestRule.setContent {
+      context = LocalContext.current
+      PlantInfosScreen(plant, ownedPlant.id, vm, onBackPressed, onSavePlant)
+    }
+
+    composeTestRule.waitForIdle()
+  }
+
   @Test
   fun allUIComponentsAreDisplayed() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_IMAGE).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).assertIsDisplayed()
@@ -67,33 +114,28 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
 
   @Test
   fun descriptionTabIsSelectedByDefault() {
-    setContent(plant)
+    setContentFromCamera(plant)
     // Verify description is shown and health info is not
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_HEADER).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).assertDoesNotExist()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertDoesNotExist()
   }
 
   @Test
-  fun healthStatusDescriptionIsDisplayedAfterClickingHealthTab() {
-    setContent(plant)
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION)
-        .assertIsDisplayed()
-  }
-
-  @Test
-  fun healthStatusIsDisplayedAfterClickingHealthTab() {
-    setContent(plant)
+  fun healthStatusIsDisplayedAfterClickingHealthTab() = runTest {
+    setContentFromGarden(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).assertIsDisplayed()
   }
 
   @Test
   fun wateringFrequencyIsDisplayedAfterClickingHealthTab() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY_HEADER)
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY).assertIsDisplayed()
   }
 
@@ -103,9 +145,22 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
    */
   @Test
   fun lastTimeWateredIsNotDisplayedAfterClickingHealthTabIfWeComeFromTheCamera() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.LAST_TIME_WATERED_HEADER)
+        .assertIsNotDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LAST_TIME_WATERED).assertIsNotDisplayed()
+  }
+
+  /** Check that if the user comes from the garden screen the health status is displayed. */
+  @Test
+  fun plantInfoFromGarden_showsPlantHealthStatus() = runTest {
+    // We need a repository to store the ownedPlant
+    setContentFromGarden(plant, {}, {})
+
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).assertIsDisplayed()
   }
 
   /**
@@ -115,19 +170,12 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   @Test
   fun plantInfoFromGarden_showsLastTimeWatered() = runTest {
     // We need a repository to store the ownedPlant
-    val repository = PlantsRepositoryLocal()
-    val id = "test getOwned id 1"
-    val timestamp = Timestamp(System.currentTimeMillis())
-    val ownedPlant = repository.saveToGarden(plant, id, timestamp)
-    val vm = PlantInfoViewModel(repository)
-
-    composeTestRule.setContent {
-      context = LocalContext.current
-      PlantInfosScreen(plant, ownedPlant.id, vm, {}, {})
-    }
-    composeTestRule.waitForIdle()
+    setContentFromGarden(plant, {}, {})
 
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.LAST_TIME_WATERED_HEADER)
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LAST_TIME_WATERED).assertIsDisplayed()
   }
 
@@ -138,17 +186,8 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   @Test
   fun plantInfoFromGarden_showDateOfCreation() = runTest {
     // We need a repository to store the ownedPlant
-    val repository = PlantsRepositoryLocal()
-    val id = "test getOwned id 1"
-    val timestamp = Timestamp(System.currentTimeMillis())
-    val ownedPlant = repository.saveToGarden(plant, id, timestamp)
-    val vm = PlantInfoViewModel(repository)
+    setContentFromGarden(plant, {}, {})
 
-    composeTestRule.setContent {
-      context = LocalContext.current
-      PlantInfosScreen(plant, ownedPlant.id, vm, {}, {})
-    }
-    composeTestRule.waitForIdle()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_DATE_OF_CREATION)
         .assertIsDisplayed()
@@ -160,7 +199,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
    */
   @Test
   fun plantInfoFromCamera_doesNotShowDateOfCreation() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_DATE_OF_CREATION)
         .assertIsNotDisplayed()
@@ -168,21 +207,21 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
 
   @Test
   fun locationTextIsDisplayedAfterClickingLocationTab() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertIsDisplayed()
   }
 
   @Test
   fun lightExposureDescriptionIsDisplayedAfterClickingLocationTab() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT).assertIsDisplayed()
   }
 
   @Test
   fun switchingToHealthTabHidesDescriptionAndLocationText() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertDoesNotExist()
@@ -191,7 +230,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
 
   @Test
   fun switchingBackToDescriptionTabShowsDescription() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TAB).performClick()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
@@ -199,13 +238,13 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
 
   @Test
   fun plantNameDisplaysCorrectText() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).assertTextEquals(plant.name)
   }
 
   @Test
   fun plantLatinNameDisplaysCorrectText() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME)
         .assertTextEquals(plant.latinName)
@@ -213,42 +252,35 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
 
   @Test
   fun descriptionDisplaysCorrectText() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
         .assertTextEquals(plant.description)
   }
 
   @Test
-  fun healthStatusDescriptionDisplaysCorrectText() {
-    setContent(plant)
+  fun healthStatusNotDisplayedWhenFromCamera() {
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION)
-        .assertTextEquals(plant.healthStatusDescription)
-  }
-
-  @Test
-  fun healthStatusDisplaysCorrectText() {
-    setContent(plant)
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals(context.getString(R.string.status_label, plant.healthStatus.description))
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).assertIsNotDisplayed()
   }
 
   @Test
   fun wateringFrequencyDisplaysCorrectText() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY_HEADER)
+        .assertTextEquals(context.getString(R.string.watering_frequency_header))
+    composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
-        .assertTextEquals(context.getString(R.string.watering_frequency, plant.wateringFrequency))
+        .assertTextEquals(
+            context.getString(R.string.watering_frequency_value, plant.wateringFrequency))
   }
 
   @Test
   fun locationTabDisplaysCorrectText() {
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT)
@@ -259,12 +291,12 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   }
 
   @Test
-  fun needsWaterStatusDisplaysCorrectDescription() {
+  fun needsWaterStatusDisplaysCorrectDescription() = runTest {
     val needsWaterPlant =
         plant.copy(
             healthStatus = PlantHealthStatus.NEEDS_WATER,
             healthStatusDescription = "This plant needs water now.")
-    setContent(needsWaterPlant)
+    setContentFromGarden(plant = needsWaterPlant, status = PlantHealthStatus.NEEDS_WATER)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
@@ -273,52 +305,42 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   }
 
   @Test
-  fun overwateredStatusDisplaysCorrectDescription() {
+  fun severelyDryStatusDisplaysCorrectDescription() = runTest {
     val overwateredPlant =
         plant.copy(
-            healthStatus = PlantHealthStatus.OVERWATERED,
-            healthStatusDescription = "This plant has too much water.")
-    setContent(overwateredPlant)
+            healthStatus = PlantHealthStatus.SEVERELY_DRY,
+            healthStatusDescription = "This plant really needs water.")
+    setContentFromGarden(plant = overwateredPlant, status = PlantHealthStatus.SEVERELY_DRY)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).printToLog("TEST_DEBUG")
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
         .assertTextEquals(
-            context.getString(R.string.status_label, PlantHealthStatus.OVERWATERED.description))
+            context.getString(R.string.status_label, PlantHealthStatus.SEVERELY_DRY.description))
   }
 
   @Test
-  fun unknownStatusDisplaysCorrectDescription() {
-    val unknownPlant =
+  fun healthyStatusDisplaysCorrectDescription() = runTest {
+    val healthyPlant =
         plant.copy(
-            healthStatus = PlantHealthStatus.UNKNOWN,
-            healthStatusDescription = "We don't know the status of this plant.")
-    setContent(unknownPlant)
+            healthStatus = PlantHealthStatus.HEALTHY,
+            healthStatusDescription = "This plant is healthy!")
+    setContentFromGarden(plant = healthyPlant, status = PlantHealthStatus.HEALTHY)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
         .assertTextEquals(
-            context.getString(R.string.status_label, PlantHealthStatus.UNKNOWN.description))
-  }
-
-  @Test
-  fun healthStatusDescriptionChangesWithDifferentPlant() {
-    val customDescription = "Custom health description for testing."
-    val customPlant = plant.copy(healthStatusDescription = customDescription)
-    setContent(customPlant)
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION)
-        .assertTextEquals(customDescription)
+            context.getString(R.string.status_label, PlantHealthStatus.HEALTHY.description))
   }
 
   @Test
   fun differentWateringFrequencyDisplaysCorrectly() {
     val plantWith7DaysWatering = plant.copy(wateringFrequency = 7)
-    setContent(plantWith7DaysWatering)
+    setContentFromCamera(plantWith7DaysWatering)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
-        .assertTextEquals(context.getString(R.string.watering_frequency, 7))
+        .assertTextEquals(context.getString(R.string.watering_frequency_value, 7))
   }
 
   @Test
@@ -327,7 +349,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
         plant.copy(
             description =
                 "Line 1\n".repeat(100) + "End of long description") // Create very long content
-    setContent(plantWithLongDescription)
+    setContentFromCamera(plantWithLongDescription)
 
     // Verify the content container is scrollable by checking it exists and is displayed
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.CONTENT_CONTAINER).assertIsDisplayed()
@@ -340,24 +362,12 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   }
 
   @Test
-  fun healthTabContentIsAlsoScrollable() {
-    val plantWithLongHealthDescription =
-        plant.copy(healthStatusDescription = "Health info\n".repeat(100))
-    setContent(plantWithLongHealthDescription)
-
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION)
-        .performScrollTo()
-  }
-
-  @Test
   fun saveButtonTriggersOnSavePlantCallback() {
     gatedRepo.gate.complete(Unit)
     composeTestRule.waitForIdle()
 
     var savePlantCalled = false
-    setContent(plant, onSavePlant = { savePlantCalled = true })
+    setContentFromCamera(plant, onSavePlant = { savePlantCalled = true })
 
     // Wait for initialization to complete
     composeTestRule.waitForIdle()
@@ -375,7 +385,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   @Test
   fun backButtonTriggersOnBackPressedCallback() {
     var backPressedCalled = false
-    setContent(plant, onBackPressed = { backPressedCalled = true })
+    setContentFromCamera(plant, onBackPressed = { backPressedCalled = true })
 
     // Wait for initialization to complete
     composeTestRule.waitForIdle()
@@ -400,7 +410,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun nextButton_showsLoading_untilWorkCompletes() {
-    setContent(plant)
+    setContentFromCamera(plant)
 
     // Click → VM put isSaving=true and bloc one gate.await()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
@@ -425,7 +435,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
   fun tipsButton_isDisplayed() {
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
 
-    setContent(plant)
+    setContentFromCamera(plant)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_BUTTON).assertIsDisplayed()
   }
 
@@ -438,7 +448,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
     fakePlantRepositoryUtils.mockPlantCareTips(fakeTips)
     fakePlantRepositoryUtils.setUpMockRepo()
 
-    setContent(plant)
+    setContentFromCamera(plant)
 
     // Click the tips button
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_BUTTON).performClick()
@@ -459,7 +469,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
     fakePlantRepositoryUtils.mockPlantCareTips(fakeTips)
     fakePlantRepositoryUtils.setUpMockRepo()
 
-    setContent(plant)
+    setContentFromCamera(plant)
 
     // Open dialog
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.TIPS_BUTTON).performClick()

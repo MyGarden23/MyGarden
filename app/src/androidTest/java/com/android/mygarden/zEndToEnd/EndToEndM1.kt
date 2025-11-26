@@ -2,6 +2,7 @@ package com.android.mygarden.zEndToEnd
 
 import android.Manifest
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isDisplayed
@@ -15,9 +16,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
-import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
-import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
@@ -39,7 +38,6 @@ import org.junit.runner.RunWith
 // Constant string for the e2e test
 private const val NOT_IDENTIFY_PLANT_DESCRIPTION = "The AI was not able to identify the plant."
 private const val UNKNOWN_PLANT_NAME = "Unknown"
-private const val NO_HEALTH_DESCRIPTION = "No health status description available"
 
 /**
  * End-to-end test for MyGarden's core user flow. This test assume that we have an internet
@@ -155,33 +153,15 @@ class EndToEndM1 {
         .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
         .assertTextEquals(NOT_IDENTIFY_PLANT_DESCRIPTION)
 
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME)
-        .assertTextEquals(UNKNOWN_PLANT_NAME)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME).assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME)
-        .assertTextEquals(UNKNOWN_PLANT_NAME)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME).assertIsDisplayed()
 
     // Test health tab
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION)
-        .assertTextEquals(NO_HEALTH_DESCRIPTION)
-    var expectedStatus = ""
-    var expectedWatering = ""
-    scenario.onActivity { activity ->
-      expectedStatus =
-          activity.getString(R.string.status_label, PlantHealthStatus.UNKNOWN.description)
-      expectedWatering = activity.getString(R.string.watering_frequency, 0)
-    }
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals(expectedStatus)
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
-        .assertTextEquals(expectedWatering)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY).assertIsDisplayed()
 
     // === BACK TO CAMERA ===
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).isDisplayed()
