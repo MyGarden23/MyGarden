@@ -80,10 +80,10 @@ fun AppNavHost(
           profileViewModel = vm,
           onSavePressed = {
             // When the user finishes creating a profile, navigate to Camera and
-            // clear Auth (and NewProfile) from the back stack so the sign-in
-            // screen cannot be reached via back.
+            // remove NewProfile from the back stack so the user cannot return to
+            // the profile creation screen via the system back button.
             navController.navigate(Screen.Camera.route) {
-              popUpTo(Screen.Auth.route) { inclusive = true }
+              popUpTo(Screen.NewProfile.route) { inclusive = true }
               launchSingleTop = true
             }
           },
