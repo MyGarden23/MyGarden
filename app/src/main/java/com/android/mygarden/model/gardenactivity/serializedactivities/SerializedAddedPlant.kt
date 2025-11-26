@@ -1,6 +1,7 @@
 package com.android.mygarden.model.gardenactivity.serializedactivities
 
 import androidx.annotation.Keep
+import com.android.mygarden.model.gardenactivity.ActivityType
 import com.android.mygarden.model.plant.SerializedOwnedPlant
 
 /**
@@ -19,5 +20,5 @@ data class SerializedAddedPlant(
     override val createdAt: Long = 0,
     val ownedPlant: SerializedOwnedPlant = SerializedOwnedPlant()
 ) : SerializedActivity() {
-  override val type: String = "ADDED_PLANT"
+  override val type: String = ActivityType.ADDED_PLANT.toString()
 }

@@ -70,10 +70,10 @@ object ActivityMapper {
    */
   fun mapTypeToSerializedClass(type: String): Class<out SerializedActivity>? {
     return when (type) {
-      "ADDED_PLANT" -> SerializedAddedPlant::class.java
-      "ACHIEVEMENT" -> SerializedAchievement::class.java
-      "ADDED_FRIEND" -> SerializedAddFriend::class.java
-      "WATERED_PLANT" -> SerializedWaterPlant::class.java
+      ActivityType.ADDED_PLANT.toString() -> SerializedAddedPlant::class.java
+      ActivityType.ACHIEVEMENT.toString() -> SerializedAchievement::class.java
+      ActivityType.ADDED_FRIEND.toString() -> SerializedAddFriend::class.java
+      ActivityType.WATERED_PLANT.toString() -> SerializedWaterPlant::class.java
       else -> null
     }
   }

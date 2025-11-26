@@ -1,6 +1,7 @@
 package com.android.mygarden.model.gardenactivity.serializedactivities
 
 import androidx.annotation.Keep
+import com.android.mygarden.model.gardenactivity.ActivityType
 
 /**
  * Represents a serialized "add friend" activity for Firestore.
@@ -18,5 +19,5 @@ data class SerializedAddFriend(
     override val createdAt: Long = 0,
     val friendId: String = "",
 ) : SerializedActivity() {
-  override val type: String = "ADDED_FRIEND"
+  override val type: String = ActivityType.ADDED_FRIEND.toString()
 }
