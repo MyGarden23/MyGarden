@@ -146,7 +146,6 @@ private fun ProfileForm(
   var isExperienceExpanded by remember { mutableStateOf(false) }
   var isCountryExpanded by remember { mutableStateOf(false) }
   val countryFocusRequester = remember { FocusRequester() }
-  var pseudoTouched by remember { mutableStateOf(false) }
 
   Column(modifier = modifier, verticalArrangement = Arrangement.SpaceEvenly) {
     // Required fields with validation
@@ -176,14 +175,13 @@ private fun ProfileForm(
         modifier =
             Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.PSEUDO_FIELD).onFocusChanged {
                 state ->
-              pseudoTouched = true
               if (!state.isFocused) {
                 profileViewModel.checkAvailabilityNow()
               }
             },
-        isError = profileViewModel.pseudoIsError() && pseudoTouched,
+        isError = profileViewModel.pseudoIsError(),
         supportingText = {
-          if (profileViewModel.pseudoIsError() && pseudoTouched) {
+          if (profileViewModel.pseudoIsError()) {
             Text(
                 text = stringResource(R.string.error_pseudo_taken),
                 color = MaterialTheme.colorScheme.error)

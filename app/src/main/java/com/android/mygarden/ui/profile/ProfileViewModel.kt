@@ -264,9 +264,9 @@ class ProfileViewModel(
    * @return true if register was pressed and pseudo is invalid
    */
   fun pseudoIsError(): Boolean {
-    return !_pseudoAvailable.value || _uiState.value.pseudo.isBlank()
-    // return !pseudoValid() && _uiState.value.registerPressed || ((!_pseudoAvailable.value) ||
-    // _uiState.value.pseudo.isBlank())
+    return (!pseudoValid() && _uiState.value.registerPressed) ||
+        !_pseudoAvailable.value ||
+        _uiState.value.pseudo.isBlank()
   }
 
   /**
