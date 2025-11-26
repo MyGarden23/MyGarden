@@ -4,11 +4,23 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
+/**
+ * Firestore-backed implementation of [FriendsRepository].
+ *
+ * This repository stores friends inside: users/{uid}/friends/{friendUid}
+ *
+ * Only the authenticated user can add friends to their own list.
+ */
 class FriendsRepositoryFirestore(
     private val db: FirebaseFirestore,
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : FriendsRepository {
 
+  /**
+   * Returns a reference to the authenticated user's "friends" subcollection.
+   *
+   * Path: users/{userId}/friends
+   */
   private fun friendsCollection(userId: String) =
       db.collection("users").document(userId).collection("friends")
 

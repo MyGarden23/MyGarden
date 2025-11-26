@@ -6,6 +6,12 @@ import kotlinx.coroutines.tasks.await
 
 private const val COLLECTION_USERS = "users"
 
+/**
+ * Firestore-backed implementation of [UserProfileRepository].
+ *
+ * Loads public user profile data from the `users/{userId}` document, including pseudo and avatar.
+ * Returns `null` if the user does not exist.
+ */
 class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserProfileRepository {
 
   override suspend fun getUserProfile(userId: String): UserProfile? {
