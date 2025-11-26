@@ -201,7 +201,7 @@ class CameraViewModel : ViewModel() {
    * @param context the context used to access the Shared Preferences
    * @param value true if the user has already denied camera permission, false otherwise
    */
-  fun sethasAlreadyDeniedCameraPermission(context: Context, value: Boolean) {
+  fun setHasAlreadyDeniedCameraPermission(context: Context, value: Boolean) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     prefs.edit { putBoolean(HAS_DENIED_CAMERA, value) }
   }

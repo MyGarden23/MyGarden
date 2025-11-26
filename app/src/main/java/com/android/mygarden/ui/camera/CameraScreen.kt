@@ -221,7 +221,7 @@ private fun refreshAndRequestCameraPermission(
   // If not already asked, ask for the permission to use the camera
   if (!cameraViewModel.hasAlreadyDeniedCameraPermission(context) && !cameraPermission.value) {
     launchPermissionRequest()
-    cameraViewModel.sethasAlreadyDeniedCameraPermission(context, true)
+    cameraViewModel.setHasAlreadyDeniedCameraPermission(context, true)
   }
 }
 
