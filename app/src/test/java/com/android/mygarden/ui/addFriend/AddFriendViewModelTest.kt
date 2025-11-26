@@ -232,6 +232,12 @@ class AddFriendViewModelTest {
       uidMap.remove(pseudo.lowercase())
     }
 
+    override suspend fun updatePseudoAtomic(
+        oldPseudo: String?,
+        newPseudo: String,
+        userId: String
+    ) {}
+
     override suspend fun searchPseudoStartingWith(query: String): List<String> = searchResults
 
     override suspend fun getUidFromPseudo(pseudo: String): String? = uidMap[pseudo.lowercase()]

@@ -175,9 +175,9 @@ private fun ProfileForm(
         label = { Text(stringResource(R.string.mandatory_pseudo_label)) },
         placeholder = { Text(stringResource(R.string.mandatory_pseudo_placeholder)) },
         modifier = Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.PSEUDO_FIELD),
-        isError = profileViewModel.pseudoIsError(pseudoAvailable),
+        isError = profileViewModel.pseudoIsError(),
         supportingText = {
-          if (profileViewModel.pseudoIsError(pseudoAvailable)) {
+          if (profileViewModel.pseudoIsError()) {
             Text(
                 text = stringResource(R.string.error_pseudo_taken),
                 color = MaterialTheme.colorScheme.error)
