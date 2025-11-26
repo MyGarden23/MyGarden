@@ -18,9 +18,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -44,10 +46,20 @@ import com.android.mygarden.ui.navigation.TopBar
 
 object AddFriendTestTags {
 
+  const val SEARCH_TEXT = "searchText"
+  const val SEARCH_BUTTON = "searchButton"
+  const val FRIEND_COLUMN = "friendColumn"
+
   // Test tags that are Friend Card specific
   fun getTestTagForFriendCard(pseudo: String): String = "friendCardTestTag/${pseudo}"
 
   fun getTestTagForPseudoOnFriendCard(pseudo: String) = "pseudoOnFriendCardTestTag/${pseudo}"
+
+  fun getTestTagForRowOnFriendCard(pseudo: String) = "rowOnFriendCardTestTag/${pseudo}"
+
+  fun getTestTagForAvatarOnFriendCard(pseudo: String) = "avatarOnFriendCardTestTag/${pseudo}"
+
+  fun getTestTagForButtonOnFriendCard(pseudo: String) = "buttonOnFriendCardTestTag/${pseudo}"
 }
 
 @Preview
@@ -73,12 +85,12 @@ fun AddFriendScreen(
           Spacer(modifier = Modifier.fillMaxHeight(0.02f))
           Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(0.6f),
+                modifier = Modifier.fillMaxWidth(0.6f).testTag(AddFriendTestTags.SEARCH_TEXT),
                 value = "Pseudo",
                 onValueChange = {},
             )
             Button(
-                // modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.testTag(AddFriendTestTags.SEARCH_BUTTON),
                 onClick = {}, // Start the research
             ) {
               Text(
@@ -91,17 +103,18 @@ fun AddFriendScreen(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(horizontal = 20.dp, vertical = 35.dp)
-                      .verticalScroll(rememberScrollState()),
+                      .verticalScroll(rememberScrollState())
+                      .testTag(AddFriendTestTags.FRIEND_COLUMN),
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                FriendCard("Pseudo", context)
-                FriendCard("LONG long NAME YOOO", context)
-                FriendCard("Jean_wile ROdrigue", context)
-                FriendCard("Pseudo", context)
-                FriendCard("Pseudo", context)
-                FriendCard("Pseudo", context)
-                FriendCard("Pseudo", context)
-                FriendCard("Pseudo", context)
+                //                FriendCard("Pseudo", context)
+                //                FriendCard("LONG long NAME YOOO", context)
+                //                FriendCard("Jean_wile ROdrigue", context)
+                //                FriendCard("Pseudo", context)
+                //                FriendCard("Pseudo", context)
+                //                FriendCard("Pseudo", context)
+                //                FriendCard("Pseudo", context)
+                //                FriendCard("Pseudo", context)
               }
         }
       },
@@ -121,16 +134,22 @@ fun FriendCard(
               .testTag(AddFriendTestTags.getTestTagForFriendCard(pseudo))) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
           Row(
-              modifier = Modifier.fillMaxWidth(0.94f),
+              modifier =
+                  Modifier.fillMaxWidth(0.94f)
+                      .testTag(AddFriendTestTags.getTestTagForRowOnFriendCard(pseudo)),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween) {
-                Card(modifier = Modifier.clip(CircleShape).size(80.dp)) {
-                  Image(
-                      painter = painterResource(R.drawable.avatar_a1),
-                      contentDescription =
-                          context.getString(R.string.avatar_description_friend_screen, "test"),
-                      modifier = Modifier.fillMaxSize())
-                }
+                Card(
+                    modifier =
+                        Modifier.clip(CircleShape)
+                            .size(80.dp)
+                            .testTag(AddFriendTestTags.getTestTagForAvatarOnFriendCard(pseudo))) {
+                      Image(
+                          painter = painterResource(R.drawable.avatar_a1),
+                          contentDescription =
+                              context.getString(R.string.avatar_description_friend_screen, "test"),
+                          modifier = Modifier.fillMaxSize())
+                    }
                 Box(
                     modifier = Modifier.fillMaxHeight().fillMaxWidth(0.6f),
                     contentAlignment = Alignment.Center,
@@ -140,15 +159,17 @@ fun FriendCard(
                       fontWeight = FontWeight.Bold,
                       fontSize = 20.sp,
                       modifier =
-                          Modifier
-                              // .alignByBaseline()
-                              .testTag(AddFriendTestTags.getTestTagForPseudoOnFriendCard(pseudo)),
+                          Modifier.testTag(
+                              AddFriendTestTags.getTestTagForPseudoOnFriendCard(pseudo)),
                       maxLines = 1,
                       overflow = TextOverflow.Ellipsis,
                   )
                 }
                 Button(
+                    modifier =
+                        Modifier.testTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudo)),
                     onClick = {}, // Update the UIstate to change the relation.
+                    colors = ButtonDefaults.buttonColors(RELATION.ADD.color),
                     content = { Text("Add") })
               }
         }
@@ -161,10 +182,11 @@ enum class RELATION {
   ASKED;
 
   val color: Color
+    @Composable
     get() =
         when (this) {
-          ADD -> TODO()
-          RELATION.ADDED -> TODO()
-          RELATION.ASKED -> TODO()
+          ADD -> colorScheme.primary
+          RELATION.ADDED -> colorScheme.primaryContainer
+          RELATION.ASKED -> colorScheme.onSurfaceVariant
         }
 }
