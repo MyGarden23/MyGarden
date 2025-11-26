@@ -263,12 +263,12 @@ private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
       title = { Text(text = stringResource(R.string.tips_title, uiState.latinName)) },
       text = {
         val textToShow =
-            when {
-              uiState.careTips == PlantInfoViewModel.LOADING_TIPS_PLACEHOLDER ->
+            when (uiState.careTips) {
+              PlantInfoViewModel.LOADING_TIPS_PLACEHOLDER ->
                   stringResource(R.string.tips_loading_message)
-              uiState.careTips == PlantInfoViewModel.UNKNOWN_PLANT_TIPS_PLACEHOLDER ->
+              PlantInfoViewModel.UNKNOWN_PLANT_TIPS_PLACEHOLDER ->
                   stringResource(R.string.unknown_plant_tips_message)
-              uiState.careTips == PlantInfoViewModel.ERROR_GENERATING_TIPS ->
+              PlantInfoViewModel.ERROR_GENERATING_TIPS ->
                   stringResource(R.string.error_generating_care_tips)
               else -> uiState.careTips
             }
@@ -477,7 +477,10 @@ private fun PlantDescriptionTab(uiState: PlantInfoUIState) {
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(20.dp)) {
-              Text("Overview", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+              Text(
+                  stringResource(R.string.description_header),
+                  fontSize = 22.sp,
+                  fontWeight = FontWeight.Bold)
               Text(
                   text = uiState.description,
                   fontSize = 18.sp,
@@ -510,23 +513,26 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
                 customColors = ExtendedTheme.colors)
             .backgroundColor
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = cardColor.copy(alpha = 0.2f),
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
-          Text(
-              text =
-                  stringResource(
-                      R.string.status_label,
-                      stringResource(id = uiState.healthStatus.descriptionRes)),
-              fontSize = 20.sp,
-              fontWeight = FontWeight.Medium,
-              color = MaterialTheme.colorScheme.onBackground,
-              modifier = Modifier.padding(20.dp).testTag(PlantInfoScreenTestTags.HEALTH_STATUS))
-        }
+    // Plant status (only if from garden)
+    if (uiState.isFromGarden) {
+      Card(
+          modifier = Modifier.fillMaxWidth(),
+          shape = RoundedCornerShape(16.dp),
+          colors =
+              CardDefaults.cardColors(
+                  containerColor = cardColor.copy(alpha = 0.2f),
+                  contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+            Text(
+                text =
+                    stringResource(
+                        R.string.status_label,
+                        stringResource(id = uiState.healthStatus.descriptionRes)),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(20.dp).testTag(PlantInfoScreenTestTags.HEALTH_STATUS))
+          }
+    }
 
     // Watering frequency
     Row(
@@ -539,21 +545,21 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
               tint = MaterialTheme.colorScheme.primary)
           Column(verticalArrangement = Arrangement.SpaceAround, modifier = Modifier.height(50.dp)) {
             Text(
-                text = "Watering frequency",
+                text = stringResource(R.string.watering_frequency_header),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
 
             Text(
-                text = "Every ${uiState.wateringFrequency} days",
+                text = stringResource(R.string.watering_frequency_value, uiState.wateringFrequency),
                 fontSize = 20.sp,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
           }
         }
 
-    // Last time watered information
+    // Last time watered information (only if from garden)
     if (uiState.isFromGarden) {
       // Get the TimeStamp of the last time watered it is not null because the
       // user comes from the garden.
@@ -578,7 +584,7 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
             Column(
                 verticalArrangement = Arrangement.SpaceAround, modifier = Modifier.height(50.dp)) {
                   Text(
-                      text = "Last watered",
+                      text = stringResource(R.string.last_time_watered_header_plant_info),
                       fontSize = 20.sp,
                       fontWeight = FontWeight.Medium,
                       color = MaterialTheme.colorScheme.onBackground,
