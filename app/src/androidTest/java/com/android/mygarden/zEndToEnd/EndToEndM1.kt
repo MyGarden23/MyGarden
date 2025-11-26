@@ -123,16 +123,9 @@ class EndToEndM1 {
     // === CAMERA SCREEN ===
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
 
-    // Wait for the camera preview/controller to be bound. This test tag is emitted once the
-    // preview's AndroidView has been created and bound to the lifecycle, which indicates the
-    // camera had time to initialize on the CI device.
+    // Wait for camera ready
     composeTestRule.waitUntil(TIMEOUT) {
-      try {
-        composeTestRule.onNodeWithTag(CameraScreenTestTags.CAMERA_READY).fetchSemanticsNode()
-        true
-      } catch (_: Throwable) {
-        false
-      }
+      composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
     }
     // Verify UI elements
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()

@@ -62,9 +62,6 @@ object CameraScreenTestTags {
   const val PREVIEW_VIEW = "preview_view"
   const val ACCESS_GALLERY_NO_CAMERA_ACCESS_BUTTON = "access_gallery_no_camera"
   const val ENABLE_CAMERA_PERMISSION = "enable_camera_permission"
-
-  // Test-only tag emitted when the camera preview has been bound and should be ready
-  const val CAMERA_READY = "camera_ready"
 }
 
 // Icon sizes
@@ -294,14 +291,9 @@ private fun CameraGrantedContent(
           }
         }
       }
-  // Track whether the preview/controller was bound and the camera should be ready.
-  val cameraReadyState = remember { mutableStateOf(false) }
 
   Box(modifier = modifier.fillMaxSize()) {
-    CameraPreview(
-        controller = controller,
-        modifier = modifier.fillMaxSize(),
-        onCameraReady = { cameraReadyState.value = true })
+    CameraPreview(controller = controller, modifier = modifier.fillMaxSize())
 
     // Button for switching between back camera and front camera
     IconButton(
@@ -361,11 +353,6 @@ private fun CameraGrantedContent(
               modifier = modifier.size(LARGE_ICON_GALLERY_SIZE),
               tint = ExtendedTheme.colors.iconsAndButtonWhiteColor)
         }
-    // Emit a test-only node when the camera preview has been bound. Tests wait for this tag
-    // to ensure the camera had time to initialize before attempting to take a picture.
-    if (cameraReadyState.value) {
-      Box(modifier = Modifier.testTag(CameraScreenTestTags.CAMERA_READY))
-    }
   }
 }
 
@@ -374,23 +361,15 @@ private fun CameraGrantedContent(
  *
  * @param controller the controller that manages the camera lifecycle and outputs the preview
  * @param modifier the optional modifier of the composable
- * @param onCameraReady callback invoked when the camera preview is ready
  */
 @Composable
-private fun CameraPreview(
-    controller: LifecycleCameraController,
-    modifier: Modifier = Modifier,
-    onCameraReady: (() -> Unit)? = null,
-) {
+private fun CameraPreview(controller: LifecycleCameraController, modifier: Modifier = Modifier) {
   val lifeCycleOwner = LocalLifecycleOwner.current
   AndroidView(
       factory = { context ->
         PreviewView(context).apply {
           this.controller = controller
           controller.bindToLifecycle(lifeCycleOwner)
-          // Notify that the controller was bound and the preview view created. This is
-          // used in tests to ensure the camera has had time to initialize.
-          onCameraReady?.invoke()
         }
       },
       modifier = modifier.testTag(CameraScreenTestTags.PREVIEW_VIEW),
@@ -398,7 +377,6 @@ private fun CameraPreview(
         if (view.controller !== controller) {
           view.controller = controller
           controller.bindToLifecycle(lifeCycleOwner)
-          onCameraReady?.invoke()
         }
       })
 }
