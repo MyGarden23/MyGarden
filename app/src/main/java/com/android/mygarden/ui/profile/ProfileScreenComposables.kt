@@ -47,9 +47,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -102,7 +104,6 @@ private fun ProfileHeader(
     uiState: ProfileUIState,
     onAvatarClick: () -> Unit,
 ) {
-  val context = LocalContext.current
 
   Box(modifier = modifier.fillMaxWidth()) {
     Column(
@@ -121,7 +122,7 @@ private fun ProfileHeader(
               contentAlignment = Alignment.Center) {
                 Image(
                     painter = painterResource(uiState.avatar.resId),
-                    contentDescription = context.getString(R.string.avatar_picture_description),
+                    contentDescription = stringResource(R.string.avatar_picture_description),
                     modifier = Modifier.fillMaxSize())
               }
         }
@@ -142,19 +143,17 @@ private fun ProfileForm(
     profileViewModel: ProfileViewModel,
     modifier: Modifier = Modifier
 ) {
-  val context = LocalContext.current
   var isExperienceExpanded by remember { mutableStateOf(false) }
   var isCountryExpanded by remember { mutableStateOf(false) }
   val countryFocusRequester = remember { FocusRequester() }
-  val pseudoAvailable by profileViewModel.pseudoAvailable.collectAsState()
 
   Column(modifier = modifier, verticalArrangement = Arrangement.SpaceEvenly) {
     // Required fields with validation
     OutlinedTextField(
         value = uiState.firstName,
         onValueChange = { profileViewModel.setFirstName(it) },
-        label = { Text(context.getString(R.string.mandatory_first_name_label)) },
-        placeholder = { Text(context.getString(R.string.mandatory_first_name_placeholder)) },
+        label = { Text(stringResource(R.string.mandatory_first_name_label)) },
+        placeholder = { Text(stringResource(R.string.mandatory_first_name_placeholder)) },
         modifier = Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.FIRST_NAME_FIELD),
         isError = profileViewModel.firstNameIsError(),
         singleLine = true)
@@ -162,8 +161,8 @@ private fun ProfileForm(
     OutlinedTextField(
         value = uiState.lastName,
         onValueChange = { profileViewModel.setLastName(it) },
-        label = { Text(context.getString(R.string.mandatory_last_name_label)) },
-        placeholder = { Text(context.getString(R.string.mandatory_last_name_placeholder)) },
+        label = { Text(stringResource(R.string.mandatory_last_name_label)) },
+        placeholder = { Text(stringResource(R.string.mandatory_last_name_placeholder)) },
         modifier = Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.LAST_NAME_FIELD),
         isError = profileViewModel.lastNameIsError(),
         singleLine = true)
@@ -171,14 +170,20 @@ private fun ProfileForm(
     OutlinedTextField(
         value = uiState.pseudo,
         onValueChange = { profileViewModel.setPseudo(it, false) },
-        label = { Text(context.getString(R.string.mandatory_pseudo_label)) },
-        placeholder = { Text(context.getString(R.string.mandatory_pseudo_placeholder)) },
-        modifier = Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.PSEUDO_FIELD),
-        isError = profileViewModel.pseudoIsError(pseudoAvailable),
+        label = { Text(stringResource(R.string.mandatory_pseudo_label)) },
+        placeholder = { Text(stringResource(R.string.mandatory_pseudo_placeholder)) },
+        modifier =
+            Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.PSEUDO_FIELD).onFocusChanged {
+                state ->
+              if (!state.isFocused) {
+                profileViewModel.checkAvailabilityNow()
+              }
+            },
+        isError = profileViewModel.pseudoIsError(),
         supportingText = {
-          if (profileViewModel.pseudoIsError(pseudoAvailable)) {
+          if (profileViewModel.pseudoIsError()) {
             Text(
-                text = context.getString(R.string.error_pseudo_taken),
+                text = stringResource(R.string.error_pseudo_taken),
                 color = MaterialTheme.colorScheme.error)
           }
         },
@@ -194,8 +199,8 @@ private fun ProfileForm(
     OutlinedTextField(
         value = uiState.favoritePlant,
         onValueChange = { profileViewModel.setFavoritePlant(it) },
-        label = { Text(context.getString(R.string.favorite_plant_label)) },
-        placeholder = { Text(context.getString(R.string.favorite_plant_placeholder)) },
+        label = { Text(stringResource(R.string.favorite_plant_label)) },
+        placeholder = { Text(stringResource(R.string.favorite_plant_placeholder)) },
         modifier = Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.FAVORITE_PLANT_FIELD),
         singleLine = true)
 
@@ -224,7 +229,6 @@ private fun ExperienceDropdown(
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit
 ) {
-  val context = LocalContext.current
 
   ExposedDropdownMenuBox(
       expanded = isExpanded,
@@ -234,8 +238,8 @@ private fun ExperienceDropdown(
             value = uiState.gardeningSkill?.name ?: "",
             onValueChange = {},
             readOnly = true,
-            label = { Text(context.getString(R.string.experience_label)) },
-            placeholder = { Text(context.getString(R.string.experience_placeholder)) },
+            label = { Text(stringResource(R.string.experience_label)) },
+            placeholder = { Text(stringResource(R.string.experience_placeholder)) },
             modifier =
                 Modifier.fillMaxWidth()
                     .menuAnchor()
@@ -293,8 +297,8 @@ private fun CountryDropdown(
           profileViewModel.setCountry(newText)
           onExpandedChange(newText.isNotEmpty())
         },
-        label = { Text(context.getString(R.string.mandatory_country_label)) },
-        placeholder = { Text(context.getString(R.string.mandatory_country_placeholder)) },
+        label = { Text(stringResource(R.string.mandatory_country_label)) },
+        placeholder = { Text(stringResource(R.string.mandatory_country_placeholder)) },
         modifier =
             Modifier.fillMaxWidth()
                 .focusRequester(countryFocusRequester)
@@ -304,8 +308,7 @@ private fun CountryDropdown(
         trailingIcon = {
           Icon(
               Icons.Default.ArrowDropDown,
-              contentDescription =
-                  context.getString(R.string.mandatory_country_dropdown_description),
+              contentDescription = stringResource(R.string.mandatory_country_dropdown_description),
               modifier =
                   Modifier.clickable { onExpandedChange(!isExpanded) }
                       .testTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_ICON))
@@ -333,7 +336,6 @@ private fun CountryDropdownMenu(
     filteredCountries: List<String>,
     onCountrySelected: (String) -> Unit
 ) {
-  val context = LocalContext.current
 
   Card(
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),
@@ -347,7 +349,7 @@ private fun CountryDropdownMenu(
           // Search results count
           item {
             Text(
-                text = context.getString(R.string.number_countries_found, filteredCountries.size),
+                text = stringResource(R.string.number_countries_found, filteredCountries.size),
                 modifier =
                     Modifier.padding(STANDARD_PADDING)
                         .testTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT),
@@ -373,7 +375,7 @@ private fun CountryDropdownMenu(
             item {
               Text(
                   text =
-                      context.getString(
+                      stringResource(
                           R.string.more_countries_found,
                           filteredCountries.size - MAX_COUNTRIES_DISPLAYED),
                   modifier =
@@ -389,7 +391,7 @@ private fun CountryDropdownMenu(
           if (filteredCountries.isEmpty()) {
             item {
               Text(
-                  text = context.getString(R.string.no_country_found),
+                  text = stringResource(R.string.no_country_found),
                   modifier =
                       Modifier.padding(STANDARD_PADDING)
                           .testTag(ProfileScreenTestTags.COUNTRY_NO_RESULTS),
@@ -432,7 +434,7 @@ private fun SaveButton(profileViewModel: ProfileViewModel, onRegisterPressed: ()
       colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
       shape = RoundedCornerShape(BUTTON_CORNER_RADIUS)) {
         Text(
-            text = context.getString(R.string.save_profile_button_text),
+            text = stringResource(R.string.save_profile_button_text),
             color = MaterialTheme.colorScheme.onPrimary,
             fontSize = BUTTON_FONT_SIZE,
             fontWeight = FontWeight.Medium)

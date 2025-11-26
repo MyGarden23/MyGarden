@@ -49,6 +49,9 @@ class ProfileViewModel(
   private val _pseudoAvailable = MutableStateFlow(true)
   val pseudoAvailable: StateFlow<Boolean> = _pseudoAvailable.asStateFlow()
 
+  /** List of valid country names used for validation */
+  private var countries: List<String> = emptyList()
+
   var initialized: Boolean = false
 
   /**
@@ -78,8 +81,7 @@ class ProfileViewModel(
     }
   }
 
-  /** List of valid country names used for validation */
-  private var countries: List<String> = emptyList()
+  // ======== SETTERS to update the state =========
 
   /**
    * Updates the list of valid countries
@@ -97,17 +99,6 @@ class ProfileViewModel(
    */
   fun setFirstName(firstName: String) {
     _uiState.value = _uiState.value.copy(firstName = firstName)
-  }
-
-  /** Checks if the pseudo is available and updates the UI state accordingly */
-  private suspend fun checkPseudoAvailability() {
-    val pseudo = _uiState.value.pseudo.trim()
-
-    if (pseudo.isBlank() || pseudo == _uiState.value.previousPseudo) {
-      _pseudoAvailable.value = true
-      return
-    }
-    _pseudoAvailable.value = pseudoRepository.isPseudoAvailable(pseudo)
   }
 
   /**
@@ -181,57 +172,26 @@ class ProfileViewModel(
   }
 
   /**
-   * Validate and save the profile in firestore through the repository.
+   * Public function so that the UI can check if the pseudo is available
    *
-   * @param onResult the callback called with as argument the success (true) or fail (false) of the
-   *   saving operation on the Profile repo
-   * @param context the context used to access Shared Preferences to try and send the potential
-   *   local FCM token
+   * @return true if the pseudo is available, false otherwise
    */
-  fun submit(onResult: (Boolean) -> Unit, context: Context) {
-    // show errors if needed
-    setRegisterPressed(true)
-
-    viewModelScope.launch {
-      checkPseudoAvailability()
-      val state = _uiState.value
-
-      if (!canRegister()) {
-        onResult(false)
-        return@launch
-      }
-
-      val uid = profileRepository.getCurrentUserId()
-      if (uid.isNullOrBlank()) {
-        // no connected user
-        onResult(false)
-        return@launch
-      }
-
-      val profile =
-          Profile(
-              pseudo = state.pseudo.trim(),
-              firstName = state.firstName.trim(),
-              lastName = state.lastName.trim(),
-              gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
-              favoritePlant = state.favoritePlant.trim(),
-              country = state.country.trim(),
-              hasSignedIn = true,
-              avatar = state.avatar)
-
-      viewModelScope.launch {
-        try {
-          if (state.previousPseudo != "") pseudoRepository.deletePseudo(state.previousPseudo)
-          pseudoRepository.savePseudo(state.pseudo.trim(), uid)
-          profileRepository.saveProfile(profile)
-          onResult(true)
-        } catch (_: Exception) {
-          // log if needed
-          onResult(false)
-        }
-      }
-    }
+  fun checkAvailabilityNow() {
+    viewModelScope.launch { checkPseudoAvailability() }
   }
+
+  /** Checks if the pseudo is available and updates the UI state accordingly */
+  private suspend fun checkPseudoAvailability() {
+    val pseudo = _uiState.value.pseudo.trim()
+
+    if (pseudo.isBlank() || pseudo == _uiState.value.previousPseudo) {
+      _pseudoAvailable.value = true
+      return
+    }
+    _pseudoAvailable.value = pseudoRepository.isPseudoAvailable(pseudo)
+  }
+
+  // ======== VALIDATORS to validate all the filed of the profile =========
 
   /**
    * Validates that the first name is not blank
@@ -261,6 +221,26 @@ class ProfileViewModel(
   }
 
   /**
+   * Validates that the pseudo is not blank
+   *
+   * @return true if pseudo is valid, false otherwise
+   */
+  private fun pseudoValid(): Boolean {
+    return _uiState.value.pseudo.isNotBlank() && _pseudoAvailable.value
+  }
+
+  /**
+   * Checks if all required fields are valid for registration
+   *
+   * @return true if all validation passes, false otherwise
+   */
+  fun canRegister(): Boolean {
+    return firstNameValid() && lastNameValid() && countryValid() && pseudoValid()
+  }
+
+  // ======== IS ERROR to pass to the UI if it is an error =========
+
+  /**
    * Determines if the first name field should show an error
    *
    * @return true if register was pressed and first name is invalid
@@ -279,22 +259,14 @@ class ProfileViewModel(
   }
 
   /**
-   * Validates that the pseudo is not blank
-   *
-   * @return true if pseudo is valid, false otherwise
-   */
-  private fun pseudoValid(): Boolean {
-    return _uiState.value.pseudo.isNotBlank() && _pseudoAvailable.value
-  }
-
-  /**
    * Determines if the pseudo field should show an error
    *
-   * @param pseudoAvailable true if pseudo is available, false otherwise
    * @return true if register was pressed and pseudo is invalid
    */
-  fun pseudoIsError(pseudoAvailable: Boolean): Boolean {
-    return !pseudoValid() || !pseudoAvailable
+  fun pseudoIsError(): Boolean {
+    return (!pseudoValid() && _uiState.value.registerPressed) ||
+        !_pseudoAvailable.value ||
+        _uiState.value.pseudo.isBlank()
   }
 
   /**
@@ -306,12 +278,58 @@ class ProfileViewModel(
     return _uiState.value.registerPressed && !countryValid()
   }
 
+  // ======== SUBMISSION to update firebase repositories =========
+
   /**
-   * Checks if all required fields are valid for registration
+   * Validate and save the profile in firestore through the repository.
    *
-   * @return true if all validation passes, false otherwise
+   * @param onResult the callback called with as argument the success (true) or fail (false) of the
+   *   saving operation on the Profile repo
+   * @param context the context used to access Shared Preferences to try and send the potential
+   *   local FCM token
    */
-  fun canRegister(): Boolean {
-    return firstNameValid() && lastNameValid() && countryValid() && pseudoValid()
+  fun submit(onResult: (Boolean) -> Unit, context: Context) {
+    // show errors if needed
+    setRegisterPressed(true)
+    viewModelScope.launch {
+      checkPseudoAvailability()
+      val state = _uiState.value
+
+      if (!canRegister()) {
+        onResult(false)
+        return@launch
+      }
+
+      val uid = profileRepository.getCurrentUserId()
+      if (uid.isNullOrBlank()) {
+        // no connected user
+        onResult(false)
+        return@launch
+      }
+
+      val profile =
+          Profile(
+              pseudo = state.pseudo.trim(),
+              firstName = state.firstName.trim(),
+              lastName = state.lastName.trim(),
+              gardeningSkill = state.gardeningSkill ?: GardeningSkill.BEGINNER,
+              favoritePlant = state.favoritePlant.trim(),
+              country = state.country.trim(),
+              hasSignedIn = true,
+              avatar = state.avatar)
+
+      try {
+        pseudoRepository.updatePseudoAtomic(
+            oldPseudo = state.previousPseudo.ifBlank { null },
+            newPseudo = state.pseudo.trim(),
+            userId = uid)
+
+        profileRepository.saveProfile(profile)
+        onResult(true)
+      } catch (_: Exception) {
+        // log if needed
+        onResult(false)
+      }
+    }
   }
 }

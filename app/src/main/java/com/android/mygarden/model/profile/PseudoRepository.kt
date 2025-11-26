@@ -28,6 +28,15 @@ interface PseudoRepository {
   suspend fun deletePseudo(pseudo: String)
 
   /**
+   * Updates a pseudo in the repository.
+   *
+   * @param oldPseudo The old pseudo to delete.
+   * @param newPseudo The new pseudo to replace the old one.
+   * @param userId The ID of the user associated with the pseudo
+   */
+  suspend fun updatePseudoAtomic(oldPseudo: String?, newPseudo: String, userId: String)
+
+  /**
    * Searches pseudos that start with the given query, for friend suggestions.
    *
    * @param query The prefix to match. Example: "ma" → ["matt", "marie", ...]
