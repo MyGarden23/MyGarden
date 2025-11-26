@@ -1,7 +1,7 @@
 package com.android.mygarden.model.gardenactivity
 
 import android.util.Log
-import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
+import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot

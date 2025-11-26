@@ -1,4 +1,4 @@
-package com.android.mygarden.model.gardenactivity.activitiyclasses
+package com.android.mygarden.model.gardenactivity.activityclasses
 
 import com.android.mygarden.model.gardenactivity.ActivityType
 import java.sql.Timestamp
