@@ -60,18 +60,21 @@ class PseudoRepositoryFirestore(private val db: FirebaseFirestore) : PseudoRepos
     val newRef = pseudoRef(newPseudo)
     val oldRef = oldPseudo?.let { pseudoRef(it) }
 
-    db.runTransaction { transaction ->
-          val newPseudo = transaction.get(newRef)
+    if (newRef != oldRef) {
+      db.runTransaction { transaction ->
+            val newPseudo = transaction.get(newRef)
 
-          if (oldRef != null) {
-            val oldSnap = transaction.get(oldRef)
-            if (oldSnap.exists()) {
-              transaction.delete(oldRef)
+            if (oldRef != null) {
+              val oldSnap = transaction.get(oldRef)
+              if (oldSnap.exists()) {
+                transaction.delete(oldRef)
+              }
             }
+
+            check(!(newPseudo.exists())) { "Pseudo already taken" }
+            transaction.set(newRef, mapOf(USER_ID_FIELD to userId))
           }
-          check(!(newPseudo.exists())) { "Pseudo already taken" }
-          transaction.set(newRef, mapOf(USER_ID_FIELD to userId))
-        }
-        .await()
+          .await()
+    }
   }
 }

@@ -252,10 +252,9 @@ class ProfileViewModel(
   /**
    * Determines if the pseudo field should show an error
    *
-   * @param pseudoAvailable true if pseudo is available, false otherwise
    * @return true if register was pressed and pseudo is invalid
    */
-  fun pseudoIsError(pseudoAvailable: Boolean): Boolean {
+  fun pseudoIsError(): Boolean {
     return !pseudoValid() && _uiState.value.registerPressed
   }
 
@@ -281,7 +280,6 @@ class ProfileViewModel(
   fun submit(onResult: (Boolean) -> Unit, context: Context) {
     // show errors if needed
     setRegisterPressed(true)
-
     viewModelScope.launch {
       checkPseudoAvailability()
       val state = _uiState.value

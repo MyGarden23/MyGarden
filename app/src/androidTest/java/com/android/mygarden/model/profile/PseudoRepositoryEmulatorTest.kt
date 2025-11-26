@@ -165,18 +165,34 @@ class PseudoRepositoryEmulatorTest : FirestoreProfileTest() {
   }
 
   @Test
+  fun updatePseudoAtomic_replaces_old_with_same_pseudo() = runTest {
+    pseudoRepo.savePseudo("samepseudo", "uid1")
+
+    pseudoRepo.updatePseudoAtomic(
+        oldPseudo = "samepseudo", newPseudo = "samepseudo", userId = "uid1")
+
+    val doc = db.collection("pseudos").document("samepseudo").get().await()
+
+    assertTrue(doc.exists())
+    assertEquals("uid1", doc.getString("userID"))
+
+    val allDocs = db.collection("pseudos").get().await()
+    val count = allDocs.documents.count { it.id == "samepseudo" }
+
+    assertEquals(1, count)
+  }
+
+  @Test
   fun updatePseudoAtomic_aborts_if_new_pseudo_taken() = runTest {
     pseudoRepo.savePseudo("taken", "uid123")
     pseudoRepo.savePseudo("old", "uid1")
 
-    val error =
-        assertThrows(IllegalStateException::class.java) {
-          runBlocking {
-            pseudoRepo.updatePseudoAtomic(oldPseudo = "old", newPseudo = "taken", userId = "uid1")
-          }
-        }
-
-    assertEquals("Pseudo already taken", error.message)
+    try {
+      pseudoRepo.updatePseudoAtomic("old", "taken", "uid1")
+      fail("Expected IllegalStateException to be thrown")
+    } catch (e: IllegalStateException) {
+      assertEquals("Pseudo already taken", e.message)
+    }
   }
 
   @Test
