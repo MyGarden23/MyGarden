@@ -9,7 +9,7 @@ import com.android.mygarden.model.plant.SerializedOwnedPlant
  * @property userId The user's Firebase Auth UID.
  * @property type Always "ADDED_PLANT"
  * @property pseudo The username of who added the plant.
- * @property timestamp When the plant was added.
+ * @property createdAt When the plant was added.
  * @property ownedPlant The serialized plant data.
  */
 @Keep

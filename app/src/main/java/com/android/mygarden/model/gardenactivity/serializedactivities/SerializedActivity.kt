@@ -10,7 +10,7 @@ import androidx.annotation.Keep
  * @property userId The Firebase Auth UID of the user who performed this activity.
  * @property type The type of activity as a string.
  * @property pseudo The username of who performed the activity.
- * @property timestamp The Firestore timestamp of when the activity occurred.
+ * @property createdAt The Firestore timestamp of when the activity occurred.
  */
 @Keep
 sealed class SerializedActivity {

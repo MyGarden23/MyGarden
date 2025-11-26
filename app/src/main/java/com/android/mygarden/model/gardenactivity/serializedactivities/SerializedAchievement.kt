@@ -8,7 +8,7 @@ import androidx.annotation.Keep
  * @property userId The user's Firebase Auth UID.
  * @property type Always "ACHIEVEMENT"
  * @property pseudo The username of who earned the achievement.
- * @property timestamp When the achievement was earned.
+ * @property createdAt When the achievement was earned.
  */
 @Keep
 data class SerializedAchievement(
