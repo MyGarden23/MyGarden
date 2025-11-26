@@ -39,16 +39,40 @@ class AddFriendViewModelTest {
 
   @Test
   fun onQueryChange_updates_query_and_clears_results() = runTest {
-    val vm = createViewModel()
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
 
-    // Pre-populate results to verify that they are cleared when the query changes.
-    setUiStateResults(vm, listOf(dummyProfile("old")))
+    val fakeFriends = FakeFriendsRepository()
+    val fakeUserProfile = FakeUserProfileRepository()
+    val fakePseudo =
+        TestPseudoRepository().apply {
+          searchResults = listOf("alice")
+          uidMap["alice"] = "uid-alice"
+        }
+    fakeUserProfile.profiles["uid-alice"] =
+        UserProfile(id = "uid-alice", pseudo = "alice", avatar = Avatar.A1)
 
+    val vm =
+        AddFriendViewModel(
+            friendsRepository = fakeFriends,
+            userProfileRepository = fakeUserProfile,
+            pseudoRepository = fakePseudo)
+
+    // First: perform a search to populate results
+    vm.onQueryChange("al")
+    vm.onSearch(onError = {})
+
+    advanceUntilIdle()
+    assertTrue(vm.uiState.value.searchResults.isNotEmpty())
+
+    // Then: change query and ensure results are cleared
     vm.onQueryChange("newQuery")
 
     val state = vm.uiState.value
     assertEquals("newQuery", state.query)
     assertTrue(state.searchResults.isEmpty())
+
+    Dispatchers.resetMain()
   }
 
   // ---------- onSearch ----------
@@ -182,53 +206,34 @@ class AddFriendViewModelTest {
           pseudoRepository = pseudoRepo)
 
   /**
-   * Helper that injects a custom [searchResults] list into the ViewModel's state by accessing the
-   * internal MutableStateFlow via reflection.
+   * Test-only fake implementation of [PseudoRepository] used in this test class.
    *
-   * This is used only in tests to simulate an initial state.
+   * It allows configuring:
+   * - [searchResults] for [searchPseudoStartingWith],
+   * - [uidMap] for [getUidFromPseudo].
+   *
+   * This avoids changing the global [FakePseudoRepository] used in other tests.
    */
-  private fun setUiStateResults(vm: AddFriendViewModel, results: List<UserProfile>) {
-    val current = vm.uiState.value
-    val field = AddFriendViewModel::class.java.getDeclaredField("_uiState")
-    field.isAccessible = true
-    @Suppress("UNCHECKED_CAST")
-    val stateFlow = field.get(vm) as kotlinx.coroutines.flow.MutableStateFlow<AddFriendUiState>
-    stateFlow.value = current.copy(searchResults = results)
+  private class TestPseudoRepository : PseudoRepository {
+
+    /** List of pseudos returned by [searchPseudoStartingWith]. */
+    var searchResults: List<String> = emptyList()
+
+    /** Mapping from pseudo (lowercased) to UID returned by [getUidFromPseudo]. */
+    val uidMap: MutableMap<String, String> = mutableMapOf()
+
+    override suspend fun isPseudoAvailable(pseudo: String) = true
+
+    override suspend fun savePseudo(pseudo: String, userId: String) {
+      uidMap[pseudo.lowercase()] = userId
+    }
+
+    override suspend fun deletePseudo(pseudo: String) {
+      uidMap.remove(pseudo.lowercase())
+    }
+
+    override suspend fun searchPseudoStartingWith(query: String): List<String> = searchResults
+
+    override suspend fun getUidFromPseudo(pseudo: String): String? = uidMap[pseudo.lowercase()]
   }
-
-  /** Creates a simple [UserProfile] with distinct values using the given [suffix]. */
-  private fun dummyProfile(suffix: String) =
-      UserProfile(id = "id-$suffix", pseudo = "pseudo-$suffix", avatar = Avatar.A1)
-}
-
-/**
- * Test-only fake implementation of [PseudoRepository] used in this test class.
- *
- * It allows configuring:
- * - [searchResults] for [searchPseudoStartingWith],
- * - [uidMap] for [getUidFromPseudo].
- *
- * This avoids changing the global [FakePseudoRepository] used in other tests.
- */
-private class TestPseudoRepository : PseudoRepository {
-
-  /** List of pseudos returned by [searchPseudoStartingWith]. */
-  var searchResults: List<String> = emptyList()
-
-  /** Mapping from pseudo (lowercased) to UID returned by [getUidFromPseudo]. */
-  val uidMap: MutableMap<String, String> = mutableMapOf()
-
-  override suspend fun isPseudoAvailable(pseudo: String) = true
-
-  override suspend fun savePseudo(pseudo: String, userId: String) {
-    uidMap[pseudo.lowercase()] = userId
-  }
-
-  override suspend fun deletePseudo(pseudo: String) {
-    uidMap.remove(pseudo.lowercase())
-  }
-
-  override suspend fun searchPseudoStartingWith(query: String): List<String> = searchResults
-
-  override suspend fun getUidFromPseudo(pseudo: String): String? = uidMap[pseudo.lowercase()]
 }
