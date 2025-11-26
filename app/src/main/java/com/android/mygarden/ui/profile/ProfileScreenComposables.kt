@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -103,7 +104,6 @@ private fun ProfileHeader(
     uiState: ProfileUIState,
     onAvatarClick: () -> Unit,
 ) {
-  val context = LocalContext.current
 
   Box(modifier = modifier.fillMaxWidth()) {
     Column(
@@ -143,11 +143,10 @@ private fun ProfileForm(
     profileViewModel: ProfileViewModel,
     modifier: Modifier = Modifier
 ) {
-  val context = LocalContext.current
   var isExperienceExpanded by remember { mutableStateOf(false) }
   var isCountryExpanded by remember { mutableStateOf(false) }
   val countryFocusRequester = remember { FocusRequester() }
-  val pseudoAvailable by profileViewModel.pseudoAvailable.collectAsState()
+  var pseudoTouched by remember { mutableStateOf(false) }
 
   Column(modifier = modifier, verticalArrangement = Arrangement.SpaceEvenly) {
     // Required fields with validation
@@ -174,10 +173,17 @@ private fun ProfileForm(
         onValueChange = { profileViewModel.setPseudo(it, false) },
         label = { Text(stringResource(R.string.mandatory_pseudo_label)) },
         placeholder = { Text(stringResource(R.string.mandatory_pseudo_placeholder)) },
-        modifier = Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.PSEUDO_FIELD),
-        isError = profileViewModel.pseudoIsError(),
+        modifier =
+            Modifier.fillMaxWidth().testTag(ProfileScreenTestTags.PSEUDO_FIELD).onFocusChanged {
+                state ->
+              pseudoTouched = true
+              if (!state.isFocused) {
+                profileViewModel.checkAvailabilityNow()
+              }
+            },
+        isError = profileViewModel.pseudoIsError() && pseudoTouched,
         supportingText = {
-          if (profileViewModel.pseudoIsError()) {
+          if (profileViewModel.pseudoIsError() && pseudoTouched) {
             Text(
                 text = stringResource(R.string.error_pseudo_taken),
                 color = MaterialTheme.colorScheme.error)
@@ -225,7 +231,6 @@ private fun ExperienceDropdown(
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit
 ) {
-  val context = LocalContext.current
 
   ExposedDropdownMenuBox(
       expanded = isExpanded,
@@ -333,7 +338,6 @@ private fun CountryDropdownMenu(
     filteredCountries: List<String>,
     onCountrySelected: (String) -> Unit
 ) {
-  val context = LocalContext.current
 
   Card(
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),

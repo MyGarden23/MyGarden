@@ -171,6 +171,11 @@ class ProfileViewModel(
     _uiState.value = _uiState.value.copy(registerPressed = registerPressed)
   }
 
+  /** Public fonction so that the UI can check if the pseudo is available */
+  fun checkAvailabilityNow() {
+    viewModelScope.launch { checkPseudoAvailability() }
+  }
+
   /** Checks if the pseudo is available and updates the UI state accordingly */
   private suspend fun checkPseudoAvailability() {
     val pseudo = _uiState.value.pseudo.trim()
@@ -255,7 +260,9 @@ class ProfileViewModel(
    * @return true if register was pressed and pseudo is invalid
    */
   fun pseudoIsError(): Boolean {
-    return !pseudoValid() && _uiState.value.registerPressed
+    return !_pseudoAvailable.value || _uiState.value.pseudo.isBlank()
+    // return !pseudoValid() && _uiState.value.registerPressed || ((!_pseudoAvailable.value) ||
+    // _uiState.value.pseudo.isBlank())
   }
 
   /**
