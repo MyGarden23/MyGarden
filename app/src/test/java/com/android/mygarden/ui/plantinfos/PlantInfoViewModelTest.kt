@@ -3,12 +3,14 @@ package com.android.mygarden.ui.plantinfos
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.android.mygarden.R
+import com.android.mygarden.model.caretips.CareTipsRepository
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.utils.FakeActivityRepository
+import com.android.mygarden.utils.FakeCareTipsRepository
 import com.android.mygarden.utils.FakeProfileRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,6 +39,7 @@ class PlantInfoViewModelTest {
   private lateinit var repository: PlantsRepositoryLocal
   private lateinit var activityRepo: FakeActivityRepository
   private lateinit var profileRepo: FakeProfileRepository
+  private lateinit var tipsRepo: CareTipsRepository
   private val testDispatcher = StandardTestDispatcher()
   private lateinit var context: Context
 
@@ -48,7 +51,8 @@ class PlantInfoViewModelTest {
     profileRepo =
         FakeProfileRepository(
             Profile(pseudo = "pseudo")) // Pass a profile with a pseudo to the FakeProfileRepository
-    viewModel = PlantInfoViewModel(repository, activityRepo, profileRepo)
+    tipsRepo = FakeCareTipsRepository()
+    viewModel = PlantInfoViewModel(repository, activityRepo, profileRepo, tipsRepo)
     context = ApplicationProvider.getApplicationContext()
   }
 
@@ -289,7 +293,7 @@ class PlantInfoViewModelTest {
   fun savePlant_doesNotCreateActivity_whenProfileIsNull() = runTest {
     // Arrange: create a profile repository that returns null
     val nullProfileRepo = FakeProfileRepository()
-    val vm = PlantInfoViewModel(repository, activityRepo, nullProfileRepo)
+    val vm = PlantInfoViewModel(repository, activityRepo, nullProfileRepo, tipsRepo)
     val plant = createTestPlant(name = "Test Plant")
 
     // Act: save the plant
@@ -353,7 +357,7 @@ class PlantInfoViewModelTest {
           }
         }
 
-    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo)
+    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo, tipsRepo)
 
     // Act: call showCareTips and advance coroutines to completion
     vm.showCareTips("Testus plantus", PlantHealthStatus.HEALTHY)
@@ -378,7 +382,7 @@ class PlantInfoViewModelTest {
           }
         }
 
-    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo)
+    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo, tipsRepo)
     vm.showCareTips("Testus plantus", PlantHealthStatus.HEALTHY)
     advanceUntilIdle()
 
@@ -404,7 +408,7 @@ class PlantInfoViewModelTest {
             throw RuntimeException("AI backend down")
           }
         }
-    val vm = PlantInfoViewModel(throwingRepo, activityRepo, profileRepo)
+    val vm = PlantInfoViewModel(throwingRepo, activityRepo, profileRepo, tipsRepo)
 
     // Act: call showCareTips and advance the coroutine
     vm.showCareTips("Testus plantus", PlantHealthStatus.UNKNOWN)
@@ -419,7 +423,7 @@ class PlantInfoViewModelTest {
   @Test
   fun showCareTips_showsUnknownPlaceholder() = runTest {
     val plantRepo = PlantsRepositoryLocal()
-    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo)
+    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo, tipsRepo)
 
     // Case: latin name equals "unknown"
     vm.showCareTips("unknown", PlantHealthStatus.HEALTHY)
@@ -427,5 +431,56 @@ class PlantInfoViewModelTest {
     var finalState = vm.uiState.value
     assertTrue(finalState.showCareTipsDialog)
     assertEquals(PlantInfoViewModel.UNKNOWN_PLANT_TIPS_PLACEHOLDER, finalState.careTips)
+  }
+
+  @Test
+  fun showCareTips_usesCacheWhenKnownTip() = runTest {
+    // Arrange: create a fake repository that returns a predictable tips string
+    val fakeTips = "Water lightly every 3 days"
+    val fakeTip2 = "thisisafaketip"
+    val workingFakeCareTipsRepo = FakeCareTipsRepository(working = true)
+    val plantRepo =
+        object : com.android.mygarden.model.plant.PlantsRepository by PlantsRepositoryLocal() {
+          override suspend fun generateCareTips(
+              latinName: String,
+              healthStatus: PlantHealthStatus
+          ): String {
+            return fakeTips
+          }
+        }
+    val fakePlant = createTestPlant()
+    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo, workingFakeCareTipsRepo)
+
+    workingFakeCareTipsRepo.addTip(fakePlant.latinName, fakePlant.healthStatus, fakeTip2)
+    advanceUntilIdle()
+    vm.showCareTips(fakePlant.latinName, fakePlant.healthStatus)
+    advanceUntilIdle()
+    val finalState = vm.uiState.value
+    assertEquals(fakeTip2, finalState.careTips)
+    assertNotEquals(fakeTips, finalState.careTips)
+  }
+
+  @Test
+  fun showCareTips_addsToCacheWhenUnknownTip() = runTest {
+    val fakeTips = "Water lightly every 3 days"
+    val workingFakeCareTipsRepo = FakeCareTipsRepository(working = true)
+    val plantRepo =
+        object : com.android.mygarden.model.plant.PlantsRepository by PlantsRepositoryLocal() {
+          override suspend fun generateCareTips(
+              latinName: String,
+              healthStatus: PlantHealthStatus
+          ): String {
+            return fakeTips
+          }
+        }
+
+    val fakePlant = createTestPlant()
+    val vm = PlantInfoViewModel(plantRepo, activityRepo, profileRepo, workingFakeCareTipsRepo)
+
+    vm.showCareTips(fakePlant.latinName, fakePlant.healthStatus)
+    advanceUntilIdle()
+    val finalState = vm.uiState.value
+    assertEquals(fakeTips, finalState.careTips)
+    assertNotNull(workingFakeCareTipsRepo.getTip(fakePlant.latinName, fakePlant.healthStatus))
   }
 }
