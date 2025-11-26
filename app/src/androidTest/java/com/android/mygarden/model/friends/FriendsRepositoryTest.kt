@@ -7,7 +7,6 @@ import androidx.test.filters.LargeTest
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FirestoreProfileTest
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -37,21 +36,18 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
    * emulator, and wires the [FriendsRepositoryProvider] to use a Firestore-backed implementation.
    */
   @Before
-  override fun setUp() {
+  override fun setUp() = runTest {
     super.setUp()
 
     compose.setContent { MyGardenTheme {} }
 
     auth = FirebaseAuth.getInstance()
 
-    // Sign in anonymously on the Auth emulator so FriendsRepositoryFirestore
-    // can read auth.currentUser?.uid
-    runBlocking {
-      val result = auth.signInAnonymously().await()
-      currentUserId = result.user?.uid ?: error("Failed to sign in anonymously on Auth emulator")
-    }
+    // Sign in anonymously
+    val result = auth.signInAnonymously().await()
+    currentUserId = result.user?.uid ?: error("Failed to sign in anonymously on Auth emulator")
 
-    // Override the provider so the whole app (and tests) use the emulator-backed instance
+    // Override repository provider
     FriendsRepositoryProvider.repository = FriendsRepositoryFirestore(db, auth)
     friendsRepo = FriendsRepositoryProvider.repository
   }
@@ -66,7 +62,6 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
   fun provider_returns_overridden_repository_instance() {
     val fromProvider = FriendsRepositoryProvider.repository
 
-    // Should be the same instance we injected in setUp()
     assertSame(friendsRepo, fromProvider)
     assertTrue(fromProvider is FriendsRepositoryFirestore)
   }
@@ -92,8 +87,7 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
             .get()
             .await()
 
-    assertTrue(
-        "Friend document should exist in current user's friends subcollection", snapshot.exists())
+    assertTrue(snapshot.exists())
     assertEquals(friendUid, snapshot.getString("friendUid"))
   }
 
@@ -102,7 +96,6 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
     val friend1 = "friend-1"
     val friend2 = "friend-2"
 
-    // Add two friends through the repository, using the provider
     friendsRepo.addFriend(friend1)
     friendsRepo.addFriend(friend2)
 
@@ -115,12 +108,11 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
 
   @Test
   fun addFriend_throws_when_adding_self() = runTest {
-    val error =
-        assertThrows(IllegalArgumentException::class.java) {
-          runBlocking { friendsRepo.addFriend(currentUserId) }
-        }
+    val error = runCatching { friendsRepo.addFriend(currentUserId) }.exceptionOrNull()
 
-    assertEquals("You cannot add yourself as a friend.", error.message)
+    assertNotNull(error)
+    assertTrue(error is IllegalArgumentException)
+    assertEquals("You cannot add yourself as a friend.", error!!.message)
   }
 
   @Test
@@ -128,11 +120,10 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
     // Sign out to simulate an unauthenticated state
     auth.signOut()
 
-    val error =
-        assertThrows(IllegalStateException::class.java) {
-          runBlocking { friendsRepo.addFriend("any-friend") }
-        }
+    val error = runCatching { friendsRepo.addFriend("any-friend") }.exceptionOrNull()
 
-    assertEquals("User not authenticated", error.message)
+    assertNotNull(error)
+    assertTrue(error is IllegalStateException)
+    assertEquals("User not authenticated", error!!.message)
   }
 }
