@@ -89,4 +89,55 @@ class PseudoRepositoryEmulatorTest : FirestoreProfileTest() {
 
     assertTrue(snapshot.exists())
   }
+
+  @Test
+  fun getUidFromPseudo_returns_null_when_pseudo_does_not_exist() = runTest {
+    val uid = pseudoRepo.getUidFromPseudo("unknownPseudo")
+    assertNull(uid)
+  }
+
+  @Test
+  fun getUidFromPseudo_returns_uid_for_existing_pseudo_case_insensitive() = runTest {
+    val pseudo = "SomeUser"
+    val expectedUid = "uid-123"
+
+    pseudoRepo.savePseudo(pseudo, expectedUid)
+
+    // Lookup with different casing should still work
+    val result = pseudoRepo.getUidFromPseudo("sOmEuSeR")
+
+    assertEquals(expectedUid, result)
+  }
+
+  @Test
+  fun searchPseudoStartingWith_returns_matching_pseudos() = runTest {
+    // Given: multiple pseudos saved in the repository
+    pseudoRepo.savePseudo("alice", "uid-alice")
+    pseudoRepo.savePseudo("alex", "uid-alex")
+    pseudoRepo.savePseudo("bob", "uid-bob")
+    pseudoRepo.savePseudo("albert", "uid-albert")
+
+    // When: searching for pseudos starting with "al"
+    val results = pseudoRepo.searchPseudoStartingWith("al")
+
+    // Then: we should find all the "al*" pseudos, and none of the others
+    assertTrue(results.contains("alice"))
+    assertTrue(results.contains("alex"))
+    assertTrue(results.contains("albert"))
+    assertFalse(results.contains("bob"))
+  }
+
+  @Test
+  fun searchPseudoStartingWith_is_case_insensitive_on_query() = runTest {
+    pseudoRepo.savePseudo("charlie", "uid-charlie")
+    pseudoRepo.savePseudo("Charlotte", "uid-charlotte")
+
+    // Implementation lowercases both document ids and query,
+    // so searching with weird casing should still find them.
+    val results = pseudoRepo.searchPseudoStartingWith("Ch")
+
+    // All pseudos are normalized to lowercase in Firestore
+    assertTrue(results.contains("charlie"))
+    assertTrue(results.contains("charlotte"))
+  }
 }
