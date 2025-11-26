@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -70,8 +71,7 @@ private const val AVATAR_WIDTH_FRACTION = 0.25f
 // Dimensions
 private val BUTTON_HEIGHT = 56.dp
 private val BUTTON_CORNER_RADIUS = 25.dp
-private val DROPDOWN_HEIGHT = 250.dp
-private val DROPDOWN_OFFSET = (-266).dp
+private val DROPDOWN_HEIGHT = 150.dp
 private val CARD_ELEVATION = 6.dp
 private val MAX_WIDTH_AVATAR = 160.dp
 
@@ -343,8 +343,8 @@ private fun CountryDropdownMenu(
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),
       modifier =
           Modifier.fillMaxWidth()
-              .height(DROPDOWN_HEIGHT)
-              .offset(y = DROPDOWN_OFFSET)
+              .sizeIn(maxHeight = DROPDOWN_HEIGHT)
+              .offset(y = (-DROPDOWN_HEIGHT))
               .testTag(ProfileScreenTestTags.COUNTRY_DROPDOWN),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         LazyColumn(modifier = Modifier.testTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)) {
@@ -365,15 +365,14 @@ private fun CountryDropdownMenu(
                       fontStyle = FontStyle.Italic,
                       color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-                  Text(
-                      text = context.getString(R.string.close_country_dropdown),
+                  Icon(
+                      imageVector = Icons.Default.Close,
+                      contentDescription = context.getString(R.string.close_country_dropdown),
                       modifier =
                           Modifier.clickable { onClose() }
                               .padding(start = VERTICAL_PADDING)
                               .testTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_CLOSE),
-                      fontSize = CAPTION_FONT_SIZE,
-                      fontWeight = FontWeight.Bold,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant)
+                      tint = MaterialTheme.colorScheme.error)
                 }
           }
 
