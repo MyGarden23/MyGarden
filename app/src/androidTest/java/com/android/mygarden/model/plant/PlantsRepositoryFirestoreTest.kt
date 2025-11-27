@@ -17,6 +17,7 @@ import com.google.firebase.storage.StorageException
 import java.io.File
 import java.io.FileOutputStream
 import java.sql.Timestamp
+import java.util.Collections.list
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
@@ -181,6 +182,13 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     val ownedPlantFromRepo = repository.getOwnedPlant(id)
 
     assertEquals(updatePlantHealthStatus(ownedPlantBefore), ownedPlantFromRepo)
+  }
+
+  @Test
+  fun getAllOwnedPlant_withNoPlantReturnsEmptyList() = runTest {
+    val emptyListOwnedPlant: List<OwnedPlant> = repository.getAllOwnedPlants()
+    assertEquals(emptyList<OwnedPlant>(), emptyListOwnedPlant)
+    assertEquals(listOf<OwnedPlant>(), emptyListOwnedPlant)
   }
 
   @Test

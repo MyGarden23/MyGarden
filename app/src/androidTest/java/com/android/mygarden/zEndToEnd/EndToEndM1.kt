@@ -1,4 +1,4 @@
-package com.android.mygarden.zendToEnd
+package com.android.mygarden.zEndToEnd
 
 import android.Manifest
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -127,13 +127,11 @@ class EndToEndM1 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
     }
-
     // Verify UI elements
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).assertIsDisplayed()
 
-    // Take photo
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
 
     // === PLANT INFO SCREEN ===
@@ -214,6 +212,7 @@ class EndToEndM1 {
     }
 
     // === PLANT INFO AGAIN ===
+
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()

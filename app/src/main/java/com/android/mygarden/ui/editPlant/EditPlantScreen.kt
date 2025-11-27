@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.editPlant
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,7 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.min
 
 /** Test tags for [EditPlantScreen]. */
 object EditPlantScreenTestTags {
@@ -77,6 +79,8 @@ fun EditPlantScreen(
     goBack: () -> Unit = {},
 ) {
   val context = LocalContext.current
+  // Manage back button of device like back button of the screen
+  BackHandler() { goBack() }
 
   // Load the plant when the id changes
   LaunchedEffect(ownedPlantId) { editPlantViewModel.loadPlant(ownedPlantId) }
@@ -317,7 +321,10 @@ private data class TouchedFlags(
  */
 private fun handleDatePicked(millis: Long?, editPlantViewModel: EditPlantViewModelInterface) {
   if (millis != null) {
-    editPlantViewModel.setLastWatered(Timestamp(millis))
+    // Prevent storing a future date: clamp the selected millis to the current time
+    val now = System.currentTimeMillis()
+    val safeMillis = min(millis, now)
+    editPlantViewModel.setLastWatered(Timestamp(safeMillis))
   }
 }
 

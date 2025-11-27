@@ -113,6 +113,8 @@
     <string name="more_countries_found">… and %1$d more countries</string>
     <string name="no_country_found">No countries found</string>
     <string name="save_profile_button_text">Save Profile</string>
+    <string name="close_country_dropdown">Close</string>
+
 
 
 

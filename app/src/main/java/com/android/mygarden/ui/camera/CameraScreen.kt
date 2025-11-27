@@ -291,6 +291,7 @@ private fun CameraGrantedContent(
           }
         }
       }
+
   Box(modifier = modifier.fillMaxSize()) {
     CameraPreview(controller = controller, modifier = modifier.fillMaxSize())
 

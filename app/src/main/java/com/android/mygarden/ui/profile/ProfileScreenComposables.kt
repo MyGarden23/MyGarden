@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -71,8 +72,7 @@ private const val AVATAR_WIDTH_FRACTION = 0.25f
 // Dimensions
 private val BUTTON_HEIGHT = 56.dp
 private val BUTTON_CORNER_RADIUS = 25.dp
-private val DROPDOWN_HEIGHT = 250.dp
-private val DROPDOWN_OFFSET = (-266).dp
+private val DROPDOWN_HEIGHT = 150.dp
 private val CARD_ELEVATION = 6.dp
 private val MAX_WIDTH_AVATAR = 160.dp
 
@@ -320,7 +320,8 @@ private fun CountryDropdown(
           onCountrySelected = { country ->
             profileViewModel.setCountry(country)
             onExpandedChange(false)
-          })
+          },
+          onClose = { onExpandedChange(false) })
     }
   }
 }
@@ -330,32 +331,49 @@ private fun CountryDropdown(
  *
  * @param filteredCountries List of countries matching the search criteria
  * @param onCountrySelected Callback when a country is selected
+ * @param onClose Callback when the dropdown is closed
  */
 @Composable
 private fun CountryDropdownMenu(
     filteredCountries: List<String>,
-    onCountrySelected: (String) -> Unit
+    onCountrySelected: (String) -> Unit,
+    onClose: () -> Unit
 ) {
 
   Card(
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),
       modifier =
           Modifier.fillMaxWidth()
-              .height(DROPDOWN_HEIGHT)
-              .offset(y = DROPDOWN_OFFSET)
+              .sizeIn(maxHeight = DROPDOWN_HEIGHT)
+              .offset(y = (-DROPDOWN_HEIGHT))
               .testTag(ProfileScreenTestTags.COUNTRY_DROPDOWN),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         LazyColumn(modifier = Modifier.testTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_MENU)) {
           // Search results count
           item {
-            Text(
-                text = stringResource(R.string.number_countries_found, filteredCountries.size),
+            Row(
                 modifier =
-                    Modifier.padding(STANDARD_PADDING)
-                        .testTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT),
-                fontSize = CAPTION_FONT_SIZE,
-                fontStyle = FontStyle.Italic,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Modifier.fillMaxWidth()
+                        .padding(horizontal = STANDARD_PADDING, vertical = VERTICAL_PADDING),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                      text =
+                          stringResource(R.string.number_countries_found, filteredCountries.size),
+                      modifier = Modifier.testTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT),
+                      fontSize = CAPTION_FONT_SIZE,
+                      fontStyle = FontStyle.Italic,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                  Icon(
+                      painter = painterResource(R.drawable.x_circle),
+                      contentDescription = stringResource(R.string.close_country_dropdown),
+                      modifier =
+                          Modifier.clickable { onClose() }
+                              .padding(start = VERTICAL_PADDING)
+                              .testTag(ProfileScreenTestTags.COUNTRY_DROPDOWN_CLOSE),
+                      tint = MaterialTheme.colorScheme.error)
+                }
           }
 
           // Country list (limited for performance)

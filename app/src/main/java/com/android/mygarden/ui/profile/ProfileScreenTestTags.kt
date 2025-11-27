@@ -15,6 +15,7 @@ object ProfileScreenTestTags {
   const val COUNTRY_FIELD = "country_field"
   const val COUNTRY_DROPDOWN = "country_dropdown"
   const val COUNTRY_DROPDOWN_ICON = "country_dropdown_icon"
+  const val COUNTRY_DROPDOWN_CLOSE = "country_dropdown_close"
   const val SAVE_BUTTON = "save_button"
 
   // Dropdown menu items
