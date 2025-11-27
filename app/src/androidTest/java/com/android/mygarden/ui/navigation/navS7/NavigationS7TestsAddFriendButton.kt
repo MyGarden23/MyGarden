@@ -7,11 +7,17 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.android.mygarden.model.friends.FriendsRepositoryProvider
+import com.android.mygarden.model.profile.PseudoRepositoryProvider
+import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.feed.FeedScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeFriendsRepository
+import com.android.mygarden.utils.FakePseudoRepository
+import com.android.mygarden.utils.FakeUserProfileRepository
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -25,6 +31,9 @@ class NavigationS7TestsAddFriendButton {
   /** Sets up the Compose test environment before each test. */
   @Before
   fun setUp() {
+    FriendsRepositoryProvider.repository = FakeFriendsRepository()
+    UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
+    PseudoRepositoryProvider.repository = FakePseudoRepository()
 
     composeTestRule.setContent {
       val controller = rememberNavController()
