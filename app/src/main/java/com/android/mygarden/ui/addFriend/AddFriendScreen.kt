@@ -46,7 +46,6 @@ import com.android.mygarden.R
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.profile.Avatar
-import com.google.firebase.ai.type.content
 
 /** Contains all test tags used within the Add Friend screen UI. */
 object AddFriendTestTags {
