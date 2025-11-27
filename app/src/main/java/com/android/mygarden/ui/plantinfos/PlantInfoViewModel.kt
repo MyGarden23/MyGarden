@@ -4,15 +4,21 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
+import com.android.mygarden.model.gardenactivity.ActivityRepository
+import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /** Enum representing which tab is currently selected in the plant info screen. */
@@ -60,7 +66,9 @@ data class PlantInfoUIState(
 
 /** ViewModel for managing the plant information screen state. */
 class PlantInfoViewModel(
-    private val plantsRepository: PlantsRepository = PlantsRepositoryProvider.repository
+    private val plantsRepository: PlantsRepository = PlantsRepositoryProvider.repository,
+    private val activityRepository: ActivityRepository = ActivityRepositoryProvider.repository,
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
   // Private mutable state flow
   private val _uiState = MutableStateFlow(PlantInfoUIState())
@@ -148,7 +156,22 @@ class PlantInfoViewModel(
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(isSaving = true)
       val newId = plantsRepository.getNewId()
-      plantsRepository.saveToGarden(plant, newId, Timestamp(System.currentTimeMillis()))
+      val createdAt = Timestamp(System.currentTimeMillis())
+
+      // Save the plant to the garden
+      val ownedPlant = plantsRepository.saveToGarden(plant, newId, createdAt)
+
+      // Get user information for the activity
+      val pseudo = profileRepository.getProfile().firstOrNull()?.pseudo
+      val userId = activityRepository.getCurrentUserId()
+
+      // Create the activity if we have the necessary information
+      if (pseudo != null && userId != null) {
+        activityRepository.addActivity(
+            ActivityAddedPlant(
+                userId = userId, pseudo = pseudo, createdAt = createdAt, ownedPlant = ownedPlant))
+      }
+
       _uiState.value = _uiState.value.copy(isSaving = false)
       onPlantSaved(newId)
     }

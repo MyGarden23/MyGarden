@@ -32,6 +32,16 @@ class ProfileViewModelTest {
     override suspend fun savePseudo(pseudo: String, userId: String) {}
 
     override suspend fun deletePseudo(pseudo: String) {}
+
+    override suspend fun updatePseudoAtomic(
+        oldPseudo: String?,
+        newPseudo: String,
+        userId: String
+    ) {}
+
+    override suspend fun searchPseudoStartingWith(query: String) = emptyList<String>()
+
+    override suspend fun getUidFromPseudo(pseudo: String) = null
   }
 
   private class FakeProfileRepository : ProfileRepository {

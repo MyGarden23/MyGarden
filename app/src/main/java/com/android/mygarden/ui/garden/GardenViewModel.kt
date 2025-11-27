@@ -3,6 +3,9 @@ package com.android.mygarden.ui.garden
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
+import com.android.mygarden.model.gardenactivity.ActivityRepository
+import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
+import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
@@ -14,6 +17,7 @@ import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /**
@@ -42,11 +46,13 @@ data class GardenUIState(
  * The view model of the garden that handles all UI interactions.
  *
  * @property plantsRepo the repository of the plants to store them
- * @property profileRepo tge repository of the profiles used to fetch user information
+ * @property profileRepo the repository of the profiles used to fetch user information
+ * @property activityRepo the repository of the activities to store them
  */
 class GardenViewModel(
     private val plantsRepo: PlantsRepository = PlantsRepositoryProvider.repository,
     private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(GardenUIState())
   val uiState: StateFlow<GardenUIState> = _uiState.asStateFlow()
@@ -99,7 +105,22 @@ class GardenViewModel(
    */
   fun waterPlant(ownedPlant: OwnedPlant) {
     viewModelScope.launch {
-      plantsRepo.waterPlant(ownedPlant.id, Timestamp(System.currentTimeMillis()))
+      val wateringTime = Timestamp(System.currentTimeMillis())
+      val pseudo = profileRepo.getProfile().firstOrNull()?.pseudo
+      val userId = activityRepo.getCurrentUserId()
+
+      // Water the plant first
+      plantsRepo.waterPlant(ownedPlant.id, wateringTime)
+
+      // Then create the activity if we have the necessary information
+      if (pseudo != null && userId != null) {
+        activityRepo.addActivity(
+            ActivityWaterPlant(
+                userId = userId,
+                pseudo = pseudo,
+                createdAt = wateringTime,
+                ownedPlant = ownedPlant))
+      }
     }
   }
 
