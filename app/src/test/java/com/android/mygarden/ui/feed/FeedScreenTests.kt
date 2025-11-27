@@ -8,11 +8,11 @@ import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFriend
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
-import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus

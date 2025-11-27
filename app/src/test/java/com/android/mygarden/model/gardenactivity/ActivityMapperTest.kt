@@ -1,9 +1,9 @@
 package com.android.mygarden.model.gardenactivity
 
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFriend
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAchievement
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAddFriend
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAddedPlant
@@ -58,7 +58,7 @@ class ActivityMapperTest {
     assertTrue(serialized is SerializedAddedPlant)
     val serializedPlant = serialized as SerializedAddedPlant
     assertEquals("user123", serializedPlant.userId)
-    assertEquals("ADDED_PLANT", serializedPlant.type)
+    assertEquals(ActivityType.ADDED_PLANT.toString(), serializedPlant.type)
     assertEquals("TestUser", serializedPlant.pseudo)
     assertEquals("plant123", serializedPlant.ownedPlant.id)
     assertEquals("Test Rose", serializedPlant.ownedPlant.plant.name)
@@ -97,7 +97,7 @@ class ActivityMapperTest {
     assertTrue(serialized is SerializedAchievement)
     val serializedAchievement = serialized as SerializedAchievement
     assertEquals("user456", serializedAchievement.userId)
-    assertEquals("ACHIEVEMENT", serializedAchievement.type)
+    assertEquals(ActivityType.ACHIEVEMENT.toString(), serializedAchievement.type)
     assertEquals("AchievementUser", serializedAchievement.pseudo)
 
     // Deserialize
@@ -154,7 +154,7 @@ class ActivityMapperTest {
     assertTrue(serialized is SerializedAddFriend)
     val serializedFriend = serialized as SerializedAddFriend
     assertEquals("userFriend", serializedFriend.userId)
-    assertEquals("ADDED_FRIEND", serializedFriend.type)
+    assertEquals(ActivityType.ADDED_FRIEND.toString(), serializedFriend.type)
     assertEquals("FriendUser", serializedFriend.pseudo)
     assertEquals("friend123", serializedFriend.friendId)
 
@@ -205,7 +205,7 @@ class ActivityMapperTest {
     assertTrue(serialized is SerializedWaterPlant)
     val serializedWater = serialized as SerializedWaterPlant
     assertEquals("userWater", serializedWater.userId)
-    assertEquals("WATERED_PLANT", serializedWater.type)
+    assertEquals(ActivityType.WATERED_PLANT.toString(), serializedWater.type)
     assertEquals("WaterUser", serializedWater.pseudo)
     assertEquals("ownedWatered123", serializedWater.ownedPlant.id)
     assertEquals("Watered Plant", serializedWater.ownedPlant.plant.name)
@@ -225,9 +225,11 @@ class ActivityMapperTest {
   @Test
   fun testMapTypeToSerializedClassKnownTypes() {
     assertEquals(
-        SerializedAddedPlant::class.java, ActivityMapper.mapTypeToSerializedClass("ADDED_PLANT"))
+        SerializedAddedPlant::class.java,
+        ActivityMapper.mapTypeToSerializedClass(ActivityType.ADDED_PLANT.toString()))
     assertEquals(
-        SerializedAchievement::class.java, ActivityMapper.mapTypeToSerializedClass("ACHIEVEMENT"))
+        SerializedAchievement::class.java,
+        ActivityMapper.mapTypeToSerializedClass(ActivityType.ACHIEVEMENT.toString()))
   }
 
   @Test

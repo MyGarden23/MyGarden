@@ -1,7 +1,7 @@
 package com.android.mygarden.ui.garden
 
 import com.android.mygarden.R
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation

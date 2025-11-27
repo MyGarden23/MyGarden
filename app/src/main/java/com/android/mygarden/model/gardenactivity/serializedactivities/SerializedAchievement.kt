@@ -1,6 +1,7 @@
 package com.android.mygarden.model.gardenactivity.serializedactivities
 
 import androidx.annotation.Keep
+import com.android.mygarden.model.gardenactivity.ActivityType
 
 /**
  * Represents a serialized achievement activity for Firestore.
@@ -8,7 +9,7 @@ import androidx.annotation.Keep
  * @property userId The user's Firebase Auth UID.
  * @property type Always "ACHIEVEMENT"
  * @property pseudo The username of who earned the achievement.
- * @property timestamp When the achievement was earned.
+ * @property createdAt When the achievement was earned.
  */
 @Keep
 data class SerializedAchievement(
@@ -17,5 +18,5 @@ data class SerializedAchievement(
     override val createdAt: Long = 0,
     val achievementName: String = ""
 ) : SerializedActivity() {
-  override val type: String = "ACHIEVEMENT"
+  override val type: String = ActivityType.ACHIEVEMENT.toString()
 }

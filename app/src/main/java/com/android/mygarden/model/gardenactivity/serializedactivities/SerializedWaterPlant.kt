@@ -1,6 +1,7 @@
 package com.android.mygarden.model.gardenactivity.serializedactivities
 
 import androidx.annotation.Keep
+import com.android.mygarden.model.gardenactivity.ActivityType
 import com.android.mygarden.model.plant.SerializedOwnedPlant
 
 /**
@@ -9,7 +10,7 @@ import com.android.mygarden.model.plant.SerializedOwnedPlant
  * @property userId Firebase Auth UID of the user who watered the plant.
  * @property type Always "WATERED_PLANT".
  * @property pseudo Public‑facing username of the user who watered the plant.
- * @property timestamp Moment at which the watering action occurred.
+ * @property createdAt Moment at which the watering action occurred.
  * @property ownedPlant The serialized plant data that was watered.
  */
 @Keep
@@ -19,5 +20,5 @@ data class SerializedWaterPlant(
     override val createdAt: Long = 0,
     val ownedPlant: SerializedOwnedPlant = SerializedOwnedPlant(),
 ) : SerializedActivity() {
-  override val type: String = "WATERED_PLANT"
+  override val type: String = ActivityType.WATERED_PLANT.toString()
 }

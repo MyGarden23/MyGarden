@@ -1,10 +1,10 @@
 package com.android.mygarden.model.gardenactivity
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFriend
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.TestPlants

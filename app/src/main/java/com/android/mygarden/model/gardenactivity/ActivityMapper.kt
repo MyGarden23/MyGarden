@@ -1,10 +1,10 @@
 package com.android.mygarden.model.gardenactivity
 
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddFriend
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
-import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAchievement
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedActivity
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedAddFriend
@@ -70,10 +70,10 @@ object ActivityMapper {
    */
   fun mapTypeToSerializedClass(type: String): Class<out SerializedActivity>? {
     return when (type) {
-      "ADDED_PLANT" -> SerializedAddedPlant::class.java
-      "ACHIEVEMENT" -> SerializedAchievement::class.java
-      "ADDED_FRIEND" -> SerializedAddFriend::class.java
-      "WATERED_PLANT" -> SerializedWaterPlant::class.java
+      ActivityType.ADDED_PLANT.toString() -> SerializedAddedPlant::class.java
+      ActivityType.ACHIEVEMENT.toString() -> SerializedAchievement::class.java
+      ActivityType.ADDED_FRIEND.toString() -> SerializedAddFriend::class.java
+      ActivityType.WATERED_PLANT.toString() -> SerializedWaterPlant::class.java
       else -> null
     }
   }

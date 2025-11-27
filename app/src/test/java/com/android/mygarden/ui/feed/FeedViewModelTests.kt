@@ -2,8 +2,8 @@ package com.android.mygarden.ui.feed
 
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepository
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
-import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
