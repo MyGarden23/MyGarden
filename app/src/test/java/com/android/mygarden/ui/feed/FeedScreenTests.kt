@@ -19,6 +19,7 @@ import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeFriendsRepository
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -90,18 +91,6 @@ class FeedScreenTests {
     override fun cleanup() {
       activitiesFlow.value = emptyList()
     }
-  }
-
-  private class FakeFriendsRepository : FriendsRepository {
-    private val _friendsFlow = MutableStateFlow<List<String>>(emptyList())
-
-    override suspend fun getFriends(userId: String): List<String> = _friendsFlow.value
-
-    override suspend fun addFriend(friendUserId: String) {
-      _friendsFlow.value = _friendsFlow.value + friendUserId
-    }
-
-    override fun friendsFlow(userId: String): Flow<List<String>> = _friendsFlow
   }
 
   private lateinit var activityRepo: ActivityRepository
