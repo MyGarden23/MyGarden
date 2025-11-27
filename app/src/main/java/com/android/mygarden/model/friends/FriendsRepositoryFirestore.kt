@@ -2,6 +2,9 @@ package com.android.mygarden.model.friends
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 /**
@@ -38,5 +41,24 @@ class FriendsRepositoryFirestore(
     // Add friend in current user’s list
     val currentDoc = friendsCollection(currentUserId).document(friendUserId)
     currentDoc.set(mapOf("friendUid" to friendUserId)).await()
+  }
+
+  override fun friendsFlow(userId: String): Flow<List<String>> = callbackFlow {
+    val registration =
+        friendsCollection(userId).addSnapshotListener { snapshot, error ->
+          if (error != null) {
+            // optionally log error
+            // close(error) // if you want the flow to terminate
+            return@addSnapshotListener
+          }
+
+          if (snapshot != null) {
+            val friends = snapshot.documents.mapNotNull { it.getString("friendUid") }
+            trySend(friends).isSuccess
+          }
+        }
+
+    // Clean up the listener when the flow collector is cancelled
+    awaitClose { registration.remove() }
   }
 }
