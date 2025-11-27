@@ -8,7 +8,7 @@ import com.android.mygarden.model.caretips.CareTipsRepository
 import com.android.mygarden.model.caretips.CareTipsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
