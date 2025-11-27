@@ -160,6 +160,8 @@ class EndToEndM1 {
     // Test health tab
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
+
+    // Not displayed because we come from the camera screen
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).assertIsNotDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY).assertIsDisplayed()
 

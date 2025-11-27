@@ -80,6 +80,11 @@
     <string name="unknown_plant_tips_message">Plant unknown</string>
     <string name="date_of_creation_prefix">Added the</string>
     <string name="description_header">Overview</string>
+    <string name="water_drop_icon_description">Water drop icon</string>
+    <string name="alarm_icon_description">Alarm icon</string>
+    <string name="indoor_plant_icon_description">Indoor plant icon</string>
+    <string name="outdoor_plant_icon_description">Outdoor plant icon</string>
+    <string name="unknown_plant_icon_description">Unknown plant icon</string>
 
 
     <!-- Pop Up Screen -->

@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -111,6 +110,10 @@ private val BOTTOM_BAR_PADDING = 16.dp
 private val BACK_BUTTON_PADDING = 8.dp
 private val INFO_TAB_PADDING = 20.dp
 
+// Spacer widths
+private val PROGRESS_INDICATOR_TEXT_SPACER_WIDTH = 12.dp
+private val NAMES_TIPS_BUTTON_SPACE_WIDTH = 8.dp
+
 /**
  * Screen displaying detailed information about a plant.
  *
@@ -210,7 +213,7 @@ fun PlantInfosScreen(
                   }
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(NAMES_TIPS_BUTTON_SPACE_WIDTH))
 
                 // Tips button
                 Button(
@@ -346,7 +349,7 @@ private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Uni
                           modifier = Modifier.size(UPLOADING_INDICATOR_SIZE),
                           color = MaterialTheme.colorScheme.onSurfaceVariant,
                           strokeWidth = UPLOADING_INDICATOR_STROKE_WIDTH)
-                      Spacer(modifier = Modifier.width(12.dp))
+                      Spacer(modifier = Modifier.width(PROGRESS_INDICATOR_TEXT_SPACER_WIDTH))
                       Text(
                           text = stringResource(id = R.string.uploading),
                           fontSize = EDIT_NEXT_BUTTON_FONT_SIZE,
@@ -488,7 +491,7 @@ private fun PlantInfoTabContent(
               .padding(INFO_TAB_PADDING)) {
         when (uiState.selectedTab) {
           SelectedPlantInfoTab.DESCRIPTION -> PlantDescriptionTab(uiState)
-          SelectedPlantInfoTab.HEALTH_STATUS -> PlantHealthTab(uiState, context)
+          SelectedPlantInfoTab.HEALTH_STATUS -> PlantHealthTab(uiState)
           SelectedPlantInfoTab.LOCATION -> PlantLocationTab(uiState)
         }
       }
@@ -520,7 +523,6 @@ private fun PlantDescriptionTab(uiState: PlantInfoUIState) {
               Text(
                   text = uiState.description,
                   fontSize = DESCRIPTION_LIGHT_EXPOSURE_FONT_SIZE,
-                  color = MaterialTheme.colorScheme.onBackground,
                   textAlign = TextAlign.Justify,
                   modifier = Modifier.testTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT))
             }
@@ -534,10 +536,9 @@ private fun PlantDescriptionTab(uiState: PlantInfoUIState) {
  * - Last time the plant was watered (if coming from the garden)
  *
  * @param uiState The current UI state containing all health-related data.
- * @param context Android context used for formatting string resources.
  */
 @Composable
-private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
+private fun PlantHealthTab(uiState: PlantInfoUIState) {
 
   Column(verticalArrangement = Arrangement.spacedBy(HEALTH_TAB_SPACING)) {
     // Current health status
@@ -564,7 +565,6 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
                         stringResource(id = uiState.healthStatus.descriptionRes)),
                 fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onBackground,
                 modifier =
                     Modifier.padding(INFO_TAB_PADDING)
                         .testTag(PlantInfoScreenTestTags.HEALTH_STATUS))
@@ -577,7 +577,7 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
         horizontalArrangement = Arrangement.spacedBy(ROWS_SPACING)) {
           Icon(
               Icons.Default.WaterDrop,
-              contentDescription = null,
+              contentDescription = stringResource(R.string.water_drop_icon_description),
               modifier = Modifier.size(ICONS_SIZE),
               tint = MaterialTheme.colorScheme.primary)
           Column(
@@ -587,7 +587,7 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
                     text = stringResource(R.string.watering_frequency_header),
                     fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY_HEADER))
 
                 Text(
@@ -595,7 +595,7 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
                         stringResource(
                             R.string.watering_frequency_value, uiState.wateringFrequency),
                     fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
               }
         }
@@ -619,7 +619,7 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
           horizontalArrangement = Arrangement.spacedBy(ROWS_SPACING)) {
             Icon(
                 Icons.Default.Alarm,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.alarm_icon_description),
                 modifier = Modifier.size(ICONS_SIZE),
                 tint = MaterialTheme.colorScheme.primary)
             Column(
@@ -629,13 +629,13 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
                       text = stringResource(R.string.last_time_watered_header_plant_info),
                       fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
                       fontWeight = FontWeight.Medium,
-                      color = MaterialTheme.colorScheme.onBackground,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
                       modifier = Modifier.testTag(PlantInfoScreenTestTags.LAST_TIME_WATERED_HEADER))
 
                   Text(
                       text = formattedText,
                       fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
-                      color = MaterialTheme.colorScheme.onBackground,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
                       modifier = Modifier.testTag(PlantInfoScreenTestTags.LAST_TIME_WATERED))
                 }
           }
@@ -677,7 +677,6 @@ private fun PlantLocationTab(uiState: PlantInfoUIState) {
                   text = uiState.lightExposure,
                   fontSize = DESCRIPTION_LIGHT_EXPOSURE_FONT_SIZE,
                   textAlign = TextAlign.Justify,
-                  color = MaterialTheme.colorScheme.onBackground,
                   modifier = Modifier.testTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT))
             }
       }
@@ -696,19 +695,22 @@ private fun PlantLocationTab(uiState: PlantInfoUIState) {
 fun LocationIcon(location: PlantLocation) {
   when (location) {
     PlantLocation.INDOOR -> {
-      Icon(Icons.Default.House, contentDescription = null, modifier = Modifier.size(ICONS_SIZE))
+      Icon(
+          Icons.Default.House,
+          contentDescription = stringResource(R.string.indoor_plant_icon_description),
+          modifier = Modifier.size(ICONS_SIZE))
     }
     PlantLocation.OUTDOOR -> {
       Icon(
           Icons.Default.WbSunny,
-          contentDescription = null,
+          contentDescription = stringResource(R.string.outdoor_plant_icon_description),
           modifier = Modifier.size(ICONS_SIZE),
           tint = MaterialTheme.colorScheme.secondary)
     }
     PlantLocation.UNKNOWN -> {
       Icon(
           Icons.Default.QuestionMark,
-          contentDescription = null,
+          contentDescription = stringResource(R.string.unknown_plant_icon_description),
           modifier = Modifier.size(ICONS_SIZE))
     }
   }

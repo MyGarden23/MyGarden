@@ -11,7 +11,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.printToLog
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
@@ -61,6 +60,7 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
    * @param plant The Plant object to display
    * @param onSavePlant Callback for the "Next" button (default: empty lambda)
    * @param onBackPressed Callback for the back button (default: empty lambda)
+   * @param status the status we want the OwnedPlant to have (default: UNKNOWN)
    */
   suspend fun setContentFromGarden(
       plant: Plant,
@@ -312,7 +312,6 @@ class PlantInfoScreenTests : FirestoreProfileTest() {
             healthStatusDescription = "This plant really needs water.")
     setContentFromGarden(plant = overwateredPlant, status = PlantHealthStatus.SEVERELY_DRY)
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).printToLog("TEST_DEBUG")
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
         .assertTextEquals(
