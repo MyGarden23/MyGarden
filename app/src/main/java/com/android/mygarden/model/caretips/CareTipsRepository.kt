@@ -18,6 +18,7 @@ interface CareTipsRepository {
    *
    * @param latinName the latin name of the plant for which the care tip was called
    * @param healthStatus the status of the plant for which the care tip was called
+   * @param tip the queried tip from the Gemini API to cache on Firestore
    */
   suspend fun addTip(latinName: String, healthStatus: PlantHealthStatus, tip: String)
 }
