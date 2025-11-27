@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
+import com.android.mygarden.model.caretips.CareTipsRepository
+import com.android.mygarden.model.caretips.CareTipsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
@@ -68,7 +70,8 @@ data class PlantInfoUIState(
 class PlantInfoViewModel(
     private val plantsRepository: PlantsRepository = PlantsRepositoryProvider.repository,
     private val activityRepository: ActivityRepository = ActivityRepositoryProvider.repository,
-    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val tipsRepository: CareTipsRepository = CareTipsRepositoryProvider.repository
 ) : ViewModel() {
   // Private mutable state flow
   private val _uiState = MutableStateFlow(PlantInfoUIState())
@@ -212,14 +215,19 @@ class PlantInfoViewModel(
       }
 
       val tips =
-          try {
-            plantsRepository.generateCareTips(latinName, healthStatus)
-          } catch (e: Exception) {
-            Log.e("plantInfoViewModel", "Error generating care tips for $latinName", e)
-            // Use a placeholder constant instead of a hardcoded user-facing string.
-            // The UI will map this placeholder to a localized string resource.
-            ERROR_GENERATING_TIPS
-          }
+          // check if the tip is cached or not
+          tipsRepository.getTip(latinName, healthStatus)
+              ?: try {
+                // tip is not cached : generate one and add it to the cache
+                val newTip = plantsRepository.generateCareTips(latinName, healthStatus)
+                tipsRepository.addTip(latinName, healthStatus, newTip)
+                newTip
+              } catch (e: Exception) {
+                Log.e("plantInfoViewModel", "Error generating care tips for $latinName", e)
+                // Use a placeholder constant instead of a hardcoded user-facing string.
+                // The UI will map this placeholder to a localized string resource.
+                ERROR_GENERATING_TIPS
+              }
 
       _uiState.value = _uiState.value.copy(careTips = tips)
     }
