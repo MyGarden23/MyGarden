@@ -1,6 +1,8 @@
 package com.android.mygarden.utils
 
 import com.android.mygarden.model.friends.FriendsRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * A lightweight in-memory fake implementation of [FriendsRepository] for unit tests.
@@ -34,5 +36,9 @@ class FakeFriendsRepository : FriendsRepository {
   override suspend fun addFriend(friendUserId: String) {
     throwOnAdd?.let { throw it }
     addedFriends += friendUserId
+  }
+
+  override fun friendsFlow(userId: String): Flow<List<String>> {
+    return flowOf(addedFriends)
   }
 }
