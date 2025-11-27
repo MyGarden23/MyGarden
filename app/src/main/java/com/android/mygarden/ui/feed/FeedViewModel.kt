@@ -58,12 +58,6 @@ class FeedViewModel(
             activityRepo.getFeedActivities(allIds)
           }
           .collect { activities -> _uiState.value = _uiState.value.copy(activities = activities) }
-      //      activityRepo.getActivities().collect { updatedList ->
-      //        // Here no need to sort it by createdAt timestamp because it's already done in the
-      // activity
-      //        // repository
-      //        _uiState.value = _uiState.value.copy(activities = updatedList)
-      //      }
     }
   }
 }
