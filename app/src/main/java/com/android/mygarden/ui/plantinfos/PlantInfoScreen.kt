@@ -79,9 +79,37 @@ object PlantInfoScreenTestTags {
   const val TIPS_CLOSE_BUTTON = "tips_close_button"
 }
 
-// Padding constants for PlantInfosScreen
+// Font sizes values
+private val PLANT_NAME_FONT_SIZE = 32.sp
+private val PLANT_LATIN_NAME_FONT_SIZE = 18.sp
+private val PLANT_CREATION_DATE_FONT_SIZE = 14.sp
+private val TIPS_BUTTON_TITLE_FONT_SIZE = 18.sp
+private val TAB_HEADERS_FONT_SIZE = 18.sp
+private val EDIT_NEXT_BUTTON_FONT_SIZE = 18.sp
+private val HEALTH_TAB_TEXTS_FONT_SIZE = 20.sp
+private val DESCRIPTION_HEADER_LOCATION_FONT_SIZE = 22.sp
+private val DESCRIPTION_LIGHT_EXPOSURE_FONT_SIZE = 18.sp
+
+// Sizing values
+private val BOTTOM_BAR_SHAPE_SIZE = 28.dp
+private val BOTTOM_BAR_HEIGHT = 56.dp
+private val UPLOADING_INDICATOR_SIZE = 24.dp
+private val UPLOADING_INDICATOR_STROKE_WIDTH = 2.dp
+private val HEADER_HEIGHT = 280.dp
+private val INFO_TAB_CARDS_SHAPE_SIZE = 16.dp
+private val INFO_TAB_CARDS_ELEVATION = 2.dp
+private val DESCRIPTION_LOCATION_TAB_SPACING = 4.dp
+private val HEALTH_TAB_SPACING = 20.dp
+private const val ALPHA_COPY_RATIO = 0.2f
+private val ICONS_SIZE = 50.dp
+private val ROWS_SPACING = 12.dp
+
+// Padding values
 private val PLANT_NAME_SECTION_HORIZONTAL_PADDING = 20.dp
 private val PLANT_NAME_SECTION_VERTICAL_PADDING = 16.dp
+private val BOTTOM_BAR_PADDING = 16.dp
+private val BACK_BUTTON_PADDING = 8.dp
+private val INFO_TAB_PADDING = 20.dp
 
 /**
  * Screen displaying detailed information about a plant.
@@ -160,13 +188,13 @@ fun PlantInfosScreen(
                   Text(
                       text = uiState.name,
                       modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_NAME),
-                      fontSize = 32.sp,
+                      fontSize = PLANT_NAME_FONT_SIZE,
                       fontWeight = FontWeight.Bold,
                       color = MaterialTheme.colorScheme.onBackground)
                   // Scientific name (e.g., "Rosa rubiginosa")
                   Text(
                       text = uiState.latinName,
-                      fontSize = 18.sp,
+                      fontSize = PLANT_LATIN_NAME_FONT_SIZE,
                       color = MaterialTheme.colorScheme.onSurfaceVariant,
                       modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME))
 
@@ -176,7 +204,7 @@ fun PlantInfosScreen(
                         text =
                             context.getString(R.string.date_of_creation_prefix) +
                                 " ${formatTimeStampForDateOfCreation(uiState.dateOfCreation!!)}",
-                        fontSize = 14.sp,
+                        fontSize = PLANT_CREATION_DATE_FONT_SIZE,
                         color = MaterialTheme.colorScheme.outline,
                         modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_DATE_OF_CREATION))
                   }
@@ -194,7 +222,9 @@ fun PlantInfosScreen(
                       plantInfoViewModel.showCareTips(uiState.latinName, uiState.healthStatus)
                     },
                     modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_BUTTON)) {
-                      Text(text = stringResource(id = R.string.tips_button_label), fontSize = 18.sp)
+                      Text(
+                          text = stringResource(id = R.string.tips_button_label),
+                          fontSize = TIPS_BUTTON_TITLE_FONT_SIZE)
                     }
               }
 
@@ -252,7 +282,7 @@ fun ModulableTabRow(
                     text = stringResource(id = tab.textRes),
                     fontWeight =
                         if (uiState.selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
-                    fontSize = 18.sp)
+                    fontSize = TAB_HEADERS_FONT_SIZE)
               })
         }
       }
@@ -294,46 +324,48 @@ private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Uni
   val testTagButton =
       if (uiState.isFromGarden) PlantInfoScreenTestTags.EDIT_BUTTON
       else PlantInfoScreenTestTags.NEXT_BUTTON
-  Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-    Button(
-        onClick = onSavePlant,
-        modifier = Modifier.fillMaxWidth().height(56.dp).testTag(testTagButton),
-        shape = RoundedCornerShape(28.dp),
-        enabled = !uiState.isSaving,
-        colors =
-            ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-          if (uiState.isSaving) {
-            Row(
-                modifier = Modifier.testTag(PlantInfoScreenTestTags.NEXT_BUTTON_LOADING),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically) {
-                  CircularProgressIndicator(
-                      modifier = Modifier.size(24.dp),
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
-                      strokeWidth = 2.dp)
-                  Spacer(modifier = Modifier.width(12.dp))
-                  Text(
-                      text = stringResource(id = R.string.uploading),
-                      fontSize = 18.sp,
-                      fontWeight = FontWeight.Medium,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-          } else if (uiState.isFromGarden) {
-            Text(
-                text = context.getString(R.string.edit),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium)
-          } else {
-            Text(
-                text = context.getString(R.string.next),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium)
-          }
-        }
-  }
+  Box(
+      modifier = Modifier.fillMaxWidth().padding(BOTTOM_BAR_PADDING),
+      contentAlignment = Alignment.Center) {
+        Button(
+            onClick = onSavePlant,
+            modifier = Modifier.fillMaxWidth().height(BOTTOM_BAR_HEIGHT).testTag(testTagButton),
+            shape = RoundedCornerShape(BOTTOM_BAR_SHAPE_SIZE),
+            enabled = !uiState.isSaving,
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+              if (uiState.isSaving) {
+                Row(
+                    modifier = Modifier.testTag(PlantInfoScreenTestTags.NEXT_BUTTON_LOADING),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically) {
+                      CircularProgressIndicator(
+                          modifier = Modifier.size(UPLOADING_INDICATOR_SIZE),
+                          color = MaterialTheme.colorScheme.onSurfaceVariant,
+                          strokeWidth = UPLOADING_INDICATOR_STROKE_WIDTH)
+                      Spacer(modifier = Modifier.width(12.dp))
+                      Text(
+                          text = stringResource(id = R.string.uploading),
+                          fontSize = EDIT_NEXT_BUTTON_FONT_SIZE,
+                          fontWeight = FontWeight.Medium,
+                          color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+              } else if (uiState.isFromGarden) {
+                Text(
+                    text = context.getString(R.string.edit),
+                    fontSize = EDIT_NEXT_BUTTON_FONT_SIZE,
+                    fontWeight = FontWeight.Medium)
+              } else {
+                Text(
+                    text = context.getString(R.string.next),
+                    fontSize = EDIT_NEXT_BUTTON_FONT_SIZE,
+                    fontWeight = FontWeight.Medium)
+              }
+            }
+      }
 }
 
 /**
@@ -357,7 +389,7 @@ private fun PlantInfoHeader(
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .height(280.dp)
+              .height(HEADER_HEIGHT)
               .background(MaterialTheme.colorScheme.primary)
               .testTag(PlantInfoScreenTestTags.PLANT_IMAGE)) {
         // Placeholder for plant image
@@ -379,7 +411,7 @@ private fun PlantInfoHeader(
             enabled = !uiState.isSaving,
             modifier =
                 Modifier.align(Alignment.TopStart)
-                    .padding(8.dp)
+                    .padding(BACK_BUTTON_PADDING)
                     .testTag(PlantInfoScreenTestTags.BACK_BUTTON)) {
               Icon(
                   imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -453,7 +485,7 @@ private fun PlantInfoTabContent(
                   if (uiState.selectedTab == SelectedPlantInfoTab.DESCRIPTION)
                       descriptionScrollState
                   else healthScrollState)
-              .padding(20.dp)) {
+              .padding(INFO_TAB_PADDING)) {
         when (uiState.selectedTab) {
           SelectedPlantInfoTab.DESCRIPTION -> PlantDescriptionTab(uiState)
           SelectedPlantInfoTab.HEALTH_STATUS -> PlantHealthTab(uiState, context)
@@ -471,22 +503,23 @@ private fun PlantInfoTabContent(
 private fun PlantDescriptionTab(uiState: PlantInfoUIState) {
   Card(
       modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(16.dp),
-      elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+      shape = RoundedCornerShape(INFO_TAB_CARDS_SHAPE_SIZE),
+      elevation = CardDefaults.cardElevation(defaultElevation = INFO_TAB_CARDS_ELEVATION),
       colors =
           CardDefaults.cardColors(
               containerColor = MaterialTheme.colorScheme.surfaceVariant,
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(20.dp)) {
+            verticalArrangement = Arrangement.spacedBy(DESCRIPTION_LOCATION_TAB_SPACING),
+            modifier = Modifier.padding(INFO_TAB_PADDING)) {
               Text(
                   stringResource(R.string.description_header),
-                  fontSize = 22.sp,
+                  fontSize = DESCRIPTION_HEADER_LOCATION_FONT_SIZE,
                   fontWeight = FontWeight.Bold,
                   modifier = Modifier.testTag(PlantInfoScreenTestTags.DESCRIPTION_HEADER))
               Text(
                   text = uiState.description,
-                  fontSize = 18.sp,
+                  fontSize = DESCRIPTION_LIGHT_EXPOSURE_FONT_SIZE,
                   color = MaterialTheme.colorScheme.onBackground,
                   textAlign = TextAlign.Justify,
                   modifier = Modifier.testTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT))
@@ -506,7 +539,7 @@ private fun PlantDescriptionTab(uiState: PlantInfoUIState) {
 @Composable
 private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
 
-  Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+  Column(verticalArrangement = Arrangement.spacedBy(HEALTH_TAB_SPACING)) {
     // Current health status
     val cardColor =
         colorsFromHealthStatus(
@@ -519,46 +552,52 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
     if (uiState.isFromGarden) {
       Card(
           modifier = Modifier.fillMaxWidth(),
-          shape = RoundedCornerShape(16.dp),
+          shape = RoundedCornerShape(INFO_TAB_CARDS_SHAPE_SIZE),
           colors =
               CardDefaults.cardColors(
-                  containerColor = cardColor.copy(alpha = 0.2f),
+                  containerColor = cardColor.copy(alpha = ALPHA_COPY_RATIO),
                   contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
             Text(
                 text =
                     stringResource(
                         R.string.status_label,
                         stringResource(id = uiState.healthStatus.descriptionRes)),
-                fontSize = 20.sp,
+                fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(20.dp).testTag(PlantInfoScreenTestTags.HEALTH_STATUS))
+                modifier =
+                    Modifier.padding(INFO_TAB_PADDING)
+                        .testTag(PlantInfoScreenTestTags.HEALTH_STATUS))
           }
     }
 
     // Watering frequency
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        horizontalArrangement = Arrangement.spacedBy(ROWS_SPACING)) {
           Icon(
               Icons.Default.WaterDrop,
               contentDescription = null,
-              modifier = Modifier.size(50.dp),
+              modifier = Modifier.size(ICONS_SIZE),
               tint = MaterialTheme.colorScheme.primary)
-          Column(verticalArrangement = Arrangement.SpaceAround, modifier = Modifier.height(50.dp)) {
-            Text(
-                text = stringResource(R.string.watering_frequency_header),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY_HEADER))
+          Column(
+              verticalArrangement = Arrangement.SpaceAround,
+              modifier = Modifier.height(ICONS_SIZE)) {
+                Text(
+                    text = stringResource(R.string.watering_frequency_header),
+                    fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY_HEADER))
 
-            Text(
-                text = stringResource(R.string.watering_frequency_value, uiState.wateringFrequency),
-                fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
-          }
+                Text(
+                    text =
+                        stringResource(
+                            R.string.watering_frequency_value, uiState.wateringFrequency),
+                    fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.testTag(PlantInfoScreenTestTags.WATERING_FREQUENCY))
+              }
         }
 
     // Last time watered information (only if from garden)
@@ -577,24 +616,25 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
               .toString()
       Row(
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+          horizontalArrangement = Arrangement.spacedBy(ROWS_SPACING)) {
             Icon(
                 Icons.Default.Alarm,
                 contentDescription = null,
-                modifier = Modifier.size(50.dp),
+                modifier = Modifier.size(ICONS_SIZE),
                 tint = MaterialTheme.colorScheme.primary)
             Column(
-                verticalArrangement = Arrangement.SpaceAround, modifier = Modifier.height(50.dp)) {
+                verticalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier.height(ICONS_SIZE)) {
                   Text(
                       text = stringResource(R.string.last_time_watered_header_plant_info),
-                      fontSize = 20.sp,
+                      fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
                       fontWeight = FontWeight.Medium,
                       color = MaterialTheme.colorScheme.onBackground,
                       modifier = Modifier.testTag(PlantInfoScreenTestTags.LAST_TIME_WATERED_HEADER))
 
                   Text(
                       text = formattedText,
-                      fontSize = 20.sp,
+                      fontSize = HEALTH_TAB_TEXTS_FONT_SIZE,
                       color = MaterialTheme.colorScheme.onBackground,
                       modifier = Modifier.testTag(PlantInfoScreenTestTags.LAST_TIME_WATERED))
                 }
@@ -614,27 +654,28 @@ private fun PlantHealthTab(uiState: PlantInfoUIState, context: Context) {
 private fun PlantLocationTab(uiState: PlantInfoUIState) {
   Card(
       modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(16.dp),
-      elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+      shape = RoundedCornerShape(INFO_TAB_CARDS_SHAPE_SIZE),
+      elevation = CardDefaults.cardElevation(defaultElevation = INFO_TAB_CARDS_ELEVATION),
       colors =
           CardDefaults.cardColors(
               containerColor = MaterialTheme.colorScheme.surfaceVariant,
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(20.dp)) {
+            verticalArrangement = Arrangement.spacedBy(DESCRIPTION_LOCATION_TAB_SPACING),
+            modifier = Modifier.padding(INFO_TAB_PADDING)) {
               Row(
                   verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                  horizontalArrangement = Arrangement.spacedBy(ROWS_SPACING)) {
                     LocationIcon(uiState.location)
                     Text(
                         uiState.location.name,
-                        fontSize = 22.sp,
+                        fontSize = DESCRIPTION_HEADER_LOCATION_FONT_SIZE,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.testTag(PlantInfoScreenTestTags.LOCATION_TEXT))
                   }
               Text(
                   text = uiState.lightExposure,
-                  fontSize = 18.sp,
+                  fontSize = DESCRIPTION_LIGHT_EXPOSURE_FONT_SIZE,
                   textAlign = TextAlign.Justify,
                   color = MaterialTheme.colorScheme.onBackground,
                   modifier = Modifier.testTag(PlantInfoScreenTestTags.LIGHT_EXPOSURE_TEXT))
@@ -655,17 +696,20 @@ private fun PlantLocationTab(uiState: PlantInfoUIState) {
 fun LocationIcon(location: PlantLocation) {
   when (location) {
     PlantLocation.INDOOR -> {
-      Icon(Icons.Default.House, contentDescription = null, modifier = Modifier.size(50.dp))
+      Icon(Icons.Default.House, contentDescription = null, modifier = Modifier.size(ICONS_SIZE))
     }
     PlantLocation.OUTDOOR -> {
       Icon(
           Icons.Default.WbSunny,
           contentDescription = null,
-          modifier = Modifier.size(50.dp),
+          modifier = Modifier.size(ICONS_SIZE),
           tint = MaterialTheme.colorScheme.secondary)
     }
     PlantLocation.UNKNOWN -> {
-      Icon(Icons.Default.QuestionMark, contentDescription = null, modifier = Modifier.size(50.dp))
+      Icon(
+          Icons.Default.QuestionMark,
+          contentDescription = null,
+          modifier = Modifier.size(ICONS_SIZE))
     }
   }
 }
