@@ -1,7 +1,7 @@
 package com.android.mygarden.utils
 
 import com.android.mygarden.model.gardenactivity.ActivityRepository
-import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
+import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
