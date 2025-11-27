@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -368,7 +367,7 @@ private fun CountryDropdownMenu(
                       color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                   Icon(
-                      imageVector = Icons.Default.Close,
+                      painter = painterResource(R.drawable.x_circle),
                       contentDescription = context.getString(R.string.close_country_dropdown),
                       modifier =
                           Modifier.clickable { onClose() }
