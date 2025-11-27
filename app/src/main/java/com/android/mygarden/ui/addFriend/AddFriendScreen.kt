@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.addFriend
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,10 +33,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,7 @@ import com.android.mygarden.R
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.profile.Avatar
+import com.google.firebase.ai.type.content
 
 /** Contains all test tags used within the Add Friend screen UI. */
 object AddFriendTestTags {
@@ -65,6 +67,16 @@ object AddFriendTestTags {
   fun getTestTagForButtonOnFriendCard(pseudo: String) = "buttonOnFriendCardTestTag/${pseudo}"
 }
 
+const val FRACTION_SPACER = 0.02f
+const val FRACTION_OUTLINED_TEXT = 0.6f
+const val MAX_LINE = 1
+val PADDING_VERTICAL = 20.dp
+val PADDING_HORIZONTAL = 35.dp
+val VERTICAL_ARRANGEMENT_SPACE = 10.dp
+val CARD_HEIGHT = 80.dp
+const val FRACTION_ROW_WIDTH = 0.94f
+const val FRACTION_BOX_WIDTH = 0.6f
+val TEXT_FONT_SIZE = 20.sp
 /**
  * Screen for adding friends.
  *
@@ -86,7 +98,12 @@ fun AddFriendScreen(
   val context = LocalContext.current
   val uiState by addFriendViewModel.uiState.collectAsState()
   Scaffold(
-      topBar = { TopBar(title = "Add friend", hasGoBackButton = true, onGoBack = onBackPressed) },
+      topBar = {
+        TopBar(
+            title = stringResource(R.string.top_bar_name),
+            hasGoBackButton = true,
+            onGoBack = onBackPressed)
+      },
       modifier = Modifier.testTag(NavigationTestTags.ADD_FRIEND_SCREEN),
       content = { paddingValues ->
         Column(
@@ -96,22 +113,32 @@ fun AddFriendScreen(
                     .background(MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-          Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+          Spacer(modifier = Modifier.fillMaxHeight(FRACTION_SPACER))
 
           // Search bar row
           Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(0.6f).testTag(AddFriendTestTags.SEARCH_TEXT),
+                modifier =
+                    Modifier.fillMaxWidth(FRACTION_OUTLINED_TEXT)
+                        .testTag(AddFriendTestTags.SEARCH_TEXT),
                 value = uiState.query,
                 onValueChange = { addFriendViewModel.onQueryChange(it) },
             )
             Button(
                 modifier = Modifier.testTag(AddFriendTestTags.SEARCH_BUTTON),
-                onClick = { addFriendViewModel.onSearch({}) }, // Start the research
+                onClick = {
+                  addFriendViewModel.onSearch({ // Start the research
+                    Toast.makeText(
+                            context,
+                            context.getString(R.string.error_failed_search),
+                            Toast.LENGTH_SHORT)
+                        .show()
+                  })
+                },
             ) {
               Text(
-                  text = "Search",
-                  maxLines = 1,
+                  text = context.getString(R.string.search_button),
+                  maxLines = MAX_LINE,
               )
             }
           }
@@ -120,14 +147,13 @@ fun AddFriendScreen(
           Column(
               modifier =
                   Modifier.fillMaxSize()
-                      .padding(horizontal = 20.dp, vertical = 35.dp)
+                      .padding(horizontal = PADDING_VERTICAL, vertical = PADDING_HORIZONTAL)
                       .verticalScroll(rememberScrollState())
                       .testTag(AddFriendTestTags.FRIEND_COLUMN),
               horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(10.dp)) {
+              verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT_SPACE)) {
                 uiState.searchResults.forEach { u ->
-                  FriendCard(
-                      u.id, u.pseudo, u.avatar, u.friendRelation, addFriendViewModel, context)
+                  FriendCard(u.id, u.pseudo, u.avatar, addFriendViewModel, context)
                 }
               }
         }
@@ -149,7 +175,6 @@ fun AddFriendScreen(
  * @param userId The ID of the user represented by this card.
  * @param pseudo The username displayed on the card.
  * @param avatar The user's avatar.
- * @param friendRelation Current relationship status with the user.
  * @param viewModel ViewModel handling friend request actions.
  * @param context Android context used for localized strings.
  */
@@ -158,19 +183,18 @@ fun FriendCard(
     userId: String,
     pseudo: String,
     avatar: Avatar,
-    friendRelation: FriendRelation,
     viewModel: AddFriendViewModel,
     context: Context,
 ) {
   Card(
       modifier =
           Modifier.fillMaxWidth()
-              .height(80.dp)
+              .height(CARD_HEIGHT)
               .testTag(AddFriendTestTags.getTestTagForFriendCard(pseudo))) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
           Row(
               modifier =
-                  Modifier.fillMaxWidth(0.94f)
+                  Modifier.fillMaxWidth(FRACTION_ROW_WIDTH)
                       .testTag(AddFriendTestTags.getTestTagForRowOnFriendCard(pseudo)),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween) {
@@ -178,28 +202,28 @@ fun FriendCard(
                 Card(
                     modifier =
                         Modifier.clip(CircleShape)
-                            .size(80.dp)
+                            .size(CARD_HEIGHT)
                             .testTag(AddFriendTestTags.getTestTagForAvatarOnFriendCard(pseudo))) {
                       Image(
                           painter = painterResource(avatar.resId),
                           contentDescription =
-                              context.getString(R.string.avatar_description_friend_screen, "test"),
+                              context.getString(R.string.avatar_description_friend_screen, pseudo),
                           modifier = Modifier.fillMaxSize())
                     }
 
                 // Pseudo
                 Box(
-                    modifier = Modifier.fillMaxHeight().fillMaxWidth(0.6f),
+                    modifier = Modifier.fillMaxHeight().fillMaxWidth(FRACTION_BOX_WIDTH),
                     contentAlignment = Alignment.Center,
                 ) {
                   Text(
                       text = pseudo,
                       fontWeight = FontWeight.Bold,
-                      fontSize = 20.sp,
+                      fontSize = TEXT_FONT_SIZE,
                       modifier =
                           Modifier.testTag(
                               AddFriendTestTags.getTestTagForPseudoOnFriendCard(pseudo)),
-                      maxLines = 1,
+                      maxLines = MAX_LINE,
                       overflow = TextOverflow.Ellipsis,
                   )
                 }
@@ -208,40 +232,27 @@ fun FriendCard(
                 Button(
                     modifier =
                         Modifier.testTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudo)),
-                    onClick = { viewModel.onAdd(userId, {}, {}) },
-                    colors = ButtonDefaults.buttonColors(friendRelation.color),
-                    content = { Text(friendRelation.toString()) })
+                    onClick = {
+                      viewModel.onAdd(
+                          userId,
+                          {
+                            Toast.makeText(
+                                    context,
+                                    context.getString(R.string.add_friend_failed, pseudo),
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                          },
+                          {
+                            Toast.makeText(
+                                    context,
+                                    context.getString(R.string.added_friend_successfully, pseudo),
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                          })
+                    },
+                    colors = ButtonDefaults.buttonColors(FriendRelation.ADD.color),
+                    content = { Text(stringResource(FriendRelation.ADD.labelRes)) })
               }
         }
       }
-}
-
-/**
- * Represents the relationship status between the current user and another user's profile.
- *
- * Each relation provides:
- * - A readable string representation via [toString], used for the button of a [FriendCard].
- * - A [color] property that exposes the appropriate color for the given relation.
- */
-enum class FriendRelation {
-  /** Indicates that the user can send a friend request. */
-  ADD,
-  /** Indicates that the users are already connected. */
-  ADDED;
-
-  override fun toString(): String {
-    return when (this) {
-      FriendRelation.ADD -> "Add"
-      FriendRelation.ADDED -> "Added"
-    }
-  }
-
-  /** A color representing this friend relation. */
-  val color: Color
-    @Composable
-    get() =
-        when (this) {
-          ADD -> colorScheme.primary
-          ADDED -> colorScheme.outline
-        }
 }

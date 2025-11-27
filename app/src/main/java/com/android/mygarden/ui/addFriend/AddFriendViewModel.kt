@@ -1,7 +1,11 @@
 package com.android.mygarden.ui.addFriend
 
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.R
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.profile.PseudoRepository
@@ -28,6 +32,7 @@ data class AddFriendUiState(
     val query: String = "",
     val isSearching: Boolean = false,
     val searchResults: List<UserProfile> = emptyList(),
+    val alreadyFriend: List<UserProfile> = emptyList(),
 )
 
 /**
@@ -103,30 +108,40 @@ class AddFriendViewModel(
     viewModelScope.launch {
       try {
         friendsRepository.addFriend(userId)
-        onSuccess() // create xml with "Friend added successfully."
-        _uiState.value =
-            _uiState.value.copy(
-                searchResults =
-                    _uiState.value.searchResults.updateRelation(userId, FriendRelation.ADDED))
+        onSuccess()
       } catch (_: Exception) {
-        onError() // create xml with "Failed to add friend."
+        onError()
       }
     }
   }
+}
 
-  /**
-   * Returns a new list where the [UserProfile] with the given [id] has its [friendRelation]
-   * replaced by [newRelation] if it was not already [newRelation].
-   *
-   * This function does not mutate the original list. If no element matches the provided [id], the
-   * original list is returned unchanged.
-   *
-   * @param id The identifier of the user whose relation should be updated.
-   * @param newRelation The new [FriendRelation] to assign to the matching user.
-   * @return A new `List<UserProfile>` with the updated relation applied.
-   */
-  fun List<UserProfile>.updateRelation(id: String, newRelation: FriendRelation) = map {
-    if (it.id == id && it.friendRelation != newRelation) it.copy(friendRelation = newRelation)
-    else it
+/**
+ * Represents the relationship status between the current user and another user's profile.
+ *
+ * Each relation provides:
+ * - A readable string representation via [toString], used for the button of a [FriendCard].
+ * - A [color] property that exposes the appropriate color for the given relation.
+ */
+enum class FriendRelation(val labelRes: Int) { //
+  /** Indicates that the user can send a friend request. */
+  ADD(R.string.add_enum),
+  /** Indicates that the users are already connected. */
+  ADDED(R.string.added_enum);
+
+  override fun toString(): String {
+    return when (this) {
+      FriendRelation.ADD -> "Add"
+      FriendRelation.ADDED -> "Added"
+    }
   }
+
+  /** A color representing this friend relation. */
+  val color: Color
+    @Composable
+    get() =
+        when (this) {
+          ADD -> colorScheme.primary
+          ADDED -> colorScheme.outline
+        }
 }

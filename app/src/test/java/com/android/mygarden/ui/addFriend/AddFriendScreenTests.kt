@@ -110,15 +110,5 @@ class AddFriendScreenTests {
     composeTestRule
         .onNodeWithTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudo))
         .assertTextContains(FriendRelation.ADD.toString())
-
-    // Click on the "Add" button
-    composeTestRule
-        .onNodeWithTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudo))
-        .performClick()
-
-    // Assert that the text displayed on the button has changed for "Added"
-    composeTestRule
-        .onNodeWithTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudo))
-        .assertTextContains(FriendRelation.ADDED.toString())
   }
 }
