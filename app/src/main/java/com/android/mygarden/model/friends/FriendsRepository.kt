@@ -1,5 +1,7 @@
 package com.android.mygarden.model.friends
 
+import kotlinx.coroutines.flow.Flow
+
 interface FriendsRepository {
 
   /** Returns the list of friends for the given user. */
@@ -12,4 +14,7 @@ interface FriendsRepository {
    * @throws IllegalArgumentException if currentUserId == friendUserId
    */
   suspend fun addFriend(friendUserId: String)
+
+  /** Flow of friends */
+  fun friendsFlow(userId: String): Flow<List<String>>
 }

@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import app.cash.turbine.test
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FirestoreProfileTest
 import com.google.firebase.auth.FirebaseAuth
@@ -125,5 +126,18 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
     assertNotNull(error)
     assertTrue(error is IllegalStateException)
     assertEquals("User not authenticated", error!!.message)
+  }
+
+  @Test
+  fun addFriend_updatesFlow() = runTest {
+    friendsRepo.friendsFlow(currentUserId).test {
+      // first emission always empty
+      assertEquals(emptyList<String>(), awaitItem())
+
+      friendsRepo.addFriend("friend1")
+      assertEquals(listOf("friend1"), awaitItem())
+
+      cancelAndIgnoreRemainingEvents()
+    }
   }
 }

@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.feed
 
+import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAddedPlant
 import com.android.mygarden.model.gardenactivity.activitiyclasses.GardenActivity
@@ -7,6 +8,7 @@ import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
+import com.android.mygarden.utils.FakeFriendsRepository
 import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,6 +51,7 @@ class FeedViewModelTests {
   private class FakeActivityRepository : ActivityRepository {
 
     val activitiesFlow = MutableStateFlow<List<GardenActivity>>(emptyList())
+    var lastFriendsList: List<String>? = null
 
     override fun getCurrentUserId(): String = "fake-uid"
 
@@ -59,7 +62,8 @@ class FeedViewModelTests {
     }
 
     override fun getFeedActivities(userIds: List<String>, limit: Int): Flow<List<GardenActivity>> {
-      return emptyFlow()
+      lastFriendsList = userIds
+      return activitiesFlow
     }
 
     override suspend fun addActivity(activity: GardenActivity) {
@@ -76,6 +80,7 @@ class FeedViewModelTests {
 
   private lateinit var repositoryScope: TestScope
   private lateinit var activityRepo: ActivityRepository
+  private lateinit var friendsRepo: FriendsRepository
   private lateinit var vm: FeedViewModel
 
   /** Sets up the correct scopes, the repository and the view model */
@@ -84,7 +89,8 @@ class FeedViewModelTests {
     Dispatchers.setMain(testDispatcher)
     repositoryScope = TestScope(SupervisorJob() + testDispatcher)
     activityRepo = FakeActivityRepository()
-    vm = FeedViewModel(activityRepo)
+    friendsRepo = FakeFriendsRepository()
+    vm = FeedViewModel(activityRepo, friendsRepo)
   }
 
   /** Resets the scopes and ensures the clear of the list of activities */
@@ -105,7 +111,7 @@ class FeedViewModelTests {
   fun initialNonEmptyCorrectlyCollected() = runTest {
     activityRepo.addActivity(addedPlantActivity)
     // new instance created after the activity is added to the repository
-    val newVM = FeedViewModel(activityRepo)
+    val newVM = FeedViewModel(activityRepo, friendsRepo)
     runCurrent()
     assertEquals(listOf(addedPlantActivity), newVM.uiState.value.activities)
   }
@@ -117,6 +123,34 @@ class FeedViewModelTests {
     runCurrent()
     vm.refreshUIState()
     runCurrent()
+    assertEquals(listOf(addedPlantActivity), vm.uiState.value.activities)
+  }
+
+  @Test
+  fun feedUsesCurrentUserOnlyWhenNoFriends() = runTest {
+    val fakeRepo = activityRepo as FakeActivityRepository
+    val vm = FeedViewModel(fakeRepo, friendsRepo)
+    runCurrent()
+    assertEquals(listOf("fake-uid"), fakeRepo.lastFriendsList)
+  }
+
+  @Test
+  fun activitiesUpdateAfterFriendListChanges() = runTest {
+    val fakeActivityRepo = activityRepo as FakeActivityRepository
+    val fakeFriendsRepo = friendsRepo as FakeFriendsRepository
+
+    val vm = FeedViewModel(fakeActivityRepo, fakeFriendsRepo)
+    runCurrent()
+
+    assertTrue(vm.uiState.value.activities.isEmpty())
+
+    fakeFriendsRepo.addFriend("friend-456")
+    runCurrent()
+
+    // add a plant should emit after friends list change
+    fakeActivityRepo.addActivity(addedPlantActivity)
+    runCurrent()
+
     assertEquals(listOf(addedPlantActivity), vm.uiState.value.activities)
   }
 }
