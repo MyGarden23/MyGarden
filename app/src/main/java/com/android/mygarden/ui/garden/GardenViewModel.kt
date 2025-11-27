@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
-import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityWaterPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
