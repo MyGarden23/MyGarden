@@ -76,4 +76,6 @@ sealed class Screen(val route: String, val nameResId: Int, val isTopLevel: Boole
       Screen(route = "choose_avatar", nameResId = R.string.choose_avatar_screen_title)
 
   object Feed : Screen(route = "feed", nameResId = R.string.feed_screen_title, isTopLevel = true)
+
+  object AddFriend : Screen(route = "add_friends", nameResId = R.string.add_friend_screen)
 }

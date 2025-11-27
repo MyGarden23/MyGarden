@@ -1,13 +1,11 @@
 package com.android.mygarden.ui.addFriend
 
-import com.android.mygarden.model.friends.FriendsRepository
-import com.android.mygarden.model.profile.PseudoRepository
 import com.android.mygarden.model.users.UserProfile
-import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeFriendsRepository
-import com.android.mygarden.utils.FakePseudoRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
+import com.android.mygarden.utils.TestPseudoRepository
+import com.android.mygarden.utils.createViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -38,7 +36,7 @@ class AddFriendViewModelTest {
   // ---------- onQueryChange ----------
 
   @Test
-  fun onQueryChange_updates_query_and_clears_results() = runTest {
+  fun onQueryChange_updates_query_and_keep_result() = runTest {
     val dispatcher = StandardTestDispatcher(testScheduler)
     Dispatchers.setMain(dispatcher)
 
@@ -65,12 +63,12 @@ class AddFriendViewModelTest {
     advanceUntilIdle()
     assertTrue(vm.uiState.value.searchResults.isNotEmpty())
 
-    // Then: change query and ensure results are cleared
+    // Then: change query and ensure results are not changed
     vm.onQueryChange("newQuery")
 
     val state = vm.uiState.value
     assertEquals("newQuery", state.query)
-    assertTrue(state.searchResults.isEmpty())
+    assertTrue(vm.uiState.value.searchResults.isNotEmpty())
 
     Dispatchers.resetMain()
   }
@@ -184,62 +182,5 @@ class AddFriendViewModelTest {
     assertFalse(successCalled)
 
     Dispatchers.resetMain()
-  }
-
-  // --------------------------------------------------------------------
-  // Helpers
-  // --------------------------------------------------------------------
-
-  /**
-   * Creates an [AddFriendViewModel] with fake repositories by default.
-   *
-   * Callers can override individual repositories when they need specific behavior for a given test.
-   */
-  private fun createViewModel(
-      friendsRepo: FriendsRepository = FakeFriendsRepository(),
-      userProfileRepo: UserProfileRepository = FakeUserProfileRepository(),
-      pseudoRepo: PseudoRepository = FakePseudoRepository()
-  ): AddFriendViewModel =
-      AddFriendViewModel(
-          friendsRepository = friendsRepo,
-          userProfileRepository = userProfileRepo,
-          pseudoRepository = pseudoRepo)
-
-  /**
-   * Test-only fake implementation of [PseudoRepository] used in this test class.
-   *
-   * It allows configuring:
-   * - [searchResults] for [searchPseudoStartingWith],
-   * - [uidMap] for [getUidFromPseudo].
-   *
-   * This avoids changing the global [FakePseudoRepository] used in other tests.
-   */
-  private class TestPseudoRepository : PseudoRepository {
-
-    /** List of pseudos returned by [searchPseudoStartingWith]. */
-    var searchResults: List<String> = emptyList()
-
-    /** Mapping from pseudo (lowercased) to UID returned by [getUidFromPseudo]. */
-    val uidMap: MutableMap<String, String> = mutableMapOf()
-
-    override suspend fun isPseudoAvailable(pseudo: String) = true
-
-    override suspend fun savePseudo(pseudo: String, userId: String) {
-      uidMap[pseudo.lowercase()] = userId
-    }
-
-    override suspend fun deletePseudo(pseudo: String) {
-      uidMap.remove(pseudo.lowercase())
-    }
-
-    override suspend fun updatePseudoAtomic(
-        oldPseudo: String?,
-        newPseudo: String,
-        userId: String
-    ) {}
-
-    override suspend fun searchPseudoStartingWith(query: String): List<String> = searchResults
-
-    override suspend fun getUidFromPseudo(pseudo: String): String? = uidMap[pseudo.lowercase()]
   }
 }
