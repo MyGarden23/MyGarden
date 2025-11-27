@@ -65,8 +65,9 @@
 
     <!-- Plant Info Screen -->
     <string name="image_plant_description">Image of the plant</string>
-    <string name="watering_frequency">Watering Frequency: Every %1$d days</string>
-    <string name="last_time_watered_plant_info">Last Time Watered: %1$d %2$s %3$d:%4$d</string>
+    <string name="watering_frequency_header">Watering frequency</string>
+    <string name="watering_frequency_value">Every %1$d days</string>
+    <string name="last_time_watered_header_plant_info">Last watered</string>
     <string name="status_label">Status: %1$s</string>
     <string name="tab_health">Health</string>
     <string name="loading_plant_infos">Loading Plant Infos…</string>
@@ -78,6 +79,12 @@
     <string name="error_generating_care_tips">Unable to generate care tips</string>
     <string name="unknown_plant_tips_message">Plant unknown</string>
     <string name="date_of_creation_prefix">Added the</string>
+    <string name="description_header">Overview</string>
+    <string name="water_drop_icon_description">Water drop icon</string>
+    <string name="alarm_icon_description">Alarm icon</string>
+    <string name="indoor_plant_icon_description">Indoor plant icon</string>
+    <string name="outdoor_plant_icon_description">Outdoor plant icon</string>
+    <string name="unknown_plant_icon_description">Unknown plant icon</string>
 
 
     <!-- Pop Up Screen -->

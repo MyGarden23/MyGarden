@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -142,6 +143,8 @@ fun SignInScreen(
                       contentDescription = context.getString(R.string.description_google_icon),
                       tint = Color.Unspecified, // To keep the reel colors of the logo
                       modifier = Modifier.size(20.dp))
+
+                  Spacer(modifier = Modifier.width(12.dp))
 
                   Text(
                       text = context.getString(R.string.sign_in_with_google),
