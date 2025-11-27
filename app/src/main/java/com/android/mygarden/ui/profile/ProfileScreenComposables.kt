@@ -359,8 +359,7 @@ private fun CountryDropdownMenu(
                 verticalAlignment = Alignment.CenterVertically) {
                   Text(
                       text =
-                          context.getString(
-                              R.string.number_countries_found, filteredCountries.size),
+                          stringResource(R.string.number_countries_found, filteredCountries.size),
                       modifier = Modifier.testTag(ProfileScreenTestTags.COUNTRY_RESULTS_COUNT),
                       fontSize = CAPTION_FONT_SIZE,
                       fontStyle = FontStyle.Italic,
@@ -368,7 +367,7 @@ private fun CountryDropdownMenu(
 
                   Icon(
                       painter = painterResource(R.drawable.x_circle),
-                      contentDescription = context.getString(R.string.close_country_dropdown),
+                      contentDescription = stringResource(R.string.close_country_dropdown),
                       modifier =
                           Modifier.clickable { onClose() }
                               .padding(start = VERTICAL_PADDING)
