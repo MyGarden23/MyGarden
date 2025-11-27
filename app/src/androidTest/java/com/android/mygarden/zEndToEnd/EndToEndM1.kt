@@ -1,25 +1,23 @@
 package com.android.mygarden.zEndToEnd
 
 import android.Manifest
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
 import com.android.mygarden.R
+import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantsRepositoryLocal
-import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
@@ -27,21 +25,22 @@ import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
+import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
+import com.android.mygarden.utils.PlantRepositoryType
 import com.android.mygarden.utils.RequiresCamera
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 // Constant string for the e2e test
-private const val ERROR_LATIN_NAME_DESCRIPTION = "There was an error getting the plant latin name."
 private const val NOT_IDENTIFY_PLANT_DESCRIPTION = "The AI was not able to identify the plant."
 private const val UNKNOWN_PLANT_NAME = "Unknown"
 private const val NO_HEALTH_DESCRIPTION = "No health status description available"
+
 /**
  * End-to-end test for MyGarden's core user flow. This test assume that we have an internet
  * connection
@@ -60,20 +59,16 @@ class EndToEndM1 {
     }
   }
 
-  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
-
-  /**
-   * Automatically grants camera permission before tests run. Essential for camera functionality
-   * testing without user interaction prompts.
-   */
+  @get:Rule val composeTestRule = createEmptyComposeRule()
   @get:Rule
   val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
-
   @get:Rule
   val permissionNotifsRule: GrantPermissionRule =
       GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
+
   private val TIMEOUT = 10_000L
   private val firebaseUtils: FirebaseUtils = FirebaseUtils()
+  private lateinit var scenario: ActivityScenario<MainActivity>
 
   /**
    * Pre-test setup method that ensures the application is fully loaded before test execution.
@@ -83,8 +78,22 @@ class EndToEndM1 {
    * - Calls waitForAppToLoad() to verify core components are ready
    */
   @Before
-  fun setUp() = runTest {
-    firebaseUtils.initialize()
+  fun setUp() {
+    runBlocking { firebaseUtils.initialize() }
+
+    // Configure a fake plants repository for deterministic behavior
+    val fakeRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoLocal)
+    fakeRepoUtils.mockIdentifyPlant(
+        Plant(
+            name = UNKNOWN_PLANT_NAME,
+            latinName = UNKNOWN_PLANT_NAME,
+            description = NOT_IDENTIFY_PLANT_DESCRIPTION,
+        ))
+    fakeRepoUtils.setUpMockRepo()
+
+    // Launch the activity via ActivityScenario
+    scenario = ActivityScenario.launch(MainActivity::class.java)
+
     // Wait for the app to be fully loaded
     composeTestRule.waitForIdle()
     waitForAppToLoad()
@@ -99,14 +108,12 @@ class EndToEndM1 {
    * 5. Bottom bar navigation
    */
   @Test
-  fun endToEndTest() = runTest {
-    val context = composeTestRule.activity
-    PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
+  fun endToEndTest() {
     composeTestRule
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
         .performClick()
-    firebaseUtils.signIn()
+    runBlocking { firebaseUtils.signIn() }
     // === NEW PROFILE SCREEN ===
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
@@ -143,42 +150,10 @@ class EndToEndM1 {
     // Test description tab content
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TAB).assertIsDisplayed()
 
-    // This handles the non-deterministic behavior of the AI (between 2 possible cases)
-    val text =
-        composeTestRule
-            .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-            .fetchSemanticsNode()
-            .config
-            .getOrNull(SemanticsProperties.Text)
-            ?.joinToString(separator = "") { it.text } ?: ""
-    assertTrue(
-        "Expected one of the possible texts, but was: $text",
-        text == context.getString(R.string.loading_plant_infos) ||
-            text == ERROR_LATIN_NAME_DESCRIPTION)
-
-    /**
-     * This is in the specific case where the AI does not return the [ERROR_LATIN_NAME_DESCRIPTION]
-     * description
-     *
-     * Need to wait for Gemini description, assume that it takes < 10 seconds. The pictures are
-     * taken from the emulator, hence the AI does not recognize plants
-     */
-    if (text == context.getString(R.string.loading_plant_infos)) {
-      composeTestRule.waitUntil(TIMEOUT) {
-        val currentText =
-            composeTestRule
-                .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-                .fetchSemanticsNode()
-                .config
-                .getOrNull(SemanticsProperties.Text)
-                ?.joinToString(separator = "") { it.text } ?: ""
-
-        currentText.contains(NOT_IDENTIFY_PLANT_DESCRIPTION)
-      }
-      composeTestRule
-          .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-          .assertTextEquals(NOT_IDENTIFY_PLANT_DESCRIPTION)
-    }
+    // Description deterministic via FakePlantRepository
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
+        .assertTextEquals(NOT_IDENTIFY_PLANT_DESCRIPTION)
 
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME)
@@ -194,13 +169,19 @@ class EndToEndM1 {
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION)
         .assertTextEquals(NO_HEALTH_DESCRIPTION)
+    var expectedStatus = ""
+    var expectedWatering = ""
+    scenario.onActivity { activity ->
+      expectedStatus =
+          activity.getString(R.string.status_label, PlantHealthStatus.UNKNOWN.description)
+      expectedWatering = activity.getString(R.string.watering_frequency, 0)
+    }
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals(
-            context.getString(R.string.status_label, PlantHealthStatus.UNKNOWN.description))
+        .assertTextEquals(expectedStatus)
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
-        .assertTextEquals(context.getString(R.string.watering_frequency, 0))
+        .assertTextEquals(expectedWatering)
 
     // === BACK TO CAMERA ===
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).isDisplayed()
@@ -298,6 +279,10 @@ class EndToEndM1 {
 
   @After
   fun tearDown() {
+    // Close the ActivityScenario if initialized
+    if (::scenario.isInitialized) {
+      scenario.close()
+    }
     // Clean up the system property to avoid affecting other tests
     System.clearProperty("mygarden.e2e")
   }
