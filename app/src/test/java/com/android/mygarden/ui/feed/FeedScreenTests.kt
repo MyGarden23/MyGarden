@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.android.mygarden.model.friends.FriendsRepository
+import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.gardenactivity.activitiyclasses.ActivityAchievement
@@ -77,7 +79,7 @@ class FeedScreenTests {
     }
 
     override fun getFeedActivities(userIds: List<String>, limit: Int): Flow<List<GardenActivity>> {
-      return emptyFlow()
+      return activitiesFlow
     }
 
     override suspend fun addActivity(activity: GardenActivity) {
@@ -90,7 +92,20 @@ class FeedScreenTests {
     }
   }
 
+  private class FakeFriendsRepository : FriendsRepository {
+    private val _friendsFlow = MutableStateFlow<List<String>>(emptyList())
+
+    override suspend fun getFriends(userId: String): List<String> = _friendsFlow.value
+
+    override suspend fun addFriend(friendUserId: String) {
+      _friendsFlow.value = _friendsFlow.value + friendUserId
+    }
+
+    override fun friendsFlow(userId: String): Flow<List<String>> = _friendsFlow
+  }
+
   private lateinit var activityRepo: ActivityRepository
+  private lateinit var friendsRepo: FriendsRepository
 
   /** additional function that checks that all activities from the given list are displayed */
   fun ComposeTestRule.allActivitiesAreDisplayed(activities: List<GardenActivity>) {
@@ -106,7 +121,9 @@ class FeedScreenTests {
   @Before
   fun setup() {
     ActivityRepositoryProvider.repository = FakeActivityRepository()
+    FriendsRepositoryProvider.repository = FakeFriendsRepository()
     activityRepo = ActivityRepositoryProvider.repository
+    friendsRepo = FriendsRepositoryProvider.repository
     composeRule.setContent { MyGardenTheme { FeedScreen() } }
   }
 
