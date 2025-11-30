@@ -8,7 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.android.mygarden.R
@@ -16,7 +15,6 @@ import com.android.mygarden.ui.popup.PopupButton
 import com.android.mygarden.ui.popup.PopupScreenTestTags
 import com.android.mygarden.ui.popup.PopupTitle
 import com.android.mygarden.ui.popup.QuitPopup
-import com.android.mygarden.ui.theme.MyGardenTheme
 
 private val CARD_HEIGHT = 230.dp
 private val CARD_PADDING = 16.dp
@@ -69,16 +67,4 @@ fun FriendsRequestsPopup(
               }
         }
   }
-}
-
-@Preview
-@Composable
-fun darkP() {
-  MyGardenTheme(true) { FriendsRequestsPopup("matteo") }
-}
-
-@Preview
-@Composable
-fun lightP() {
-  MyGardenTheme() { FriendsRequestsPopup("matteo") }
 }
