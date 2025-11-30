@@ -7,15 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.android.mygarden.R
+import com.android.mygarden.ui.popup.PopupButton
 import com.android.mygarden.ui.popup.PopupScreenTestTags
+import com.android.mygarden.ui.popup.PopupTitle
+import com.android.mygarden.ui.popup.QuitPopup
 import com.android.mygarden.ui.theme.MyGardenTheme
 
 private val CARD_HEIGHT = 230.dp
@@ -56,37 +56,16 @@ fun FriendsRequestsPopup(
 
                 // Button to close the popUp
                 Row(modifier = Modifier.fillMaxWidth().padding(DISMISS_BUTTON_PADDING)) {
-                  IconButton(
-                      modifier = Modifier.testTag(PopupScreenTestTags.DISMISS_BUTTON),
-                      onClick = onDismiss) {
-                        Icon(
-                            painter = painterResource(R.drawable.x_circle),
-                            contentDescription =
-                                stringResource(R.string.popup_dismiss_button_content_description),
-                            tint = MaterialTheme.colorScheme.error)
-                      }
+                  QuitPopup(onClick = onDismiss)
                 }
 
                 // Title of the popUp
-                Text(
-                    modifier = Modifier.padding(TITLE_PADDING).testTag(PopupScreenTestTags.TITLE),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    text = stringResource(R.string.friend_pop_up_title, senderName))
+                PopupTitle(text = stringResource(R.string.friend_pop_up_title, senderName))
 
                 // Confirm button
-                Button(
-                    modifier =
-                        Modifier.padding(CONFIRM_BUTTON_PADDING)
-                            .testTag(PopupScreenTestTags.CONFIRM_BUTTON),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary),
-                    onClick = onConfirm) {
-                      Text(text = stringResource(R.string.friend_popup_confirm_button_text))
-                    }
+                PopupButton(
+                    onClick = onConfirm,
+                    text = stringResource(R.string.friend_popup_confirm_button_text))
               }
         }
   }
