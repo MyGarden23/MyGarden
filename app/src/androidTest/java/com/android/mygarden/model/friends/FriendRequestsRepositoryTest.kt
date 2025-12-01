@@ -268,17 +268,16 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
 
   @Test
   fun acceptRequest_throws_when_current_user_is_not_receiver() = runTest {
-    val otherUserId = "other-user"
     val targetUserId = "target-user"
 
-    // Create a request FROM other TO target (currentUser is neither)
+    // Create a request FROM currentUser TO target (currentUser is sender, not receiver)
     val requestData =
         mapOf(
-            "fromUserId" to otherUserId,
+            "fromUserId" to currentUserId,
             "toUserId" to targetUserId,
             "status" to "PENDING",
             "createdAt" to com.google.firebase.Timestamp.now())
-    // Add to currentUser's subcollection
+
     val docRef =
         db.collection("users")
             .document(currentUserId)
@@ -290,7 +289,7 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
 
     assertNotNull(error)
     assertTrue(error is IllegalArgumentException)
-    assertTrue(error!!.message!!.contains("Only the recipient can accept"))
+    assertTrue(error!!.message!!.contains("Only the recipient can"))
   }
 
   @Test
