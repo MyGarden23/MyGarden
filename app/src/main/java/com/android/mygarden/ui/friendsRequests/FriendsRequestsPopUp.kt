@@ -20,19 +20,17 @@ private val CARD_HEIGHT = 230.dp
 private val CARD_PADDING = 16.dp
 private val CARD_ROUND_ANGLE = 16.dp
 private val DISMISS_BUTTON_PADDING = 6.dp
-private val TITLE_PADDING = 8.dp
-private val CONFIRM_BUTTON_PADDING = 16.dp
 
 /**
  * Popup displayed when the user receives a friend request.
  *
- * @param senderName Name of the user who sent the request
+ * @param senderPseudo Pseudo of the user who sent the request
  * @param onDismiss Callback when clicking outside or on the cross
  * @param onConfirm Callback when clicking on the "Go to Request" button
  */
 @Composable
 fun FriendsRequestsPopup(
-    senderName: String,
+    senderPseudo: String,
     onDismiss: () -> Unit = {},
     onConfirm: () -> Unit = {}
 ) {
@@ -58,7 +56,7 @@ fun FriendsRequestsPopup(
                 }
 
                 // Title of the popUp
-                PopupTitle(text = stringResource(R.string.friend_pop_up_title, senderName))
+                PopupTitle(text = stringResource(R.string.friend_pop_up_title, senderPseudo))
 
                 // Confirm button
                 PopupButton(

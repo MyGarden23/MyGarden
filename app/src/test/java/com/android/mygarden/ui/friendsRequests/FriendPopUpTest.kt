@@ -23,7 +23,7 @@ class FriendsRequestsPopupTests {
   @Before
   fun setContent() {
     testRule.setContent {
-      FriendsRequestsPopup(senderName = "Pseudo", onDismiss = {}, onConfirm = {})
+      FriendsRequestsPopup(senderPseudo = "Pseudo", onDismiss = {}, onConfirm = {})
     }
   }
 
