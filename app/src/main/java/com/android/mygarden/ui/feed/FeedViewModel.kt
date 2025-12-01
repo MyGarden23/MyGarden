@@ -6,7 +6,14 @@ import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
+import com.android.mygarden.model.plant.OwnedPlant
+import com.android.mygarden.model.plant.Plant
+import java.sql.Timestamp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,6 +56,14 @@ class FeedViewModel(
   fun refreshUIState() {
     viewModelScope.launch {
       // listen on the flow of the list of friends of the current user
+      val plant = Plant()
+      val ownedPlant = OwnedPlant("id", plant, Timestamp(System.currentTimeMillis()))
+      val addedPlantActivity = ActivityAddedPlant("user", "pseudo", ownedPlant = ownedPlant)
+      val addedPlant2Activity = ActivityAddedPlant("user", "pseudo", ownedPlant = ownedPlant)
+      val fuckThatShitMen = ActivityWaterPlant("user", "pseudo", ownedPlant = ownedPlant)
+      val addedAFriend =
+          ActivityAddFriend("user", "Lebron", friendUserId = "Lebron", friendPseudo = "Steph Curry")
+      val achievement = ActivityAchievement("user", "pseudo", achievementName = "Lebron")
       friendsRepo
           .friendsFlow(currentUserId)
           .flatMapLatest { friends ->
@@ -57,7 +72,17 @@ class FeedViewModel(
             // fetch all activities to display
             activityRepo.getFeedActivities(allIds)
           }
-          .collect { activities -> _uiState.value = _uiState.value.copy(activities = activities) }
+          .collect { activities ->
+            _uiState.value =
+                _uiState.value.copy(
+                    activities =
+                        listOf(
+                            addedPlantActivity,
+                            addedPlant2Activity,
+                            fuckThatShitMen,
+                            addedAFriend,
+                            achievement))
+          }
     }
   }
 }

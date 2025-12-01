@@ -48,7 +48,8 @@ object ActivityMapper {
               userId = activity.userId,
               pseudo = activity.pseudo,
               createdAt = activity.createdAt.time,
-              friendId = activity.friendUserId)
+              friendId = activity.friendUserId,
+              friendPseudo = activity.friendPseudo)
       is ActivityWaterPlant ->
           SerializedWaterPlant(
               userId = activity.userId,
@@ -110,7 +111,8 @@ object ActivityMapper {
             userId = serializedActivity.userId,
             pseudo = serializedActivity.pseudo,
             createdAt = Timestamp(serializedActivity.createdAt),
-            friendUserId = serializedActivity.friendId)
+            friendUserId = serializedActivity.friendId,
+            friendPseudo = serializedActivity.friendPseudo)
       }
       is SerializedWaterPlant -> {
         ActivityWaterPlant(

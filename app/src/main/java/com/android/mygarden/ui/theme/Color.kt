@@ -80,5 +80,10 @@ data class CustomColors(
     val redPlantCardBackground: Color,
     val iconsAndButtonWhiteColor: Color,
     val acceptButtonColor: Color,
-    val refuseButtonColor: Color
+    val refuseButtonColor: Color,
+    val waterActivityBlue: Color,
+    val onWaterActivityBlue: Color,
+    val friendActivityRed: Color,
+    val onFriendActivityRed: Color,
 )
+// TODO : update the kdoc

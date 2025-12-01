@@ -1,5 +1,7 @@
 package com.android.mygarden.ui.feed
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,6 +44,8 @@ import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPl
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
+import com.android.mygarden.ui.theme.CustomColors
+import com.android.mygarden.ui.theme.ExtendedTheme
 
 /*----------------- PADDING / SIZE / OPACITY CONSTANTS ------------------*/
 private val BUTTON_ROW_HORIZONTAL_PADDING = 24.dp
@@ -88,6 +93,7 @@ fun FeedScreen(
     modifier: Modifier = Modifier,
     feedViewModel: FeedViewModel = viewModel(),
     onAddFriend: () -> Unit = {},
+    onNotifClick: () -> Unit = {},
     onFriendList: () -> Unit = {}
 ) {
 
@@ -107,7 +113,8 @@ fun FeedScreen(
           Row(
               modifier =
                   modifier.fillMaxWidth().padding(horizontal = BUTTON_ROW_HORIZONTAL_PADDING),
-              horizontalArrangement = Arrangement.End) {
+              horizontalArrangement = Arrangement.SpaceBetween) {
+                NotificationButton(onClick = onNotifClick)
                 FriendListButton(modifier, onFriendList)
               }
           // space between button and activities
@@ -149,6 +156,22 @@ fun FeedScreen(
         }
       })
 }
+/**
+ * The notification button to go to the RequestsScreen
+ *
+ * @param onClick the callback to be triggered when the user clicks on the button
+ */
+@Composable
+fun NotificationButton(onClick: () -> Unit = {}) {
+  IconButton(
+      onClick = onClick,
+  ) {
+    Image(
+        painter = painterResource(R.drawable.notif),
+        contentDescription = "",
+    )
+  }
+}
 
 /**
  * The button to add a friend
@@ -184,7 +207,8 @@ fun FriendListButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
  */
 @Composable
 fun ActivityItem(modifier: Modifier = Modifier, activity: GardenActivity) {
-  val colorPalette = activityTypeColor(activity, MaterialTheme.colorScheme)
+  val colorPalette =
+      activityTypeColor(activity, MaterialTheme.colorScheme, customColors = ExtendedTheme.colors)
   Card(
       modifier =
           modifier
@@ -217,6 +241,22 @@ fun AddedAPlantCard(
     activity: ActivityAddedPlant,
     colorPalette: CardColorPalette
 ) {
+  val titleText = stringResource(R.string.in_card_added_activity_title)
+  val icon = R.drawable.potted_plant_icon
+  val cardText =
+      stringResource(R.string.added_plant_activity, activity.pseudo, activity.ownedPlant.plant.name)
+
+  GenericCard(colorPalette, modifier, titleText, icon, cardText)
+}
+
+@Composable
+fun GenericCard(
+    colorPalette: CardColorPalette,
+    modifier: Modifier = Modifier,
+    titleText: String,
+    icon: Int,
+    cardText: String,
+) { // TODO Add borders
   Row(
       modifier = modifier.fillMaxSize().padding(IN_CARD_ROW_PADDING),
       horizontalArrangement = Arrangement.SpaceEvenly,
@@ -229,10 +269,11 @@ fun AddedAPlantCard(
                   fontSize = IN_CARD_ACTIVITY_TITLE_SIZE,
                   fontWeight = FontWeight.ExtraBold,
                   color = colorPalette.textColor.copy(alpha = IN_CARD_ACTIVITY_TITLE_OPACITY),
-                  text = stringResource(R.string.in_card_added_activity_title))
+                  text = titleText)
               Icon(
-                  painter = painterResource(R.drawable.potted_plant_icon),
-                  contentDescription = null,
+                  painter = painterResource(icon),
+                  contentDescription =
+                      stringResource(R.string.icon_of_the_activity_card_description),
                   tint = colorPalette.textColor.copy(IN_CARD_ACTIVITY_ICON_OPACITY))
             }
         Text(
@@ -242,9 +283,7 @@ fun AddedAPlantCard(
                     .padding(horizontal = IN_CARD_TEXT_HORIZONTAL_PADDING)
                     .testTag(FeedScreenTestTags.ADDED_PLANT_DESCRIPTION),
             color = MaterialTheme.colorScheme.onPrimaryContainer,
-            text =
-                stringResource(
-                    R.string.added_plant_activity, activity.pseudo, activity.ownedPlant.plant.name))
+            text = cardText)
       }
 }
 
@@ -261,10 +300,20 @@ fun AddedAFriendCard(
     activity: ActivityAddFriend,
     colorPalette: CardColorPalette
 ) {
-  Text(
-      modifier = modifier.testTag(FeedScreenTestTags.ADDED_FRIEND_DESCRIPTION),
-      color = colorPalette.textColor,
-      text = stringResource(R.string.added_friend_activity, activity.type))
+  val titleText = stringResource(R.string.in_card_friends_activity_title)
+  val icon = R.drawable.friends_icon
+  val cardText =
+      stringResource(R.string.added_friend_activity, activity.pseudo, activity.friendPseudo)
+
+  GenericCard(colorPalette, modifier, titleText, icon, cardText)
+  //    Icon(
+  //        painter = painterResource(R.drawable.friends_icon),
+  //        contentDescription = null,
+  //        tint = colorPalette.textColor.copy(IN_CARD_ACTIVITY_ICON_OPACITY))
+  //      Text(
+  //          modifier = modifier.testTag(FeedScreenTestTags.ADDED_FRIEND_DESCRIPTION),
+  //          //color = colorPalette.textColor,
+  //          text = stringResource(R.string.added_friend_activity, "élkj", "asdf"))
 }
 
 /**
@@ -299,10 +348,15 @@ fun WateredAPlantCard(
     activity: ActivityWaterPlant,
     colorPalette: CardColorPalette
 ) {
-  Text(
-      modifier = modifier.testTag(FeedScreenTestTags.WATERED_PLANT_DESCRIPTION),
-      color = colorPalette.textColor,
-      text = stringResource(R.string.watered_plant_activity, activity.type))
+  val titleText = stringResource(R.string.in_card_friends_activity_title)
+  val icon = R.drawable.watering_can
+  val cardText = "yo"
+
+  GenericCard(colorPalette, modifier, titleText, icon, cardText)
+  //  Text(
+  //      modifier = modifier.testTag(FeedScreenTestTags.WATERED_PLANT_DESCRIPTION),
+  //      //color = colorPalette.textColor,
+  //      text = stringResource(R.string.watered_plant_activity, activity.type))
 }
 
 /**
@@ -311,15 +365,19 @@ fun WateredAPlantCard(
  * @param activity the activity to match the correct color palette
  * @param colorScheme the colorscheme used in the app for specific/consistent colors
  */
-fun activityTypeColor(activity: GardenActivity, colorScheme: ColorScheme): CardColorPalette {
+fun activityTypeColor(
+    activity: GardenActivity,
+    colorScheme: ColorScheme,
+    customColors: CustomColors
+): CardColorPalette {
   return when (activity) {
     is ActivityAchievement ->
         CardColorPalette(colorScheme.errorContainer, colorScheme.onErrorContainer)
     is ActivityAddFriend ->
-        CardColorPalette(colorScheme.errorContainer, colorScheme.onErrorContainer)
+        CardColorPalette(customColors.friendActivityRed, customColors.onFriendActivityRed)
     is ActivityAddedPlant ->
         CardColorPalette(colorScheme.primaryContainer, colorScheme.onPrimaryContainer)
     is ActivityWaterPlant ->
-        CardColorPalette(colorScheme.errorContainer, colorScheme.onErrorContainer)
+        CardColorPalette(customColors.waterActivityBlue, customColors.onWaterActivityBlue)
   }
 }

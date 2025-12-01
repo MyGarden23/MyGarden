@@ -157,10 +157,12 @@
 
     <!-- Feed activities strings -->
     <string name="added_plant_activity">%1$s just added a new %2$s to their garden!</string>
-    <string name="added_friend_activity">The activity type %1$s is not implemented yet</string>
+    <string name="added_friend_activity">%1$s and %2$s are now friends!</string>
     <string name="got_achievement_activity">The activity type %1$s is not implemented yet</string>
     <string name="watered_plant_activity">The activity type %1$s is not implemented yet</string>
     <string name="in_card_added_activity_title">ADDED</string>
+    <string name="in_card_friends_activity_title">FRIENDS</string>
+    <string name="icon_of_the_activity_card_description">The icon of the activity</string>
 
     <!-- Feed Screen -->
     <string name="add_friend_button">Add a friend</string>
