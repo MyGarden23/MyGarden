@@ -38,9 +38,14 @@ class FriendsRepositoryFirestore(
         auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
     require(currentUserId != friendUserId) { "You cannot add yourself as a friend." }
 
-    // Add friend in current user’s list
+    // Add friend in both users' lists (bidirectional friendship) using a batch
     val currentDoc = friendsCollection(currentUserId).document(friendUserId)
-    currentDoc.set(mapOf("friendUid" to friendUserId)).await()
+    val friendDoc = friendsCollection(friendUserId).document(currentUserId)
+
+    val batch = db.batch()
+    batch.set(currentDoc, mapOf("friendUid" to friendUserId))
+    batch.set(friendDoc, mapOf("friendUid" to currentUserId))
+    batch.commit().await()
   }
 
   override fun friendsFlow(userId: String): Flow<List<String>> = callbackFlow {
