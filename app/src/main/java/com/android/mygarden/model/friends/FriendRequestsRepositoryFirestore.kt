@@ -51,9 +51,64 @@ class FriendRequestsRepositoryFirestore(
    * Returns a reference to a user's friend_requests subcollection.
    *
    * Path: users/{userId}/friend_requests
+   *
+   * @param userId The user ID
    */
   private fun friendRequestsCollection(userId: String) =
       db.collection(COLLECTION_USERS).document(userId).collection(COLLECTION_FRIEND_REQUESTS)
+
+  /**
+   * Parses a Firestore document into a FriendRequest object.
+   *
+   * @param doc The Firestore document snapshot
+   * @return A FriendRequest object, or null if parsing fails
+   */
+  private fun parseFriendRequest(
+      doc: com.google.firebase.firestore.DocumentSnapshot
+  ): FriendRequest? {
+    return try {
+      FriendRequest(
+          id = doc.id,
+          fromUserId = doc.getString(FIELD_FROM_USER_ID) ?: "",
+          toUserId = doc.getString(FIELD_TO_USER_ID) ?: "",
+          status = FriendRequestStatus.valueOf(doc.getString(FIELD_STATUS) ?: "PENDING"),
+          createdAt =
+              doc.getTimestamp(FIELD_CREATED_AT)?.toDate()?.time ?: System.currentTimeMillis())
+    } catch (e: Exception) {
+      Log.e("FriendRequestsRepo", "Error parsing friend request", e)
+      null
+    }
+  }
+
+  /**
+   * Creates a Flow that listens to a Firestore query and emits parsed FriendRequest objects.
+   *
+   * @param query The Firestore query to listen to
+   * @param errorTag A tag for logging errors
+   * @return A Flow of FriendRequest lists
+   */
+  private fun observeRequestsQuery(query: Query, errorTag: String): Flow<List<FriendRequest>> =
+      callbackFlow {
+        val reg =
+            query.addSnapshotListener { snapshots, error ->
+              if (error != null) {
+                Log.e("FriendRequestsRepo", "Error listening to $errorTag", error)
+                trySend(emptyList())
+                return@addSnapshotListener
+              }
+
+              val requests =
+                  snapshots?.documents?.mapNotNull { parseFriendRequest(it) } ?: emptyList()
+              trySend(requests)
+            }
+
+        activeListeners.add(reg)
+
+        awaitClose {
+          reg.remove()
+          activeListeners.remove(reg)
+        }
+      }
 
   /**
    * Returns all friend requests for the current user (both sent and received).
@@ -63,46 +118,7 @@ class FriendRequestsRepositoryFirestore(
    */
   override fun myRequests(): Flow<List<FriendRequest>> {
     val uid = getCurrentUserId() ?: return flowOf(emptyList())
-
-    return callbackFlow {
-      // We need to listen to requests in the current user's subcollection
-      // These are requests where current user is either sender or receiver
-      val reg =
-          friendRequestsCollection(uid).addSnapshotListener { snapshots, error ->
-            if (error != null) {
-              Log.e("FriendRequestsRepo", "Error listening to friend requests", error)
-              trySend(emptyList())
-              return@addSnapshotListener
-            }
-
-            val requests =
-                snapshots?.documents?.mapNotNull { doc ->
-                  try {
-                    FriendRequest(
-                        id = doc.id, // Id document Firestore
-                        fromUserId = doc.getString(FIELD_FROM_USER_ID) ?: "",
-                        toUserId = doc.getString(FIELD_TO_USER_ID) ?: "",
-                        status =
-                            FriendRequestStatus.valueOf(doc.getString(FIELD_STATUS) ?: "PENDING"),
-                        createdAt =
-                            doc.getTimestamp(FIELD_CREATED_AT)?.toDate()?.time
-                                ?: System.currentTimeMillis())
-                  } catch (e: Exception) {
-                    Log.e("FriendRequestsRepo", "Error parsing friend request", e)
-                    null
-                  }
-                } ?: emptyList()
-
-            trySend(requests) // Try to send the list of requests
-          }
-
-      activeListeners.add(reg)
-
-      awaitClose {
-        reg.remove()
-        activeListeners.remove(reg)
-      }
-    }
+    return observeRequestsQuery(friendRequestsCollection(uid), "friend requests")
   }
 
   /**
@@ -111,102 +127,32 @@ class FriendRequestsRepositoryFirestore(
   override fun incomingRequests(): Flow<List<FriendRequest>> {
     val uid = getCurrentUserId() ?: return flowOf(emptyList())
 
-    return callbackFlow {
-      val reg =
-          friendRequestsCollection(uid)
-              .whereEqualTo(FIELD_TO_USER_ID, uid)
-              .whereEqualTo(FIELD_STATUS, FriendRequestStatus.PENDING.name)
-              .orderBy(FIELD_CREATED_AT, Query.Direction.DESCENDING)
-              .addSnapshotListener { snapshots, error ->
-                if (error != null) {
-                  Log.e("FriendRequestsRepo", "Error listening to incoming requests", error)
-                  trySend(emptyList())
-                  return@addSnapshotListener
-                }
+    val query =
+        friendRequestsCollection(uid)
+            .whereEqualTo(FIELD_TO_USER_ID, uid)
+            .whereEqualTo(FIELD_STATUS, FriendRequestStatus.PENDING.name)
+            .orderBy(FIELD_CREATED_AT, Query.Direction.DESCENDING)
 
-                val requests =
-                    snapshots?.documents?.mapNotNull { doc ->
-                      try {
-                        FriendRequest(
-                            id = doc.id,
-                            fromUserId = doc.getString(FIELD_FROM_USER_ID) ?: "",
-                            toUserId = doc.getString(FIELD_TO_USER_ID) ?: "",
-                            status =
-                                FriendRequestStatus.valueOf(
-                                    doc.getString(FIELD_STATUS) ?: "PENDING"),
-                            createdAt =
-                                doc.getTimestamp(FIELD_CREATED_AT)?.toDate()?.time
-                                    ?: System.currentTimeMillis())
-                      } catch (e: Exception) {
-                        Log.e("FriendRequestsRepo", "Error parsing incoming request", e)
-                        null
-                      }
-                    } ?: emptyList()
-
-                trySend(requests)
-              }
-
-      activeListeners.add(reg)
-
-      awaitClose {
-        reg.remove()
-        activeListeners.remove(reg)
-      }
-    }
+    return observeRequestsQuery(query, "incoming requests")
   }
 
   /** Returns only outgoing friend requests (where current user is the sender). Requests send */
   override fun outgoingRequests(): Flow<List<FriendRequest>> {
     val uid = getCurrentUserId() ?: return flowOf(emptyList())
 
-    return callbackFlow {
-      val reg =
-          friendRequestsCollection(uid)
-              .whereEqualTo(FIELD_FROM_USER_ID, uid)
-              .whereEqualTo(FIELD_STATUS, FriendRequestStatus.PENDING.name)
-              .orderBy(FIELD_CREATED_AT, Query.Direction.DESCENDING)
-              .addSnapshotListener { snapshots, error ->
-                if (error != null) {
-                  Log.e("FriendRequestsRepo", "Error listening to outgoing requests", error)
-                  trySend(emptyList())
-                  return@addSnapshotListener
-                }
+    val query =
+        friendRequestsCollection(uid)
+            .whereEqualTo(FIELD_FROM_USER_ID, uid)
+            .whereEqualTo(FIELD_STATUS, FriendRequestStatus.PENDING.name)
+            .orderBy(FIELD_CREATED_AT, Query.Direction.DESCENDING)
 
-                val requests =
-                    snapshots?.documents?.mapNotNull { doc ->
-                      try {
-                        FriendRequest(
-                            id = doc.id,
-                            fromUserId = doc.getString(FIELD_FROM_USER_ID) ?: "",
-                            toUserId = doc.getString(FIELD_TO_USER_ID) ?: "",
-                            status =
-                                FriendRequestStatus.valueOf(
-                                    doc.getString(FIELD_STATUS) ?: "PENDING"),
-                            createdAt =
-                                doc.getTimestamp(FIELD_CREATED_AT)?.toDate()?.time
-                                    ?: System.currentTimeMillis())
-                      } catch (e: Exception) {
-                        Log.e("FriendRequestsRepo", "Error parsing outgoing request", e)
-                        null
-                      }
-                    } ?: emptyList()
-
-                trySend(requests)
-              }
-
-      activeListeners.add(reg)
-
-      awaitClose {
-        reg.remove()
-        activeListeners.remove(reg)
-      }
-    }
+    return observeRequestsQuery(query, "outgoing requests")
   }
 
   /**
    * Sends a friend request to another user.
    *
-   * Creates the request in BOTH users' subcollections:
+   * Creates the request in BOTH users' subcollections atomically using a WriteBatch:
    * - users/{currentUserId}/friend_requests/{requestId}
    * - users/{targetUserId}/friend_requests/{requestId}
    */
@@ -236,12 +182,12 @@ class FriendRequestsRepositoryFirestore(
               FIELD_STATUS to FriendRequestStatus.PENDING.name,
               FIELD_CREATED_AT to Timestamp.now())
 
-      // Add to sender's subcollection
+      // Use WriteBatch to write to both subcollections atomically
+      val batch = db.batch()
       val senderDoc = friendRequestsCollection(currentUserId).document()
-      senderDoc.set(requestData).await()
-
-      // Add to receiver's subcollection with same ID
-      friendRequestsCollection(targetUserId).document(senderDoc.id).set(requestData).await()
+      batch.set(senderDoc, requestData)
+      batch.set(friendRequestsCollection(targetUserId).document(senderDoc.id), requestData)
+      batch.commit().await()
 
       Log.d("FriendRequestsRepo", "Friend request sent successfully")
     } catch (e: Exception) {
@@ -252,7 +198,7 @@ class FriendRequestsRepositoryFirestore(
 
   /**
    * Accepts a friend request.
-   * - Updates the status to ACCEPTED in both users' subcollections
+   * - Updates the status to ACCEPTED in both users' subcollections atomically
    * - Adds each user to the other's friends list using FriendsRepository
    */
   override suspend fun acceptRequest(requestId: String) {
@@ -271,11 +217,19 @@ class FriendRequestsRepositoryFirestore(
       // Verify current user is the receiver
       require(toUserId == currentUserId) { "Only the recipient can accept this friend request" }
 
-      // Update status to ACCEPTED in both subcollections
-      val updateData = mapOf(FIELD_STATUS to FriendRequestStatus.ACCEPTED.name)
+      // Verify the request is still pending
+      val status = requestDoc.getString(FIELD_STATUS)
+      require(status == FriendRequestStatus.PENDING.name) {
+        "Friend request is not pending (current status: $status)"
+      }
 
-      friendRequestsCollection(currentUserId).document(requestId).update(updateData).await()
-      friendRequestsCollection(fromUserId).document(requestId).update(updateData).await()
+      // Update status to ACCEPTED in both subcollections using a batch
+      val batch = db.batch()
+      val requestRef = friendRequestsCollection(currentUserId).document(requestId)
+      val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
+      batch.update(requestRef, FIELD_STATUS, FriendRequestStatus.ACCEPTED.name)
+      batch.update(requestRefOther, FIELD_STATUS, FriendRequestStatus.ACCEPTED.name)
+      batch.commit().await()
 
       // Add to friends list (both directions)
       friendsRepository.addFriend(fromUserId)
@@ -290,8 +244,7 @@ class FriendRequestsRepositoryFirestore(
   /**
    * Refuses a friend request.
    *
-   * Updates the status to REFUSED in both users' subcollections (or you could delete the documents
-   * instead).
+   * Updates the status to REFUSED in both users' subcollections atomically using a batch.
    */
   override suspend fun refuseRequest(requestId: String) {
     val currentUserId = getCurrentUserId() ?: throw IllegalStateException(NOT_AUTHENTICATED_ERROR)
@@ -309,10 +262,19 @@ class FriendRequestsRepositoryFirestore(
       // Verify current user is the receiver
       require(toUserId == currentUserId) { "Only the recipient can refuse this friend request" }
 
-      // Update status to REFUSED
-      val updateData = mapOf(FIELD_STATUS to FriendRequestStatus.REFUSED.name)
-      friendRequestsCollection(currentUserId).document(requestId).update(updateData).await()
-      friendRequestsCollection(fromUserId).document(requestId).update(updateData).await()
+      // Verify the request is still pending
+      val status = requestDoc.getString(FIELD_STATUS)
+      require(status == FriendRequestStatus.PENDING.name) {
+        "Friend request is not pending (current status: $status)"
+      }
+
+      // Update status to REFUSED in both subcollections using a batch
+      val batch = db.batch()
+      val requestRef = friendRequestsCollection(currentUserId).document(requestId)
+      val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
+      batch.update(requestRef, FIELD_STATUS, FriendRequestStatus.REFUSED.name)
+      batch.update(requestRefOther, FIELD_STATUS, FriendRequestStatus.REFUSED.name)
+      batch.commit().await()
 
       Log.d("FriendRequestsRepo", "Friend request refused successfully")
     } catch (e: Exception) {
