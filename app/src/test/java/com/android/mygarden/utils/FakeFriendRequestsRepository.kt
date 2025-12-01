@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Minimal fake implementation of [FriendRequestsRepository] for tests. */
 class FakeFriendRequestsRepository : FriendRequestsRepository {
-  var currentUserId: String? = "test-user-id"
+  var currentUserIdValue: String? = "test-user-id"
 
-  override fun getCurrentUserId(): String? = currentUserId
+  override fun getCurrentUserId(): String? = currentUserIdValue
 
   override fun myRequests(): Flow<List<FriendRequest>> = MutableStateFlow(emptyList())
 
