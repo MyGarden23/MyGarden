@@ -171,4 +171,9 @@
     <string name="add_enum">Add</string>
     <string name="added_enum">Added</string>
 
+    <string name="request_screen_title">My Requests</string>
+    <string name="no_request_text">You don\'t have any friend request yet.</string>
+    <string name="accept_button">Accept</string>
+    <string name="decline_button">Decline</string>
+
 </resources>
