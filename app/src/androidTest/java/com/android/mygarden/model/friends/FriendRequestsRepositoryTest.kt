@@ -368,8 +368,5 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
     // Simply verify cleanup doesn't crash
     // The real test is in tearDown where cleanup is always called
     friendRequestsRepo.cleanup()
-
-    // No assertions needed - just verifying no crashes occur during cleanup
-    assertTrue(true)
   }
 }
