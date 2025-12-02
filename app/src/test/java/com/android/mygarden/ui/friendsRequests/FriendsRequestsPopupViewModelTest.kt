@@ -36,7 +36,7 @@ class FriendsRequestsPopupViewModelTest {
   fun emits_FriendRequestUiModel_when_new_incoming_request_arrives() = runTest {
     // Setup sender profile
     fakeUserRepo.profiles["sender-1"] =
-        UserProfile(id = "sender-1", pseudo = "Alice", avatar = Avatar.A10)
+        UserProfile(id = "sender-1", pseudo = "alice", avatar = Avatar.A10)
 
     // Create the request to send
     val req =
@@ -52,7 +52,7 @@ class FriendsRequestsPopupViewModelTest {
 
       val emitted = awaitItem()
       assertEquals("req-1", emitted.request.id)
-      assertEquals("Alice", emitted.senderPseudo)
+      assertEquals("alice", emitted.senderPseudo)
     }
   }
 
@@ -87,8 +87,8 @@ class FriendsRequestsPopupViewModelTest {
 
   @Test
   fun emits_multiple_incoming_requests_in_order() = runTest {
-    fakeUserRepo.profiles["u1"] = UserProfile("u1", "One", Avatar.A11)
-    fakeUserRepo.profiles["u2"] = UserProfile("u2", "Two", Avatar.A11)
+    fakeUserRepo.profiles["u1"] = UserProfile("u1", "alice", Avatar.A11)
+    fakeUserRepo.profiles["u2"] = UserProfile("u2", "alice", Avatar.A11)
 
     val req1 = FriendRequest(id = "A", fromUserId = "u1", toUserId = "rx")
     val req2 = FriendRequest(id = "B", fromUserId = "u2", toUserId = "rx")
@@ -98,11 +98,11 @@ class FriendsRequestsPopupViewModelTest {
 
       val first = awaitItem()
       assertEquals("A", first.request.id)
-      assertEquals("One", first.senderPseudo)
+      assertEquals("alice", first.senderPseudo)
 
       val second = awaitItem()
       assertEquals("B", second.request.id)
-      assertEquals("Two", second.senderPseudo)
+      assertEquals("alice", second.senderPseudo)
     }
   }
 

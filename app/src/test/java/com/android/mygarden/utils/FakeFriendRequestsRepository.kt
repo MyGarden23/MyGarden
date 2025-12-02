@@ -8,14 +8,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 /** Minimal fake implementation of [FriendRequestsRepository] for tests. */
 class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyList()) :
     FriendRequestsRepository {
-  val flow = MutableStateFlow(initialRequests)
+  val incomingRequestsFlow = MutableStateFlow(initialRequests)
   var currentUserIdValue: String? = "test-user-id"
 
   override fun getCurrentUserId(): String? = currentUserIdValue
 
   override fun myRequests(): Flow<List<FriendRequest>> = MutableStateFlow(emptyList())
 
-  override fun incomingRequests(): Flow<List<FriendRequest>> = flow
+  override fun incomingRequests(): Flow<List<FriendRequest>> = incomingRequestsFlow
 
   override fun outgoingRequests(): Flow<List<FriendRequest>> = MutableStateFlow(emptyList())
 
@@ -23,12 +23,13 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
     if (targetUserId == "boom-user-id") {
       throw IllegalStateException("boom")
     } else {
-      flow.value = flow.value + FriendRequest(fromUserId = targetUserId)
+      incomingRequestsFlow.value =
+          incomingRequestsFlow.value + FriendRequest(fromUserId = targetUserId)
     }
   }
 
   override suspend fun acceptRequest(requestId: String) {
-    flow.value = flow.value.filter { it.fromUserId != requestId }
+    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
   }
 
   var markedSeen: MutableList<String> = mutableListOf()
@@ -38,7 +39,7 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
   }
 
   override suspend fun refuseRequest(requestId: String) {
-    flow.value = flow.value.filter { it.fromUserId != requestId }
+    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
   }
 
   override fun cleanup() {}
