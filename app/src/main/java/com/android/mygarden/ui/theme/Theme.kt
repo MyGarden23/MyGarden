@@ -90,7 +90,9 @@ private val customColorsLight =
         wateringBlue = Color(0xff9dddee),
         wateringOrange = Color(0xffff9d0a),
         redPlantCardBackground = Color(0xffe46962),
-        iconsAndButtonWhiteColor = Color.White)
+        iconsAndButtonWhiteColor = Color.White,
+        acceptButtonColor = Color(0xFF29C42F),
+        refuseButtonColor = Color(0xFFF44336))
 
 /** The custom colors added to the MaterialTheme ones (dark mode) */
 private val customColorsDark =
@@ -98,11 +100,19 @@ private val customColorsDark =
         wateringBlue = Color(0xff9dddee),
         wateringOrange = Color(0xffff9d0a),
         redPlantCardBackground = Color(0xffe46962),
-        iconsAndButtonWhiteColor = Color.White)
+        iconsAndButtonWhiteColor = Color.White,
+        acceptButtonColor = Color(0xFF29C42F),
+        refuseButtonColor = Color(0xFFF44336))
 
 /** Local slot that holds the custom colors value in the composition tree */
 val LocalCustomColors = staticCompositionLocalOf {
-  CustomColors(Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified)
+  CustomColors(
+      Color.Unspecified,
+      Color.Unspecified,
+      Color.Unspecified,
+      Color.Unspecified,
+      Color.Unspecified,
+      Color.Unspecified)
 }
 
 @Composable

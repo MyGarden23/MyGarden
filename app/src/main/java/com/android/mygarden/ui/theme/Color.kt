@@ -78,5 +78,7 @@ data class CustomColors(
     val wateringBlue: Color,
     val wateringOrange: Color,
     val redPlantCardBackground: Color,
-    val iconsAndButtonWhiteColor: Color
+    val iconsAndButtonWhiteColor: Color,
+    val acceptButtonColor: Color,
+    val refuseButtonColor: Color
 )

@@ -2,6 +2,7 @@ package com.android.mygarden.ui.addFriend
 
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPseudoRepository
@@ -41,6 +42,7 @@ class AddFriendViewModelTest {
     Dispatchers.setMain(dispatcher)
 
     val fakeFriends = FakeFriendsRepository()
+    val fakeRequests = FakeFriendRequestsRepository()
     val fakeUserProfile = FakeUserProfileRepository()
     val fakePseudo =
         TestPseudoRepository().apply {
@@ -53,6 +55,7 @@ class AddFriendViewModelTest {
     val vm =
         AddFriendViewModel(
             friendsRepository = fakeFriends,
+            requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
             pseudoRepository = fakePseudo)
 
@@ -97,6 +100,7 @@ class AddFriendViewModelTest {
 
     val fakeUserProfile = FakeUserProfileRepository()
     val fakeFriends = FakeFriendsRepository()
+    val fakeRequests = FakeFriendRequestsRepository()
 
     // Configure a test-specific pseudo repository that returns a single match.
     val fakePseudo =
@@ -112,6 +116,7 @@ class AddFriendViewModelTest {
     val vm =
         AddFriendViewModel(
             friendsRepository = fakeFriends,
+            requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
             pseudoRepository = fakePseudo)
 
@@ -182,5 +187,49 @@ class AddFriendViewModelTest {
     assertFalse(successCalled)
 
     Dispatchers.resetMain()
+  }
+
+  @Test
+  fun onAsk_success_calls_onSuccess_and_adds_request() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
+
+    val fakeRequests = FakeFriendRequestsRepository()
+    val vm = createViewModel(requestsRepo = fakeRequests)
+
+    var onSuccessCalled = false
+    var onErrorCalled = false
+
+    vm.onAsk(
+        userId = "friend-123",
+        onError = { onErrorCalled = true },
+        onSuccess = { onSuccessCalled = true })
+
+    advanceUntilIdle()
+
+    assertTrue(onSuccessCalled)
+    assertFalse(onErrorCalled)
+    assertEquals(1, fakeRequests.flow.value.size)
+    assertEquals("friend-123", fakeRequests.flow.value[0].fromUserId)
+
+    Dispatchers.resetMain()
+  }
+
+  @Test
+  fun onAsk_failure_calls_onError_only() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
+    val vm = createViewModel()
+    var onSuccessCalled = false
+    var onErrorCalled = false
+    vm.onAsk(
+        // this user id triggers an exception on the fake repo
+        userId = "boom-user-id",
+        onError = { onErrorCalled = true },
+        onSuccess = { onSuccessCalled = true })
+    advanceUntilIdle()
+
+    assertTrue(onErrorCalled)
+    assertFalse(onSuccessCalled)
   }
 }
