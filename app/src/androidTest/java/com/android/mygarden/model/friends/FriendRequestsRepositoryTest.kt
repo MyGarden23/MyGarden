@@ -370,4 +370,36 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
     // The real test is in tearDown where cleanup is always called
     friendRequestsRepo.cleanup()
   }
+
+  @Test
+  fun markRequestAsSeen_updates_seen_flag() = runTest {
+    val senderUserId = "someone"
+
+    val requestData =
+        mapOf(
+            "fromUserId" to senderUserId,
+            "toUserId" to currentUserId,
+            "status" to "PENDING",
+            "createdAt" to com.google.firebase.Timestamp.now(),
+            "seenByReceiver" to false)
+
+    val docRef =
+        db.collection("users")
+            .document(currentUserId)
+            .collection("friend_requests")
+            .add(requestData)
+            .await()
+
+    friendRequestsRepo.markRequestAsSeen(docRef.id)
+
+    val updatedDoc =
+        db.collection("users")
+            .document(currentUserId)
+            .collection("friend_requests")
+            .document(docRef.id)
+            .get()
+            .await()
+
+    assertEquals(true, updatedDoc.getBoolean("seenByReceiver"))
+  }
 }
