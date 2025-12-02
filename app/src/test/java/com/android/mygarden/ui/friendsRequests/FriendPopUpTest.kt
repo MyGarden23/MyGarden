@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+/** Tests for the Friends Requests Popup (UI tests). */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class FriendsRequestsPopupTests {
