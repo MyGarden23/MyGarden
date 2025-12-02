@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -297,7 +296,9 @@ private fun NewFriendRequestPopup(
         senderPseudo = it.senderPseudo,
         onDismiss = { currentFriendRequest = null },
         onConfirm = {
-          actions.navTo(Screen.Camera) // TODO(Change this to FriendRequestScreen)
+          actions.navTo(
+              Screen.Garden) // TODO(Change this to FriendRequestScreen) when the navHost for
+          // FriendRequestScreen is done
           currentFriendRequest = null
         })
   }
