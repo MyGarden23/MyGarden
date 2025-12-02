@@ -164,7 +164,8 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
             "fromUserId" to otherUserId,
             "toUserId" to currentUserId,
             "status" to "PENDING",
-            "createdAt" to com.google.firebase.Timestamp.now())
+            "createdAt" to com.google.firebase.Timestamp.now(),
+            "seenByReceiver" to false)
 
     db.collection("users")
         .document(currentUserId)
@@ -179,6 +180,7 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
       assertEquals(otherUserId, requests[0].fromUserId)
       assertEquals(currentUserId, requests[0].toUserId)
       assertEquals(FriendRequestStatus.PENDING, requests[0].status)
+      assertEquals(false, requests[0].seenByReceiver)
 
       cancelAndIgnoreRemainingEvents()
     }
