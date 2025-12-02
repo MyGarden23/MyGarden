@@ -17,5 +17,6 @@ data class FriendRequest(
     val fromUserId: String = "",
     val toUserId: String = "",
     val status: FriendRequestStatus = FriendRequestStatus.PENDING,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val seenByReceiver: Boolean = false
 )

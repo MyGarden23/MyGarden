@@ -30,6 +30,7 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
   override suspend fun acceptRequest(requestId: String) {
     flow.value = flow.value.filter { it.fromUserId != requestId }
   }
+  override suspend fun markRequestAsSeen(requestId: String) {}
 
   override suspend fun refuseRequest(requestId: String) {
     flow.value = flow.value.filter { it.fromUserId != requestId }
