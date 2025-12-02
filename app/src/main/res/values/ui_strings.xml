@@ -13,6 +13,7 @@
     <string name="choose_avatar_screen_title">Choose Avatar</string>
     <string name="feed_screen_title">My Feed</string>
     <string name="add_friend_screen">Add Friend</string>
+    <string name="friends_requests_screen_title">My Requests</string>
     <string name="friend_list_screen">All My Friends</string>
 
 
@@ -193,6 +194,7 @@
     <string name="offline_cannot_save_profile">Cannot save profile while offline</string>
     <string name="offline_cannot_load_tips">Cannot load tips while offline</string>
 
+    <!-- Friends Requests Screen -->
     <string name="request_screen_title">My Requests</string>
     <string name="no_request_text">You don\'t have any friend request yet.</string>
     <string name="accept_button">Accept</string>
