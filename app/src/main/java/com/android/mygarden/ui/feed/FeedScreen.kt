@@ -67,6 +67,7 @@ private val NO_ACTIVITY_MSG_PADDING = 40.dp
 /*---------------- TEST TAGS FOR ALL COMPONENTS OF THE SCREEN --------------*/
 object FeedScreenTestTags {
   const val ADD_FRIEND_BUTTON = "AddFriendButton"
+  const val FRIENDS_REQUESTS_BUTTON = "FriendsRequestsButton"
   const val FRIEND_LIST_BUTTON = "FriendListButton"
   const val NO_ACTIVITY_MESSAGE = "NoActivityMessage"
   const val ADDED_PLANT_DESCRIPTION = "AddedPlantDescription"
@@ -115,7 +116,7 @@ fun FeedScreen(
               modifier =
                   modifier.fillMaxWidth().padding(horizontal = BUTTON_ROW_HORIZONTAL_PADDING),
               horizontalArrangement = Arrangement.SpaceBetween) {
-                NotificationButton(onClick = onNotifClick)
+                NotificationButton(modifier, onClick = onNotifClick)
                 FriendListButton(modifier, onFriendList)
               }
           // space between button and activities
@@ -158,15 +159,14 @@ fun FeedScreen(
       })
 }
 /**
- * The notification button to go to the RequestsScreen
+ * The notification button to go to the FriendsRequestsScreen
  *
+ * @param modifier the used modifier for the composable
  * @param onClick the callback to be triggered when the user clicks on the button
  */
 @Composable
-fun NotificationButton(onClick: () -> Unit = {}) {
-  IconButton(
-      onClick = onClick,
-  ) {
+fun NotificationButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
+  IconButton(onClick = onClick, modifier.testTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON)) {
     Image(
         painter = painterResource(R.drawable.notif),
         contentDescription = "",

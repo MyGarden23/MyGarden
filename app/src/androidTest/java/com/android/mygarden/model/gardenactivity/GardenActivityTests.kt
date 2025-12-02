@@ -136,7 +136,8 @@ class GardenActivityTests {
             userId = uid,
             pseudo = "FriendUser",
             createdAt = Timestamp(System.currentTimeMillis()),
-            friendUserId = "friend123")
+            friendUserId = "friend123",
+            friendPseudo = "friendPseudo")
 
     activityRepo.addActivity(activityAddFriend)
 
@@ -197,7 +198,8 @@ class GardenActivityTests {
             userId = uid,
             pseudo = "FeedUser",
             createdAt = Timestamp(System.currentTimeMillis()),
-            friendUserId = "friendFeed123")
+            friendUserId = "friendFeed123",
+            friendPseudo = "friendPseudo")
 
     val waterPlant =
         ActivityWaterPlant(
