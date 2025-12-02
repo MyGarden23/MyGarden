@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
 import com.android.mygarden.model.users.UserProfile
-import com.android.mygarden.ui.friendsRequests.CONSTANTS as DP
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.theme.ExtendedTheme
 
@@ -100,12 +99,12 @@ fun FriendsRequestsScreen(
       content = { pd ->
         Column(modifier = modifier.fillMaxSize().padding(pd)) {
           // creates a space between the top bar and the first request for better design
-          Spacer(modifier = modifier.height(DP.FIRST_REQUEST_SPACER))
+          Spacer(modifier = modifier.height(CONSTANTS.FIRST_REQUEST_SPACER))
           if (requestsUsers.isEmpty()) {
             // displays a text saying the user has no friend request at the center of the screen if
             // no request
             Box(
-                modifier = modifier.fillMaxSize().padding(DP.NO_REQUEST_TEXT_PADDING),
+                modifier = modifier.fillMaxSize().padding(CONSTANTS.NO_REQUEST_TEXT_PADDING),
                 contentAlignment = Alignment.Center) {
                   Text(
                       modifier = Modifier.testTag(FriendsRequestsScreenTestTags.NO_REQUEST_TEXT),
@@ -116,7 +115,7 @@ fun FriendsRequestsScreen(
             LazyColumn(
                 modifier = modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(DP.BETWEEN_REQUESTS_SPACE)) {
+                verticalArrangement = Arrangement.spacedBy(CONSTANTS.BETWEEN_REQUESTS_SPACE)) {
                   items(requestsUsers.size) {
                     val potentialFriend = requestsUsers[it]
                     RequestItem(
@@ -150,18 +149,20 @@ fun RequestItem(
       modifier =
           modifier
               .fillMaxWidth()
-              .padding(horizontal = DP.CARD_HORIZONTAL_PADDING)
+              .padding(horizontal = CONSTANTS.CARD_HORIZONTAL_PADDING)
               .testTag(
                   FriendsRequestsScreenTestTags.getRequestCardFromUser(potentialNewFriend.pseudo)),
-      elevation = CardDefaults.cardElevation(defaultElevation = DP.CARD_ELEVATION),
-      shape = RoundedCornerShape(DP.CARD_ROUNDED_CORNER),
+      elevation = CardDefaults.cardElevation(defaultElevation = CONSTANTS.CARD_ELEVATION),
+      shape = RoundedCornerShape(CONSTANTS.CARD_ROUNDED_CORNER),
       colors =
           CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
-        Column(modifier = modifier.fillMaxWidth().padding(DP.CARD_FULL_INNER_PADDING)) {
+        Column(modifier = modifier.fillMaxWidth().padding(CONSTANTS.CARD_FULL_INNER_PADDING)) {
           // Row with the avatar image and the pseudo
           Row(
               modifier =
-                  modifier.fillMaxWidth().padding(vertical = DP.CARD_PSEUDO_ROW_VERTICAL_PADDING),
+                  modifier
+                      .fillMaxWidth()
+                      .padding(vertical = CONSTANTS.CARD_PSEUDO_ROW_VERTICAL_PADDING),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceEvenly) {
                 Image(
@@ -170,13 +171,13 @@ fun RequestItem(
                         stringResource(R.string.avatar_description, potentialNewFriend.avatar.name),
                     modifier =
                         modifier
-                            .size(DP.AVATAR_SIZE)
+                            .size(CONSTANTS.AVATAR_SIZE)
                             .clip(CircleShape)
                             .testTag(
                                 FriendsRequestsScreenTestTags.getRequestAvatarFromUser(
                                     potentialNewFriend.pseudo)))
                 Text(
-                    fontSize = DP.PSEUDO_SIZE,
+                    fontSize = CONSTANTS.PSEUDO_SIZE,
                     textAlign = TextAlign.Center,
                     text = potentialNewFriend.pseudo)
               }
@@ -213,10 +214,10 @@ fun RequestButton(modifier: Modifier = Modifier, accept: Boolean, onClick: () ->
   Card(
       modifier =
           modifier
-              .padding(horizontal = DP.BUTTON_HORIZONTAL_PADDING)
-              .padding(vertical = DP.BUTTON_VERTICAL_PADDING)
+              .padding(horizontal = CONSTANTS.BUTTON_HORIZONTAL_PADDING)
+              .padding(vertical = CONSTANTS.BUTTON_VERTICAL_PADDING)
               .clickable(onClick = onClick),
-      shape = RoundedCornerShape(DP.BUTTON_ROUNDED_CORNER),
+      shape = RoundedCornerShape(CONSTANTS.BUTTON_ROUNDED_CORNER),
       colors =
           CardDefaults.cardColors(
               containerColor =
@@ -225,8 +226,8 @@ fun RequestButton(modifier: Modifier = Modifier, accept: Boolean, onClick: () ->
         Text(
             modifier =
                 modifier
-                    .padding(horizontal = DP.BUTTON_TEXT_HORIZONTAL_PADDING)
-                    .padding(vertical = DP.BUTTON_TEXT_VERTICAL_PADDING),
+                    .padding(horizontal = CONSTANTS.BUTTON_TEXT_HORIZONTAL_PADDING)
+                    .padding(vertical = CONSTANTS.BUTTON_TEXT_VERTICAL_PADDING),
             color = Color.White,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
