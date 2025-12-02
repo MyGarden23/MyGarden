@@ -27,5 +27,5 @@ class FakeUserProfileRepository : UserProfileRepository {
    * that id.
    */
   override suspend fun getUserProfile(userId: String): UserProfile? =
-      UserProfile(userId, "fake-pseudo", Avatar.A3)
+      UserProfile(userId, "alice", Avatar.A3)
 }

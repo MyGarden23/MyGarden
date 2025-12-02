@@ -19,7 +19,13 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
 
   override fun outgoingRequests(): Flow<List<FriendRequest>> = MutableStateFlow(emptyList())
 
-  override suspend fun askFriend(targetUserId: String) {}
+  override suspend fun askFriend(targetUserId: String) {
+    if (targetUserId == "boom-user-id") {
+      throw IllegalStateException("boom")
+    } else {
+      flow.value = flow.value + FriendRequest(fromUserId = targetUserId)
+    }
+  }
 
   override suspend fun acceptRequest(requestId: String) {
     flow.value = flow.value.filter { it.fromUserId != requestId }

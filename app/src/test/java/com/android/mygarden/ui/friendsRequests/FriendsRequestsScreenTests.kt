@@ -65,7 +65,7 @@ class FriendsRequestsScreenTests {
     rule.onNodeWithTag(NavigationTestTags.TOP_BAR).assertIsDisplayed()
     rule.onNodeWithTag(FriendsRequestsScreenTestTags.NO_REQUEST_TEXT).assertIsNotDisplayed()
     // using the fake pseudo that the FakeUserProfileRepository creates each time
-    rule.assertRequestForUserIsDisplayed("fake-pseudo")
+    rule.assertRequestForUserIsDisplayed("alice")
   }
 
   @Test
@@ -73,10 +73,10 @@ class FriendsRequestsScreenTests {
     setup(listOf(request1))
     rule.onNodeWithTag(NavigationTestTags.TOP_BAR).assertIsDisplayed()
     rule.onNodeWithTag(FriendsRequestsScreenTestTags.NO_REQUEST_TEXT).assertIsNotDisplayed()
-    rule.assertRequestForUserIsDisplayed("fake-pseudo")
+    rule.assertRequestForUserIsDisplayed("alice")
     // click on accept button
     rule
-        .onNodeWithTag(FriendsRequestsScreenTestTags.getRequestAcceptButtonFromUser("fake-pseudo"))
+        .onNodeWithTag(FriendsRequestsScreenTestTags.getRequestAcceptButtonFromUser("alice"))
         .performClick()
     // the request has been handled - no more request
     rule.onNodeWithTag(FriendsRequestsScreenTestTags.NO_REQUEST_TEXT).assertIsDisplayed()
@@ -87,10 +87,10 @@ class FriendsRequestsScreenTests {
     setup(listOf(request1))
     rule.onNodeWithTag(NavigationTestTags.TOP_BAR).assertIsDisplayed()
     rule.onNodeWithTag(FriendsRequestsScreenTestTags.NO_REQUEST_TEXT).assertIsNotDisplayed()
-    rule.assertRequestForUserIsDisplayed("fake-pseudo")
+    rule.assertRequestForUserIsDisplayed("alice")
     // click on accept button
     rule
-        .onNodeWithTag(FriendsRequestsScreenTestTags.getRequestDeclineButtonFromUser("fake-pseudo"))
+        .onNodeWithTag(FriendsRequestsScreenTestTags.getRequestDeclineButtonFromUser("alice"))
         .performClick()
     // the request has been handled - no more request
     rule.onNodeWithTag(FriendsRequestsScreenTestTags.NO_REQUEST_TEXT).assertIsDisplayed()
