@@ -94,9 +94,11 @@ private val customColorsLight =
         acceptButtonColor = Color(0xFF29C42F),
         refuseButtonColor = Color(0xFFF44336),
         waterActivityBlue = Color(0xff69bcff),
-        onWaterActivityBlue = Color(0xff3381c1),
+        onWaterActivityBlue = Color(0xff063C68),
         friendActivityRed = Color(0xffFFB3B3),
-        onFriendActivityRed = Color(0xffEA3F3F))
+        onFriendActivityRed = Color(0xffEA3F3F),
+        achievementGrey = Color(0xffD9D9D9),
+        onAchievementGrey = Color(0xff534B52))
 
 /** The custom colors added to the MaterialTheme ones (dark mode) */
 private val customColorsDark =
@@ -108,9 +110,11 @@ private val customColorsDark =
         acceptButtonColor = Color(0xFF29C42F),
         refuseButtonColor = Color(0xFFF44336),
         waterActivityBlue = Color(0xff69bcff),
-        onWaterActivityBlue = Color(0xff3381c1),
+        onWaterActivityBlue = Color(0xff063C68),
         friendActivityRed = Color(0xffFFB3B3),
-        onFriendActivityRed = Color(0xffEA3F3F))
+        onFriendActivityRed = Color(0xffEA3F3F),
+        achievementGrey = Color(0xffD9D9D9),
+        onAchievementGrey = Color(0xff534B52))
 
 /** Local slot that holds the custom colors value in the composition tree */
 val LocalCustomColors = staticCompositionLocalOf {
@@ -124,7 +128,9 @@ val LocalCustomColors = staticCompositionLocalOf {
       Color.Unspecified,
       onWaterActivityBlue = Color.Unspecified,
       friendActivityRed = Color.Unspecified,
-      onFriendActivityRed = Color.Unspecified)
+      onFriendActivityRed = Color.Unspecified,
+      achievementGrey = Color.Unspecified,
+      onAchievementGrey = Color.Unspecified)
 }
 
 @Composable

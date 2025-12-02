@@ -85,5 +85,7 @@ data class CustomColors(
     val onWaterActivityBlue: Color,
     val friendActivityRed: Color,
     val onFriendActivityRed: Color,
+    val achievementGrey: Color,
+    val onAchievementGrey: Color,
 )
 // TODO : update the kdoc

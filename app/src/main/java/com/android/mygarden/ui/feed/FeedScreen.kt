@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,7 +52,7 @@ import com.android.mygarden.ui.theme.ExtendedTheme
 private val BUTTON_ROW_HORIZONTAL_PADDING = 24.dp
 private val BETWEEN_BUTTON_AND_ACTIVITIES_SPACER_PADDING = 8.dp
 private val LAZY_COLUMN_HORIZONTAL_PADDING = 8.dp
-private val VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING = 8.dp
+private val VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING = 16.dp
 private val CARD_PADDING = 12.dp
 private val CARD_ELEVATION_PADDING = 6.dp
 private val ROUND_CORNER = 6.dp
@@ -215,7 +214,7 @@ fun ActivityItem(modifier: Modifier = Modifier, activity: GardenActivity) {
       modifier =
           modifier
               .fillMaxWidth()
-              .padding(CARD_PADDING)
+              .padding(horizontal = CARD_PADDING)
               .testTag(FeedScreenTestTags.getTestTagForActivity(activity)),
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION_PADDING),
@@ -269,20 +268,21 @@ fun GenericCard(
       horizontalArrangement = Arrangement.SpaceEvenly,
       verticalAlignment = Alignment.CenterVertically) {
         Column(
-            modifier = modifier,
+            modifier = modifier.padding(top = 2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-              Text(
-                  fontSize = IN_CARD_ACTIVITY_TITLE_SIZE,
-                  fontWeight = FontWeight.ExtraBold,
-                  color = colorPalette.textColor.copy(alpha = IN_CARD_ACTIVITY_TITLE_OPACITY),
-                  text = titleText)
+            verticalArrangement = Arrangement.Bottom) {
               Icon(
                   painter = painterResource(icon),
                   contentDescription =
                       stringResource(R.string.icon_of_the_activity_card_description),
                   tint = colorPalette.textColor.copy(IN_CARD_ACTIVITY_ICON_OPACITY),
-                  modifier = modifier.size(30.dp))
+                  modifier = modifier.size(50.dp))
+              //                Text(
+              //                    fontSize = IN_CARD_ACTIVITY_TITLE_SIZE,
+              //                    fontWeight = FontWeight.ExtraBold,
+              //                    color = colorPalette.textColor.copy(alpha =
+              // IN_CARD_ACTIVITY_TITLE_OPACITY),
+              //                    text = titleText)
             }
         Text(
             modifier =
@@ -337,10 +337,16 @@ fun GotAnAchievementCard(
     activity: ActivityAchievement,
     colorPalette: CardColorPalette
 ) {
-  Text(
-      modifier = modifier.testTag(FeedScreenTestTags.GOT_ACHIEVEMENT_DESCRIPTION),
-      color = colorPalette.textColor,
-      text = stringResource(R.string.got_achievement_activity, activity.type))
+  val titleText = stringResource(R.string.in_card_achievement_activity_title)
+  val icon = R.drawable.achievement
+  val cardText =
+      stringResource(R.string.got_achievement_activity, activity.pseudo, activity.achievementName)
+
+  GenericCard(colorPalette, modifier, titleText, icon, cardText)
+  //  Text(
+  //      modifier = modifier.testTag(FeedScreenTestTags.GOT_ACHIEVEMENT_DESCRIPTION),
+  //      color = colorPalette.textColor,
+  //      text = stringResource(R.string.got_achievement_activity, activity.type))
 }
 
 /**
@@ -356,9 +362,11 @@ fun WateredAPlantCard(
     activity: ActivityWaterPlant,
     colorPalette: CardColorPalette
 ) {
-  val titleText = stringResource(R.string.in_card_friends_activity_title)
+  val titleText = stringResource(R.string.in_card_watered_activity_title)
   val icon = R.drawable.watering_can
-  val cardText = "yo"
+  val cardText =
+      stringResource(
+          R.string.watered_plant_activity, activity.pseudo, activity.ownedPlant.plant.name)
 
   GenericCard(colorPalette, modifier, titleText, icon, cardText)
   //  Text(
@@ -380,7 +388,7 @@ fun activityTypeColor(
 ): CardColorPalette {
   return when (activity) {
     is ActivityAchievement ->
-        CardColorPalette(colorScheme.errorContainer, colorScheme.onErrorContainer)
+        CardColorPalette(customColors.achievementGrey, customColors.onAchievementGrey)
     is ActivityAddFriend ->
         CardColorPalette(customColors.friendActivityRed, customColors.onFriendActivityRed)
     is ActivityAddedPlant ->
