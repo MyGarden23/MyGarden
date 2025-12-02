@@ -1,7 +1,6 @@
 package com.android.mygarden.ui.feed
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,7 +34,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
@@ -50,19 +48,20 @@ import com.android.mygarden.ui.theme.ExtendedTheme
 
 /*----------------- PADDING / SIZE / OPACITY CONSTANTS ------------------*/
 private val BUTTON_ROW_HORIZONTAL_PADDING = 24.dp
-private val BETWEEN_BUTTON_AND_ACTIVITIES_SPACER_PADDING = 8.dp
+private val BETWEEN_BUTTON_AND_ACTIVITIES_SPACER_PADDING = 20.dp
 private val LAZY_COLUMN_HORIZONTAL_PADDING = 8.dp
 private val VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING = 16.dp
 private val CARD_PADDING = 12.dp
 private val CARD_ELEVATION_PADDING = 6.dp
 private val ROUND_CORNER = 6.dp
 private val IN_CARD_ROW_PADDING = 6.dp
-private val IN_CARD_ACTIVITY_TITLE_SIZE = 18.sp
-private val IN_CARD_ACTIVITY_TITLE_OPACITY = 0.5f
 private val IN_CARD_ACTIVITY_ICON_OPACITY = 0.5f
 private val WEIGHT_1 = 1f
 private val IN_CARD_TEXT_HORIZONTAL_PADDING = 8.dp
 private val NO_ACTIVITY_MSG_PADDING = 40.dp
+private val BORDER_CARD_WIDTH = 3.dp
+private val ICON_PADDING = 5.dp
+private val ICON_SIZE = 69.dp
 
 /*---------------- TEST TAGS FOR ALL COMPONENTS OF THE SCREEN --------------*/
 object FeedScreenTestTags {
@@ -70,10 +69,8 @@ object FeedScreenTestTags {
   const val FRIENDS_REQUESTS_BUTTON = "FriendsRequestsButton"
   const val FRIEND_LIST_BUTTON = "FriendListButton"
   const val NO_ACTIVITY_MESSAGE = "NoActivityMessage"
-  const val ADDED_PLANT_DESCRIPTION = "AddedPlantDescription"
-  const val ADDED_FRIEND_DESCRIPTION = "AddedFriendDescription"
-  const val WATERED_PLANT_DESCRIPTION = "WateredPlantDescription"
-  const val GOT_ACHIEVEMENT_DESCRIPTION = "GotAchievementDescription"
+  const val GENERIC_CARD_DESCRIPTION = "GenericCardDescription"
+  const val GENERIC_CARD_ICON = "GenericCardIcon"
 
   /** get unique test tag for a specific activity */
   fun getTestTagForActivity(activity: GardenActivity) = "Activity${activity.createdAt}"
@@ -111,7 +108,7 @@ fun FeedScreen(
       containerColor = MaterialTheme.colorScheme.background,
       content = { pd ->
         Column(modifier = modifier.fillMaxSize().padding(pd)) {
-          // Row for the button - we want it below the top bar but above the activities
+          // Buttons - we want them below the top bar but above the activities
           Row(
               modifier =
                   modifier.fillMaxWidth().padding(horizontal = BUTTON_ROW_HORIZONTAL_PADDING),
@@ -119,7 +116,7 @@ fun FeedScreen(
                 NotificationButton(modifier, onClick = onNotifClick)
                 FriendListButton(modifier, onFriendList)
               }
-          // space between button and activities
+          // space between buttons and activities
           Spacer(modifier = modifier.height(BETWEEN_BUTTON_AND_ACTIVITIES_SPACER_PADDING))
 
           Box(modifier = Modifier.weight(WEIGHT_1).fillMaxWidth()) {
@@ -242,54 +239,55 @@ fun AddedAPlantCard(
     activity: ActivityAddedPlant,
     colorPalette: CardColorPalette
 ) {
-  val titleText = stringResource(R.string.in_card_added_activity_title)
   val icon = R.drawable.potted_plant_icon
   val cardText =
       stringResource(R.string.added_plant_activity, activity.pseudo, activity.ownedPlant.plant.name)
 
-  GenericCard(colorPalette, modifier, titleText, icon, cardText)
+  GenericCard(colorPalette, modifier, icon, cardText)
 }
 
+/**
+ * Displays a generic activity card used in the feed.
+ *
+ * This function is used by all activity-specific card composables.
+ *
+ * @param colorPalette the color palette defining the background and icon/text tint associated with
+ *   the specific activity type.
+ * @param modifier the used modifier for the composable
+ * @param icon drawable resource ID for the icon displayed on the left side.
+ * @param cardText the description text of the activity.
+ */
 @Composable
 fun GenericCard(
     colorPalette: CardColorPalette,
     modifier: Modifier = Modifier,
-    titleText: String,
     icon: Int,
     cardText: String,
-) { // TODO Add const for borders
+) {
   Row(
       modifier =
           modifier
               .fillMaxSize()
               .border(
-                  width = 3.dp, color = Color(0xFF4A4A4A), shape = RoundedCornerShape(ROUND_CORNER))
+                  width = BORDER_CARD_WIDTH,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  shape = RoundedCornerShape(ROUND_CORNER))
               .padding(IN_CARD_ROW_PADDING),
       horizontalArrangement = Arrangement.SpaceEvenly,
       verticalAlignment = Alignment.CenterVertically) {
-        Column(
-            modifier = modifier.padding(top = 2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom) {
-              Icon(
-                  painter = painterResource(icon),
-                  contentDescription =
-                      stringResource(R.string.icon_of_the_activity_card_description),
-                  tint = colorPalette.textColor.copy(IN_CARD_ACTIVITY_ICON_OPACITY),
-                  modifier = modifier.size(50.dp))
-              //                Text(
-              //                    fontSize = IN_CARD_ACTIVITY_TITLE_SIZE,
-              //                    fontWeight = FontWeight.ExtraBold,
-              //                    color = colorPalette.textColor.copy(alpha =
-              // IN_CARD_ACTIVITY_TITLE_OPACITY),
-              //                    text = titleText)
-            }
+        Box(modifier = modifier.padding(ICON_PADDING)) {
+          Icon(
+              painter = painterResource(icon),
+              contentDescription = stringResource(R.string.icon_of_the_activity_card_description),
+              tint = colorPalette.textColor.copy(IN_CARD_ACTIVITY_ICON_OPACITY),
+              modifier = modifier.size(ICON_SIZE).testTag(FeedScreenTestTags.GENERIC_CARD_ICON))
+        }
         Text(
             modifier =
                 modifier
                     .weight(WEIGHT_1)
                     .padding(horizontal = IN_CARD_TEXT_HORIZONTAL_PADDING)
-                    .testTag(FeedScreenTestTags.ADDED_PLANT_DESCRIPTION),
+                    .testTag(FeedScreenTestTags.GENERIC_CARD_DESCRIPTION),
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             text = cardText)
       }
@@ -308,20 +306,11 @@ fun AddedAFriendCard(
     activity: ActivityAddFriend,
     colorPalette: CardColorPalette
 ) {
-  val titleText = stringResource(R.string.in_card_friends_activity_title)
   val icon = R.drawable.friends_icon
   val cardText =
       stringResource(R.string.added_friend_activity, activity.pseudo, activity.friendPseudo)
 
-  GenericCard(colorPalette, modifier, titleText, icon, cardText)
-  //    Icon(
-  //        painter = painterResource(R.drawable.friends_icon),
-  //        contentDescription = null,
-  //        tint = colorPalette.textColor.copy(IN_CARD_ACTIVITY_ICON_OPACITY))
-  //      Text(
-  //          modifier = modifier.testTag(FeedScreenTestTags.ADDED_FRIEND_DESCRIPTION),
-  //          //color = colorPalette.textColor,
-  //          text = stringResource(R.string.added_friend_activity, "élkj", "asdf"))
+  GenericCard(colorPalette, modifier, icon, cardText)
 }
 
 /**
@@ -337,16 +326,11 @@ fun GotAnAchievementCard(
     activity: ActivityAchievement,
     colorPalette: CardColorPalette
 ) {
-  val titleText = stringResource(R.string.in_card_achievement_activity_title)
   val icon = R.drawable.achievement
   val cardText =
       stringResource(R.string.got_achievement_activity, activity.pseudo, activity.achievementName)
 
-  GenericCard(colorPalette, modifier, titleText, icon, cardText)
-  //  Text(
-  //      modifier = modifier.testTag(FeedScreenTestTags.GOT_ACHIEVEMENT_DESCRIPTION),
-  //      color = colorPalette.textColor,
-  //      text = stringResource(R.string.got_achievement_activity, activity.type))
+  GenericCard(colorPalette, modifier, icon, cardText)
 }
 
 /**
@@ -362,17 +346,12 @@ fun WateredAPlantCard(
     activity: ActivityWaterPlant,
     colorPalette: CardColorPalette
 ) {
-  val titleText = stringResource(R.string.in_card_watered_activity_title)
   val icon = R.drawable.watering_can
   val cardText =
       stringResource(
           R.string.watered_plant_activity, activity.pseudo, activity.ownedPlant.plant.name)
 
-  GenericCard(colorPalette, modifier, titleText, icon, cardText)
-  //  Text(
-  //      modifier = modifier.testTag(FeedScreenTestTags.WATERED_PLANT_DESCRIPTION),
-  //      //color = colorPalette.textColor,
-  //      text = stringResource(R.string.watered_plant_activity, activity.type))
+  GenericCard(colorPalette, modifier, icon, cardText)
 }
 
 /**
