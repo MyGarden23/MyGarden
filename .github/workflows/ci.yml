@@ -132,6 +132,19 @@ jobs:
           }
           JSON
 
+      # Deploy Firestore indexes to production (only on main branch push)
+      - name: Deploy Firestore Indexes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          if [ -f "firestore.indexes.json" ] && [ -n "$FIREBASE_TOKEN" ]; then
+            echo "Deploying Firestore indexes to production..."
+            firebase deploy --only firestore:indexes --project "${{ steps.firebase_project.outputs.project_id }}" --token "$FIREBASE_TOKEN"
+          else
+            echo "Skipping Firestore indexes deployment (missing firestore.indexes.json or FIREBASE_TOKEN)"
+          fi
+
       - name: Start Firebase emulators
         run: |
           if [ -e "firebase.json" ]; then
