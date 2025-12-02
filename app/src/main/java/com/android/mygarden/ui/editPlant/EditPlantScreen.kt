@@ -25,9 +25,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
+import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.model.plant.*
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
+import com.android.mygarden.ui.utils.OfflineMessages
+import com.android.mygarden.ui.utils.handleOfflineClick
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.ZoneId
@@ -88,6 +91,9 @@ fun EditPlantScreen(
   val plantUIState by editPlantViewModel.uiState.collectAsState()
   val snackbarHostState = remember { SnackbarHostState() }
 
+  // Collect offline state
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
+
   LaunchedEffect(plantUIState.errorMsg) {
     plantUIState.errorMsg?.let { resId ->
       snackbarHostState.showSnackbar(
@@ -141,7 +147,8 @@ fun EditPlantScreen(
   // Enable the Save button if the plant has been recognized by the API and the
   // lastWatered field is set and description is not blank or if the fields are all
   // filled if the plant is not recognized.
-  val isSaveEnabled = remember(plantUIState) { computeIsSaveEnabled(plantUIState) }
+  val isSaveEnabled =
+      remember(plantUIState, isOnline) { computeIsSaveEnabled(plantUIState, isOnline) }
 
   Scaffold(
       modifier = Modifier.testTag(NavigationTestTags.EDIT_PLANT_SCREEN),
@@ -250,8 +257,13 @@ fun EditPlantScreen(
           },
           onSave = {
             if (isSaveEnabled) {
-              editPlantViewModel.editPlant(ownedPlantId)
-              onSaved()
+              handleOfflineClick(
+                  isOnline = isOnline,
+                  context = context,
+                  offlineMessageResId = OfflineMessages.CANNOT_SAVE_PLANT) {
+                    editPlantViewModel.editPlant(ownedPlantId)
+                    onSaved()
+                  }
             }
           },
       )
@@ -262,9 +274,14 @@ fun EditPlantScreen(
           showDeletePopup = showDeletePopup,
           onShowDeletePopupChange = { showDeletePopup = it },
           onConfirmDelete = {
-            editPlantViewModel.deletePlant(ownedPlantId)
-            showDeletePopup = false
-            onDeleted?.invoke()
+            handleOfflineClick(
+                isOnline = isOnline,
+                context = context,
+                offlineMessageResId = OfflineMessages.CANNOT_DELETE_PLANT) {
+                  editPlantViewModel.deletePlant(ownedPlantId)
+                  showDeletePopup = false
+                  onDeleted?.invoke()
+                }
           },
       )
     }
@@ -372,10 +389,13 @@ private fun computeEditPlantErrorFlags(
  * - If not recognized: name, Latin name, description, and last watered date must all be provided.
  *
  * @param uiState The current UI state of the Edit Plant screen.
+ * @param isOnline Whether the device is online.
  * @return True if all required fields are valid, false otherwise.
  */
-private fun computeIsSaveEnabled(uiState: EditPlantUIState): Boolean {
-  return if (uiState.isRecognized) {
+private fun computeIsSaveEnabled(uiState: EditPlantUIState, isOnline: Boolean): Boolean {
+  return if (!isOnline) {
+    false
+  } else if (uiState.isRecognized) {
     uiState.description.isNotBlank() && uiState.lastWatered != null
   } else {
     uiState.description.isNotBlank() &&
