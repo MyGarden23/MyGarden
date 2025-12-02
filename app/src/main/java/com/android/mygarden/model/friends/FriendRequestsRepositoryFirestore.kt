@@ -180,7 +180,6 @@ class FriendRequestsRepositoryFirestore(
         friendRequestsCollection(uid)
             .whereEqualTo(FIELD_TO_USER_ID, uid)
             .whereEqualTo(FIELD_STATUS, FriendRequestStatus.PENDING.name)
-            .whereEqualTo(FIELD_SEEN_BY_RECEIVER, false)
             .orderBy(FIELD_CREATED_AT, Query.Direction.DESCENDING)
 
     return observeRequestsQuery(query, "incoming requests")

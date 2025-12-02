@@ -39,7 +39,7 @@ class FriendsRequestsPopupViewModel(
       friendsRepo.incomingRequests().collect { list ->
         list.forEach { newRequest ->
           val profile = userProfileRepo.getUserProfile(newRequest.fromUserId)
-          if (profile != null) {
+          if (profile != null && !newRequest.seenByReceiver) {
             _newRequests.emit(
                 FriendRequestUiModel(request = newRequest, senderPseudo = profile.pseudo))
             friendsRepo.markRequestAsSeen(newRequest.id)
