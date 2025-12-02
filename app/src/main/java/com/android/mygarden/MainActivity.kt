@@ -274,6 +274,36 @@ private fun ThirstyPlantsPopup(
 }
 
 /**
+ * Observes the list of new friend requests and displays a popup to notify the user.
+ *
+ * @param actions Navigation helper used to redirect the user when confirming or deleting the popup.
+ * @param friendRequestPopupVM ViewModel that emits new friend requests.
+ */
+@Composable
+private fun NewFriendRequestPopup(
+    actions: NavigationActions,
+    friendRequestPopupVM: FriendsRequestsPopupViewModel = viewModel(),
+) {
+  var currentFriendRequest by remember { mutableStateOf<FriendRequestUiModel?>(null) }
+
+  LaunchedEffect(Unit) {
+    friendRequestPopupVM.newRequests.collect { friendRequestUIModel ->
+      currentFriendRequest = friendRequestUIModel
+    }
+  }
+
+  currentFriendRequest?.let {
+    FriendsRequestsPopup(
+        senderPseudo = it.senderPseudo,
+        onDismiss = { currentFriendRequest = null },
+        onConfirm = {
+          actions.navTo(Screen.Camera) // TODO(Change this to FriendRequestScreen)
+          currentFriendRequest = null
+        })
+  }
+}
+
+/**
  * Ask the user for notification permission if the API is greater of equal to 33.
  *
  * Note: this function is really basic and assumes that the user allows the app to send
@@ -299,29 +329,5 @@ internal fun AskForNotificationsPermission() {
       notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
       setHasAlreadyDeniedNotificationsPermission(context, true)
     }
-  }
-}
-
-@Composable
-private fun NewFriendRequestPopup(
-    actions: NavigationActions,
-    friendRequestPopupVM: FriendsRequestsPopupViewModel = viewModel(),
-) {
-  var currentFriendRequest by remember { mutableStateOf<FriendRequestUiModel?>(null) }
-
-  LaunchedEffect(Unit) {
-    friendRequestPopupVM.newRequests.collect { friendRequestUIModel ->
-      currentFriendRequest = friendRequestUIModel
-    }
-  }
-  Log.d("FriendRequestsMain", currentFriendRequest.toString())
-  currentFriendRequest?.let {
-    FriendsRequestsPopup(
-        senderPseudo = it.senderPseudo,
-        onDismiss = { currentFriendRequest = null },
-        onConfirm = {
-          actions.navTo(Screen.Camera) // TODO(Change this to FriendRequestScreen)
-          currentFriendRequest = null
-        })
   }
 }
