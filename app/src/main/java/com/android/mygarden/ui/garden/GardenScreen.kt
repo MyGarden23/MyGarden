@@ -496,7 +496,7 @@ fun WaterButton(
                   WATER_BUTTON_BORDER_WIDTH,
                   if (isOnline) color else MaterialTheme.colorScheme.surfaceVariant,
                   RoundedCornerShape(PLANT_CARD_ROUND_SHAPING))
-              .clickable(onClick = onButtonPressed, enabled = isOnline),
+              .clickable(onClick = onButtonPressed),
       contentAlignment = Alignment.Center) {
         Icon(
             Icons.Default.WaterDrop,

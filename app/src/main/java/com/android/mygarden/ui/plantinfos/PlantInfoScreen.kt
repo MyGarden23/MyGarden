@@ -225,11 +225,15 @@ fun PlantInfosScreen(
                 // Tips button
                 Button(
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                        if (isOnline) {
+                          ButtonDefaults.buttonColors(
+                              containerColor = MaterialTheme.colorScheme.primary,
+                              contentColor = MaterialTheme.colorScheme.onPrimary)
+                        } else {
+                          ButtonDefaults.buttonColors(
+                              containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                              contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                        },
                     onClick = {
                       handleOfflineClick(
                           isOnline = isOnline,
@@ -238,7 +242,6 @@ fun PlantInfosScreen(
                             plantInfoViewModel.showCareTips(uiState.latinName, uiState.healthStatus)
                           }
                     },
-                    enabled = isOnline,
                     modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_BUTTON)) {
                       Text(
                           text = stringResource(id = R.string.tips_button_label),
