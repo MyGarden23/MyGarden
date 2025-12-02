@@ -2,6 +2,7 @@ package com.android.mygarden.ui.feed
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -256,9 +258,14 @@ fun GenericCard(
     titleText: String,
     icon: Int,
     cardText: String,
-) { // TODO Add borders
+) { // TODO Add const for borders
   Row(
-      modifier = modifier.fillMaxSize().padding(IN_CARD_ROW_PADDING),
+      modifier =
+          modifier
+              .fillMaxSize()
+              .border(
+                  width = 3.dp, color = Color(0xFF4A4A4A), shape = RoundedCornerShape(ROUND_CORNER))
+              .padding(IN_CARD_ROW_PADDING),
       horizontalArrangement = Arrangement.SpaceEvenly,
       verticalAlignment = Alignment.CenterVertically) {
         Column(
@@ -274,7 +281,8 @@ fun GenericCard(
                   painter = painterResource(icon),
                   contentDescription =
                       stringResource(R.string.icon_of_the_activity_card_description),
-                  tint = colorPalette.textColor.copy(IN_CARD_ACTIVITY_ICON_OPACITY))
+                  tint = colorPalette.textColor.copy(IN_CARD_ACTIVITY_ICON_OPACITY),
+                  modifier = modifier.size(30.dp))
             }
         Text(
             modifier =
