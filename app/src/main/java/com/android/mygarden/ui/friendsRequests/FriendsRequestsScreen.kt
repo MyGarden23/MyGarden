@@ -1,10 +1,10 @@
 package com.android.mygarden.ui.friendsRequests
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -55,8 +57,8 @@ private object CONSTANTS {
   val BUTTON_VERTICAL_PADDING = 8.dp
   val BUTTON_ROUNDED_CORNER = 18.dp
   val BUTTON_TEXT_HORIZONTAL_PADDING = 32.dp
-  val BUTTON_TEXT_VERTICAL_PADDING = 4.dp
   val NO_REQUEST_TEXT_PADDING = 40.dp
+  val DEFAULT_BUTTON_HEIGHT = 32.dp
 }
 
 /** All test tags needed to ensure all components are correctly displayed when needed */
@@ -77,6 +79,7 @@ object FriendsRequestsScreenTestTags {
  * and a decline button.
  *
  * @param modifier the modifier used throughout the whole screen for correct design
+ * @param requestsViewModel the view model used to handle UI interactions (buttons clicks)
  * @param onGoBack the callback to be triggered when the user clicks on the back button
  */
 @Composable
@@ -186,14 +189,14 @@ fun RequestItem(
             RequestButton(
                 modifier =
                     modifier.testTag(
-                        FriendsRequestsScreenTestTags.getRequestAcceptButtonFromUser(
+                        FriendsRequestsScreenTestTags.getRequestDeclineButtonFromUser(
                             potentialNewFriend.pseudo)),
                 accept = false,
                 onClick = onRefuse)
             RequestButton(
                 modifier =
                     modifier.testTag(
-                        FriendsRequestsScreenTestTags.getRequestDeclineButtonFromUser(
+                        FriendsRequestsScreenTestTags.getRequestAcceptButtonFromUser(
                             potentialNewFriend.pseudo)),
                 accept = true,
                 onClick = onAccept)
@@ -211,23 +214,25 @@ fun RequestItem(
  */
 @Composable
 fun RequestButton(modifier: Modifier = Modifier, accept: Boolean, onClick: () -> Unit = {}) {
-  Card(
+  Button(
+      onClick = onClick,
       modifier =
           modifier
               .padding(horizontal = CONSTANTS.BUTTON_HORIZONTAL_PADDING)
               .padding(vertical = CONSTANTS.BUTTON_VERTICAL_PADDING)
-              .clickable(onClick = onClick),
+              .height(CONSTANTS.DEFAULT_BUTTON_HEIGHT),
       shape = RoundedCornerShape(CONSTANTS.BUTTON_ROUNDED_CORNER),
       colors =
-          CardDefaults.cardColors(
+          ButtonDefaults.buttonColors(
               containerColor =
                   if (accept) ExtendedTheme.colors.acceptButtonColor
-                  else ExtendedTheme.colors.refuseButtonColor)) {
+                  else ExtendedTheme.colors.refuseButtonColor),
+      // override default padding values of Button composable
+      contentPadding =
+          PaddingValues(
+              horizontal = CONSTANTS.BUTTON_TEXT_HORIZONTAL_PADDING,
+          )) {
         Text(
-            modifier =
-                modifier
-                    .padding(horizontal = CONSTANTS.BUTTON_TEXT_HORIZONTAL_PADDING)
-                    .padding(vertical = CONSTANTS.BUTTON_TEXT_VERTICAL_PADDING),
             color = Color.White,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,

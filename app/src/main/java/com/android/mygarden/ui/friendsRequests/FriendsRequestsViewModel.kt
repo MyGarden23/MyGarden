@@ -21,15 +21,15 @@ data class FriendsRequestsUIState(val pendingRequestsUsers: List<UserProfile> = 
 
 /**
  * View Model that handles interactions between the model (both repositories below) and the UI (here
- * the FriendsRequestsScreen
+ * the FriendsRequestsScreen)
  *
  * @property userProfileRepo the repository of userProfile, used to retrieve more infos about the
  *   users requesting a friendship
  * @property requestsRepo the repository of requests
  */
 class FriendsRequestsViewModel(
-    val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
-    val requestsRepo: FriendRequestsRepository = FriendRequestsRepositoryProvider.repository
+    private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
+    private val requestsRepo: FriendRequestsRepository = FriendRequestsRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FriendsRequestsUIState())

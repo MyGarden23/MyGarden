@@ -28,7 +28,7 @@ class FriendsRequestsScreenTests {
 
   @get:Rule val rule = createComposeRule()
 
-  val request1 = FriendRequest(fromUserId = "from-user-1")
+  private val request1 = FriendRequest(fromUserId = "from-user-1")
 
   private lateinit var requestRepo: FriendRequestsRepository
   private lateinit var userRepo: UserProfileRepository
@@ -88,7 +88,7 @@ class FriendsRequestsScreenTests {
     rule.onNodeWithTag(NavigationTestTags.TOP_BAR).assertIsDisplayed()
     rule.onNodeWithTag(FriendsRequestsScreenTestTags.NO_REQUEST_TEXT).assertIsNotDisplayed()
     rule.assertRequestForUserIsDisplayed("alice")
-    // click on accept button
+    // click on decline button
     rule
         .onNodeWithTag(FriendsRequestsScreenTestTags.getRequestDeclineButtonFromUser("alice"))
         .performClick()
