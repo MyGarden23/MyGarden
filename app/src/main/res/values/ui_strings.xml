@@ -179,6 +179,15 @@
     <string name="add_enum">Add</string>
     <string name="added_enum">Added</string>
 
+    <!-- Offline Mode Messages -->
+    <string name="offline_cannot_water_plants">Cannot water plants while offline</string>
+    <string name="offline_cannot_add_plants">Cannot add plants while offline</string>
+    <string name="offline_cannot_save_plant">Cannot save plant while offline</string>
+    <string name="offline_cannot_delete_plant">Cannot delete plant while offline</string>
+    <string name="offline_cannot_edit_profile">Cannot edit profile while offline</string>
+    <string name="offline_cannot_save_profile">Cannot save profile while offline</string>
+    <string name="offline_cannot_load_tips">Cannot load tips while offline</string>
+
     <string name="request_screen_title">My Requests</string>
     <string name="no_request_text">You don\'t have any friend request yet.</string>
     <string name="accept_button">Accept</string>
