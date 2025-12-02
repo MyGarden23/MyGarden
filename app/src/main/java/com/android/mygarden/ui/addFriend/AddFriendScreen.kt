@@ -232,19 +232,19 @@ fun FriendCard(
                     modifier =
                         Modifier.testTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudo)),
                     onClick = {
-                      viewModel.onAdd(
+                      viewModel.onAsk(
                           userId,
                           {
                             Toast.makeText(
                                     context,
-                                    context.getString(R.string.add_friend_failed, pseudo),
+                                    context.getString(R.string.ask_friend_failed, pseudo),
                                     Toast.LENGTH_SHORT)
                                 .show()
                           },
                           {
                             Toast.makeText(
                                     context,
-                                    context.getString(R.string.added_friend_successfully, pseudo),
+                                    context.getString(R.string.asked_friend_successfully, pseudo),
                                     Toast.LENGTH_SHORT)
                                 .show()
                           })

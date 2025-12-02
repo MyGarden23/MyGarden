@@ -6,6 +6,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
+import com.android.mygarden.model.friends.FriendRequestsRepository
+import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.profile.PseudoRepository
@@ -49,6 +51,8 @@ data class AddFriendUiState(
  */
 class AddFriendViewModel(
     private val friendsRepository: FriendsRepository = FriendsRepositoryProvider.repository,
+    private val requestsRepository: FriendRequestsRepository =
+        FriendRequestsRepositoryProvider.repository,
     private val userProfileRepository: UserProfileRepository =
         UserProfileRepositoryProvider.repository,
     private val pseudoRepository: PseudoRepository = PseudoRepositoryProvider.repository,
@@ -108,6 +112,24 @@ class AddFriendViewModel(
     viewModelScope.launch {
       try {
         friendsRepository.addFriend(userId)
+        onSuccess()
+      } catch (_: Exception) {
+        onError()
+      }
+    }
+  }
+
+  /**
+   * Asks the user [userId] to be friend. Note that the error handling
+   *
+   * @param userId the user id of the one the current user wants to be friend with
+   * @param onError Invoked if the operation fails for any reason.
+   * @param onSuccess Invoked if the friend was added successfully.
+   */
+  fun onAsk(userId: String, onError: () -> Unit, onSuccess: () -> Unit) {
+    viewModelScope.launch {
+      try {
+        requestsRepository.askFriend(userId)
         onSuccess()
       } catch (_: Exception) {
         onError()

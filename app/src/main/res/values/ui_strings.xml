@@ -168,6 +168,8 @@
     <string name="search_button">Search</string>
     <string name="added_friend_successfully">You successfully added %1$s as a friend</string>
     <string name="add_friend_failed">Failed to add %1$s as a friend</string>
+    <string name="asked_friend_successfully">You successfully asked %1$s to be your friend</string>
+    <string name="ask_friend_failed">Failed to ask %1$s to be your friend</string>
     <string name="add_enum">Add</string>
     <string name="added_enum">Added</string>
 
