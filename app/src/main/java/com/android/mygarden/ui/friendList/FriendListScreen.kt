@@ -65,12 +65,6 @@ val TEXT_FONT_SIZE = 20.sp
 /**
  * Displays the friend list screen, showing either the list of friends or an empty-state message.
  *
- * This composable:
- * - Retrieves the list of friends through [FriendListViewModel]
- * - Shows a “no friends” message when the list is empty
- * - Shows a list of [FriendCard] elements when the list is non-empty
- * - Includes a top bar with a back button
- *
  * @param onBackPressed callback triggered when the user presses the top bar back button
  * @param friendListViewModel ViewModel providing the friend list data
  */
@@ -140,8 +134,6 @@ fun FriendListScreen(
  * - their gardening skill
  * - their favorite plant
  * - an icon on the right (currently a decorative or future action icon)
- *
- * The layout matches the structure used in AddFriendScreen for visual consistency.
  *
  * @param friend user profile to display inside the card
  */

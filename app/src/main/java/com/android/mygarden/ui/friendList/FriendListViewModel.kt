@@ -27,12 +27,6 @@ data class FriendListUiState(
 /**
  * ViewModel responsible for loading and exposing the user's list of friends.
  *
- * This ViewModel:
- * - Retrieves the current user from FirebaseAuth
- * - Fetches the list of friend UIDs through [FriendsRepository]
- * - Resolves each UID into a [UserProfile] using [UserProfileRepository]
- * - Exposes the results through a [StateFlow] of [FriendListUiState]
- *
  * @property friendsRepository repository used to retrieve friend UIDs
  * @property userProfileRepository repository that provides detailed user profiles
  * @property auth Firebase authentication instance used to obtain the current user
@@ -52,13 +46,6 @@ class FriendListViewModel(
 
   /**
    * Loads the list of friends for the current user.
-   *
-   * This function:
-   * - Sets [isLoading] to true
-   * - Fetches friend UIDs via [FriendsRepository.getFriends]
-   * - Resolves each UID into a [UserProfile] via [UserProfileRepository.getUserProfile]
-   * - Updates the UI state with the final list of profiles
-   * - Calls [onError] and stops loading if any exception occurs
    *
    * @param onError callback invoked if the friend list could not be loaded
    */
