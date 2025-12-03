@@ -25,86 +25,84 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FriendListViewModelTest {
 
-    @Test
-    fun getFriends_populates_uiState_with_friend_profiles() = runTest {
-        val dispatcher = StandardTestDispatcher(testScheduler)
-        Dispatchers.setMain(dispatcher)
+  @Test
+  fun getFriends_populates_uiState_with_friend_profiles() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
 
-        val fakeFriends = FakeFriendsRepository()
-        val fakeUserProfiles = FakeUserProfileRepository()
+    val fakeFriends = FakeFriendsRepository()
+    val fakeUserProfiles = FakeUserProfileRepository()
 
-        // Mock FirebaseAuth.currentUser
-        val auth: FirebaseAuth = mock()
-        val user: FirebaseUser = mock()
-        whenever(auth.currentUser).thenReturn(user)
-        whenever(user.uid).thenReturn("current-user-id")
+    // Mock FirebaseAuth.currentUser
+    val auth: FirebaseAuth = mock()
+    val user: FirebaseUser = mock()
+    whenever(auth.currentUser).thenReturn(user)
+    whenever(user.uid).thenReturn("current-user-id")
 
-        // Configure FakeFriendsRepository: feed friend UIDs via the flow
-        fakeFriends.friendsFlow.value = listOf("uid-alice", "uid-bob")
+    // Configure FakeFriendsRepository: feed friend UIDs via the flow
+    fakeFriends.friendsFlow.value = listOf("uid-alice", "uid-bob")
 
-        // Configure FakeUserProfileRepository: map UID -> UserProfile
-        fakeUserProfiles.profiles["uid-alice"] =
-            UserProfile("uid-alice", "Alice", Avatar.A1, "Beginner", "Rose")
-        fakeUserProfiles.profiles["uid-bob"] =
-            UserProfile("uid-bob", "Bob", Avatar.A2, "Expert", "Cactus")
+    // Configure FakeUserProfileRepository: map UID -> UserProfile
+    fakeUserProfiles.profiles["uid-alice"] =
+        UserProfile("uid-alice", "Alice", Avatar.A1, "Beginner", "Rose")
+    fakeUserProfiles.profiles["uid-bob"] =
+        UserProfile("uid-bob", "Bob", Avatar.A2, "Expert", "Cactus")
 
-        val vm =
-            FriendListViewModel(
-                friendsRepository = fakeFriends,
-                userProfileRepository = fakeUserProfiles,
-                auth = auth)
+    val vm =
+        FriendListViewModel(
+            friendsRepository = fakeFriends, userProfileRepository = fakeUserProfiles, auth = auth)
 
-        var onErrorCalled = false
-        vm.getFriends(onError = { onErrorCalled = true })
+    var onErrorCalled = false
+    vm.getFriends(onError = { onErrorCalled = true })
 
-        advanceUntilIdle()
+    advanceUntilIdle()
 
-        val state = vm.uiState.value
-        assertTrue(!onErrorCalled)
-        assertEquals(2, state.friends.size)
-        assertEquals("Alice", state.friends[0].pseudo)
-        assertEquals("Bob", state.friends[1].pseudo)
+    val state = vm.uiState.value
+    assertTrue(!onErrorCalled)
+    assertEquals(2, state.friends.size)
+    assertEquals("Alice", state.friends[0].pseudo)
+    assertEquals("Bob", state.friends[1].pseudo)
 
-        Dispatchers.resetMain()
-    }
+    Dispatchers.resetMain()
+  }
 
-    @Test
-    fun getFriends_calls_onError_when_repository_throws() = runTest {
-        val dispatcher = StandardTestDispatcher(testScheduler)
-        Dispatchers.setMain(dispatcher)
+  @Test
+  fun getFriends_calls_onError_when_repository_throws() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
 
-        // Small local fake that throws on getFriends
-        val throwingFriendsRepo =
-            object : com.android.mygarden.model.friends.FriendsRepository {
-                override suspend fun getFriends(userId: String): List<String> {
-                    throw IllegalStateException("boom")
-                }
+    // Small local fake that throws on getFriends
+    val throwingFriendsRepo =
+        object : com.android.mygarden.model.friends.FriendsRepository {
+          override suspend fun getFriends(userId: String): List<String> {
+            throw IllegalStateException("boom")
+          }
 
-                override fun friendsFlow(userId: String) = FakeFriendsRepository().friendsFlow
+          override fun friendsFlow(userId: String) = FakeFriendsRepository().friendsFlow
 
-                override suspend fun addFriend(friendUserId: String) = Unit
-            }
+          override suspend fun addFriend(friendUserId: String) = Unit
+        }
 
-        val fakeUserProfiles = FakeUserProfileRepository()
+    val fakeUserProfiles = FakeUserProfileRepository()
 
-        val auth: FirebaseAuth = mock()
-        val user: FirebaseUser = mock()
-        whenever(auth.currentUser).thenReturn(user)
-        whenever(user.uid).thenReturn("current-user-id")
+    val auth: FirebaseAuth = mock()
+    val user: FirebaseUser = mock()
+    whenever(auth.currentUser).thenReturn(user)
+    whenever(user.uid).thenReturn("current-user-id")
 
-        val vm =
-            FriendListViewModel(
-                friendsRepository = throwingFriendsRepo,
-                userProfileRepository = fakeUserProfiles,
-                auth = auth)
+    val vm =
+        FriendListViewModel(
+            friendsRepository = throwingFriendsRepo,
+            userProfileRepository = fakeUserProfiles,
+            auth = auth)
 
-        var onErrorCalled = false
-        vm.getFriends(onError = { onErrorCalled = true })
+    var onErrorCalled = false
+    vm.getFriends(onError = { onErrorCalled = true })
 
-        advanceUntilIdle()
+    advanceUntilIdle()
 
-        assertTrue(onErrorCalled)
+    assertTrue(onErrorCalled)
 
-        Dispatchers.resetMain()
-    }
+    Dispatchers.resetMain()
+  }
 }

@@ -1,9 +1,7 @@
 package com.android.mygarden.utils
 
-import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileRepository
-import com.android.mygarden.ui.profile.Avatar
 
 /**
  * A simple in-memory fake implementation of [UserProfileRepository] for unit tests.
@@ -20,12 +18,12 @@ import com.android.mygarden.ui.profile.Avatar
  */
 class FakeUserProfileRepository : UserProfileRepository {
 
-    /** In-memory storage of user profiles keyed by userId. */
-    val profiles: MutableMap<String, UserProfile> = mutableMapOf()
+  /** In-memory storage of user profiles keyed by userId. */
+  val profiles: MutableMap<String, UserProfile> = mutableMapOf()
 
-    /**
-     * Returns the profile stored for the given [userId], or `null` if no profile has been set for
-     * that id.
-     */
-    override suspend fun getUserProfile(userId: String): UserProfile? = profiles[userId]
+  /**
+   * Returns the profile stored for the given [userId], or `null` if no profile has been set for
+   * that id.
+   */
+  override suspend fun getUserProfile(userId: String): UserProfile? = profiles[userId]
 }

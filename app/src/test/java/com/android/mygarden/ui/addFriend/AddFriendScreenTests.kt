@@ -47,7 +47,12 @@ class AddFriendScreenTests {
     val fakeUserProfile =
         FakeUserProfileRepository().apply {
           profiles["uid-alice"] =
-              UserProfile(id = "uid-alice", pseudo = "alice", avatar = Avatar.A1, GardeningSkill.NOVICE.name, "rose")
+              UserProfile(
+                  id = "uid-alice",
+                  pseudo = "alice",
+                  avatar = Avatar.A1,
+                  GardeningSkill.NOVICE.name,
+                  "rose")
         }
 
     val fakeFriends = FakeFriendsRepository()
