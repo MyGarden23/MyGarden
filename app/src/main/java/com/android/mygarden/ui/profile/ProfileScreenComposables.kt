@@ -437,7 +437,7 @@ private fun SaveButton(
     onRegisterPressed: () -> Unit,
     isOnline: Boolean = true
 ) {
-  val context = LocalContext.current
+    val context = LocalContext.current
 
   Button(
       onClick = {
@@ -447,13 +447,11 @@ private fun SaveButton(
             offlineMessageResId = OfflineMessages.CANNOT_SAVE_PROFILE) {
               profileViewModel.setRegisterPressed(true)
               if (profileViewModel.canRegister()) {
-                profileViewModel.submit(
-                    { success ->
-                      if (success) {
+                profileViewModel.submit { success ->
+                    if (success) {
                         onRegisterPressed()
-                      }
-                    },
-                    context)
+                    }
+                }
               }
             }
       },

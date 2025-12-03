@@ -1,8 +1,9 @@
 package com.android.mygarden.ui.profile
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.model.achievements.AchievementsRepository
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
@@ -33,11 +34,13 @@ data class ProfileUIState(
 
 /**
  * ViewModel for managing the new profile creation screen state Handles user input updates and form
- * validation
+ * validation.
  */
 class ProfileViewModel(
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
     private val pseudoRepository: PseudoRepository = PseudoRepositoryProvider.repository,
+    private val achievementsRepository: AchievementsRepository =
+        AchievementsRepositoryProvider.repository,
 ) : ViewModel() {
   // Private mutable state flow for internal state management
   private val _uiState = MutableStateFlow(ProfileUIState())
@@ -285,10 +288,8 @@ class ProfileViewModel(
    *
    * @param onResult the callback called with as argument the success (true) or fail (false) of the
    *   saving operation on the Profile repo
-   * @param context the context used to access Shared Preferences to try and send the potential
-   *   local FCM token
    */
-  fun submit(onResult: (Boolean) -> Unit, context: Context) {
+  fun submit(onResult: (Boolean) -> Unit) {
     // show errors if needed
     setRegisterPressed(true)
     viewModelScope.launch {
@@ -325,6 +326,10 @@ class ProfileViewModel(
             userId = uid)
 
         profileRepository.saveProfile(profile)
+
+        // Set all achievements to have a value of 0 => Lvl 1 in every achievements
+        achievementsRepository.initializeAchievementsForNewUser(uid)
+
         onResult(true)
       } catch (_: Exception) {
         // log if needed

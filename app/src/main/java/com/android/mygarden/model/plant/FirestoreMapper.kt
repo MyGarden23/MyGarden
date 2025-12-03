@@ -44,13 +44,17 @@ data class SerializedPlant(
  * @property plant The plant information (species, care requirements, etc.).
  * @property lastWatered Timestamp of when the plant was most recently watered.
  * @property previousLastWatered Optional timestamp of the watering before lastWatered.
+ * @property dateOfCreation Timestamp of when the plant was added to the garde.
+ * @property healthySince Timestamp of the current healthy streak or 0 if the plant is not currently
+ *   healthy or slightly dry.
  */
 data class SerializedOwnedPlant(
     val id: String = "",
     val plant: SerializedPlant = SerializedPlant(),
     val lastWatered: Long = 0,
     val previousLastWatered: Long = 0,
-    val dateOfCreation: Long = 0
+    val dateOfCreation: Long = 0,
+    val healthySince: Long = 0
 )
 
 /**
@@ -76,7 +80,8 @@ object FirestoreMapper {
         plant = fromPlantToSerializedPlant(ownedPlant.plant),
         lastWatered = ownedPlant.lastWatered.time,
         previousLastWatered = ownedPlant.previousLastWatered?.time ?: 0L,
-        dateOfCreation = ownedPlant.dateOfCreation.time)
+        dateOfCreation = ownedPlant.dateOfCreation.time,
+        healthySince = ownedPlant.healthySince?.time ?: 0L)
   }
 
   /**
@@ -93,7 +98,9 @@ object FirestoreMapper {
         previousLastWatered =
             if (sOwnedPlant.previousLastWatered != 0L) Timestamp(sOwnedPlant.previousLastWatered)
             else null,
-        dateOfCreation = Timestamp(sOwnedPlant.dateOfCreation))
+        dateOfCreation = Timestamp(sOwnedPlant.dateOfCreation),
+        healthySince =
+            if (sOwnedPlant.healthySince != 0L) Timestamp(sOwnedPlant.healthySince) else null)
   }
 
   /**

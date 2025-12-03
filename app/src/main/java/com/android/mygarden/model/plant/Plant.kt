@@ -53,13 +53,16 @@ data class Plant(
  * @property previousLastWatered Optional timestamp of the watering before lastWatered
  * @property dateOfCreation Timestamp of when the plant was added to the garden by the user (the
  *   user's current time by default)
+ * @property healthySince Timestamp of the current healthy streak or null if the plant is not
+ *   currently healthy or slightly dry
  */
 data class OwnedPlant(
     val id: String,
     val plant: Plant,
     val lastWatered: Timestamp,
     val previousLastWatered: Timestamp? = null,
-    val dateOfCreation: Timestamp = Timestamp(System.currentTimeMillis())
+    val dateOfCreation: Timestamp = Timestamp(System.currentTimeMillis()),
+    val healthySince: Timestamp? = null
 )
 
 /**

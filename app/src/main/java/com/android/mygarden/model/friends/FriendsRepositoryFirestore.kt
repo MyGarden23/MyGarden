@@ -1,5 +1,8 @@
 package com.android.mygarden.model.friends
 
+import com.android.mygarden.model.achievements.AchievementType
+import com.android.mygarden.model.achievements.AchievementsRepository
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
@@ -16,8 +19,12 @@ import kotlinx.coroutines.tasks.await
  */
 class FriendsRepositoryFirestore(
     private val db: FirebaseFirestore,
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val achievementsRep: AchievementsRepository = AchievementsRepositoryProvider.repository
 ) : FriendsRepository {
+
+  // Variable that stores locally the friends count to avoid repeating calls to the database
+  private var friendsCount: Int? = null
 
   /**
    * Returns a reference to the authenticated user's "friends" subcollection.
@@ -29,8 +36,9 @@ class FriendsRepositoryFirestore(
 
   override suspend fun getFriends(userId: String): List<String> {
     val snapshot = friendsCollection(userId).get().await()
-
-    return snapshot.documents.mapNotNull { doc -> doc.getString("friendUid") }
+    val friends = snapshot.documents.mapNotNull { doc -> doc.getString("friendUid") }
+    friendsCount = friends.size
+    return friends
   }
 
   override suspend fun addFriend(friendUserId: String) {
@@ -46,6 +54,14 @@ class FriendsRepositoryFirestore(
     batch.set(currentDoc, mapOf("friendUid" to friendUserId))
     batch.set(friendDoc, mapOf("friendUid" to currentUserId))
     batch.commit().await()
+
+    currentDoc.set(mapOf("friendUid" to friendUserId)).await()
+
+    // Get the number of friends and update the friends number achievement
+    val newCount = (friendsCount ?: 0) + 1
+    friendsCount = newCount
+    achievementsRep.updateAchievementValue(
+        currentUserId, AchievementType.FRIENDS_NUMBER, friendsCount!!)
   }
 
   override fun friendsFlow(userId: String): Flow<List<String>> = callbackFlow {

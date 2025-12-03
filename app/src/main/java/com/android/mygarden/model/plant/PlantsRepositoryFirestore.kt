@@ -2,6 +2,9 @@ package com.android.mygarden.model.plant
 
 import android.net.Uri
 import android.util.Log
+import com.android.mygarden.model.achievements.AchievementType
+import com.android.mygarden.model.achievements.AchievementsRepository
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.plant.FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant
 import com.android.mygarden.model.plant.FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant
 import com.google.firebase.auth.FirebaseAuth
@@ -43,7 +46,8 @@ private fun differentIdsErrMsg(id1: String, id2: String) =
 class PlantsRepositoryFirestore(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
+    private val storage: FirebaseStorage = FirebaseStorage.getInstance(),
+    private val achievementsRepo: AchievementsRepository = AchievementsRepositoryProvider.repository
 ) : PlantsRepositoryBase() {
   private val healthCalculator = PlantHealthCalculator()
 
@@ -113,7 +117,12 @@ class PlantsRepositoryFirestore(
     val serializedOwnedPlant = fromOwnedPlantToSerializedOwnedPlant(ownedPlant)
 
     userPlantsCollection().document(id).set(serializedOwnedPlant).await()
-    // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
+
+    // Update the achievements
+    achievementsRepo.updateAchievementValue(
+        currentUserId(), AchievementType.PLANTS_NUMBER, plantsFlow.value.size)
+
+    // Trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
     // thirsty
     _plantsUpdate.emit(true)
     return ownedPlant
@@ -124,7 +133,7 @@ class PlantsRepositoryFirestore(
     val serializedList = snapshot.toObjects(SerializedOwnedPlant::class.java)
     val ownedPlantList = serializedList.map(FirestoreMapper::fromSerializedOwnedPlantToOwnedPlant)
 
-    // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
+    // Trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
     // thirsty
     _plantsUpdate.emit(true)
     return ownedPlantList.map { p -> updatePlantHealthStatus(p) }
@@ -140,7 +149,7 @@ class PlantsRepositoryFirestore(
 
     val ownedPlant = fromSerializedOwnedPlantToOwnedPlant(serializedOwnedPlant)
 
-    // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
+    // Trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
     // thirsty
     _plantsUpdate.emit(true)
     return updatePlantHealthStatus(ownedPlant)
@@ -154,6 +163,10 @@ class PlantsRepositoryFirestore(
     userPlantsCollection().document(id).delete().await()
     // Delete the image in Cloud Storage
     deleteImageInCloudStorage(id)
+
+    // Update the achievements
+    achievementsRepo.updateAchievementValue(
+        currentUserId(), AchievementType.PLANTS_NUMBER, plantsFlow.value.size - 1)
   }
 
   override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
@@ -163,7 +176,7 @@ class PlantsRepositoryFirestore(
         .document(id)
         .set(fromOwnedPlantToSerializedOwnedPlant(newOwnedPlant), SetOptions.merge())
         .await()
-    // trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
+    // Trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
     // thirsty
     _plantsUpdate.emit(true)
   }
@@ -248,7 +261,24 @@ class PlantsRepositoryFirestore(
             wateringFrequency = ownedPlant.plant.wateringFrequency,
             previousLastWatered = ownedPlant.previousLastWatered)
     val updatedPlant = ownedPlant.plant.copy(healthStatus = calculatedStatus)
-    return ownedPlant.copy(plant = updatedPlant)
+
+    // Handle the transition to and from HEALTHY/SLIGHTLY_DRY for the healthy streak achievement
+    val isNowHealthy =
+        calculatedStatus == PlantHealthStatus.HEALTHY ||
+            calculatedStatus == PlantHealthStatus.SLIGHTLY_DRY
+    val wasHealthy =
+        ownedPlant.plant.healthStatus == PlantHealthStatus.HEALTHY ||
+            ownedPlant.plant.healthStatus == PlantHealthStatus.SLIGHTLY_DRY
+
+    // Set the healthySince if the plant goes from HEALTHY/SLIGHTLY_DRY to another status
+    val newHealthySince =
+        when {
+          !wasHealthy && isNowHealthy -> Timestamp(System.currentTimeMillis())
+          wasHealthy && !isNowHealthy -> null
+          else -> ownedPlant.healthySince
+        }
+
+    return ownedPlant.copy(plant = updatedPlant, healthySince = newHealthySince)
   }
 
   /**
