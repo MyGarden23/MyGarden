@@ -13,6 +13,7 @@
     <string name="choose_avatar_screen_title">Choose Avatar</string>
     <string name="feed_screen_title">My Feed</string>
     <string name="add_friend_screen">Add Friend</string>
+    <string name="friend_list_screen">All My Friends</string>
 
 
     <!-- Sign In Screen -->
@@ -163,6 +164,7 @@
 
     <!-- Feed Screen -->
     <string name="add_friend_button">Add a friend</string>
+    <string name="friend_list_button">See All Friends</string>
     <string name="no_activity_message">There is no recent activity yet. Add more friends to see their activities!</string>
 
     <!-- Add Friend Screen -->
@@ -181,5 +183,10 @@
     <string name="no_request_text">You don\'t have any friend request yet.</string>
     <string name="accept_button">Accept</string>
     <string name="decline_button">Decline</string>
+
+    <!-- Friend List Screen -->
+    <string name="friend_list_no_friend">You don’t have any friend for the moment. You can see them once you have added them!</string>
+    <string name="friend_list_plant_icon_description">Open friend garden</string>
+    <string name="error_loading_friends">An error occurred while loading your friends.</string>
 
 </resources>
