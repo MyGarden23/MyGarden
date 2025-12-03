@@ -42,7 +42,7 @@ import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.profile.Avatar
 
-/** Test tags spécifiques à l'écran de liste d'amis. */
+/** Test tags used for accessing FriendListScreen UI elements in automated tests. */
 object FriendListScreenTestTags {
   const val SCREEN = "FriendListScreen"
   const val FRIEND_COLUMN = "friendListColumn"
@@ -62,6 +62,18 @@ const val FRACTION_ROW_WIDTH = 0.94f
 const val FRACTION_BOX_WIDTH = 0.6f
 val TEXT_FONT_SIZE = 20.sp
 
+/**
+ * Displays the friend list screen, showing either the list of friends or an empty-state message.
+ *
+ * This composable:
+ * - Retrieves the list of friends through [FriendListViewModel]
+ * - Shows a “no friends” message when the list is empty
+ * - Shows a list of [FriendCard] elements when the list is non-empty
+ * - Includes a top bar with a back button
+ *
+ * @param onBackPressed callback triggered when the user presses the top bar back button
+ * @param friendListViewModel ViewModel providing the friend list data
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendListScreen(
@@ -71,7 +83,7 @@ fun FriendListScreen(
   val context = LocalContext.current
   val uiState by friendListViewModel.uiState.collectAsState()
 
-  // Charge la liste d'amis au premier affichage
+  // Load the friend list when the screen first appears
   LaunchedEffect(Unit) {
     friendListViewModel.getFriends(
         onError = {
@@ -84,7 +96,7 @@ fun FriendListScreen(
   Scaffold(
       topBar = {
         TopBar(
-            title = stringResource(R.string.friend_list_screen), // "All My Friends"
+            title = stringResource(R.string.friend_list_screen),
             hasGoBackButton = true,
             onGoBack = onBackPressed)
       },
@@ -99,17 +111,13 @@ fun FriendListScreen(
               Spacer(modifier = Modifier.fillMaxHeight(FRACTION_SPACER))
 
               if (uiState.friends.isEmpty()) {
-                // État vide : aucun ami
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                   Text(
-                      text =
-                          stringResource(
-                              R.string.friend_list_no_friend), // "You don’t have any friend..."
+                      text = stringResource(R.string.friend_list_no_friend),
                       modifier = Modifier.testTag(FriendListScreenTestTags.NO_FRIEND),
                       style = MaterialTheme.typography.bodyLarge)
                 }
               } else {
-                // Liste d'amis
                 Column(
                     modifier =
                         Modifier.fillMaxWidth()
@@ -123,26 +131,37 @@ fun FriendListScreen(
       })
 }
 
+/**
+ * UI representation of a single friend in the list.
+ *
+ * This card shows:
+ * - the friend's avatar
+ * - their pseudo
+ * - their gardening skill
+ * - their favorite plant
+ * - an icon on the right (currently a decorative or future action icon)
+ *
+ * The layout matches the structure used in AddFriendScreen for visual consistency.
+ *
+ * @param friend user profile to display inside the card
+ */
 @Composable
 private fun FriendCard(friend: UserProfile) {
   val context = LocalContext.current
   val pseudo = friend.pseudo
   val avatar: Avatar = friend.avatar
-  val gardeningSkill = friend.gardeningSkill
-  val favoritePlant = friend.favoritePlant
 
   Card(
       modifier =
           Modifier.fillMaxWidth()
               .height(CARD_HEIGHT)
               .testTag(FriendListScreenTestTags.REQUEST_CARD)) {
-        // Same pattern as in AddFriendScreen: Box centering a Row with FRACTION_ROW_WIDTH
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
           Row(
               modifier = Modifier.fillMaxWidth(FRACTION_ROW_WIDTH),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween) {
-                // Avatar (same style as AddFriend)
+                // Avatar
                 Card(
                     modifier =
                         Modifier.clip(CircleShape)
@@ -155,7 +174,7 @@ private fun FriendCard(friend: UserProfile) {
                           modifier = Modifier.fillMaxSize())
                     }
 
-                // Text block (pseudo + 2 lines) instead of just pseudo
+                // Pseudo + details (gardening skill & favorite plant)
                 Box(
                     modifier = Modifier.fillMaxHeight().fillMaxWidth(FRACTION_BOX_WIDTH),
                     contentAlignment = Alignment.CenterStart) {
@@ -168,19 +187,19 @@ private fun FriendCard(friend: UserProfile) {
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.testTag(FriendListScreenTestTags.FRIEND_PSEUDO))
                         Text(
-                            text = gardeningSkill,
+                            text = friend.gardeningSkill,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis)
                         Text(
-                            text = favoritePlant,
+                            text = friend.favoritePlant,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis)
                       }
                     }
 
-                // Icon on the right instead of the button
+                // Garden icon (placeholder for future navigation or action)
                 Icon(
                     painter = painterResource(R.drawable.potted_plant_icon),
                     contentDescription =
