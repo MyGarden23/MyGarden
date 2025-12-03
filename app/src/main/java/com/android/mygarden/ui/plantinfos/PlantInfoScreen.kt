@@ -356,7 +356,7 @@ private fun SavePlantBottomBar(
             onClick = onSavePlant,
             modifier = Modifier.fillMaxWidth().height(BOTTOM_BAR_HEIGHT).testTag(testTagButton),
             shape = RoundedCornerShape(BOTTOM_BAR_SHAPE_SIZE),
-            enabled = !uiState.isSaving && isOnline,
+            enabled = !uiState.isSaving,
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
