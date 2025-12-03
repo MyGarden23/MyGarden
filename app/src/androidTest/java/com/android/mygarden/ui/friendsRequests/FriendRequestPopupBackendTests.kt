@@ -35,15 +35,13 @@ class FriendRequestPopupBackendTests {
   private lateinit var fakeUserRepo: FakeUserProfileRepository
 
   @Before
-  fun setupRepo() {
+  fun setup() {
     fakeFriendsRepo = FakeFriendRequestsRepository()
     fakeUserRepo = FakeUserProfileRepository()
 
     FriendRequestsRepositoryProvider.repository = fakeFriendsRepo
     UserProfileRepositoryProvider.repository = fakeUserRepo
-  }
 
-  fun setContent() {
     rule.setContent { MyGardenTheme { MyGardenApp() } }
     rule.waitForIdle()
   }
@@ -85,20 +83,17 @@ class FriendRequestPopupBackendTests {
 
   @Test
   fun noPopupWhenNoIncomingRequest() {
-    setContent()
     rule.wholePopupIsNotDisplayed()
   }
 
   @Test
   fun popupAppearsWhenNewFriendRequestArrives() {
-    setContent()
     emitFriendRequest("alice-id", "Alice")
     rule.wholePopupIsDisplayed()
   }
 
   @Test
   fun canDismissPopupByClickingOnDismissButton() {
-    setContent()
     emitFriendRequest("bob-id", "Bob")
     rule.wholePopupIsDisplayed()
 
@@ -109,7 +104,6 @@ class FriendRequestPopupBackendTests {
 
   @Test
   fun popupLeavesScreenWhenClickingOnConfirmButton() {
-    setContent()
     emitFriendRequest("bob1-id", "bob1")
     rule.wholePopupIsDisplayed()
 
@@ -120,7 +114,6 @@ class FriendRequestPopupBackendTests {
 
   @Test
   fun popupNavToGardenWhenClickingOnConfirmButton() {
-    setContent()
     emitFriendRequest("alice1-id", "alice1")
     rule.wholePopupIsDisplayed()
 
@@ -129,6 +122,6 @@ class FriendRequestPopupBackendTests {
 
     rule
         .onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG)
-        .assertIsDisplayed() // TODO(Modify at the same time that the Main)
+        .assertIsDisplayed() // Modify at the same time that the Main
   }
 }

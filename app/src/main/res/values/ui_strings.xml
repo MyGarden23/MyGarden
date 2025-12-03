@@ -95,7 +95,7 @@
 
     <!-- Friend's Request Pop Up Screen -->
     <string name="friend_popup_confirm_button_text">"Go to Request"</string>
-    <string name="friend_pop_up_title">New Friend\'s Request from %1$s</string>
+    <string name="friend_pop_up_title">New Friend Request from %1$s</string>
 
 
     <!-- Delete Plant Pop Up -->

@@ -10,6 +10,8 @@ import androidx.annotation.Keep
  * @property toUserId The user who received the request
  * @property status Current status of the request (PENDING, ACCEPTED, REFUSED)
  * @property createdAt Timestamp in milliseconds when the request was created
+ * @property seenByReceiver Boolean to check if the receiver has seen the request (used for friend
+ *   request popups)
  */
 @Keep
 data class FriendRequest(

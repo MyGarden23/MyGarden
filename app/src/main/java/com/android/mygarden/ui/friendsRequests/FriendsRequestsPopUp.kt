@@ -8,18 +8,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.android.mygarden.R
+import com.android.mygarden.ui.popup.PopUpDimensions
 import com.android.mygarden.ui.popup.PopupButton
 import com.android.mygarden.ui.popup.PopupScreenTestTags
 import com.android.mygarden.ui.popup.PopupTitle
 import com.android.mygarden.ui.popup.QuitPopup
-
-private val CARD_HEIGHT = 230.dp
-private val CARD_PADDING = 16.dp
-private val CARD_ROUND_ANGLE = 16.dp
-private val DISMISS_BUTTON_PADDING = 6.dp
 
 /**
  * Popup displayed when the user receives a friend request.
@@ -39,9 +34,9 @@ fun FriendsRequestsPopup(
         modifier =
             Modifier.testTag(PopupScreenTestTags.CARD)
                 .fillMaxWidth()
-                .height(CARD_HEIGHT)
-                .padding(CARD_PADDING),
-        shape = RoundedCornerShape(CARD_ROUND_ANGLE),
+                .height(PopUpDimensions.CARD_HEIGHT)
+                .padding(PopUpDimensions.CARD_PADDING),
+        shape = RoundedCornerShape(PopUpDimensions.CARD_ROUND_ANGLE),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -51,9 +46,11 @@ fun FriendsRequestsPopup(
               horizontalAlignment = Alignment.CenterHorizontally) {
 
                 // Button to close the popUp
-                Row(modifier = Modifier.fillMaxWidth().padding(DISMISS_BUTTON_PADDING)) {
-                  QuitPopup(onClick = onDismiss)
-                }
+                Row(
+                    modifier =
+                        Modifier.fillMaxWidth().padding(PopUpDimensions.DISMISS_BUTTON_PADDING)) {
+                      QuitPopup(onClick = onDismiss)
+                    }
 
                 // Title of the popUp
                 PopupTitle(text = stringResource(R.string.friend_pop_up_title, senderPseudo))

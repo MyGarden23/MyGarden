@@ -23,6 +23,22 @@ class FriendsRequestsPopupViewModelTest {
   private lateinit var fakeUserRepo: FakeUserProfileRepository
   private lateinit var vm: FriendsRequestsPopupViewModel
 
+  /** Request used in the tests. (From Alice) */
+  private val classicalFriendRequestAlice =
+      FriendRequest(
+          id = "req-A",
+          fromUserId = "sender-A",
+          toUserId = "rx",
+          status = FriendRequestStatus.PENDING)
+
+  /** Request used in the tests. (From Bob) */
+  private val classicalFriendRequestBob =
+      FriendRequest(
+          id = "req-B",
+          fromUserId = "sender-B",
+          toUserId = "rx",
+          status = FriendRequestStatus.PENDING)
+
   @Before
   fun setup() {
     fakeFriendsRepo = FakeFriendRequestsRepository()
@@ -30,28 +46,22 @@ class FriendsRequestsPopupViewModelTest {
 
     vm =
         FriendsRequestsPopupViewModel(friendsRepo = fakeFriendsRepo, userProfileRepo = fakeUserRepo)
+
+    fakeUserRepo.profiles["sender"] =
+        UserProfile(id = "sender", pseudo = "alice", avatar = Avatar.A10)
+
+    fakeUserRepo.profiles["bob"] = UserProfile("bob", "Bob", Avatar.A11)
   }
 
   @Test
   fun emits_FriendRequestUiModel_when_new_incoming_request_arrives() = runTest {
     // Setup sender profile
-    fakeUserRepo.profiles["sender-1"] =
-        UserProfile(id = "sender-1", pseudo = "alice", avatar = Avatar.A10)
-
-    // Create the request to send
-    val req =
-        FriendRequest(
-            id = "req-1",
-            fromUserId = "sender-1",
-            toUserId = "rx",
-            status = FriendRequestStatus.PENDING)
-
     vm.newRequests.test {
       // Emit request
-      fakeFriendsRepo.incomingRequestsFlow.value = listOf(req)
+      fakeFriendsRepo.incomingRequestsFlow.value = listOf(classicalFriendRequestAlice)
 
       val emitted = awaitItem()
-      assertEquals("req-1", emitted.request.id)
+      assertEquals("req-A", emitted.request.id)
       assertEquals("alice", emitted.senderPseudo)
     }
   }
@@ -73,46 +83,35 @@ class FriendsRequestsPopupViewModelTest {
 
   @Test
   fun marks_request_as_seen_when_emitted() = runTest {
-    fakeUserRepo.profiles["bob"] = UserProfile("bob", "Bob", Avatar.A11)
-
-    val req = FriendRequest(id = "req-3", fromUserId = "bob", toUserId = "rx")
-
     vm.newRequests.test {
-      fakeFriendsRepo.incomingRequestsFlow.value = listOf(req)
+      fakeFriendsRepo.incomingRequestsFlow.value = listOf(classicalFriendRequestAlice)
 
       awaitItem()
-      assertTrue("req-3" in fakeFriendsRepo.markedSeen)
+      assertTrue("req-A" in fakeFriendsRepo.markedSeen)
     }
   }
 
   @Test
   fun emits_multiple_incoming_requests_in_order() = runTest {
-    fakeUserRepo.profiles["u1"] = UserProfile("u1", "alice", Avatar.A11)
-    fakeUserRepo.profiles["u2"] = UserProfile("u2", "alice", Avatar.A11)
-
-    val req1 = FriendRequest(id = "A", fromUserId = "u1", toUserId = "rx")
-    val req2 = FriendRequest(id = "B", fromUserId = "u2", toUserId = "rx")
-
     vm.newRequests.test {
-      fakeFriendsRepo.incomingRequestsFlow.value = listOf(req1, req2)
+      fakeFriendsRepo.incomingRequestsFlow.value =
+          listOf(classicalFriendRequestAlice, classicalFriendRequestBob)
 
       val first = awaitItem()
-      assertEquals("A", first.request.id)
+      assertEquals("req-A", first.request.id)
       assertEquals("alice", first.senderPseudo)
 
       val second = awaitItem()
-      assertEquals("B", second.request.id)
+      assertEquals("req-B", second.request.id)
       assertEquals("alice", second.senderPseudo)
     }
   }
 
   @Test
   fun does_not_replay_old_items() = runTest {
-    fakeUserRepo.profiles["sender"] = UserProfile("sender", "Pseudo", Avatar.A11)
 
     // Emit before collecting
-    fakeFriendsRepo.incomingRequestsFlow.value =
-        listOf(FriendRequest(id = "old", fromUserId = "sender", toUserId = "rx"))
+    fakeFriendsRepo.incomingRequestsFlow.value = listOf(classicalFriendRequestAlice)
 
     vm.newRequests.test {
       expectNoEvents() // nothing is replayed
@@ -121,13 +120,8 @@ class FriendsRequestsPopupViewModelTest {
 
   @Test
   fun does_not_emit_when_request_is_already_seen() = runTest {
-    fakeUserRepo.profiles["sender"] = UserProfile("sender", "Alice", Avatar.A11)
-
-    val alreadySeen =
-        FriendRequest(id = "seen-1", fromUserId = "sender", toUserId = "rx", seenByReceiver = true)
-
     vm.newRequests.test {
-      fakeFriendsRepo.incomingRequestsFlow.value = listOf(alreadySeen)
+      fakeFriendsRepo.incomingRequestsFlow.value = listOf(classicalFriendRequestAlice)
 
       expectNoEvents()
 

@@ -296,8 +296,7 @@ private fun NewFriendRequestPopup(
         senderPseudo = it.senderPseudo,
         onDismiss = { currentFriendRequest = null },
         onConfirm = {
-          actions.navTo(
-              Screen.Garden) // TODO(Change this to FriendRequestScreen) when the navHost for
+          actions.navTo(Screen.Garden) // Change this to FriendRequestScreen when the navHost for
           // FriendRequestScreen is done
           currentFriendRequest = null
         })
