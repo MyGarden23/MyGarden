@@ -435,14 +435,14 @@ private fun CountryDropdownMenu(
 private fun SaveButton(
     profileViewModel: ProfileViewModel,
     onRegisterPressed: () -> Unit,
-    enabled: Boolean = true
+    isOnline: Boolean = true
 ) {
   val context = LocalContext.current
 
   Button(
       onClick = {
         handleOfflineClick(
-            isOnline = enabled,
+            isOnline = isOnline,
             context = context,
             offlineMessageResId = OfflineMessages.CANNOT_SAVE_PROFILE) {
               profileViewModel.setRegisterPressed(true)
@@ -462,12 +462,20 @@ private fun SaveButton(
               .height(BUTTON_HEIGHT)
               .padding(horizontal = HORIZONTAL_PADDING, vertical = VERTICAL_PADDING)
               .testTag(ProfileScreenTestTags.SAVE_BUTTON),
-      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-      shape = RoundedCornerShape(BUTTON_CORNER_RADIUS),
-      enabled = enabled) {
+      colors =
+          if (isOnline) {
+            ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+          } else {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+          },
+      shape = RoundedCornerShape(BUTTON_CORNER_RADIUS)) {
         Text(
             text = stringResource(R.string.save_profile_button_text),
-            color = MaterialTheme.colorScheme.onPrimary,
+            color =
+                if (isOnline) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = BUTTON_FONT_SIZE,
             fontWeight = FontWeight.Medium)
       }
@@ -525,7 +533,7 @@ fun ProfileScreenBase(
           SaveButton(
               profileViewModel = profileViewModel,
               onRegisterPressed = onSavePressed,
-              enabled = isOnline)
+              isOnline = isOnline)
         }
       }) { paddingValues ->
         Column(
