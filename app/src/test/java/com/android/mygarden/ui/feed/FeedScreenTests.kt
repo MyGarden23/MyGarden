@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.android.mygarden.model.friends.FriendRequestsRepository
+import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
@@ -19,6 +21,7 @@ import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.Flow
@@ -96,6 +99,7 @@ class FeedScreenTests {
 
   private lateinit var activityRepo: ActivityRepository
   private lateinit var friendsRepo: FriendsRepository
+  private lateinit var friendsRequestsRepo: FriendRequestsRepository
 
   /** additional function that checks that all activities from the given list are displayed */
   fun ComposeTestRule.allActivitiesAreDisplayed(activities: List<GardenActivity>) {
@@ -112,8 +116,10 @@ class FeedScreenTests {
   fun setup() {
     ActivityRepositoryProvider.repository = FakeActivityRepository()
     FriendsRepositoryProvider.repository = FakeFriendsRepository()
+    FriendRequestsRepositoryProvider.repository = FakeFriendRequestsRepository()
     activityRepo = ActivityRepositoryProvider.repository
     friendsRepo = FriendsRepositoryProvider.repository
+    friendsRequestsRepo = FriendRequestsRepositoryProvider.repository
     composeRule.setContent { MyGardenTheme { FeedScreen() } }
   }
 

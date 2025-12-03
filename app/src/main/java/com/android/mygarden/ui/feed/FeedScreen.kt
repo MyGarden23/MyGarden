@@ -62,6 +62,7 @@ private val NO_ACTIVITY_MSG_PADDING = 40.dp
 private val BORDER_CARD_WIDTH = 3.dp
 private val ICON_PADDING = 5.dp
 private val ICON_SIZE = 69.dp
+private val NOTIF_ICON_SIZE = 50.dp
 
 /*---------------- TEST TAGS FOR ALL COMPONENTS OF THE SCREEN --------------*/
 object FeedScreenTestTags {
@@ -113,7 +114,7 @@ fun FeedScreen(
               modifier =
                   modifier.fillMaxWidth().padding(horizontal = BUTTON_ROW_HORIZONTAL_PADDING),
               horizontalArrangement = Arrangement.SpaceBetween) {
-                NotificationButton(modifier, onClick = onNotifClick)
+                NotificationButton(modifier, onClick = onNotifClick, uiState)
                 FriendListButton(modifier, onFriendList)
               }
           // space between buttons and activities
@@ -156,19 +157,34 @@ fun FeedScreen(
       })
 }
 /**
- * The notification button to go to the FriendsRequestsScreen
+ * The notification button to go to the FriendsRequestsScreen.
+ *
+ * The icon has a red button or not
  *
  * @param modifier the used modifier for the composable
  * @param onClick the callback to be triggered when the user clicks on the button
+ * @param uiState the uiState used to know which icon to display
  */
 @Composable
-fun NotificationButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
-  IconButton(onClick = onClick, modifier.testTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON)) {
-    Image(
-        painter = painterResource(R.drawable.notif),
-        contentDescription = "",
-    )
-  }
+fun NotificationButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    uiState: FeedUIState
+) {
+  val icon =
+      if (uiState.hasRequests) {
+        R.drawable.notif_with_request
+      } else {
+        R.drawable.notif
+      }
+  IconButton(
+      onClick = onClick,
+      modifier.size(NOTIF_ICON_SIZE).testTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON)) {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = "",
+        )
+      }
 }
 
 /**
