@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.addFriend
 
+import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeFriendRequestsRepository
@@ -50,7 +51,7 @@ class AddFriendViewModelTest {
           uidMap["alice"] = "uid-alice"
         }
     fakeUserProfile.profiles["uid-alice"] =
-        UserProfile(id = "uid-alice", pseudo = "alice", avatar = Avatar.A1)
+        UserProfile(id = "uid-alice", pseudo = "alice", avatar = Avatar.A1, GardeningSkill.NOVICE.name, "rose")
 
     val vm =
         AddFriendViewModel(
@@ -111,7 +112,7 @@ class AddFriendViewModelTest {
 
     // Set up the corresponding user profile for the resolved UID.
     fakeUserProfile.profiles["uid-alice"] =
-        UserProfile(id = "uid-alice", pseudo = "alice", avatar = Avatar.A1)
+        UserProfile(id = "uid-alice", pseudo = "alice", avatar = Avatar.A1, GardeningSkill.NOVICE.name, "rose")
 
     val vm =
         AddFriendViewModel(
