@@ -20,6 +20,7 @@ fun routeToScreen(route: String): Screen? =
       Screen.Garden.route -> Screen.Garden
       Screen.Feed.route -> Screen.Feed
       Screen.ChooseAvatar.route -> Screen.ChooseAvatar
+      Screen.FriendList.route -> Screen.FriendList
       else -> {
         if (route.startsWith(Screen.EditPlant.BASE)) {
           val ownedPlantId = route.removePrefix("${Screen.EditPlant.BASE}/")

@@ -22,6 +22,7 @@ import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.editPlant.EditPlantScreen
 import com.android.mygarden.ui.editPlant.EditPlantViewModel
 import com.android.mygarden.ui.feed.FeedScreen
+import com.android.mygarden.ui.friendList.FriendListScreen
 import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
@@ -163,12 +164,19 @@ fun AppNavHost(
 
     // Feed
     composable(Screen.Feed.route) {
-      FeedScreen(onAddFriend = { navigationActions.navTo(Screen.AddFriend) })
+      FeedScreen(
+          onAddFriend = { navigationActions.navTo(Screen.AddFriend) },
+          onFriendList = { navigationActions.navTo(Screen.FriendList) })
     }
 
     // Add Friends
     composable(Screen.AddFriend.route) {
       AddFriendScreen(onBackPressed = { navigationActions.navBack() })
+    }
+
+    // Friend List
+    composable(Screen.FriendList.route) {
+      FriendListScreen(onBackPressed = { navigationActions.navBack() })
     }
 
     // Plant Info From Garden
