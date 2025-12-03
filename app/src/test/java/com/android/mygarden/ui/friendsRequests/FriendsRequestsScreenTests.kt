@@ -9,9 +9,12 @@ import androidx.compose.ui.test.performClick
 import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
+import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
@@ -45,10 +48,27 @@ class FriendsRequestsScreenTests {
 
   // to be called each time to correctly setup the initial requests (if any)
   fun setup(initialRequests: List<FriendRequest> = emptyList()) {
+    // Fake friend-requests repo with initial data
     FriendRequestsRepositoryProvider.repository = FakeFriendRequestsRepository(initialRequests)
-    UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
     requestRepo = FriendRequestsRepositoryProvider.repository
+
+    // Fake user-profile repo with one profile per request (pseudo = "alice")
+    val fakeUserRepo =
+        FakeUserProfileRepository().apply {
+          initialRequests.forEach { request ->
+            profiles[request.fromUserId] =
+                UserProfile(
+                    id = request.fromUserId,
+                    pseudo = "alice",
+                    avatar = Avatar.A3,
+                    gardeningSkill = GardeningSkill.NOVICE.name,
+                    favoritePlant = "Rose",
+                )
+          }
+        }
+    UserProfileRepositoryProvider.repository = fakeUserRepo
     userRepo = UserProfileRepositoryProvider.repository
+
     rule.setContent { MyGardenTheme { FriendsRequestsScreen() } }
   }
 
