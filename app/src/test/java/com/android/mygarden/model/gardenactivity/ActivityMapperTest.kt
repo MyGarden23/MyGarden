@@ -1,5 +1,6 @@
 package com.android.mygarden.model.gardenactivity
 
+import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
@@ -88,7 +89,7 @@ class ActivityMapperTest {
             userId = "user456",
             pseudo = "AchievementUser",
             createdAt = timestamp,
-            achievementName = "Gained Badge")
+            achievementType = AchievementType.PLANTS_NUMBER)
 
     // Serialize
     val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)
@@ -132,7 +133,7 @@ class ActivityMapperTest {
             userId = "user2",
             pseudo = "User2",
             createdAt = timestamp,
-            achievementName = "Gained Badge")
+            achievementType = AchievementType.PLANTS_NUMBER)
 
     assertEquals(ActivityType.ADDED_PLANT, activityAddedPlant.type)
     assertEquals(ActivityType.ACHIEVEMENT, activityAchievement.type)
