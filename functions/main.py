@@ -7,9 +7,10 @@ This module:
 """
 
 from enum import Enum
-from firebase_functions import firestore_fn, scheduler_fn, options  # noqa: F401 (options imported for parity with original)
+from firebase_functions import scheduler_fn
 from firebase_admin import initialize_app, firestore, messaging
-from datetime import datetime, timezone, timedelta  # noqa: F401 (timedelta imported for parity with original)
+from datetime import datetime, timezone, timedelta
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
 import functools, random, logging, time
 
 
@@ -192,6 +193,9 @@ def _update_all_plants_status():
     users_ref = db_client.collection("users")
     users = users_ref.stream()
 
+    now = datetime.now(timezone.utc)
+    now_millisec = int(now.timestamp() * 1000)
+
     # Update plant status for each plant for each user
     for user_snap in users:
         uid = user_snap.id
@@ -227,11 +231,46 @@ def _update_all_plants_status():
 
                 new_status = compute_status(last_watered, watering_frequency_days, prev_last_watered)
 
+                # Achievements logic: handle the healthy streak
+                healthy_streak_ref = users_ref.document(uid).collection("achievements").document("HEALTHY_STREAK")
+                healthy_streak_doc = healthy_streak_ref.get()
+
+                # Skip the achievements updates if it can't be fetched
+                if healthy_streak_doc.exists:
+                    # Update the streak value
+                    data = healthy_streak_doc.to_dict()
+                    max_streak = data.get("value")
+
+                    healthy_since = doc.get("healthySince")
+                    if (healthy_since != 0):
+                        # Check wether the current streak is higher than the previous one
+                        current_streak = int(_days(_dt(healthy_since), now))
+
+                        if (current_streak > max_streak):
+                            healthy_streak_ref.update({
+                                "value": current_streak
+                            })
+
                 # If the new health status is different then updates it
                 if old_status_enum != new_status:
                     plants_ref.document(plant_snap.id).update({
                         "plant.healthStatus": new_status.value
                     })
+
+                    # Achievements logic: update the healthySince field of the plant
+                    was_healthy = old_status_enum in (PlantHealthStatus.HEALTHY, PlantHealthStatus.SLIGHTLY_DRY)
+                    is_now_healthy = new_status in (PlantHealthStatus.HEALTHY, PlantHealthStatus.SLIGHTLY_DRY)
+
+                    if (not was_healthy and is_now_healthy):
+                        plants_ref.document(plant_snap.id).update({
+                            "healthySince": now_millisec
+                        })
+                    
+                    elif(not is_now_healthy and was_healthy):
+                        plants_ref.document(plant_snap.id).update({
+                            "healthySince": 0
+                        })
+
 
                     # If the plant needs water or goes critically dry, send notification
                     if new_status == PlantHealthStatus.NEEDS_WATER or new_status == PlantHealthStatus.SEVERELY_DRY:
@@ -272,7 +311,7 @@ def _days(a: datetime, b: datetime) -> float:
         b (datetime): End datetime
 
     Returns:
-        float: The difference in seconds
+        float: The difference in days
     """
     seconds_in_day = float(60 * 60 * 24)
     return (b - a).total_seconds() / seconds_in_day
@@ -327,3 +366,4 @@ def compute_status(
     if pct <= NEEDS_WATER_MAX:
         return PlantHealthStatus.NEEDS_WATER
     return PlantHealthStatus.SEVERELY_DRY
+
