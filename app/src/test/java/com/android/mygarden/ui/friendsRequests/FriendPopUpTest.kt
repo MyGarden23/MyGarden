@@ -35,7 +35,7 @@ class FriendsRequestsPopupTests {
     testRule.onNodeWithTag(PopupScreenTestTags.TITLE).assertIsDisplayed()
     testRule
         .onNodeWithTag(PopupScreenTestTags.TITLE)
-        .assertTextEquals("New Friend's Request from Pseudo")
+        .assertTextEquals("New Friend Request from Pseudo")
     testRule.onNodeWithTag(PopupScreenTestTags.CONFIRM_BUTTON).assertIsDisplayed()
     testRule.onNodeWithTag(PopupScreenTestTags.DISMISS_BUTTON).assertIsDisplayed()
   }
