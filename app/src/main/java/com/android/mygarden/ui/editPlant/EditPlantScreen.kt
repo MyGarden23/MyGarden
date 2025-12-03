@@ -147,8 +147,7 @@ fun EditPlantScreen(
   // Enable the Save button if the plant has been recognized by the API and the
   // lastWatered field is set and description is not blank or if the fields are all
   // filled if the plant is not recognized.
-  val isSaveEnabled =
-      remember(plantUIState, isOnline) { computeIsSaveEnabled(plantUIState, isOnline) }
+  val isSaveEnabled = remember(plantUIState) { computeIsSaveEnabled(plantUIState) }
 
   Scaffold(
       modifier = Modifier.testTag(NavigationTestTags.EDIT_PLANT_SCREEN),
@@ -389,13 +388,10 @@ private fun computeEditPlantErrorFlags(
  * - If not recognized: name, Latin name, description, and last watered date must all be provided.
  *
  * @param uiState The current UI state of the Edit Plant screen.
- * @param isOnline Whether the device is online.
  * @return True if all required fields are valid, false otherwise.
  */
-private fun computeIsSaveEnabled(uiState: EditPlantUIState, isOnline: Boolean): Boolean {
-  return if (!isOnline) {
-    false
-  } else if (uiState.isRecognized) {
+private fun computeIsSaveEnabled(uiState: EditPlantUIState): Boolean {
+  return if (uiState.isRecognized) {
     uiState.description.isNotBlank() && uiState.lastWatered != null
   } else {
     uiState.description.isNotBlank() &&
