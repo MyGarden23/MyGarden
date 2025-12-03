@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
@@ -305,7 +306,8 @@ fun GenericCard(
                     .padding(horizontal = IN_CARD_TEXT_HORIZONTAL_PADDING)
                     .testTag(FeedScreenTestTags.GENERIC_CARD_DESCRIPTION),
             color = MaterialTheme.colorScheme.onPrimaryContainer,
-            text = cardText)
+            text = cardText,
+            fontWeight = FontWeight.Bold)
       }
 }
 

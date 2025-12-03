@@ -43,7 +43,7 @@ class FeedViewModel(
     private val friendsRepo: FriendsRepository = FriendsRepositoryProvider.repository,
     private val friendsRequestsRepo: FriendRequestsRepository =
         FriendRequestsRepositoryProvider.repository
-) : ViewModel() { // TODO : testTag figma.
+) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FeedUIState())
   val uiState: StateFlow<FeedUIState> = _uiState.asStateFlow()
