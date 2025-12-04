@@ -147,7 +147,7 @@ fun PlantInfosScreen(
   val uiState by plantInfoViewModel.uiState.collectAsState()
 
   // Observe online state
-  val isOnline by OfflineStateManager.isOnline.collectAsState(initial = true)
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
 
   // Remember scroll states for each tab separately
   // This ensures scroll position is maintained when switching between tabs
