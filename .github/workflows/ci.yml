@@ -18,6 +18,13 @@ jobs:
     # Execute the CI on the course's runners
     runs-on: ubuntu-latest
 
+    # Increase heap for Gradle and spawned JVMs (unit tests)
+    env:
+      # Heap for Gradle JVM itself (daemon). Adjust if necessary but keep within runner RAM.
+      GRADLE_OPTS: -Xmx3g
+      # Ensures child JVMs (tests, tools) also see the higher heap limit
+      JAVA_TOOL_OPTIONS: -Xmx3g
+
     steps:
       # First step : Checkout the repository on the runner
       - name: Checkout
@@ -115,7 +122,7 @@ jobs:
         id: firebase_project
         run: |
           echo "project_id=$(jq -r '.project_info.project_id' app/google-services.json)" >> $GITHUB_OUTPUT
-          
+
       - name: Create firebase.json
         run: |
           cat > firebase.json <<'JSON'
