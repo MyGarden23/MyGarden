@@ -23,6 +23,7 @@ import com.android.mygarden.ui.editPlant.EditPlantScreen
 import com.android.mygarden.ui.editPlant.EditPlantViewModel
 import com.android.mygarden.ui.feed.FeedScreen
 import com.android.mygarden.ui.friendList.FriendListScreen
+import com.android.mygarden.ui.friendsRequests.FriendsRequestsScreen
 import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
@@ -166,7 +167,13 @@ fun AppNavHost(
     composable(Screen.Feed.route) {
       FeedScreen(
           onAddFriend = { navigationActions.navTo(Screen.AddFriend) },
-          onFriendList = { navigationActions.navTo(Screen.FriendList) })
+          onFriendList = { navigationActions.navTo(Screen.FriendList) },
+          onNotifClick = { navigationActions.navTo(Screen.FriendsRequests) })
+    }
+
+    // Friends Requests
+    composable(Screen.FriendsRequests.route) {
+      FriendsRequestsScreen(onGoBack = { navigationActions.navBack() })
     }
 
     // Add Friends

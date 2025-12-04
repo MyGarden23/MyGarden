@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
 import com.android.mygarden.model.users.UserProfile
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.theme.ExtendedTheme
 
@@ -92,7 +93,7 @@ fun FriendsRequestsScreen(
   val requestsUsers = uiState.pendingRequestsUsers
 
   Scaffold(
-      modifier = modifier,
+      modifier = modifier.testTag(NavigationTestTags.FRIENDS_REQUESTS_SCREEN),
       topBar = {
         TopBar(
             title = stringResource(R.string.request_screen_title),

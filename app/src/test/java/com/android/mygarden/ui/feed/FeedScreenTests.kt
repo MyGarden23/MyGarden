@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.android.mygarden.model.friends.FriendRequestsRepository
+import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
@@ -19,6 +21,7 @@ import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.Flow
@@ -58,7 +61,8 @@ class FeedScreenTests {
       ActivityAddedPlant("uid", "gregory", Timestamp(System.currentTimeMillis()), ownedPlant1)
 
   val addedFriendActivity =
-      ActivityAddFriend("uid1", "gregory", Timestamp(System.currentTimeMillis()), "uid2")
+      ActivityAddFriend(
+          "uid1", "gregory", Timestamp(System.currentTimeMillis()), "uid2", "friendPseudo")
 
   val wateredPlantActivity =
       ActivityWaterPlant("uid1", "gregory", Timestamp(System.currentTimeMillis()), ownedPlant1)
@@ -95,6 +99,7 @@ class FeedScreenTests {
 
   private lateinit var activityRepo: ActivityRepository
   private lateinit var friendsRepo: FriendsRepository
+  private lateinit var friendsRequestsRepo: FriendRequestsRepository
 
   /** additional function that checks that all activities from the given list are displayed */
   fun ComposeTestRule.allActivitiesAreDisplayed(activities: List<GardenActivity>) {
@@ -111,8 +116,10 @@ class FeedScreenTests {
   fun setup() {
     ActivityRepositoryProvider.repository = FakeActivityRepository()
     FriendsRepositoryProvider.repository = FakeFriendsRepository()
+    FriendRequestsRepositoryProvider.repository = FakeFriendRequestsRepository()
     activityRepo = ActivityRepositoryProvider.repository
     friendsRepo = FriendsRepositoryProvider.repository
+    friendsRequestsRepo = FriendRequestsRepositoryProvider.repository
     composeRule.setContent { MyGardenTheme { FeedScreen() } }
   }
 
@@ -124,6 +131,7 @@ class FeedScreenTests {
   fun noActivitiesCorrectDisplay() {
     composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeRule.onNodeWithTag(FeedScreenTestTags.ADD_FRIEND_BUTTON).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON).assertIsDisplayed()
     composeRule.onNodeWithTag(FeedScreenTestTags.NO_ACTIVITY_MESSAGE).assertIsDisplayed()
   }
 
@@ -132,9 +140,11 @@ class FeedScreenTests {
   fun addedPlantActivityCorrectDisplay() = runTest {
     composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeRule.onNodeWithTag(FeedScreenTestTags.ADD_FRIEND_BUTTON).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON).assertIsDisplayed()
     activityRepo.addActivity(addedPlantActivity)
     composeRule.allActivitiesAreDisplayed(listOf(addedPlantActivity))
-    composeRule.onNodeWithTag(FeedScreenTestTags.ADDED_PLANT_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.GENERIC_CARD_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.GENERIC_CARD_ICON).assertIsDisplayed()
   }
 
   /** Tests the correct display when an added friend activity is added to the activity repo */
@@ -142,9 +152,11 @@ class FeedScreenTests {
   fun addedFriendActivityCorrectDisplay() = runTest {
     composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeRule.onNodeWithTag(FeedScreenTestTags.ADD_FRIEND_BUTTON).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON).assertIsDisplayed()
     activityRepo.addActivity(addedFriendActivity)
     composeRule.allActivitiesAreDisplayed(listOf(addedFriendActivity))
-    composeRule.onNodeWithTag(FeedScreenTestTags.ADDED_FRIEND_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.GENERIC_CARD_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.GENERIC_CARD_ICON).assertIsDisplayed()
   }
 
   /** Tests the correct display when a watered plant activity is added to the activity repo */
@@ -152,9 +164,11 @@ class FeedScreenTests {
   fun wateredPlantActivityCorrectDisplay() = runTest {
     composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeRule.onNodeWithTag(FeedScreenTestTags.ADD_FRIEND_BUTTON).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON).assertIsDisplayed()
     activityRepo.addActivity(wateredPlantActivity)
     composeRule.allActivitiesAreDisplayed(listOf(wateredPlantActivity))
-    composeRule.onNodeWithTag(FeedScreenTestTags.WATERED_PLANT_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.GENERIC_CARD_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.GENERIC_CARD_ICON).assertIsDisplayed()
   }
 
   /** Tests the correct display when a got achievement activity is added to the activity repo */
@@ -162,8 +176,10 @@ class FeedScreenTests {
   fun gotAchievementActivityCorrectDisplay() = runTest {
     composeRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeRule.onNodeWithTag(FeedScreenTestTags.ADD_FRIEND_BUTTON).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON).assertIsDisplayed()
     activityRepo.addActivity(gotAchievementActivity)
     composeRule.allActivitiesAreDisplayed(listOf(gotAchievementActivity))
-    composeRule.onNodeWithTag(FeedScreenTestTags.GOT_ACHIEVEMENT_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.GENERIC_CARD_DESCRIPTION).assertIsDisplayed()
+    composeRule.onNodeWithTag(FeedScreenTestTags.GENERIC_CARD_ICON).assertIsDisplayed()
   }
 }

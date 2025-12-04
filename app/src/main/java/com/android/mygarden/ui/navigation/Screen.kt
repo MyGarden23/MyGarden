@@ -79,5 +79,8 @@ sealed class Screen(val route: String, val nameResId: Int, val isTopLevel: Boole
 
   object AddFriend : Screen(route = "add_friends", nameResId = R.string.add_friend_screen)
 
+  object FriendsRequests :
+      Screen(route = "friends_requests", nameResId = R.string.friends_requests_screen_title)
+
   object FriendList : Screen(route = "friend_list", nameResId = R.string.friend_list_screen)
 }

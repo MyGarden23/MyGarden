@@ -14,7 +14,7 @@ import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
-import com.android.mygarden.ui.garden.GardenScreenTestTags
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.popup.PopupScreenTestTags
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
@@ -119,15 +119,13 @@ class FriendRequestPopupBackendTests {
   }
 
   @Test
-  fun popupNavToGardenWhenClickingOnConfirmButton() {
+  fun popupNavToFriendsRequestsWhenClickingOnConfirmButton() {
     emitFriendRequest("alice1-id", "alice1")
     rule.wholePopupIsDisplayed()
 
     rule.onNodeWithTag(PopupScreenTestTags.CONFIRM_BUTTON).performClick()
     rule.wholePopupIsNotDisplayed()
 
-    rule
-        .onNodeWithTag(GardenScreenTestTags.EMPTY_GARDEN_MSG)
-        .assertIsDisplayed() // Modify at the same time that the Main
+    rule.onNodeWithTag(NavigationTestTags.FRIENDS_REQUESTS_SCREEN).assertIsDisplayed()
   }
 }

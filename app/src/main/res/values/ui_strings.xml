@@ -13,6 +13,7 @@
     <string name="choose_avatar_screen_title">Choose Avatar</string>
     <string name="feed_screen_title">My Feed</string>
     <string name="add_friend_screen">Add Friend</string>
+    <string name="friends_requests_screen_title">My Requests</string>
     <string name="friend_list_screen">All My Friends</string>
 
 
@@ -157,10 +158,15 @@
 
     <!-- Feed activities strings -->
     <string name="added_plant_activity">%1$s just added a new %2$s to their garden!</string>
-    <string name="added_friend_activity">The activity type %1$s is not implemented yet</string>
-    <string name="got_achievement_activity">The activity type %1$s is not implemented yet</string>
-    <string name="watered_plant_activity">The activity type %1$s is not implemented yet</string>
+    <string name="added_friend_activity">%1$s and %2$s are now friends!</string>
+    <string name="got_achievement_activity">%1$s improved in the achievement : %2$s!</string>
+    <string name="watered_plant_activity">%1$s just watered %2$s!</string>
     <string name="in_card_added_activity_title">ADDED</string>
+    <string name="in_card_friends_activity_title">FRIENDS</string>
+    <string name="in_card_watered_activity_title">WATERED</string>
+    <string name="in_card_achievement_activity_title">ACHIEVEMENT</string>
+    <string name="icon_of_the_activity_card_description">The icon of the activity</string>
+    <string name="icon_of_the_notification_button_description">The icon of the notification button</string>
 
     <!-- Feed Screen -->
     <string name="add_friend_button">Add a friend</string>
@@ -189,6 +195,7 @@
     <string name="offline_cannot_save_profile">Cannot save profile while offline</string>
     <string name="offline_cannot_load_tips">Cannot load tips while offline</string>
 
+    <!-- Friends Requests Screen -->
     <string name="request_screen_title">My Requests</string>
     <string name="no_request_text">You don\'t have any friend request yet.</string>
     <string name="accept_button">Accept</string>

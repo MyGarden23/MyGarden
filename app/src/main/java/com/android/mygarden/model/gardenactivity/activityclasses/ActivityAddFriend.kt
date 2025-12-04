@@ -13,12 +13,14 @@ import java.sql.Timestamp
  * @property pseudo Public‑facing username of the user who added the friend.
  * @property createdAt Moment at which the friend was added.
  * @property friendUserId Firebase Auth UID of the friend that was added.
+ * @property pseudo The pseudo of the friend.
  */
 data class ActivityAddFriend(
     override val userId: String,
     override val pseudo: String,
     override val createdAt: Timestamp = Timestamp(System.currentTimeMillis()),
     val friendUserId: String,
+    val friendPseudo: String,
 ) : GardenActivity() {
 
   /** Indicates that this activity represents an [ActivityType.ADDED_FRIEND] event. */

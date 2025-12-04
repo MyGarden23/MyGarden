@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.feed
 
+import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
@@ -8,6 +9,7 @@ import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
+import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
@@ -81,6 +83,7 @@ class FeedViewModelTests {
   private lateinit var repositoryScope: TestScope
   private lateinit var activityRepo: ActivityRepository
   private lateinit var friendsRepo: FriendsRepository
+  private lateinit var friendsRequestsRepo: FriendRequestsRepository
   private lateinit var vm: FeedViewModel
 
   /** Sets up the correct scopes, the repository and the view model */
@@ -90,7 +93,8 @@ class FeedViewModelTests {
     repositoryScope = TestScope(SupervisorJob() + testDispatcher)
     activityRepo = FakeActivityRepository()
     friendsRepo = FakeFriendsRepository()
-    vm = FeedViewModel(activityRepo, friendsRepo)
+    friendsRequestsRepo = FakeFriendRequestsRepository()
+    vm = FeedViewModel(activityRepo, friendsRepo, friendsRequestsRepo)
   }
 
   /** Resets the scopes and ensures the clear of the list of activities */
@@ -111,7 +115,7 @@ class FeedViewModelTests {
   fun initialNonEmptyCorrectlyCollected() = runTest {
     activityRepo.addActivity(addedPlantActivity)
     // new instance created after the activity is added to the repository
-    val newVM = FeedViewModel(activityRepo, friendsRepo)
+    val newVM = FeedViewModel(activityRepo, friendsRepo, friendsRequestsRepo)
     runCurrent()
     assertEquals(listOf(addedPlantActivity), newVM.uiState.value.activities)
   }
@@ -129,7 +133,7 @@ class FeedViewModelTests {
   @Test
   fun feedUsesCurrentUserOnlyWhenNoFriends() = runTest {
     val fakeRepo = activityRepo as FakeActivityRepository
-    val vm = FeedViewModel(fakeRepo, friendsRepo)
+    val vm = FeedViewModel(fakeRepo, friendsRepo, friendsRequestsRepo)
     runCurrent()
     assertEquals(listOf("fake-uid"), fakeRepo.lastFriendsList)
   }
@@ -139,7 +143,7 @@ class FeedViewModelTests {
     val fakeActivityRepo = activityRepo as FakeActivityRepository
     val fakeFriendsRepo = friendsRepo as FakeFriendsRepository
 
-    val vm = FeedViewModel(fakeActivityRepo, fakeFriendsRepo)
+    val vm = FeedViewModel(fakeActivityRepo, fakeFriendsRepo, friendsRequestsRepo)
     runCurrent()
 
     assertTrue(vm.uiState.value.activities.isEmpty())

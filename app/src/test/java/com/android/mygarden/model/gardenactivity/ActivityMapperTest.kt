@@ -147,7 +147,8 @@ class ActivityMapperTest {
             userId = "userFriend",
             pseudo = "FriendUser",
             createdAt = timestamp,
-            friendUserId = "friend123")
+            friendUserId = "friend123",
+            friendPseudo = "friendPseudo")
 
     val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)
 

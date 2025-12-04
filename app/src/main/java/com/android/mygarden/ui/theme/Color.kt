@@ -73,6 +73,20 @@ val md_theme_dark_scrim = Color(0xFF000000)
  *   state
  * @param iconsAndButtonWhiteColor the white color that is used to put some icons and buttons in
  *   white for better UI (fixed to be the same in the light and dark mode)
+ * @param acceptButtonColor the color used for the accept button in [FriendsRequestsScreen]
+ * @param refuseButtonColor the color used for the refuse button in [FriendsRequestsScreen]
+ * @param waterActivityBlue the blue color used for the background of the waterActivity card in
+ *   [FeedScreen]
+ * @param onWaterActivityBlue the blue color used for the icon of the waterActivity card in
+ *   [FeedScreen]
+ * @param friendActivityRed the red color used for the background of the friendActivity card in
+ *   [FeedScreen]
+ * @param onFriendActivityRed the red color used for the icon of the friendActivity card in
+ *   [FeedScreen]
+ * @param achievementGrey the grey color used for the background of the achievementActivity card in
+ *   [FeedScreen]
+ * @param onAchievementGrey the grey color used for the icon of the achievementActivity card in
+ *   [FeedScreen]
  */
 data class CustomColors(
     val wateringBlue: Color,
@@ -80,5 +94,11 @@ data class CustomColors(
     val redPlantCardBackground: Color,
     val iconsAndButtonWhiteColor: Color,
     val acceptButtonColor: Color,
-    val refuseButtonColor: Color
+    val refuseButtonColor: Color,
+    val waterActivityBlue: Color,
+    val onWaterActivityBlue: Color,
+    val friendActivityRed: Color,
+    val onFriendActivityRed: Color,
+    val achievementGrey: Color,
+    val onAchievementGrey: Color,
 )
