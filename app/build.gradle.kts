@@ -244,6 +244,7 @@ dependencies {
     globalTestImplementation(libs.compose.test.junit)
     globalTestImplementation(libs.kaspresso)
     globalTestImplementation(libs.kaspresso.compose)
+    globalTestImplementation(libs.turbine)
 
     // =======================
     // Instrumentation tests (androidTest)
@@ -254,7 +255,6 @@ dependencies {
         exclude(group = "org.junit") // safe extra guard
     }
     androidTestImplementation(libs.json)
-    androidTestImplementation(libs.turbine)
     androidTestImplementation(libs.mockito.android)
     androidTestImplementation(libs.mockito.kotlin)
 }

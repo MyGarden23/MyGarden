@@ -93,6 +93,10 @@
     <string name="popup_confirm_button_text">Go to Garden</string>
     <string name="pop_up_title">Your %1$s is thirsty!</string>
 
+    <!-- Friend's Request Pop Up Screen -->
+    <string name="friend_popup_confirm_button_text">"Go to Request"</string>
+    <string name="friend_pop_up_title">New Friend Request from %1$s</string>
+
 
     <!-- Delete Plant Pop Up -->
     <string name="delete_plant_question">Delete this plant?</string>

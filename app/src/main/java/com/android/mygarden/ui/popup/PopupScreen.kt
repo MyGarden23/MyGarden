@@ -35,6 +35,14 @@ object PopupScreenTestTags {
   const val CONFIRM_BUTTON = "ConfirmButton"
 }
 
+/** Dimensions used for the popups across the app */
+object PopUpDimensions {
+  val CARD_HEIGHT = 230.dp
+  val CARD_PADDING = 16.dp
+  val CARD_ROUND_ANGLE = 16.dp
+  val DISMISS_BUTTON_PADDING = 6.dp
+}
+
 /**
  * Popup that is on screen whenever a plant passes in state NEED_WATER
  *
@@ -51,8 +59,11 @@ fun WaterPlantPopup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> U
   ) {
     Card(
         modifier =
-            Modifier.testTag(PopupScreenTestTags.CARD).fillMaxWidth().height(230.dp).padding(16.dp),
-        shape = RoundedCornerShape(16.dp),
+            Modifier.testTag(PopupScreenTestTags.CARD)
+                .fillMaxWidth()
+                .height(PopUpDimensions.CARD_HEIGHT)
+                .padding(PopUpDimensions.CARD_PADDING),
+        shape = RoundedCornerShape(PopUpDimensions.CARD_ROUND_ANGLE),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -61,7 +72,11 @@ fun WaterPlantPopup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> U
       Column(
           modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             // A row to have the red cross button only on top and the rest below
-            Row(modifier = Modifier.fillMaxWidth().padding(6.dp)) { QuitPopup(onClick = onDismiss) }
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth().padding(PopUpDimensions.DISMISS_BUTTON_PADDING)) {
+                  QuitPopup(onClick = onDismiss)
+                }
             PopupTitle(text = context.getString(R.string.pop_up_title, plantName))
             // Spacer puts the confirm button at the end of the popup
             Spacer(Modifier.weight(1f))

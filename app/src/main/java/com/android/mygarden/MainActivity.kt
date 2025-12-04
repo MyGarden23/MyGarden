@@ -25,6 +25,9 @@ import com.android.mygarden.model.notifications.NotificationsPermissionHandler.h
 import com.android.mygarden.model.notifications.NotificationsPermissionHandler.setHasAlreadyDeniedNotificationsPermission
 import com.android.mygarden.model.notifications.PushNotificationsService
 import com.android.mygarden.model.plant.OwnedPlant
+import com.android.mygarden.ui.friendsRequests.FriendRequestUiModel
+import com.android.mygarden.ui.friendsRequests.FriendsRequestsPopup
+import com.android.mygarden.ui.friendsRequests.FriendsRequestsPopupViewModel
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.BottomBar
 import com.android.mygarden.ui.navigation.NavigationActions
@@ -118,6 +121,7 @@ fun MyGardenApp(intent: Intent? = null) {
 
           // Display a pop-up whenever a newly thirsty plant is collected from the view model
           ThirstyPlantsPopup(actions = actions)
+          NewFriendRequestPopup(actions = actions)
         }
       }
 }
@@ -264,6 +268,37 @@ private fun ThirstyPlantsPopup(
         onConfirm = {
           actions.navTo(Screen.Garden)
           currentThirstyPlant = null
+        })
+  }
+}
+
+/**
+ * Observes the list of new friend requests and displays a popup to notify the user.
+ *
+ * @param actions Navigation helper used to redirect the user when confirming or deleting the popup.
+ * @param friendRequestPopupVM ViewModel that emits new friend requests.
+ */
+@Composable
+private fun NewFriendRequestPopup(
+    actions: NavigationActions,
+    friendRequestPopupVM: FriendsRequestsPopupViewModel = viewModel(),
+) {
+  var currentFriendRequest by remember { mutableStateOf<FriendRequestUiModel?>(null) }
+
+  LaunchedEffect(Unit) {
+    friendRequestPopupVM.newRequests.collect { friendRequestUIModel ->
+      currentFriendRequest = friendRequestUIModel
+    }
+  }
+
+  currentFriendRequest?.let {
+    FriendsRequestsPopup(
+        senderPseudo = it.senderPseudo,
+        onDismiss = { currentFriendRequest = null },
+        onConfirm = {
+          actions.navTo(Screen.Garden) // Change this to FriendRequestScreen when the navHost for
+          // FriendRequestScreen is done
+          currentFriendRequest = null
         })
   }
 }

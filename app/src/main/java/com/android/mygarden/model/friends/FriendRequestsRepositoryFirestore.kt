@@ -22,6 +22,7 @@ import kotlinx.coroutines.tasks.await
  * - toUserId: String - The user who received the request
  * - status: String - "PENDING", "ACCEPTED", or "REFUSED"
  * - createdAt: Timestamp - When the request was created
+ * - seenByReceiver: Boolean - Whether the receiver has seen the request
  */
 class FriendRequestsRepositoryFirestore(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
@@ -36,6 +37,7 @@ class FriendRequestsRepositoryFirestore(
     private const val FIELD_TO_USER_ID = "toUserId"
     private const val FIELD_STATUS = "status"
     private const val FIELD_CREATED_AT = "createdAt"
+    private const val FIELD_SEEN_BY_RECEIVER = "seenByReceiver"
 
     // Error message
     private const val NOT_AUTHENTICATED_ERROR = "User not authenticated"
@@ -73,7 +75,8 @@ class FriendRequestsRepositoryFirestore(
           toUserId = doc.getString(FIELD_TO_USER_ID) ?: "",
           status = FriendRequestStatus.valueOf(doc.getString(FIELD_STATUS) ?: "PENDING"),
           createdAt =
-              doc.getTimestamp(FIELD_CREATED_AT)?.toDate()?.time ?: System.currentTimeMillis())
+              doc.getTimestamp(FIELD_CREATED_AT)?.toDate()?.time ?: System.currentTimeMillis(),
+          seenByReceiver = doc.getBoolean(FIELD_SEEN_BY_RECEIVER) ?: false)
     } catch (e: Exception) {
       Log.e("FriendRequestsRepo", "Error parsing friend request", e)
       null
@@ -226,7 +229,8 @@ class FriendRequestsRepositoryFirestore(
               FIELD_FROM_USER_ID to currentUserId,
               FIELD_TO_USER_ID to targetUserId,
               FIELD_STATUS to FriendRequestStatus.PENDING.name,
-              FIELD_CREATED_AT to Timestamp.now())
+              FIELD_CREATED_AT to Timestamp.now(),
+              FIELD_SEEN_BY_RECEIVER to false)
 
       // Use WriteBatch to write to both subcollections atomically
       val batch = db.batch()
@@ -240,6 +244,16 @@ class FriendRequestsRepositoryFirestore(
       Log.e("FriendRequestsRepo", "Failed to send friend request", e)
       throw e
     }
+  }
+
+  /**
+   * Marks a friend request as seen.
+   *
+   * Updates the seenByReceiver field of the request to true.
+   */
+  override suspend fun markRequestAsSeen(requestId: String) {
+    val uid = getCurrentUserId() ?: return
+    friendRequestsCollection(uid).document(requestId).update(FIELD_SEEN_BY_RECEIVER, true)
   }
 
   /**

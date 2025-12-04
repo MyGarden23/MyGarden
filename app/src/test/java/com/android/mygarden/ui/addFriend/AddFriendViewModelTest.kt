@@ -209,8 +209,8 @@ class AddFriendViewModelTest {
 
     assertTrue(onSuccessCalled)
     assertFalse(onErrorCalled)
-    assertEquals(1, fakeRequests.flow.value.size)
-    assertEquals("friend-123", fakeRequests.flow.value[0].fromUserId)
+    assertEquals(1, fakeRequests.incomingRequestsFlow.value.size)
+    assertEquals("friend-123", fakeRequests.incomingRequestsFlow.value[0].fromUserId)
 
     Dispatchers.resetMain()
   }

@@ -46,6 +46,15 @@ interface FriendRequestsRepository {
   suspend fun askFriend(targetUserId: String)
 
   /**
+   * Marks a friend request as seen.
+   *
+   * Updates the seenByReceiver field of the request to true.
+   *
+   * @param requestId The ID of the friend request to mark as seen.
+   */
+  suspend fun markRequestAsSeen(requestId: String)
+
+  /**
    * Accepts a friend request.
    *
    * Updates the request status to ACCEPTED and optionally adds the friend to both users' friend
