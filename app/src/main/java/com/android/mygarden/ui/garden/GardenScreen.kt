@@ -208,7 +208,7 @@ fun GardenScreen(
               onPlantClick = onPlantClick,
               gardenViewModel = gardenViewModel,
               modifier = modifier,
-              isOffline = !isOnline)
+              isOnline = isOnline)
         }
       })
 }
@@ -333,7 +333,7 @@ fun AddPlantFloatingButton(
  * @param modifier the optional modifier of the composable
  * @param onClick the callback called when clicked on the plant card
  * @param viewModel the viewModel of the screen (used to update when watering button is pressed)
- * @param isOffline a boolean indicating if the device is offline
+ * @param isOnline a boolean indicating if the device is online
  */
 @Composable
 fun PlantCard(
@@ -341,7 +341,7 @@ fun PlantCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     viewModel: GardenViewModel,
-    isOffline: Boolean
+    isOnline: Boolean
 ) {
   val context = LocalContext.current
   // The color palette of the card depending on the health status of the plant
@@ -460,13 +460,13 @@ fun PlantCard(
                           GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(ownedPlant)),
                   onButtonPressed = {
                     handleOfflineClick(
-                        isOnline = !isOffline,
+                        isOnline = isOnline,
                         context = context,
                         offlineMessageResId = OfflineMessages.CANNOT_WATER_PLANTS) {
                           viewModel.waterPlant(ownedPlant)
                         }
                   },
-                  isOnline = !isOffline)
+                  isOnline = isOnline)
             }
       })
 }
@@ -578,7 +578,7 @@ fun colorsFromHealthStatus(
  * @param onPlantClick Callback when a plant card is clicked
  * @param gardenViewModel The view model for plant actions
  * @param modifier Optional modifier for the composable
- * @param isOffline a boolean indicating if the device is offline
+ * @param isOnline a boolean indicating if the device is online
  */
 @Composable
 fun GardenContent(
@@ -587,11 +587,9 @@ fun GardenContent(
     onPlantClick: (OwnedPlant) -> Unit,
     gardenViewModel: GardenViewModel,
     modifier: Modifier = Modifier,
-    isOffline: Boolean
+    isOnline: Boolean
 ) {
   if (filteredAndSortedPlants.isNotEmpty()) {
-
-    val isOnline by OfflineStateManager.isOnline.collectAsState() // Collect the StateFlow
 
     // The full list of owned plants
     LazyColumn(
@@ -607,7 +605,7 @@ fun GardenContent(
                 modifier,
                 { onPlantClick(filteredAndSortedPlants[index]) },
                 gardenViewModel,
-                !isOnline)
+                isOnline)
           }
         }
   } else {
