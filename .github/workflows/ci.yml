@@ -21,9 +21,9 @@ jobs:
     # Increase heap for Gradle and spawned JVMs (unit tests)
     env:
       # Heap for Gradle JVM itself (daemon). Adjust if necessary but keep within runner RAM.
-      GRADLE_OPTS: -Xmx3g
+      GRADLE_OPTS: -Xmx4g
       # Ensures child JVMs (tests, tools) also see the higher heap limit
-      JAVA_TOOL_OPTIONS: -Xmx3g
+      JAVA_TOOL_OPTIONS: -Xmx4g
 
     steps:
       # First step : Checkout the repository on the runner
