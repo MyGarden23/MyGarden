@@ -7,16 +7,18 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.android.mygarden.model.friends.FriendRequest
-import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
+import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.users.UserProfile
-import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeActivityRepository
 import com.android.mygarden.utils.FakeFriendRequestsRepository
+import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -33,8 +35,10 @@ class FriendsRequestsScreenTests {
 
   private val request1 = FriendRequest(fromUserId = "from-user-1")
 
-  private lateinit var requestRepo: FriendRequestsRepository
-  private lateinit var userRepo: UserProfileRepository
+  // private lateinit var requestRepo: FriendRequestsRepository
+  // private lateinit var userRepo: UserProfileRepository
+  // private lateinit var activityRepo: ActivityRepository
+  // private lateinit var profileRepo: ProfileRepository
 
   private fun ComposeTestRule.assertRequestForUserIsDisplayed(pseudo: String) {
     onNodeWithTag(FriendsRequestsScreenTestTags.getRequestCardFromUser(pseudo)).assertIsDisplayed()
@@ -50,7 +54,7 @@ class FriendsRequestsScreenTests {
   fun setup(initialRequests: List<FriendRequest> = emptyList()) {
     // Fake friend-requests repo with initial data
     FriendRequestsRepositoryProvider.repository = FakeFriendRequestsRepository(initialRequests)
-    requestRepo = FriendRequestsRepositoryProvider.repository
+    // requestRepo = FriendRequestsRepositoryProvider.repository
 
     // Fake user-profile repo with one profile per request (pseudo = "alice")
     val fakeUserRepo =
@@ -67,7 +71,12 @@ class FriendsRequestsScreenTests {
           }
         }
     UserProfileRepositoryProvider.repository = fakeUserRepo
-    userRepo = UserProfileRepositoryProvider.repository
+    // userRepo = UserProfileRepositoryProvider.repository
+
+    ActivityRepositoryProvider.repository = FakeActivityRepository()
+    // activityRepo = ActivityRepositoryProvider.repository
+    ProfileRepositoryProvider.repository = FakeProfileRepository()
+    // profileRepo = FakeProfileRepository()
 
     rule.setContent { MyGardenTheme { FriendsRequestsScreen() } }
   }

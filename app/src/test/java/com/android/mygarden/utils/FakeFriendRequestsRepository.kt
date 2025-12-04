@@ -29,7 +29,7 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
   }
 
   override suspend fun acceptRequest(requestId: String) {
-    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
+    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
   }
 
   var markedSeen: MutableList<String> = mutableListOf()
@@ -39,7 +39,7 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
   }
 
   override suspend fun refuseRequest(requestId: String) {
-    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
+    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
   }
 
   override fun cleanup() {}
