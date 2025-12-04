@@ -25,9 +25,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
+import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.model.plant.*
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
+import com.android.mygarden.ui.utils.OfflineMessages
+import com.android.mygarden.ui.utils.handleOfflineClick
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.ZoneId
@@ -87,6 +90,9 @@ fun EditPlantScreen(
 
   val plantUIState by editPlantViewModel.uiState.collectAsState()
   val snackbarHostState = remember { SnackbarHostState() }
+
+  // Collect offline state
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
 
   LaunchedEffect(plantUIState.errorMsg) {
     plantUIState.errorMsg?.let { resId ->
@@ -250,8 +256,13 @@ fun EditPlantScreen(
           },
           onSave = {
             if (isSaveEnabled) {
-              editPlantViewModel.editPlant(ownedPlantId)
-              onSaved()
+              handleOfflineClick(
+                  isOnline = isOnline,
+                  context = context,
+                  offlineMessageResId = OfflineMessages.CANNOT_SAVE_PLANT) {
+                    editPlantViewModel.editPlant(ownedPlantId)
+                    onSaved()
+                  }
             }
           },
       )
@@ -262,9 +273,14 @@ fun EditPlantScreen(
           showDeletePopup = showDeletePopup,
           onShowDeletePopupChange = { showDeletePopup = it },
           onConfirmDelete = {
-            editPlantViewModel.deletePlant(ownedPlantId)
-            showDeletePopup = false
-            onDeleted?.invoke()
+            handleOfflineClick(
+                isOnline = isOnline,
+                context = context,
+                offlineMessageResId = OfflineMessages.CANNOT_DELETE_PLANT) {
+                  editPlantViewModel.deletePlant(ownedPlantId)
+                  showDeletePopup = false
+                  onDeleted?.invoke()
+                }
           },
       )
     }

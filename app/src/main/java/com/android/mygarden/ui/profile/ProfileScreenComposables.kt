@@ -59,8 +59,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
+import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.ui.navigation.TopBar
+import com.android.mygarden.ui.utils.OfflineMessages
+import com.android.mygarden.ui.utils.handleOfflineClick
 
 // Layout proportions
 private const val HEADER_SECTION_WEIGHT = 0.2f
@@ -429,31 +432,50 @@ private fun CountryDropdownMenu(
  * @param onRegisterPressed Callback when registration is successful
  */
 @Composable
-private fun SaveButton(profileViewModel: ProfileViewModel, onRegisterPressed: () -> Unit) {
+private fun SaveButton(
+    profileViewModel: ProfileViewModel,
+    onRegisterPressed: () -> Unit,
+    isOnline: Boolean = true
+) {
   val context = LocalContext.current
+
   Button(
       onClick = {
-        profileViewModel.setRegisterPressed(true)
-        if (profileViewModel.canRegister()) {
-          profileViewModel.submit(
-              { success ->
-                if (success) {
-                  onRegisterPressed()
-                }
-              },
-              context)
-        }
+        handleOfflineClick(
+            isOnline = isOnline,
+            context = context,
+            offlineMessageResId = OfflineMessages.CANNOT_SAVE_PROFILE) {
+              profileViewModel.setRegisterPressed(true)
+              if (profileViewModel.canRegister()) {
+                profileViewModel.submit(
+                    { success ->
+                      if (success) {
+                        onRegisterPressed()
+                      }
+                    },
+                    context)
+              }
+            }
       },
       modifier =
           Modifier.fillMaxWidth()
               .height(BUTTON_HEIGHT)
               .padding(horizontal = HORIZONTAL_PADDING, vertical = VERTICAL_PADDING)
               .testTag(ProfileScreenTestTags.SAVE_BUTTON),
-      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+      colors =
+          if (isOnline) {
+            ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+          } else {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+          },
       shape = RoundedCornerShape(BUTTON_CORNER_RADIUS)) {
         Text(
             text = stringResource(R.string.save_profile_button_text),
-            color = MaterialTheme.colorScheme.onPrimary,
+            color =
+                if (isOnline) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = BUTTON_FONT_SIZE,
             fontWeight = FontWeight.Medium)
       }
@@ -491,6 +513,7 @@ fun ProfileScreenBase(
   LaunchedEffect(Unit) { profileViewModel.setCountries(countries) }
   val uiState by profileViewModel.uiState.collectAsState()
 
+  val isOnline by OfflineStateManager.isOnline.collectAsState(initial = true)
   Scaffold(
       modifier = Modifier.testTag(ProfileScreenTestTags.SCREEN),
       topBar = {
@@ -507,7 +530,10 @@ fun ProfileScreenBase(
       },
       bottomBar = {
         Box(Modifier.offset(y = SPACE_SAVE_BUTTON_BOTTOM_SCREEN)) {
-          SaveButton(profileViewModel = profileViewModel, onRegisterPressed = onSavePressed)
+          SaveButton(
+              profileViewModel = profileViewModel,
+              onRegisterPressed = onSavePressed,
+              isOnline = isOnline)
         }
       }) { paddingValues ->
         Column(

@@ -34,10 +34,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
+import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.ui.garden.colorsFromHealthStatus
 import com.android.mygarden.ui.theme.ExtendedTheme
+import com.android.mygarden.ui.utils.OfflineMessages
+import com.android.mygarden.ui.utils.handleOfflineClick
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.Month
@@ -143,6 +146,9 @@ fun PlantInfosScreen(
   // Observe UI state from ViewModel
   val uiState by plantInfoViewModel.uiState.collectAsState()
 
+  // Observe online state
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
+
   // Remember scroll states for each tab separately
   // This ensures scroll position is maintained when switching between tabs
   val descriptionScrollState = rememberScrollState()
@@ -170,7 +176,8 @@ fun PlantInfosScreen(
             uiState = uiState,
             ownedPlantId = ownedPlantId,
             plantInfoViewModel = plantInfoViewModel,
-            onNextPlant = onNextPlant)
+            onNextPlant = onNextPlant,
+            isOnline = isOnline)
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           // --- Plant Image Header ---
@@ -218,11 +225,22 @@ fun PlantInfosScreen(
                 // Tips button
                 Button(
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary),
+                        if (isOnline) {
+                          ButtonDefaults.buttonColors(
+                              containerColor = MaterialTheme.colorScheme.primary,
+                              contentColor = MaterialTheme.colorScheme.onPrimary)
+                        } else {
+                          ButtonDefaults.buttonColors(
+                              containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                              contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                        },
                     onClick = {
-                      plantInfoViewModel.showCareTips(uiState.latinName, uiState.healthStatus)
+                      handleOfflineClick(
+                          isOnline = isOnline,
+                          context = context,
+                          offlineMessageResId = OfflineMessages.CANNOT_LOAD_TIPS) {
+                            plantInfoViewModel.showCareTips(uiState.latinName, uiState.healthStatus)
+                          }
                     },
                     modifier = Modifier.testTag(PlantInfoScreenTestTags.TIPS_BUTTON)) {
                       Text(
@@ -322,7 +340,10 @@ private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun SavePlantBottomBar(uiState: PlantInfoUIState, onSavePlant: () -> Unit) {
+private fun SavePlantBottomBar(
+    uiState: PlantInfoUIState,
+    onSavePlant: () -> Unit,
+) {
   val context = LocalContext.current
   val testTagButton =
       if (uiState.isFromGarden) PlantInfoScreenTestTags.EDIT_BUTTON
@@ -435,31 +456,39 @@ private fun PlantInfoHeader(
  * @param ownedPlantId The ID of the owned plant when coming from the garden.
  * @param plantInfoViewModel ViewModel used to save plants and reset state.
  * @param onNextPlant Callback triggered after saving or when continuing.
+ * @param isOnline Whether the device is online.
  */
 @Composable
 private fun PlantInfoBottomBar(
     uiState: PlantInfoUIState,
     ownedPlantId: String?,
     plantInfoViewModel: PlantInfoViewModel,
-    onNextPlant: (String) -> Unit
+    onNextPlant: (String) -> Unit,
+    isOnline: Boolean
 ) {
+  val context = LocalContext.current
   SavePlantBottomBar(
       uiState = uiState,
       onSavePlant = {
-        if (!uiState.isFromGarden) {
-          // If the user doesn't come from the Garden (so from the Camera) it needs to save
-          // the plant in the repository
-          val plantToSave = uiState.savePlant()
-          plantInfoViewModel.savePlant(
-              plantToSave,
-              onPlantSaved = { plantId ->
-                plantInfoViewModel.resetUIState()
-                onNextPlant(plantId)
-              })
-        } else {
-          // If the user comes from the Garden the ownedPlantId field is not null
-          onNextPlant(requireNotNull(ownedPlantId))
-        }
+        handleOfflineClick(
+            isOnline = isOnline,
+            context = context,
+            offlineMessageResId = OfflineMessages.CANNOT_SAVE_PLANT) {
+              if (!uiState.isFromGarden) {
+                // If the user doesn't come from the Garden (so from the Camera) it needs to save
+                // the plant in the repository
+                val plantToSave = uiState.savePlant()
+                plantInfoViewModel.savePlant(
+                    plantToSave,
+                    onPlantSaved = { plantId ->
+                      plantInfoViewModel.resetUIState()
+                      onNextPlant(plantId)
+                    })
+              } else {
+                // If the user comes from the Garden the ownedPlantId field is not null
+                onNextPlant(requireNotNull(ownedPlantId))
+              }
+            }
       })
 }
 

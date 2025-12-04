@@ -15,6 +15,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -24,6 +26,7 @@ import com.android.mygarden.model.notifications.NotificationsPermissionHandler.h
 import com.android.mygarden.model.notifications.NotificationsPermissionHandler.hasNotificationsPermission
 import com.android.mygarden.model.notifications.NotificationsPermissionHandler.setHasAlreadyDeniedNotificationsPermission
 import com.android.mygarden.model.notifications.PushNotificationsService
+import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.ui.friendsRequests.FriendRequestUiModel
 import com.android.mygarden.ui.friendsRequests.FriendsRequestsPopup
@@ -39,10 +42,31 @@ import com.android.mygarden.ui.popup.PopupViewModel
 import com.android.mygarden.ui.popup.WaterPlantPopup
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.PersistentCacheSettings
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    // Initialize Firestore offline persistence
+    // This enables automatic local caching of Firestore data
+    try {
+      val firestore = FirebaseFirestore.getInstance()
+      val settings =
+          FirebaseFirestoreSettings.Builder()
+              .setLocalCacheSettings(PersistentCacheSettings.newBuilder().build())
+              .build()
+      firestore.firestoreSettings = settings
+    } catch (e: Exception) {
+      // Persistence may already be enabled or unavailable
+      android.util.Log.w("MainActivity", "Failed to enable Firestore persistence", e)
+    }
+
+    // Initialize offline state manager
+    OfflineStateManager.initialize(this)
 
     ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleObserver)
 
@@ -73,6 +97,21 @@ fun MyGardenApp(intent: Intent? = null) {
   // Check if we're in any test environment
   val isInTestEnvironment = rememberIsInTestEnvironment()
 
+  // Monitor connectivity state
+  val coroutineScope = rememberCoroutineScope()
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
+
+  // Start monitoring connectivity changes
+  LaunchedEffect(Unit) {
+    if (!isInTestEnvironment) {
+      coroutineScope.launch {
+        OfflineStateManager.getConnectivityObserver().observe().collect { connected ->
+          OfflineStateManager.setOnlineState(connected)
+        }
+      }
+    }
+  }
+
   // Ask for notification permission and skip it if currently in test environments to avoid
   // interference
   AskForNotificationsPermissionIfNeeded(isInTestEnvironment)
@@ -95,6 +134,12 @@ fun MyGardenApp(intent: Intent? = null) {
       remember(currentRoute) { if (currentRoute != null) routeToPage(currentRoute) else null }
 
   Scaffold(
+      snackbarHost = {
+        // Show offline indicator when disconnected
+        if (!isOnline && !isInTestEnvironment) {
+          OfflineIndicator()
+        }
+      },
       bottomBar = {
         // Show bottom bar for main screens: Camera, Feed and Garden
         if (currentScreen == Screen.Camera ||
@@ -123,6 +168,17 @@ fun MyGardenApp(intent: Intent? = null) {
           ThirstyPlantsPopup(actions = actions)
           NewFriendRequestPopup(actions = actions)
         }
+      }
+}
+
+/** Composable that displays an offline mode indicator at the top of the screen. */
+@Composable
+fun OfflineIndicator() {
+  Snackbar(
+      modifier = Modifier.padding(8.dp),
+      containerColor = MaterialTheme.colorScheme.errorContainer,
+      contentColor = MaterialTheme.colorScheme.onErrorContainer) {
+        Text(stringResource(R.string.offline_indicator_message))
       }
 }
 
