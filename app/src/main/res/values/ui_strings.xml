@@ -106,7 +106,6 @@
     <string name="keep_button_text">Keep in my garden</string>
 
 
-
     <!-- Profile Screen Base -->
     <string name="avatar_picture_description">Profile Avatar</string>
     <string name="mandatory_pseudo_label">Pseudo (your public name) *</string>
@@ -205,5 +204,10 @@
     <string name="friend_list_no_friend">You don’t have any friend for the moment. You can see them once you have added them!</string>
     <string name="friend_list_plant_icon_description">Open friend garden</string>
     <string name="error_loading_friends">An error occurred while loading your friends.</string>
+
+    <!-- Achievements Screen -->
+    <string name="plants_number_achievement">Plants number level: %1$s</string>
+    <string name="friends_number_achievement">Friends number level: %1$</string>
+    <string name="healthy_streak_achievement">Healthy streak level: %1$s</string>
 
 </resources>

@@ -6,6 +6,10 @@ import com.android.mygarden.model.achievements.UserAchievementProgress
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
+/**
+ * This fake repository is used in many tests to make sure there is no interaction with Firestore
+ * done in certain tests. I can override the AchievementsRepositoryProvider
+ */
 class FakeAchievementsRepository : AchievementsRepository {
 
   override fun getCurrentUserId(): String = "fake-uid"

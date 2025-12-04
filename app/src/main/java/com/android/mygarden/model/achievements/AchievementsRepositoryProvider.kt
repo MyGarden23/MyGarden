@@ -14,7 +14,7 @@ object AchievementsRepositoryProvider {
   private var _overrideRepositoryTest: AchievementsRepository? = null
 
   /**
-   * Public reference to the current repository Can be swapped in tests with a fake one if needed
+   * Public reference to the current repository can be swapped in tests with a fake one if needed
    */
   var repository: AchievementsRepository
     get() = _overrideRepositoryTest ?: _repository

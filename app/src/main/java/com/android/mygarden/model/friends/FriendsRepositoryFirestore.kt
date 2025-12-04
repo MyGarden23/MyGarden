@@ -1,5 +1,6 @@
 package com.android.mygarden.model.friends
 
+import com.android.mygarden.model.achievements.ACHIEVEMENTS_BASE_VALUE
 import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.achievements.AchievementsRepository
 import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
@@ -9,6 +10,9 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+
+// Value used to update the number of friends
+private const val FRIEND_ACHIEVEMENT_INCREMENT_STEP = 1
 
 /**
  * Firestore-backed implementation of [FriendsRepository].
@@ -58,7 +62,7 @@ class FriendsRepositoryFirestore(
     currentDoc.set(mapOf("friendUid" to friendUserId)).await()
 
     // Get the number of friends and update the friends number achievement
-    val newCount = (friendsCount ?: 0) + 1
+    val newCount = (friendsCount ?: ACHIEVEMENTS_BASE_VALUE) + FRIEND_ACHIEVEMENT_INCREMENT_STEP
     friendsCount = newCount
     achievementsRep.updateAchievementValue(
         currentUserId, AchievementType.FRIENDS_NUMBER, friendsCount!!)

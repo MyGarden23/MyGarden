@@ -35,6 +35,8 @@ private const val plantsCollection = "plants"
 
 private const val AUTH_ERR_MSG = "User not authenticated"
 
+private const val PLANT_ACHIEVEMENT_DECREMENT_STEP = 1
+
 private fun plantNotFoundErrMsg(id: String) = "OwnedPlant with id $id not found"
 
 private fun parsingFailedErrMsg(id: String) = "Failed to parse SerializedOwnedPlant with id $id"
@@ -176,7 +178,9 @@ class PlantsRepositoryFirestore(
 
     // Update the achievements
     achievementsRepo.updateAchievementValue(
-        currentUserId(), AchievementType.PLANTS_NUMBER, plantsFlow.value.size - 1)
+        currentUserId(),
+        AchievementType.PLANTS_NUMBER,
+        plantsFlow.value.size - PLANT_ACHIEVEMENT_DECREMENT_STEP)
   }
 
   override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {

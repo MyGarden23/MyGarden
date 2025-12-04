@@ -2,6 +2,8 @@ package com.android.mygarden.ui.achievements
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.model.achievements.ACHIEVEMENTS_BASE_VALUE
+import com.android.mygarden.model.achievements.ACHIEVEMENTS_FIRST_LEVEL
 import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.achievements.Achievements
 import com.android.mygarden.model.achievements.AchievementsRepository
@@ -18,9 +20,9 @@ import kotlinx.coroutines.launch
  * The values correspond to computed levels in each achievement, NOT the raw stored values.
  */
 data class AchievementsUIState(
-    val plantsNumberLevel: Int = 1,
-    val friendsNumberLevel: Int = 1,
-    val healthyStreakLevel: Int = 1
+    val plantsNumberLevel: Int = ACHIEVEMENTS_FIRST_LEVEL,
+    val friendsNumberLevel: Int = ACHIEVEMENTS_FIRST_LEVEL,
+    val healthyStreakLevel: Int = ACHIEVEMENTS_FIRST_LEVEL
 )
 
 /**
@@ -68,9 +70,11 @@ class AchievementsViewModel(
   ): AchievementsUIState {
     val byType = progressList.associateBy { it.achievementType }
 
-    val plantsValue = byType[AchievementType.PLANTS_NUMBER]?.currentValue ?: 0
-    val friendsValue = byType[AchievementType.FRIENDS_NUMBER]?.currentValue ?: 0
-    val healthyStreakValue = byType[AchievementType.HEALTHY_STREAK]?.currentValue ?: 0
+    val plantsValue = byType[AchievementType.PLANTS_NUMBER]?.currentValue ?: ACHIEVEMENTS_BASE_VALUE
+    val friendsValue =
+        byType[AchievementType.FRIENDS_NUMBER]?.currentValue ?: ACHIEVEMENTS_BASE_VALUE
+    val healthyStreakValue =
+        byType[AchievementType.HEALTHY_STREAK]?.currentValue ?: ACHIEVEMENTS_BASE_VALUE
 
     return AchievementsUIState(
         plantsNumberLevel = Achievements.PLANTS_NUMBER.computeLevel(plantsValue),

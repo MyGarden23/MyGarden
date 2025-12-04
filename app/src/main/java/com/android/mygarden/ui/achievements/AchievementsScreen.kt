@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.mygarden.R
 
 /**
  * Temporary screen used to manually verify that the Achievements flow emits the correct values.
@@ -34,9 +36,13 @@ fun AchievementsScreen(
 
         // For now just display the levels of each achievements
         Column(modifier = modifier.padding(paddingValues)) {
-          Text(text = "Plants number level: ${uiState.plantsNumberLevel}")
-          Text(text = "Friends number level: ${uiState.friendsNumberLevel}")
-          Text(text = "Healthy streak level: ${uiState.healthyStreakLevel}")
+          Text(text = stringResource(R.string.plants_number_achievement, uiState.plantsNumberLevel))
+          Text(
+              text =
+                  stringResource(R.string.friends_number_achievement, uiState.friendsNumberLevel))
+          Text(
+              text =
+                  stringResource(R.string.healthy_streak_achievement, uiState.healthyStreakLevel))
         }
       })
 }

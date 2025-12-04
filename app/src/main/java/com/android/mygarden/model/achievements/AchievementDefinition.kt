@@ -29,6 +29,15 @@ enum class AchievementType {
 /** The number of levels in the achievements */
 const val ACHIEVEMENTS_LEVEL_NUMBER = 10
 
+/** The first level of the achievements */
+const val ACHIEVEMENTS_FIRST_LEVEL = 1
+
+/** The increment used for gaining an achievement level */
+const val ACHIEVEMENTS_LEVEL_INCREMENT_STEP = 1
+
+/** The base value hold for every achievement */
+const val ACHIEVEMENTS_BASE_VALUE = 0
+
 /**
  * Definition of an achievement category.
  *
@@ -67,7 +76,7 @@ sealed class AchievementDefinition(val levelThresholds: List<Int>) {
    */
   fun computeLevel(value: Int): Int {
     val index = levelThresholds.indexOfFirst { value < it }
-    return if (index == -1) ACHIEVEMENTS_LEVEL_NUMBER else index + 1
+    return if (index == -1) ACHIEVEMENTS_LEVEL_NUMBER else index + ACHIEVEMENTS_LEVEL_INCREMENT_STEP
   }
 }
 
@@ -142,5 +151,5 @@ object Achievements {
 @Keep
 data class UserAchievementProgress(
     val achievementType: AchievementType = AchievementType.PLANTS_NUMBER,
-    val currentValue: Int = 0
+    val currentValue: Int = ACHIEVEMENTS_BASE_VALUE
 )
