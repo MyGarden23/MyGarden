@@ -62,6 +62,8 @@ const val FRACTION_ROW_WIDTH = 0.94f
 const val FRACTION_BOX_WIDTH = 0.6f
 val TEXT_FONT_SIZE = 20.sp
 
+val NUMBER_OF_LINES = 1
+
 /**
  * Displays the friend list screen, showing either the list of friends or an empty-state message.
  *
@@ -175,18 +177,18 @@ private fun FriendCard(friend: UserProfile) {
                             text = pseudo,
                             fontWeight = FontWeight.Bold,
                             fontSize = TEXT_FONT_SIZE,
-                            maxLines = 1,
+                            maxLines = NUMBER_OF_LINES,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.testTag(FriendListScreenTestTags.FRIEND_PSEUDO))
                         Text(
                             text = friend.gardeningSkill,
                             style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
+                            maxLines = NUMBER_OF_LINES,
                             overflow = TextOverflow.Ellipsis)
                         Text(
                             text = friend.favoritePlant,
                             style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
+                            maxLines = NUMBER_OF_LINES,
                             overflow = TextOverflow.Ellipsis)
                       }
                     }
