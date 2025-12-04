@@ -22,7 +22,8 @@ interface ConnectivityObserver {
 /**
  * Implementation of ConnectivityObserver using Android's ConnectivityManager.
  *
- * @param context The application context
+ * @param context The application context (use applicationContext, not activity context to avoid
+ *   memory leaks)
  */
 class NetworkConnectivityObserver(private val context: Context) : ConnectivityObserver {
 
