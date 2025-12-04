@@ -97,7 +97,8 @@ jobs:
       - name: Run tests
         run: |
           # To run the CI with debug information, add --info
-          ./gradlew testDebugUnitTest --parallel --build-cache
+          # Disable parallel execution for tests to prevent OOM in CI
+          ./gradlew testDebugUnitTest --no-parallel --max-workers=2 --build-cache
         env:
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
 
