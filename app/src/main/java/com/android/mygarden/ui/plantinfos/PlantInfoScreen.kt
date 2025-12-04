@@ -343,7 +343,6 @@ private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
 private fun SavePlantBottomBar(
     uiState: PlantInfoUIState,
     onSavePlant: () -> Unit,
-    isOnline: Boolean,
 ) {
   val context = LocalContext.current
   val testTagButton =
@@ -490,8 +489,8 @@ private fun PlantInfoBottomBar(
                 onNextPlant(requireNotNull(ownedPlantId))
               }
             }
-      },
-      isOnline = isOnline)
+      }
+  )
 }
 
 /**
