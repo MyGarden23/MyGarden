@@ -9,8 +9,6 @@ import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 /**
@@ -38,7 +36,7 @@ class FriendsRequestsPopupViewModel(
 
   init {
     viewModelScope.launch {
-      friendsRepo.incomingRequests().drop(1).collectLatest { list ->
+      friendsRepo.incomingRequests().collect { list ->
         list.forEach { newRequest ->
           val profile = userProfileRepo.getUserProfile(newRequest.fromUserId)
           if (profile != null && !newRequest.seenByReceiver) {
