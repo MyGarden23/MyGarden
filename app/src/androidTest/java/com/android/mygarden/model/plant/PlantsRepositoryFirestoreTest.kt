@@ -9,6 +9,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.android.mygarden.R
+import com.android.mygarden.model.achievements.AchievementsRepository
+import com.android.mygarden.model.achievements.AchievementsRepositoryFirestore
 import com.android.mygarden.ui.camera.LocalImageDisplay
 import com.android.mygarden.utils.FirestoreProfileTest
 import com.android.mygarden.utils.TestPlants
@@ -17,7 +19,6 @@ import com.google.firebase.storage.StorageException
 import java.io.File
 import java.io.FileOutputStream
 import java.sql.Timestamp
-import java.util.Collections.list
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
@@ -35,6 +36,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
 
   @get:Rule val composeTestRule = createComposeRule()
   private lateinit var repository: PlantsRepository
+  private lateinit var repositoryAchievements: AchievementsRepository
   private val healthCalculator = PlantHealthCalculator()
 
   /**
@@ -46,8 +48,9 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     // Start up Firebase emulator, clear data, etc. (handled by FirestoreProfileTest)
     super.setUp()
 
-    // Inject PlantsRepositoryFirestore
-    repository = PlantsRepositoryFirestore(db, auth)
+    // Inject repositories
+    repositoryAchievements = AchievementsRepositoryFirestore(db, auth)
+    repository = PlantsRepositoryFirestore(db, auth, achievementsRepo = repositoryAchievements)
   }
 
   /** Ensures to clear the repo at the end of each test for consistency */
@@ -226,15 +229,16 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     val timestamp4 = Timestamp(System.currentTimeMillis())
     val ownedPlantBefore4 = repository.saveToGarden(plant4, id4, timestamp4)
 
+    // Remove healthySince Timestamps that can differ due to update timing difference
     val allOwnedPlantBefore: List<OwnedPlant> =
         listOf(ownedPlantBefore1, ownedPlantBefore2, ownedPlantBefore3, ownedPlantBefore4).map {
             ownedP ->
-          updatePlantHealthStatus(ownedP)
+          updatePlantHealthStatus(ownedP).copy(healthySince = null)
         }
 
     val allOwnedPlantFromRepo: List<OwnedPlant> = repository.getAllOwnedPlants()
 
-    assertEquals(allOwnedPlantBefore, allOwnedPlantFromRepo)
+    assertEquals(allOwnedPlantBefore, allOwnedPlantFromRepo.map { it.copy(healthySince = null) })
   }
 
   @Test
@@ -258,16 +262,18 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     val allOwnedPlantBefore: List<OwnedPlant> =
         listOf(ownedPlantBefore1, ownedPlantBefore2, ownedPlantBefore3, ownedPlantBefore4).map {
             ownedP ->
-          updatePlantHealthStatus(ownedP)
+          updatePlantHealthStatus(ownedP).copy(healthySince = null)
         }
 
-    val allOwnedPlantFromRepo: List<OwnedPlant> = repository.getAllOwnedPlants()
+    val allOwnedPlantFromRepo: List<OwnedPlant> =
+        repository.getAllOwnedPlants().map { it.copy(healthySince = null) }
 
     assertEquals(allOwnedPlantBefore, allOwnedPlantFromRepo)
     repository.deleteFromGarden(id2)
-    val newListBefore = allOwnedPlantBefore - updatePlantHealthStatus(ownedPlantBefore2)
+    val newListBefore =
+        allOwnedPlantBefore - updatePlantHealthStatus(ownedPlantBefore2).copy(healthySince = null)
     assertEquals(3, newListBefore.size)
-    assertEquals(newListBefore, repository.getAllOwnedPlants())
+    assertEquals(newListBefore, repository.getAllOwnedPlants().map { it.copy(healthySince = null) })
   }
 
   @Test

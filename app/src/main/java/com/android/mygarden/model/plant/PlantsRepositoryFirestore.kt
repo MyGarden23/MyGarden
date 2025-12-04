@@ -113,7 +113,17 @@ class PlantsRepositoryFirestore(
 
     // Creates an OwnedPlant with the arguments and change the image field of the plant to store the
     // URL in Cloud Storage or null if there is no image.
-    val ownedPlant = OwnedPlant(id, plant.copy(image = imageUrl), lastWatered)
+    val healthySince =
+        if (plant.healthStatus == PlantHealthStatus.HEALTHY ||
+            plant.healthStatus == PlantHealthStatus.SLIGHTLY_DRY)
+            Timestamp(System.currentTimeMillis())
+        else null
+    val ownedPlant =
+        OwnedPlant(
+            id = id,
+            plant = plant.copy(image = imageUrl),
+            lastWatered = lastWatered,
+            healthySince = healthySince)
     val serializedOwnedPlant = fromOwnedPlantToSerializedOwnedPlant(ownedPlant)
 
     userPlantsCollection().document(id).set(serializedOwnedPlant).await()
@@ -271,14 +281,13 @@ class PlantsRepositoryFirestore(
             ownedPlant.plant.healthStatus == PlantHealthStatus.SLIGHTLY_DRY
 
     // Set the healthySince if the plant goes from HEALTHY/SLIGHTLY_DRY to another status
-    val newHealthySince =
-        when {
-          !wasHealthy && isNowHealthy -> Timestamp(System.currentTimeMillis())
-          wasHealthy && !isNowHealthy -> null
-          else -> ownedPlant.healthySince
-        }
-
-    return ownedPlant.copy(plant = updatedPlant, healthySince = newHealthySince)
+    return if (!wasHealthy && isNowHealthy) {
+      ownedPlant.copy(plant = updatedPlant, healthySince = Timestamp(System.currentTimeMillis()))
+    } else if (wasHealthy && !isNowHealthy) {
+      ownedPlant.copy(plant = updatedPlant, healthySince = null)
+    } else {
+      ownedPlant.copy(plant = updatedPlant)
+    }
   }
 
   /**
