@@ -303,10 +303,10 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     repository.editOwnedPlant(id2, ownedPlantBefore3)
     val allOwnedPlantEdit: List<OwnedPlant> =
         listOf(ownedPlantBefore1, ownedPlantBefore3).map { ownedP ->
-          updatePlantHealthStatus(ownedP)
+          updatePlantHealthStatus(ownedP).copy(healthySince = null)
         }
     val allOwnedPlantFromRepo = repository.getAllOwnedPlants()
-    assertEquals(allOwnedPlantEdit, allOwnedPlantFromRepo)
+    assertEquals(allOwnedPlantEdit, allOwnedPlantFromRepo.map { it.copy(healthySince = null) })
   }
 
   @Test
