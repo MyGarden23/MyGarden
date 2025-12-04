@@ -134,8 +134,12 @@ class FriendsRequestsPopupViewModelTest {
 
   @Test
   fun does_not_emit_when_request_is_already_seen() = runTest {
+    val alreadySeen =
+        FriendRequest(
+            id = "seen-1", fromUserId = "sender-A", toUserId = "rx", seenByReceiver = true)
+
     vm.newRequests.test {
-      fakeFriendsRepo.incomingRequestsFlow.value = listOf(classicalFriendRequestAlice)
+      fakeFriendsRepo.incomingRequestsFlow.value = listOf(alreadySeen)
 
       expectNoEvents()
 
