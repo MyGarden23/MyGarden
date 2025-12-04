@@ -489,8 +489,7 @@ private fun PlantInfoBottomBar(
                 onNextPlant(requireNotNull(ownedPlantId))
               }
             }
-      }
-  )
+      })
 }
 
 /**

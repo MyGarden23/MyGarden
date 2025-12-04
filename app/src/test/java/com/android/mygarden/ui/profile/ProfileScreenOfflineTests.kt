@@ -27,14 +27,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowToast
 
-/**
- * Tests for offline functionality in ProfileScreen.
- *
- * These tests verify that:
- * 1. Save button shows toast when clicked offline
- * 2. Profile is not saved when offline
- * 3. Avatar click still works when offline (local action)
- */
+/** Tests for offline functionality in ProfileScreen. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class ProfileScreenOfflineTests {
