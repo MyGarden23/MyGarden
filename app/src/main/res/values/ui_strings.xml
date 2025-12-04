@@ -166,6 +166,7 @@
     <string name="in_card_watered_activity_title">WATERED</string>
     <string name="in_card_achievement_activity_title">ACHIEVEMENT</string>
     <string name="icon_of_the_activity_card_description">The icon of the activity</string>
+    <string name="icon_of_the_notification_button_description">The icon of the notification button</string>
 
     <!-- Feed Screen -->
     <string name="add_friend_button">Add a friend</string>

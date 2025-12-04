@@ -74,11 +74,7 @@ class FeedViewModel(
       combine(activitiesFlow, hasRequestsFlow) { activities, hasRequests ->
             FeedUIState(activities = activities, hasRequests = hasRequests)
           }
-          .collect { newState ->
-            _uiState.value =
-                _uiState.value.copy(
-                    activities = newState.activities, hasRequests = newState.hasRequests)
-          }
+          .collect { newState -> _uiState.value = newState }
     }
   }
 }

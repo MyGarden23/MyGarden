@@ -115,7 +115,7 @@ fun FeedScreen(
               modifier =
                   modifier.fillMaxWidth().padding(horizontal = BUTTON_ROW_HORIZONTAL_PADDING),
               horizontalArrangement = Arrangement.SpaceBetween) {
-                NotificationButton(modifier, onClick = onNotifClick, uiState)
+                NotificationButton(modifier, onClick = onNotifClick, uiState.hasRequests)
                 FriendListButton(modifier, onFriendList)
               }
           // space between buttons and activities
@@ -164,26 +164,28 @@ fun FeedScreen(
  *
  * @param modifier the used modifier for the composable
  * @param onClick the callback to be triggered when the user clicks on the button
- * @param uiState the uiState used to know which icon to display
+ * @param hasRequests the boolean used to know which icon to display
  */
 @Composable
 fun NotificationButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    uiState: FeedUIState
+    hasRequests: Boolean
 ) {
   val icon =
-      if (uiState.hasRequests) {
+      if (hasRequests) {
         R.drawable.notif_with_request
       } else {
         R.drawable.notif
       }
   IconButton(
       onClick = onClick,
-      modifier.size(NOTIF_ICON_SIZE).testTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON)) {
+      modifier =
+          modifier.size(NOTIF_ICON_SIZE).testTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON)) {
         Image(
             painter = painterResource(icon),
-            contentDescription = "",
+            contentDescription =
+                stringResource(R.string.icon_of_the_notification_button_description),
         )
       }
 }
@@ -222,8 +224,7 @@ fun FriendListButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
  */
 @Composable
 fun ActivityItem(modifier: Modifier = Modifier, activity: GardenActivity) {
-  val colorPalette =
-      activityTypeColor(activity, MaterialTheme.colorScheme, customColors = ExtendedTheme.colors)
+  val colorPalette = activityTypeColor(activity, MaterialTheme.colorScheme, ExtendedTheme.colors)
   Card(
       modifier =
           modifier
@@ -241,26 +242,6 @@ fun ActivityItem(modifier: Modifier = Modifier, activity: GardenActivity) {
           is ActivityWaterPlant -> WateredAPlantCard(modifier, activity, colorPalette)
         }
       })
-}
-
-/**
- * The content of the generic card for a [added plant] activity
- *
- * @param modifier the used modifier for the composable
- * @param activity the specific activity
- * @param colorPalette the palette of colors for this specific activity
- */
-@Composable
-fun AddedAPlantCard(
-    modifier: Modifier = Modifier,
-    activity: ActivityAddedPlant,
-    colorPalette: CardColorPalette
-) {
-  val icon = R.drawable.potted_plant_icon
-  val cardText =
-      stringResource(R.string.added_plant_activity, activity.pseudo, activity.ownedPlant.plant.name)
-
-  GenericCard(colorPalette, modifier, icon, cardText)
 }
 
 /**
@@ -309,6 +290,26 @@ fun GenericCard(
             text = cardText,
             fontWeight = FontWeight.Bold)
       }
+}
+
+/**
+ * The content of the generic card for a [added plant] activity
+ *
+ * @param modifier the used modifier for the composable
+ * @param activity the specific activity
+ * @param colorPalette the palette of colors for this specific activity
+ */
+@Composable
+fun AddedAPlantCard(
+    modifier: Modifier = Modifier,
+    activity: ActivityAddedPlant,
+    colorPalette: CardColorPalette
+) {
+  val icon = R.drawable.potted_plant_icon
+  val cardText =
+      stringResource(R.string.added_plant_activity, activity.pseudo, activity.ownedPlant.plant.name)
+
+  GenericCard(colorPalette, modifier, icon, cardText)
 }
 
 /**

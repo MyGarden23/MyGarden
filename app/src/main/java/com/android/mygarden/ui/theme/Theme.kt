@@ -126,11 +126,11 @@ val LocalCustomColors = staticCompositionLocalOf {
       Color.Unspecified,
       Color.Unspecified,
       Color.Unspecified,
-      onWaterActivityBlue = Color.Unspecified,
-      friendActivityRed = Color.Unspecified,
-      onFriendActivityRed = Color.Unspecified,
-      achievementGrey = Color.Unspecified,
-      onAchievementGrey = Color.Unspecified)
+      Color.Unspecified,
+      Color.Unspecified,
+      Color.Unspecified,
+      Color.Unspecified,
+      Color.Unspecified)
 }
 
 @Composable
