@@ -180,6 +180,7 @@
     <string name="added_enum">Added</string>
 
     <!-- Offline Mode Messages -->
+    <string name="offline_indicator_message">⚠️ You are offline. Some features are disabled.</string>
     <string name="offline_cannot_water_plants">Cannot water plants while offline</string>
     <string name="offline_cannot_add_plants">Cannot add plants while offline</string>
     <string name="offline_cannot_save_plant">Cannot save plant while offline</string>

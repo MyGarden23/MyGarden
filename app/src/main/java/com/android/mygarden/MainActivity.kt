@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,6 +44,7 @@ import com.android.mygarden.ui.theme.MyGardenTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.PersistentCacheSettings
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -53,7 +55,10 @@ class MainActivity : ComponentActivity() {
     // This enables automatic local caching of Firestore data
     try {
       val firestore = FirebaseFirestore.getInstance()
-      val settings = FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build()
+      val settings =
+          FirebaseFirestoreSettings.Builder()
+              .setLocalCacheSettings(PersistentCacheSettings.newBuilder().build())
+              .build()
       firestore.firestoreSettings = settings
     } catch (e: Exception) {
       // Persistence may already be enabled or unavailable
@@ -173,7 +178,7 @@ fun OfflineIndicator() {
       modifier = Modifier.padding(8.dp),
       containerColor = MaterialTheme.colorScheme.errorContainer,
       contentColor = MaterialTheme.colorScheme.onErrorContainer) {
-        Text("⚠️ You are offline. Some features are disabled.")
+        Text(stringResource(R.string.offline_indicator_message))
       }
 }
 
