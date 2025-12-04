@@ -437,7 +437,7 @@ private fun SaveButton(
     onRegisterPressed: () -> Unit,
     isOnline: Boolean = true
 ) {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
   Button(
       onClick = {
@@ -448,9 +448,9 @@ private fun SaveButton(
               profileViewModel.setRegisterPressed(true)
               if (profileViewModel.canRegister()) {
                 profileViewModel.submit { success ->
-                    if (success) {
-                        onRegisterPressed()
-                    }
+                  if (success) {
+                    onRegisterPressed()
+                  }
                 }
               }
             }
