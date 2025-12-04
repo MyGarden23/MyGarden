@@ -3,6 +3,7 @@ package com.android.mygarden.ui.friendsRequests
 import app.cash.turbine.test
 import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.friends.FriendRequestStatus
+import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeFriendRequestsRepository
@@ -47,11 +48,23 @@ class FriendsRequestsPopupViewModelTest {
     vm =
         FriendsRequestsPopupViewModel(friendsRepo = fakeFriendsRepo, userProfileRepo = fakeUserRepo)
 
-    fakeUserRepo.profiles["sender"] =
-        UserProfile(id = "sender", pseudo = "alice", avatar = Avatar.A10)
+      fakeUserRepo.profiles["sender-A"] =
+          UserProfile(
+              id = "sender-A",
+              pseudo = "alice",
+              avatar = Avatar.A10,
+              gardeningSkill = GardeningSkill.NOVICE.name,
+              favoritePlant = "rose",
+          )
 
-    fakeUserRepo.profiles["bob"] = UserProfile("bob", "Bob", Avatar.A11)
-  }
+      fakeUserRepo.profiles["sender-B"] =
+          UserProfile(
+              id = "sender-B",
+              pseudo = "bob",
+              avatar = Avatar.A11,
+              gardeningSkill = GardeningSkill.INTERMEDIATE.name,
+              favoritePlant = "tulip",
+          )}
 
   @Test
   fun emits_FriendRequestUiModel_when_new_incoming_request_arrives() = runTest {
@@ -103,7 +116,7 @@ class FriendsRequestsPopupViewModelTest {
 
       val second = awaitItem()
       assertEquals("req-B", second.request.id)
-      assertEquals("alice", second.senderPseudo)
+      assertEquals("bob", second.senderPseudo)
     }
   }
 
