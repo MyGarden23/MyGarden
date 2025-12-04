@@ -2,14 +2,21 @@ package com.android.mygarden.ui.friendsRequests
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
+import com.android.mygarden.model.gardenactivity.ActivityRepository
+import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /**
@@ -17,7 +24,10 @@ import kotlinx.coroutines.launch
  *
  * @property pendingRequestsUsers the list of [UserProfile] that have asked the user to be friends
  */
-data class FriendsRequestsUIState(val pendingRequestsUsers: List<UserProfile> = emptyList())
+data class FriendsRequestsUIState(
+    val pendingRequestsUsers: List<UserProfile> = emptyList(),
+    val pendingRequests: List<FriendRequest> = emptyList()
+)
 
 /**
  * View Model that handles interactions between the model (both repositories below) and the UI (here
@@ -29,7 +39,10 @@ data class FriendsRequestsUIState(val pendingRequestsUsers: List<UserProfile> = 
  */
 class FriendsRequestsViewModel(
     private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
-    private val requestsRepo: FriendRequestsRepository = FriendRequestsRepositoryProvider.repository
+    private val requestsRepo: FriendRequestsRepository =
+        FriendRequestsRepositoryProvider.repository,
+    private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository,
+    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FriendsRequestsUIState())
@@ -46,7 +59,8 @@ class FriendsRequestsViewModel(
       requestsRepo.incomingRequests().collect { incoming ->
         // transform it into UserProfiles if the users are found (still active accounts)
         val users = incoming.mapNotNull { userProfileRepo.getUserProfile(it.fromUserId) }
-        _uiState.value = _uiState.value.copy(pendingRequestsUsers = users)
+        _uiState.value =
+            _uiState.value.copy(pendingRequests = incoming, pendingRequestsUsers = users)
       }
     }
   }
@@ -56,8 +70,20 @@ class FriendsRequestsViewModel(
    *
    * @param newFriendId the id of the user that has been accepted
    */
-  fun acceptRequest(newFriendId: String) {
-    viewModelScope.launch { requestsRepo.acceptRequest(newFriendId) }
+  fun acceptRequest(requestId: String, newFriendId: String, newFriendPseudo: String) {
+    viewModelScope.launch {
+      // accept the friend request
+      requestsRepo.acceptRequest(requestId)
+      // add the new activity that 2 users have become friends
+      val currentUserPseudo = profileRepo.getProfile().firstOrNull()?.pseudo ?: ""
+      val currentUserId = activityRepo.getCurrentUserId() ?: ""
+      activityRepo.addActivity(
+          ActivityAddFriend(
+              userId = currentUserId,
+              pseudo = currentUserPseudo,
+              friendUserId = newFriendId,
+              friendPseudo = newFriendPseudo))
+    }
   }
 
   /**

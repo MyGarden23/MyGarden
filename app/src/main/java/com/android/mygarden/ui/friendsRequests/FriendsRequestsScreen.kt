@@ -91,6 +91,7 @@ fun FriendsRequestsScreen(
 ) {
   val uiState by requestsViewModel.uiState.collectAsState()
   val requestsUsers = uiState.pendingRequestsUsers
+  val requests = uiState.pendingRequests
 
   Scaffold(
       modifier = modifier.testTag(NavigationTestTags.FRIENDS_REQUESTS_SCREEN),
@@ -104,7 +105,7 @@ fun FriendsRequestsScreen(
         Column(modifier = modifier.fillMaxSize().padding(pd)) {
           // creates a space between the top bar and the first request for better design
           Spacer(modifier = modifier.height(CONSTANTS.FIRST_REQUEST_SPACER))
-          if (requestsUsers.isEmpty()) {
+          if (requests.isEmpty()) {
             // displays a text saying the user has no friend request at the center of the screen if
             // no request
             Box(
@@ -122,10 +123,16 @@ fun FriendsRequestsScreen(
                 verticalArrangement = Arrangement.spacedBy(CONSTANTS.BETWEEN_REQUESTS_SPACE)) {
                   items(requestsUsers.size) {
                     val potentialFriend = requestsUsers[it]
+                    val correspondingRequest = requests[it]
                     RequestItem(
                         potentialNewFriend = potentialFriend,
-                        onRefuse = { requestsViewModel.declineRequest(potentialFriend.id) },
-                        onAccept = { requestsViewModel.acceptRequest(potentialFriend.id) })
+                        onRefuse = { requestsViewModel.declineRequest(correspondingRequest.id) },
+                        onAccept = {
+                          requestsViewModel.acceptRequest(
+                              requestId = correspondingRequest.id,
+                              newFriendId = potentialFriend.id,
+                              newFriendPseudo = potentialFriend.pseudo)
+                        })
                   }
                 }
           }

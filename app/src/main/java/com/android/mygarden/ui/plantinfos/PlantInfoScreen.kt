@@ -262,7 +262,7 @@ fun PlantInfosScreen(
                       .weight(1f) // Takes remaining space between tabs and bottom button
                       .background(MaterialTheme.colorScheme.background)
                       .testTag(PlantInfoScreenTestTags.CONTENT_CONTAINER)) {
-                PlantInfoTabContent(uiState, descriptionScrollState, healthScrollState, context)
+                PlantInfoTabContent(uiState, descriptionScrollState, healthScrollState)
               }
         }
         // PopUp Tips dialog
@@ -500,14 +500,12 @@ private fun PlantInfoBottomBar(
  * @param uiState The current UI state containing selected tab and data.
  * @param descriptionScrollState Scroll state used for the Description tab.
  * @param healthScrollState Scroll state used for the Health tab.
- * @param context Android context used for string formatting.
  */
 @Composable
 private fun PlantInfoTabContent(
     uiState: PlantInfoUIState,
     descriptionScrollState: ScrollState,
     healthScrollState: ScrollState,
-    context: Context
 ) {
   Column(
       modifier =
