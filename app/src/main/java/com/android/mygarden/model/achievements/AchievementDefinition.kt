@@ -1,5 +1,7 @@
 package com.android.mygarden.model.achievements
 
+import androidx.annotation.Keep
+
 /**
  * Enum class that represents every type of achievement a user can have.
  * - [AchievementType.PLANTS_NUMBER] : users have reached a certain amount of plants in their
@@ -9,6 +11,7 @@ package com.android.mygarden.model.achievements
  * - [AchievementType.HEALTHY_STREAK]: users have have managed to have a plant that has been through
  *   its watering frequency while staying in a HEALTHY or SLIGHTLY_DRY status.
  */
+@Keep
 enum class AchievementType {
   PLANTS_NUMBER,
   FRIENDS_NUMBER,
@@ -136,6 +139,7 @@ object Achievements {
  * @property currentValue the current numeric value associated with this achievement for the user.
  *   The value
  */
+@Keep
 data class UserAchievementProgress(
     val achievementType: AchievementType = AchievementType.PLANTS_NUMBER,
     val currentValue: Int = 0
