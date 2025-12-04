@@ -48,23 +48,24 @@ class FriendsRequestsPopupViewModelTest {
     vm =
         FriendsRequestsPopupViewModel(friendsRepo = fakeFriendsRepo, userProfileRepo = fakeUserRepo)
 
-      fakeUserRepo.profiles["sender-A"] =
-          UserProfile(
-              id = "sender-A",
-              pseudo = "alice",
-              avatar = Avatar.A10,
-              gardeningSkill = GardeningSkill.NOVICE.name,
-              favoritePlant = "rose",
-          )
+    fakeUserRepo.profiles["sender-A"] =
+        UserProfile(
+            id = "sender-A",
+            pseudo = "alice",
+            avatar = Avatar.A10,
+            gardeningSkill = GardeningSkill.NOVICE.name,
+            favoritePlant = "rose",
+        )
 
-      fakeUserRepo.profiles["sender-B"] =
-          UserProfile(
-              id = "sender-B",
-              pseudo = "bob",
-              avatar = Avatar.A11,
-              gardeningSkill = GardeningSkill.INTERMEDIATE.name,
-              favoritePlant = "tulip",
-          )}
+    fakeUserRepo.profiles["sender-B"] =
+        UserProfile(
+            id = "sender-B",
+            pseudo = "bob",
+            avatar = Avatar.A11,
+            gardeningSkill = GardeningSkill.INTERMEDIATE.name,
+            favoritePlant = "tulip",
+        )
+  }
 
   @Test
   fun emits_FriendRequestUiModel_when_new_incoming_request_arrives() = runTest {
