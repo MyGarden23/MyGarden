@@ -39,13 +39,16 @@ object OfflineStateManager {
             "OfflineStateManager not initialized. Call initialize() first.")
   }
 
-  /** Updates the online state. */
+  /**
+   * Updates the online state based on connectivity changes.
+   *
+   * This function should ONLY be called by the connectivity observer flow collector (typically in
+   * MainActivity) and not arbitrarily by other parts of the app. The network state is the single
+   * source of truth determined by the Android system's ConnectivityManager callbacks.
+   *
+   * @param isOnline true if connected to internet, false if disconnected
+   */
   fun setOnlineState(isOnline: Boolean) {
     _isOnline.value = isOnline
-  }
-
-  /** Checks if the device is currently online. */
-  fun isCurrentlyOnline(): Boolean {
-    return connectivityObserver?.isConnected() ?: true
   }
 }
