@@ -30,8 +30,8 @@ class FakeAchievementsRepository : AchievementsRepository {
   ) {
     val index = addedAchievements.indexOfFirst { it.achievementType == achievementType }
     if (index != -1) {
-      val value = addedAchievements[index]
-      val newVal = value.copy(currentValue = value.currentValue)
+      val v = addedAchievements[index]
+      val newVal = v.copy(currentValue = value)
       addedAchievements[index] = newVal
     }
   }
