@@ -2,7 +2,6 @@ package com.android.mygarden.utils
 
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileRepository
-import com.android.mygarden.ui.profile.Avatar
 
 /**
  * A simple in-memory fake implementation of [UserProfileRepository] for unit tests.
@@ -26,6 +25,5 @@ class FakeUserProfileRepository : UserProfileRepository {
    * Returns the profile stored for the given [userId], or `null` if no profile has been set for
    * that id.
    */
-  override suspend fun getUserProfile(userId: String): UserProfile? =
-      UserProfile(userId, "alice", Avatar.A3)
+  override suspend fun getUserProfile(userId: String): UserProfile? = profiles[userId]
 }

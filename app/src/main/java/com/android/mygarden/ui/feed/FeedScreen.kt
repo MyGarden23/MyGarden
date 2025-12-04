@@ -54,13 +54,14 @@ private val IN_CARD_ROW_PADDING = 6.dp
 private val IN_CARD_ACTIVITY_TITLE_SIZE = 18.sp
 private val IN_CARD_ACTIVITY_TITLE_OPACITY = 0.5f
 private val IN_CARD_ACTIVITY_ICON_OPACITY = 0.5f
-private val IN_CARD_TEXT_WEIGHT = 1f
+private val WEIGHT_1 = 1f
 private val IN_CARD_TEXT_HORIZONTAL_PADDING = 8.dp
 private val NO_ACTIVITY_MSG_PADDING = 40.dp
 
 /*---------------- TEST TAGS FOR ALL COMPONENTS OF THE SCREEN --------------*/
 object FeedScreenTestTags {
   const val ADD_FRIEND_BUTTON = "AddFriendButton"
+  const val FRIEND_LIST_BUTTON = "FriendListButton"
   const val NO_ACTIVITY_MESSAGE = "NoActivityMessage"
   const val ADDED_PLANT_DESCRIPTION = "AddedPlantDescription"
   const val ADDED_FRIEND_DESCRIPTION = "AddedFriendDescription"
@@ -86,7 +87,8 @@ data class CardColorPalette(val backgroundColor: Color, val textColor: Color)
 fun FeedScreen(
     modifier: Modifier = Modifier,
     feedViewModel: FeedViewModel = viewModel(),
-    onAddFriend: () -> Unit = {}
+    onAddFriend: () -> Unit = {},
+    onFriendList: () -> Unit = {}
 ) {
 
   val uiState by feedViewModel.uiState.collectAsState()
@@ -100,38 +102,50 @@ fun FeedScreen(
       topBar = { TopBar(title = stringResource(R.string.feed_screen_title)) },
       containerColor = MaterialTheme.colorScheme.background,
       content = { pd ->
-        Column(modifier = modifier.fillMaxWidth().padding(pd)) {
+        Column(modifier = modifier.fillMaxSize().padding(pd)) {
           // Row for the button - we want it below the top bar but above the activities
           Row(
               modifier =
                   modifier.fillMaxWidth().padding(horizontal = BUTTON_ROW_HORIZONTAL_PADDING),
               horizontalArrangement = Arrangement.End) {
-                AddFriendButton(modifier, onAddFriend)
+                FriendListButton(modifier, onFriendList)
               }
           // space between button and activities
           Spacer(modifier = modifier.height(BETWEEN_BUTTON_AND_ACTIVITIES_SPACER_PADDING))
-          if (activities.isEmpty()) {
-            // display a specific message if there are no activity to display
-            Box(
-                modifier =
-                    modifier
-                        .fillMaxSize()
-                        .padding(NO_ACTIVITY_MSG_PADDING)
-                        .testTag(FeedScreenTestTags.NO_ACTIVITY_MESSAGE),
-                contentAlignment = Alignment.Center) {
-                  Text(text = stringResource(R.string.no_activity_message))
-                }
-          } else {
-            LazyColumn(
-                modifier =
-                    modifier.fillMaxWidth().padding(horizontal = LAZY_COLUMN_HORIZONTAL_PADDING),
-                verticalArrangement =
-                    Arrangement.spacedBy(VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING)) {
-                  items(activities.size) { index ->
-                    ActivityItem(modifier = modifier, activity = activities[index])
+
+          Box(modifier = Modifier.weight(WEIGHT_1).fillMaxWidth()) {
+            if (activities.isEmpty()) {
+              // display a specific message if there are no activity to display
+              Box(
+                  modifier =
+                      modifier
+                          .fillMaxSize()
+                          .padding(NO_ACTIVITY_MSG_PADDING)
+                          .testTag(FeedScreenTestTags.NO_ACTIVITY_MESSAGE),
+                  contentAlignment = Alignment.Center) {
+                    Text(text = stringResource(R.string.no_activity_message))
                   }
-                }
+            } else {
+              LazyColumn(
+                  modifier =
+                      modifier.fillMaxWidth().padding(horizontal = LAZY_COLUMN_HORIZONTAL_PADDING),
+                  verticalArrangement =
+                      Arrangement.spacedBy(VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING)) {
+                    items(activities.size) { index ->
+                      ActivityItem(modifier = modifier, activity = activities[index])
+                    }
+                  }
+            }
           }
+          Row(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(
+                          end = BUTTON_ROW_HORIZONTAL_PADDING,
+                          bottom = BUTTON_ROW_HORIZONTAL_PADDING),
+              horizontalArrangement = Arrangement.End) {
+                AddFriendButton(modifier = Modifier, onClick = onAddFriend)
+              }
         }
       })
 }
@@ -146,6 +160,19 @@ fun FeedScreen(
 fun AddFriendButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
   Button(modifier = modifier.testTag(FeedScreenTestTags.ADD_FRIEND_BUTTON), onClick = onClick) {
     Text(stringResource(R.string.add_friend_button))
+  }
+}
+
+/**
+ * The button to see your friend list
+ *
+ * @param modifier the used modifier for the composable
+ * @param onClick the callback to be triggered when the user clicks on the button
+ */
+@Composable
+fun FriendListButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
+  Button(modifier = modifier.testTag(FeedScreenTestTags.FRIEND_LIST_BUTTON), onClick = onClick) {
+    Text(stringResource(R.string.friend_list_button))
   }
 }
 
@@ -211,7 +238,7 @@ fun AddedAPlantCard(
         Text(
             modifier =
                 modifier
-                    .weight(IN_CARD_TEXT_WEIGHT)
+                    .weight(WEIGHT_1)
                     .padding(horizontal = IN_CARD_TEXT_HORIZONTAL_PADDING)
                     .testTag(FeedScreenTestTags.ADDED_PLANT_DESCRIPTION),
             color = MaterialTheme.colorScheme.onPrimaryContainer,

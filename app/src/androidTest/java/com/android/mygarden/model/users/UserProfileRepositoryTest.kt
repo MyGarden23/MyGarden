@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FirestoreProfileTest
@@ -66,6 +67,8 @@ class UserProfileRepositoryTest : FirestoreProfileTest() {
     val userId = "user-123"
     val pseudo = "Matteo"
     val avatarString = "A9"
+    val gardeningSkill = GardeningSkill.NOVICE.name
+    val favoritePlant = "Rose"
 
     // Arrange: create a user document in the emulator
     db.collection("users")
@@ -74,7 +77,8 @@ class UserProfileRepositoryTest : FirestoreProfileTest() {
             mapOf(
                 "pseudo" to pseudo,
                 "avatar" to avatarString,
-            ))
+                "gardeningSkill" to gardeningSkill,
+                "favoritePlant" to favoritePlant))
         .await()
 
     // Act
@@ -86,17 +90,26 @@ class UserProfileRepositoryTest : FirestoreProfileTest() {
     assertEquals(userId, profile.id)
     assertEquals(pseudo, profile.pseudo)
     assertEquals(Avatar.A9, profile.avatar)
+    assertEquals(gardeningSkill, profile.gardeningSkill)
+    assertEquals(favoritePlant, profile.favoritePlant)
   }
 
   @Test
   fun getUserProfile_uses_default_avatar_when_invalid_avatar_string() = runTest {
     val userId = "user-invalid-avatar"
     val pseudo = "BrokenAvatarUser"
+    val gardeningSkill = GardeningSkill.NOVICE.name
+    val favoritePlant = "Sunflower"
 
     // Store an invalid avatar value that does not exist in the enum
     db.collection("users")
         .document(userId)
-        .set(mapOf("pseudo" to pseudo, "avatar" to "THIS_IS_NOT_A_VALID_AVATAR"))
+        .set(
+            mapOf(
+                "pseudo" to pseudo,
+                "avatar" to "THIS_IS_NOT_A_VALID_AVATAR",
+                "gardeningSkill" to gardeningSkill,
+                "favoritePlant" to favoritePlant))
         .await()
 
     val profile = userProfileRepo.getUserProfile(userId)

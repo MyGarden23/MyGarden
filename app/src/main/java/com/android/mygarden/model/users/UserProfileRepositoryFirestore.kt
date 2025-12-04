@@ -20,11 +20,15 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
     if (!snapshot.exists()) return null
 
     val pseudo = snapshot.getString("pseudo") ?: return null
+
     val avatar =
         snapshot.getString("avatar")?.let { avatarString ->
           runCatching { Avatar.valueOf(avatarString) }.getOrNull()
         } ?: Avatar.A1
 
-    return UserProfile(id = userId, pseudo = pseudo, avatar = avatar)
+    val gardeningSkill = snapshot.getString("gardeningSkill") ?: return null
+    val favoritePlant = snapshot.getString("favoritePlant") ?: return null
+
+    return UserProfile(id = userId, pseudo = pseudo, avatar = avatar, gardeningSkill, favoritePlant)
   }
 }
