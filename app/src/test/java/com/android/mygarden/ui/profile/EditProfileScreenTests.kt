@@ -53,7 +53,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
 
     val repo = FakeProfileRepository()
     val repoPseudo = FakePseudoRepository()
-      AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     val vm = ProfileViewModel(repo, repoPseudo)
 
     // Set up the EditProfileScreen with a test callback
@@ -73,7 +73,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
   override fun setContentWithFakeRepo() {
     val repo = FakeProfileRepository()
     val repoPseudo = FakePseudoRepository()
-      AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     val vm = ProfileViewModel(repo, repoPseudo)
     onSavePressedCalled = false
 
@@ -88,7 +88,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
   private fun setContentWithProfile(profile: Profile, pseudo: String) {
     val repo = FakeProfileRepository(profile)
     val repoPseudo = FakePseudoRepository()
-      AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     val vm = ProfileViewModel(repo, repoPseudo)
     onSavePressedCalled = false
     onBackPressedCalled = false

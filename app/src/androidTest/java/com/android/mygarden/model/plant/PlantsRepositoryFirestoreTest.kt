@@ -98,7 +98,24 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
             wateringFrequency = ownedPlant.plant.wateringFrequency,
             previousLastWatered = ownedPlant.previousLastWatered)
     val updatedPlant = ownedPlant.plant.copy(healthStatus = calculatedStatus)
-    return ownedPlant.copy(plant = updatedPlant)
+
+    // Handle the transition to and from HEALTHY/SLIGHTLY_DRY for the healthy streak achievement
+    val isNowHealthy =
+        calculatedStatus == PlantHealthStatus.HEALTHY ||
+            calculatedStatus == PlantHealthStatus.SLIGHTLY_DRY
+    val wasHealthy =
+        ownedPlant.plant.healthStatus == PlantHealthStatus.HEALTHY ||
+            ownedPlant.plant.healthStatus == PlantHealthStatus.SLIGHTLY_DRY
+
+    // Set the healthySince if the plant goes from HEALTHY/SLIGHTLY_DRY to another status
+    val newHealthySince =
+        when {
+          !wasHealthy && isNowHealthy -> Timestamp(System.currentTimeMillis())
+          wasHealthy && !isNowHealthy -> null
+          else -> ownedPlant.healthySince
+        }
+
+    return ownedPlant.copy(plant = updatedPlant, healthySince = newHealthySince)
   }
 
   /*-------------------------- FICTIONAL PLANTS -------------------*/

@@ -78,8 +78,7 @@ class ProfileViewModelTest {
     AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     viewModel =
         ProfileViewModel(
-            profileRepository = FakeProfileRepository(),
-            pseudoRepository = FakePseudoRepository())
+            profileRepository = FakeProfileRepository(), pseudoRepository = FakePseudoRepository())
 
     fakeCountries =
         listOf("Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda")
