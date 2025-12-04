@@ -5,7 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.mygarden.R
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FakePseudoRepository
 import org.junit.Rule
@@ -36,6 +38,7 @@ class NewProfileScreenTests : ProfileScreenTestBase() {
     onSavePressedCalled = false
     val repo = FakeProfileRepository()
     val repoPseudo = FakePseudoRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     val vm = ProfileViewModel(repo, repoPseudo)
 
     // Set up the NewProfileScreen with a test callback

@@ -1,5 +1,6 @@
 package com.android.mygarden.model.gardenactivity
 
+import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
@@ -42,7 +43,7 @@ object ActivityMapper {
               userId = activity.userId,
               pseudo = activity.pseudo,
               createdAt = activity.createdAt.time,
-              achievementName = activity.achievementName)
+              achievementType = activity.achievementType.name)
       is ActivityAddFriend ->
           SerializedAddFriend(
               userId = activity.userId,
@@ -103,7 +104,7 @@ object ActivityMapper {
             userId = serializedActivity.userId,
             pseudo = serializedActivity.pseudo,
             createdAt = Timestamp(serializedActivity.createdAt),
-            achievementName = serializedActivity.achievementName,
+            achievementType = AchievementType.valueOf(serializedActivity.achievementType),
         )
       }
       is SerializedAddFriend -> {

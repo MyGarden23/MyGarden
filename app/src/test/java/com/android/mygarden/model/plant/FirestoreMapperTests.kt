@@ -27,11 +27,17 @@ class FirestoreMapperTests {
 
   private val ownedPlantRecognized =
       OwnedPlant(
-          id = "1", plant = recognizedPlant, lastWatered = Timestamp(System.currentTimeMillis()))
+          id = "1",
+          plant = recognizedPlant,
+          lastWatered = Timestamp(System.currentTimeMillis()),
+          healthySince = Timestamp(System.currentTimeMillis()))
 
   private val ownedPlantUnrecognized =
       OwnedPlant(
-          id = "2", plant = unrecognizedPlant, lastWatered = Timestamp(System.currentTimeMillis()))
+          id = "2",
+          plant = unrecognizedPlant,
+          lastWatered = Timestamp(System.currentTimeMillis()),
+          healthySince = null)
 
   @Test
   fun firestoreMapper_correctly_maps_recognized_plant() = runTest {

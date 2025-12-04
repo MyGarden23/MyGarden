@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
@@ -68,7 +69,8 @@ class FeedScreenTests {
       ActivityWaterPlant("uid1", "gregory", Timestamp(System.currentTimeMillis()), ownedPlant1)
 
   val gotAchievementActivity =
-      ActivityAchievement("uid1", "gregory", Timestamp(System.currentTimeMillis()), "achievement")
+      ActivityAchievement(
+          "uid1", "gregory", Timestamp(System.currentTimeMillis()), AchievementType.PLANTS_NUMBER)
 
   /*------------------- FAKE ACTIVITY REPOSITORY -----------------*/
   private class FakeActivityRepository : ActivityRepository {

@@ -447,13 +447,11 @@ private fun SaveButton(
             offlineMessageResId = OfflineMessages.CANNOT_SAVE_PROFILE) {
               profileViewModel.setRegisterPressed(true)
               if (profileViewModel.canRegister()) {
-                profileViewModel.submit(
-                    { success ->
-                      if (success) {
-                        onRegisterPressed()
-                      }
-                    },
-                    context)
+                profileViewModel.submit { success ->
+                  if (success) {
+                    onRegisterPressed()
+                  }
+                }
               }
             }
       },

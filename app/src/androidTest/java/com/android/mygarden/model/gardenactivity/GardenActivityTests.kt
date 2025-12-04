@@ -1,6 +1,7 @@
 package com.android.mygarden.model.gardenactivity
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
@@ -82,7 +83,7 @@ class GardenActivityTests {
             userId = uid,
             pseudo = "Achiever",
             createdAt = Timestamp(System.currentTimeMillis()),
-            achievementName = "Gained Badge")
+            achievementType = AchievementType.PLANTS_NUMBER)
 
     // Add activity
     activityRepo.addActivity(activityAchievement)
@@ -106,7 +107,7 @@ class GardenActivityTests {
             userId = uid,
             pseudo = "UserFeed",
             createdAt = Timestamp(System.currentTimeMillis()),
-            achievementName = "Gained Badge")
+            achievementType = AchievementType.PLANTS_NUMBER)
 
     val activity2 =
         ActivityAddedPlant(
@@ -184,7 +185,7 @@ class GardenActivityTests {
             userId = uid,
             pseudo = "FeedUser",
             createdAt = Timestamp(System.currentTimeMillis()),
-            achievementName = "Gained Badge")
+            achievementType = AchievementType.PLANTS_NUMBER)
 
     val addedPlant =
         ActivityAddedPlant(
@@ -233,7 +234,7 @@ class GardenActivityTests {
             userId = currentUserId,
             pseudo = "CurrentUser",
             createdAt = Timestamp(System.currentTimeMillis()),
-            achievementName = "Current User Badge")
+            achievementType = AchievementType.PLANTS_NUMBER)
 
     val activityOtherUser =
         ActivityAddedPlant(

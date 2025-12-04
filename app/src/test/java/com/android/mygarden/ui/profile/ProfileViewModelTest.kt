@@ -1,9 +1,11 @@
 package com.android.mygarden.ui.profile
 
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.PseudoRepository
+import com.android.mygarden.utils.FakeAchievementsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -73,6 +75,7 @@ class ProfileViewModelTest {
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     viewModel =
         ProfileViewModel(
             profileRepository = FakeProfileRepository(), pseudoRepository = FakePseudoRepository())

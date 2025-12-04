@@ -8,10 +8,12 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.mygarden.R
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FakePseudoRepository
 import org.junit.Assert.assertEquals
@@ -51,6 +53,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
 
     val repo = FakeProfileRepository()
     val repoPseudo = FakePseudoRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     val vm = ProfileViewModel(repo, repoPseudo)
 
     // Set up the EditProfileScreen with a test callback
@@ -70,6 +73,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
   override fun setContentWithFakeRepo() {
     val repo = FakeProfileRepository()
     val repoPseudo = FakePseudoRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     val vm = ProfileViewModel(repo, repoPseudo)
     onSavePressedCalled = false
 
@@ -84,6 +88,7 @@ class EditProfileScreenTests : ProfileScreenTestBase() {
   private fun setContentWithProfile(profile: Profile, pseudo: String) {
     val repo = FakeProfileRepository(profile)
     val repoPseudo = FakePseudoRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     val vm = ProfileViewModel(repo, repoPseudo)
     onSavePressedCalled = false
     onBackPressedCalled = false

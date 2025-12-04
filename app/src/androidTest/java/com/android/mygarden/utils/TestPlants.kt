@@ -85,7 +85,7 @@ object TestPlants {
           image = null,
           latinName = "laurem ipsum",
           description = "edge plant that will soon be thirsty",
-          healthStatus = PlantHealthStatus.UNKNOWN,
+          healthStatus = PlantHealthStatus.SLIGHTLY_DRY,
           wateringFrequency = 1)
 
   val healthyAloeVera: Plant =
