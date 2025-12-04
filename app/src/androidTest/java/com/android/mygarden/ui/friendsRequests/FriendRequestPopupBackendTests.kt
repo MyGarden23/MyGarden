@@ -11,6 +11,7 @@ import com.android.mygarden.MyGardenApp
 import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.friends.FriendRequestStatus
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
+import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.garden.GardenScreenTestTags
@@ -68,7 +69,12 @@ class FriendRequestPopupBackendTests {
 
   private fun emitFriendRequest(senderId: String, senderPseudo: String) = runTest {
     fakeUserRepo.profiles[senderId] =
-        UserProfile(id = senderId, pseudo = senderPseudo, avatar = Avatar.A11)
+        UserProfile(
+            id = senderId,
+            pseudo = senderPseudo,
+            avatar = Avatar.A11,
+            GardeningSkill.NOVICE.name,
+            "rose")
 
     val req =
         FriendRequest(
