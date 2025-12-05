@@ -28,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -183,6 +184,7 @@ fun GardenScreen(
       },
       // The button to add a new plant to the collection
       floatingActionButton = { AddPlantFloatingButton(onAddPlant, modifier, isOnline) },
+      floatingActionButtonPosition = FabPosition.Start,
       containerColor = MaterialTheme.colorScheme.background,
       content = { pd ->
         Column(modifier = modifier.fillMaxWidth().padding(pd)) {
