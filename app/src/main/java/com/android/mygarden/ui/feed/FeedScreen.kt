@@ -95,7 +95,7 @@ fun FeedScreen(
     feedViewModel: FeedViewModel = viewModel(),
     onAddFriend: () -> Unit = {},
     onNotifClick: () -> Unit = {},
-    onFriendList: () -> Unit = {}
+    onFriendList: () -> Unit = {},
 ) {
 
   val uiState by feedViewModel.uiState.collectAsState()
@@ -108,6 +108,7 @@ fun FeedScreen(
       modifier = modifier.testTag(NavigationTestTags.FEED_SCREEN),
       topBar = { TopBar(title = stringResource(R.string.feed_screen_title)) },
       containerColor = MaterialTheme.colorScheme.background,
+      floatingActionButton = { AddFriendButton(modifier = Modifier, onClick = onAddFriend) },
       content = { pd ->
         Column(modifier = modifier.fillMaxSize().padding(pd)) {
           // Buttons - we want them below the top bar but above the activities
@@ -145,15 +146,6 @@ fun FeedScreen(
                   }
             }
           }
-          Row(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(
-                          end = BUTTON_ROW_HORIZONTAL_PADDING,
-                          bottom = BUTTON_ROW_HORIZONTAL_PADDING),
-              horizontalArrangement = Arrangement.End) {
-                AddFriendButton(modifier = Modifier, onClick = onAddFriend)
-              }
         }
       })
 }

@@ -107,12 +107,15 @@ fun FriendListScreen(
               Spacer(modifier = Modifier.fillMaxHeight(FRACTION_SPACER))
 
               if (uiState.friends.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                  Text(
-                      text = stringResource(R.string.friend_list_no_friend),
-                      modifier = Modifier.testTag(FriendListScreenTestTags.NO_FRIEND),
-                      style = MaterialTheme.typography.bodyLarge)
-                }
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 16.dp),
+                    contentAlignment = Alignment.Center) {
+                      Text(
+                          text = stringResource(R.string.friend_list_no_friend),
+                          modifier = Modifier.testTag(FriendListScreenTestTags.NO_FRIEND),
+                          style = MaterialTheme.typography.bodyLarge,
+                          textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    }
               } else {
                 Column(
                     modifier =
