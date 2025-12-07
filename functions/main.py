@@ -8,6 +8,7 @@ This module:
 
 from enum import Enum
 from firebase_functions import scheduler_fn
+from firebase_functions import https_fn, options
 from firebase_admin import initialize_app, firestore, messaging
 from datetime import datetime, timezone, timedelta
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -99,6 +100,89 @@ def _get_user_token(uid: str) -> str | None:
     data = doc.to_dict() or {}
     token = data.get("fcmToken") or None
     return token if isinstance(token, str) else None
+
+def _send_friend_request_notification(target_uid: str, from_pseudo: str) -> bool:
+    """
+    Send a push notification to the user with UID `target_uid`
+    telling them that `from_pseudo` sent a friend request.
+
+    Args:
+        target_uid (str): The user receiving the friend request
+        from_pseudo (str): The pseudo of the user who sent the request
+
+    Returns:
+        bool: True if notification sent successfully, False otherwise
+    """
+    token = _get_user_token(target_uid)
+    if token is None:
+        logging.info(f"No valid FCM token found for user {target_uid}. No friend request notification sent.")
+        return False
+
+    message = messaging.Message(
+        token=token,
+        notification=messaging.Notification(
+            title="New Friend Request 🤝",
+            body=f"{from_pseudo} wants to be your friend!"
+        ),
+        data={
+                "type": "FRIEND_REQUEST",
+            "fromPseudo": from_pseudo,
+        }
+    )
+
+    for attempt in range(1, MAX_RETRY_ATTEMPTS + 1):
+        try:
+            response = messaging.send(message)
+            logging.info(
+                f"Friend request notification sent to {target_uid} "
+                f"on attempt {attempt} | response={response}"
+            )
+            return True
+
+        except messaging.UnregisteredError as e:
+            logging.warning(f"Unregistered token for user {target_uid} | {e}")
+            db.collection("users").document(target_uid).update({"fcmToken": firestore.DELETE_FIELD})
+            return False
+
+        except (messaging.QuotaExceededError, messaging.InternalError) as e:
+            if attempt < MAX_RETRY_ATTEMPTS:
+                logging.warning(
+                    f"Failed to send friend request notification to {target_uid}: {e} "
+                    f"| retry {attempt}/{MAX_RETRY_ATTEMPTS}"
+                )
+                backoff_time = BACKOFF_SECONDS * (2 ** (attempt - 1))
+                time.sleep(min(backoff_time, 8))
+            else:
+                logging.exception(
+                    f"Failed to send friend request notification to user {target_uid} "
+                    f"after {MAX_RETRY_ATTEMPTS} attempts | {e}"
+                )
+                return False
+
+        except Exception as e:
+            logging.exception(f"Error sending friend request notification to {target_uid} | {e}")
+            return False
+
+
+@https_fn.on_call()
+def send_friend_request_notification(req: https_fn.CallableRequest):
+    """
+    Firebase Callable Function that the Android app calls.
+    It triggers sending a friend request push notification.
+    """
+    data = req.data
+    target_uid = data.get("targetUid")
+    from_pseudo = data.get("fromPseudo")
+
+    if not target_uid or not from_pseudo:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message="Missing targetUid or fromPseudo"
+        )
+
+    success = _send_friend_request_notification(target_uid, from_pseudo)
+    return { "success": success }
+
 
 def _send_water_notification(uid: str, plant_id: str, plant_name: str, new_status: PlantHealthStatus) -> bool:
     """
