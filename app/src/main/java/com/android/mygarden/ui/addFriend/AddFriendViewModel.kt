@@ -6,11 +6,14 @@ import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.profile.PseudoRepository
 import com.android.mygarden.model.profile.PseudoRepositoryProvider
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
+import com.google.firebase.functions.FirebaseFunctions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,6 +47,8 @@ data class AddFriendUiState(
  * - [PseudoRepository] for searching users by pseudo prefix,
  * - [UserProfileRepository] for retrieving public user profiles (pseudo + avatar),
  * - [FriendsRepository] for adding a user to the current user's friend list.
+ * - [FriendRequestsRepository] for sending a friend request to a user.
+ * - [ProfileRepository] for retrieving the current user's profile and pseudo.
  *
  * The ViewModel maintains a small UI state ([AddFriendUiState]) containing the search query,
  * loading status, and search results. The logic for showing visual feedback is delegated to the UI
@@ -56,6 +61,7 @@ class AddFriendViewModel(
     private val userProfileRepository: UserProfileRepository =
         UserProfileRepositoryProvider.repository,
     private val pseudoRepository: PseudoRepository = PseudoRepositoryProvider.repository,
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(AddFriendUiState())
   val uiState: StateFlow<AddFriendUiState> = _uiState.asStateFlow()
@@ -128,10 +134,13 @@ class AddFriendViewModel(
    * [onError] is invoked.
    *
    * @param userId the user id of the one the current user wants to be friend with
+   * @param receiverPseudo the pseudo of the user to be friend with, we put a default value so that
+   *   the previous tests are still valid
    * @param onError Invoked if the operation fails for any reason.
    * @param onSuccess Invoked if the friend was added successfully.
    */
   fun onAsk(userId: String, onError: () -> Unit, onSuccess: () -> Unit) {
+
     viewModelScope.launch {
       _uiState.value =
           _uiState.value.let { state ->
@@ -143,6 +152,18 @@ class AddFriendViewModel(
           }
       try {
         requestsRepository.askFriend(userId)
+        val functions = FirebaseFunctions.getInstance()
+        functions
+            .getHttpsCallable("send_friend_request_notification")
+            .call(
+                mapOf(
+                    "targetUid" to userId,
+                    "fromPseudo" to
+                        profileRepository
+                            .getCurrentUserId()
+                            ?.let { userProfileRepository.getUserProfile(it) }
+                            ?.pseudo))
+
         onSuccess()
       } catch (_: Exception) {
         _uiState.value =

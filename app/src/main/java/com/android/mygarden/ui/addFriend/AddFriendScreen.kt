@@ -202,6 +202,7 @@ fun AddFriendScreen(
  * @param avatar The user's avatar.
  * @param relation The current relation status with the user.
  * @param viewModel ViewModel handling friend request actions.
+ * @param recvToken the token of the user to be able to send notifications
  * @param context Android context used for localized strings.
  */
 @Composable

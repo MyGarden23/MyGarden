@@ -2,6 +2,7 @@ package com.android.mygarden.utils
 
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendsRepository
+import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.PseudoRepository
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.ui.addFriend.AddFriendViewModel
@@ -15,13 +16,15 @@ fun createViewModel(
     friendsRepo: FriendsRepository = FakeFriendsRepository(),
     requestsRepo: FriendRequestsRepository = FakeFriendRequestsRepository(),
     userProfileRepo: UserProfileRepository = FakeUserProfileRepository(),
-    pseudoRepo: PseudoRepository = FakePseudoRepository()
+    pseudoRepo: PseudoRepository = FakePseudoRepository(),
+    profilRepo: ProfileRepository = FakeProfileRepository(),
 ): AddFriendViewModel =
     AddFriendViewModel(
         friendsRepository = friendsRepo,
         requestsRepository = requestsRepo,
         userProfileRepository = userProfileRepo,
-        pseudoRepository = pseudoRepo)
+        pseudoRepository = pseudoRepo,
+        profileRepository = profilRepo)
 
 /**
  * Test-only fake implementation of [PseudoRepository] used in this test class.

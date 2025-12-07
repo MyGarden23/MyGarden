@@ -6,6 +6,7 @@ import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
+import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPseudoRepository
 import com.android.mygarden.utils.createViewModel
@@ -46,6 +47,7 @@ class AddFriendViewModelTest {
     val fakeFriends = FakeFriendsRepository()
     val fakeRequests = FakeFriendRequestsRepository()
     val fakeUserProfile = FakeUserProfileRepository()
+    val fakeProfile = FakeProfileRepository()
     val fakePseudo =
         TestPseudoRepository().apply {
           searchResults = listOf("alice")
@@ -64,7 +66,8 @@ class AddFriendViewModelTest {
             friendsRepository = fakeFriends,
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
-            pseudoRepository = fakePseudo)
+            pseudoRepository = fakePseudo,
+            profileRepository = fakeProfile)
 
     // First: perform a search to populate results
     vm.onQueryChange("al")
@@ -108,6 +111,7 @@ class AddFriendViewModelTest {
     val fakeUserProfile = FakeUserProfileRepository()
     val fakeFriends = FakeFriendsRepository()
     val fakeRequests = FakeFriendRequestsRepository()
+    val fakeProfile = FakeProfileRepository()
 
     // Configure a test-specific pseudo repository that returns a single match.
     val fakePseudo =
@@ -130,7 +134,8 @@ class AddFriendViewModelTest {
             friendsRepository = fakeFriends,
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
-            pseudoRepository = fakePseudo)
+            pseudoRepository = fakePseudo,
+            profileRepository = fakeProfile)
 
     vm.onQueryChange("al")
 
