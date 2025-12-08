@@ -55,6 +55,11 @@ class PlantsRepositoryLocal(
     return _plants.value.toList()
   }
 
+  override suspend fun getAllOwnedPlantsByUserId(userId: String): List<OwnedPlant> {
+    // In local mode, we don't have multiple users, so just return all plants
+    return getAllOwnedPlants()
+  }
+
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
     val ownedPlant =
         requireNotNull(_plants.value.firstOrNull { it.id == id }) {
