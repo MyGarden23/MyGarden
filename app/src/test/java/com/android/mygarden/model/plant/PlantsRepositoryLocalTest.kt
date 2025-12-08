@@ -388,4 +388,19 @@ class PlantsRepositoryLocalTest {
       assertTrue(exception.message?.contains("different-id") == true)
     }
   }
+
+  @Test
+  fun getAllOwnedPlantsByUserId_returnsSameAsGetAllOwnedPlants() = runTest {
+    val plant1 = createTestPlant(name = "Rose")
+    val plant2 = createTestPlant(name = "Tulip")
+    val timestamp = Timestamp(System.currentTimeMillis())
+
+    repository.saveToGarden(plant1, "rose-1", timestamp)
+    repository.saveToGarden(plant2, "tulip-1", timestamp)
+
+    val all = repository.getAllOwnedPlants()
+    val byUser = repository.getAllOwnedPlantsByUserId("some-user-id")
+
+    assertEquals(all, byUser)
+  }
 }
