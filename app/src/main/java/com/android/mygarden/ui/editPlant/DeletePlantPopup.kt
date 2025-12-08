@@ -27,6 +27,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.android.mygarden.R
 
+/** Dimension constants for DeletePlantPopup */
+private val POPUP_HEIGHT = 136.dp
+private val POPUP_CORNER_RADIUS = 16.dp
+private val POPUP_PADDING = 16.dp
+private val SPACER_SMALL = 6.dp
+private val SPACER_MEDIUM = 12.dp
+private val BUTTON_CORNER_RADIUS = 16.dp
+
 /** Test tags for [DeletePlantPopup]. */
 object DeletePlantPopupTestTags {
   const val POPUP = "DeletePlantPopup"
@@ -50,14 +58,14 @@ fun DeletePlantPopup(onDelete: () -> Unit, onCancel: () -> Unit, modifier: Modif
       onDismissRequest = onCancel,
       content = {
         Card(
-            modifier = modifier.height(136.dp).testTag(DeletePlantPopupTestTags.POPUP),
-            shape = RoundedCornerShape(16.dp),
+            modifier = modifier.height(POPUP_HEIGHT).testTag(DeletePlantPopupTestTags.POPUP),
+            shape = RoundedCornerShape(POPUP_CORNER_RADIUS),
             colors =
                 CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
               Column(
-                  modifier = modifier.fillMaxSize().padding(16.dp),
+                  modifier = modifier.fillMaxSize().padding(POPUP_PADDING),
                   horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = context.getString(R.string.delete_plant_question),
@@ -65,14 +73,14 @@ fun DeletePlantPopup(onDelete: () -> Unit, onCancel: () -> Unit, modifier: Modif
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                         modifier = modifier.testTag(DeletePlantPopupTestTags.QUESTION))
-                    Spacer(modifier = modifier.height(6.dp))
+                    Spacer(modifier = modifier.height(SPACER_SMALL))
                     Text(
                         text = context.getString(R.string.delete_plant_description),
                         style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = modifier.testTag(DeletePlantPopupTestTags.DESCRIPTION))
-                    Spacer(modifier = modifier.height(12.dp))
+                    Spacer(modifier = modifier.height(SPACER_MEDIUM))
                     Row(
                         modifier = modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -112,7 +120,10 @@ private fun DeletePlantPopupButton(
     modifier: Modifier = Modifier
 ) {
   Button(
-      onClick = onClick, colors = colors, shape = RoundedCornerShape(16.dp), modifier = modifier) {
+      onClick = onClick,
+      colors = colors,
+      shape = RoundedCornerShape(BUTTON_CORNER_RADIUS),
+      modifier = modifier) {
         Text(text = text)
       }
 }
