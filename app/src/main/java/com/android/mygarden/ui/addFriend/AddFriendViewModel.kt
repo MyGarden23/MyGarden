@@ -20,6 +20,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/** Minimum number of characters required for a search query */
+private const val MIN_QUERY_LENGTH = 2
+
+/** String representations for FriendRelation enum values */
+private const val RELATION_ADD_STRING = "Add"
+private const val RELATION_ADDED_STRING = "Added"
+
 /**
  * UI state container for the *Add Friend* screen.
  *
@@ -74,8 +81,8 @@ class AddFriendViewModel(
    */
   fun onSearch(onError: () -> Unit) {
     val rawQuery = _uiState.value.query.trim().lowercase()
-    if (rawQuery.length < 2) {
-      onError() // create xml with "Please type at least 2 characters."
+    if (rawQuery.length < MIN_QUERY_LENGTH) {
+      onError() // create xml with "Please type at least $MIN_QUERY_LENGTH characters."
       return
     }
 
@@ -153,8 +160,8 @@ enum class FriendRelation(val labelRes: Int) { //
 
   override fun toString(): String {
     return when (this) {
-      FriendRelation.ADD -> "Add"
-      FriendRelation.ADDED -> "Added"
+      FriendRelation.ADD -> RELATION_ADD_STRING
+      FriendRelation.ADDED -> RELATION_ADDED_STRING
     }
   }
 
