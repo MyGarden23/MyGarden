@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.garden
 
+import androidx.test.core.app.ApplicationProvider
 import com.android.mygarden.R
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.Plant
@@ -13,6 +14,7 @@ import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeActivityRepository
 import com.android.mygarden.utils.FakeProfileRepository
+import com.google.firebase.FirebaseApp
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
@@ -29,8 +31,13 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class GardenViewModelTests {
 
   private lateinit var plantsRepo: PlantsRepository
@@ -54,6 +61,10 @@ class GardenViewModelTests {
   /** Sets up the repository and the view model and the test dispatcher to simulate the app */
   @Before
   fun setUp() {
+    // Initialize Firebase for tests
+    if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
+      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+    }
     Dispatchers.setMain(testDispatcher)
     repositoryScope = TestScope(SupervisorJob() + testDispatcher)
     plantsRepo = PlantsRepositoryLocal(repositoryScope)
