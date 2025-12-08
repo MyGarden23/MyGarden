@@ -34,6 +34,29 @@ private const val CAMERA_ERROR_TAG = "CameraPicture"
 private const val PREFS_NAME = "camera_prefs"
 private const val HAS_DENIED_CAMERA = "has_denied_camera"
 
+/** Rotation angle constants (in degrees) */
+private const val ROTATION_0_DEGREES_INT = 0
+private const val ROTATION_0_DEGREES = 0f
+private const val ROTATION_90_DEGREES = 90f
+private const val ROTATION_180_DEGREES = 180f
+private const val ROTATION_270_DEGREES = 270f
+
+/** File and image processing constants */
+private const val PLANT_IMAGE_PREFIX = "plant_"
+private const val IMAGE_FILE_EXTENSION = ".jpg"
+private const val FILE_MODE_READ = "r"
+private const val JPEG_QUALITY = 100
+
+/** Bitmap creation start coordinates */
+private const val BITMAP_START_X = 0
+private const val BITMAP_START_Y = 0
+
+/** Error messages */
+private const val ERROR_CANNOT_OPEN_STREAM = "Cannot open input stream for gallery image"
+private const val ERROR_IMAGE_PROXY_CONVERSION = "ImageProxy could not be converted to a Bitmap"
+private const val ERROR_PICTURE_NOT_TAKEN = "Picture could not been taken"
+private const val ERROR_GALLERY_IMPORT = "Failed to import gallery image"
+
 /**
  * ViewModel responsible for managing camera state and actions. It should be used with a
  * corresponding CameraScreen.
@@ -71,15 +94,24 @@ class CameraViewModel : ViewModel() {
               // If the conversion to Bitmap rotated the image, we rotate it back such that it
               // doesn't have rotation
               val rotationDegrees = image.imageInfo.rotationDegrees
-              if (rotationDegrees != 0) {
+              if (rotationDegrees != ROTATION_0_DEGREES_INT) {
                 val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
                 bitmap =
-                    Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                    Bitmap.createBitmap(
+                        bitmap,
+                        BITMAP_START_X,
+                        BITMAP_START_Y,
+                        bitmap.width,
+                        bitmap.height,
+                        matrix,
+                        true)
               }
               image.close()
 
               // Save the image locally
-              val file = saveBitmapToFile(context, bitmap, "plant_${System.currentTimeMillis()}")
+              val file =
+                  saveBitmapToFile(
+                      context, bitmap, "$PLANT_IMAGE_PREFIX${System.currentTimeMillis()}")
 
               /* Give the image of the plant in Bitmap (to give to an API eventually)
                * and the path of the plant to the next screen
@@ -87,7 +119,7 @@ class CameraViewModel : ViewModel() {
               onPictureTaken(file.absolutePath)
             } catch (e: Exception) {
               onError()
-              Log.e(CAMERA_ERROR_TAG, "ImageProxy could not be converted to a Bitmap", e)
+              Log.e(CAMERA_ERROR_TAG, ERROR_IMAGE_PROXY_CONVERSION, e)
             }
           }
 
@@ -95,7 +127,7 @@ class CameraViewModel : ViewModel() {
             // If the picture fails, log the exception and keep the stack trace
             super.onError(exception)
             onError()
-            Log.e(CAMERA_ERROR_TAG, "Picture could not been taken", exception)
+            Log.e(CAMERA_ERROR_TAG, ERROR_PICTURE_NOT_TAKEN, exception)
           }
         })
   }
@@ -121,7 +153,7 @@ class CameraViewModel : ViewModel() {
       // Decode the bitmap from the given URI
       val input =
           context.contentResolver.openInputStream(uri)
-              ?: throw IllegalStateException("Cannot open input stream for gallery image")
+              ?: throw IllegalStateException(ERROR_CANNOT_OPEN_STREAM)
       var bitmap = input.use { BitmapFactory.decodeStream(it) }
 
       // Try to read the EXIF orientation of the image.
@@ -131,7 +163,7 @@ class CameraViewModel : ViewModel() {
       // corrupted EXIF header, or any I/O error), we safely default to ORIENTATION_NORMAL.
       val orientation =
           try {
-            context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+            context.contentResolver.openFileDescriptor(uri, FILE_MODE_READ)?.use { pfd ->
               ExifInterface(pfd.fileDescriptor)
                   .getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
             } ?: ExifInterface.ORIENTATION_NORMAL
@@ -142,13 +174,14 @@ class CameraViewModel : ViewModel() {
       bitmap = rotateBitmapIfNeeded(bitmap, orientation)
 
       // Save locally (same as camera flow)
-      val file = saveBitmapToFile(context, bitmap, "plant_${System.currentTimeMillis()}")
+      val file =
+          saveBitmapToFile(context, bitmap, "$PLANT_IMAGE_PREFIX${System.currentTimeMillis()}")
 
       // Pass the file path back through the same callback
       onPictureTaken(file.absolutePath)
     } catch (e: Exception) {
       onError()
-      Log.e(CAMERA_ERROR_TAG, "Failed to import gallery image", e)
+      Log.e(CAMERA_ERROR_TAG, ERROR_GALLERY_IMPORT, e)
     }
   }
 
@@ -158,14 +191,14 @@ class CameraViewModel : ViewModel() {
   internal fun rotateBitmapIfNeeded(src: Bitmap, exifOrientation: Int): Bitmap {
     val degrees =
         when (exifOrientation) {
-          ExifInterface.ORIENTATION_ROTATE_90 -> 90f
-          ExifInterface.ORIENTATION_ROTATE_180 -> 180f
-          ExifInterface.ORIENTATION_ROTATE_270 -> 270f
-          else -> 0f
+          ExifInterface.ORIENTATION_ROTATE_90 -> ROTATION_90_DEGREES
+          ExifInterface.ORIENTATION_ROTATE_180 -> ROTATION_180_DEGREES
+          ExifInterface.ORIENTATION_ROTATE_270 -> ROTATION_270_DEGREES
+          else -> ROTATION_0_DEGREES
         }
-    if (degrees == 0f) return src
+    if (degrees == ROTATION_0_DEGREES) return src
     val m = Matrix().apply { postRotate(degrees) }
-    return Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
+    return Bitmap.createBitmap(src, BITMAP_START_X, BITMAP_START_Y, src.width, src.height, m, true)
   }
 
   /* Camera permission handling */
@@ -233,8 +266,10 @@ class CameraViewModel : ViewModel() {
    * @param fileName the name we want to give to the image that will be stored
    */
   private fun saveBitmapToFile(context: Context, bitmap: Bitmap, fileName: String): File {
-    val file = File(context.filesDir, "$fileName.jpg")
-    FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out) }
+    val file = File(context.filesDir, "$fileName$IMAGE_FILE_EXTENSION")
+    FileOutputStream(file).use { out ->
+      bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
+    }
     return file
   }
 }
