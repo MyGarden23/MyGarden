@@ -41,7 +41,12 @@ object PopUpDimensions {
   val CARD_PADDING = 16.dp
   val CARD_ROUND_ANGLE = 16.dp
   val DISMISS_BUTTON_PADDING = 6.dp
+  val TITLE_PADDING = 8.dp
+  val CONFIRM_BUTTON_PADDING = 16.dp
 }
+
+/** Layout weights */
+private const val SPACER_WEIGHT = 1f
 
 /**
  * Popup that is on screen whenever a plant passes in state NEED_WATER
@@ -79,7 +84,7 @@ fun WaterPlantPopup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> U
                 }
             PopupTitle(text = context.getString(R.string.pop_up_title, plantName))
             // Spacer puts the confirm button at the end of the popup
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.weight(SPACER_WEIGHT))
             PopupButton(
                 onClick = onConfirm, text = context.getString(R.string.popup_confirm_button_text))
           }
@@ -95,7 +100,7 @@ fun WaterPlantPopup(plantName: String, onDismiss: () -> Unit, onConfirm: () -> U
 @Composable
 fun PopupTitle(text: String) {
   Text(
-      modifier = Modifier.padding(8.dp).testTag(PopupScreenTestTags.TITLE),
+      modifier = Modifier.padding(PopUpDimensions.TITLE_PADDING).testTag(PopupScreenTestTags.TITLE),
       textAlign = TextAlign.Center,
       style = MaterialTheme.typography.titleLarge,
       fontWeight = FontWeight.Bold,
@@ -111,7 +116,9 @@ fun PopupTitle(text: String) {
 @Composable
 fun PopupButton(onClick: () -> Unit, text: String) {
   Button(
-      modifier = Modifier.padding(16.dp).testTag(PopupScreenTestTags.CONFIRM_BUTTON),
+      modifier =
+          Modifier.padding(PopUpDimensions.CONFIRM_BUTTON_PADDING)
+              .testTag(PopupScreenTestTags.CONFIRM_BUTTON),
       colors =
           ButtonDefaults.buttonColors(
               containerColor = MaterialTheme.colorScheme.primary,
