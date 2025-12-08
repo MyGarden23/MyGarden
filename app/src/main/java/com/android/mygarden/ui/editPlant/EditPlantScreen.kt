@@ -37,6 +37,20 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.min
 
+/** Date format pattern for displaying dates */
+private const val DATE_FORMAT_PATTERN = "dd/MM/yyyy"
+
+/** Dimension constants for EditPlantScreen */
+private val SCREEN_PADDING = 16.dp
+private val COLUMN_SPACING = 12.dp
+private val IMAGE_HEIGHT = 220.dp
+private val DESCRIPTION_MIN_HEIGHT = 100.dp
+private const val DESCRIPTION_MIN_LINES = 3
+private val SPACER_HEIGHT = 8.dp
+private val LAST_WATERED_SPACING = 6.dp
+private val SAVE_BUTTON_HEIGHT = 56.dp
+private val DELETE_ICON_SPACING = 8.dp
+
 /** Test tags for [EditPlantScreen]. */
 object EditPlantScreenTestTags {
   const val SCROLLABLE_COLUMN = "scrollableColumn"
@@ -113,7 +127,7 @@ fun EditPlantScreen(
   var touchedLight by remember { mutableStateOf(false) }
   var touchedLastWatered by remember { mutableStateOf(false) }
   var showDatePicker by remember { mutableStateOf(false) }
-  val dateFmt = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
+  val dateFmt = remember { DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN) }
 
   // groups the errors in only one place
   val errorFlags =
@@ -164,10 +178,10 @@ fun EditPlantScreen(
         modifier =
             Modifier.fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(SCREEN_PADDING)
                 .verticalScroll(rememberScrollState())
                 .testTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(COLUMN_SPACING),
     ) {
       // ------- Image -------
       PlantImageSection(imageUrl = plantUIState.image)
@@ -234,7 +248,7 @@ fun EditPlantScreen(
           },
       )
 
-      Spacer(Modifier.height(8.dp))
+      Spacer(Modifier.height(SPACER_HEIGHT))
 
       // ------- Save -------
       SaveButtonSection(
@@ -487,7 +501,7 @@ private fun PlantImageSection(imageUrl: String?) {
         contentDescription = context.getString(R.string.plant_image_description),
         modifier =
             Modifier.fillMaxWidth()
-                .height(220.dp)
+                .height(IMAGE_HEIGHT)
                 .clip(MaterialTheme.shapes.medium)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .testTag(EditPlantScreenTestTags.PLANT_IMAGE),
@@ -498,7 +512,7 @@ private fun PlantImageSection(imageUrl: String?) {
     Box(
         modifier =
             Modifier.fillMaxWidth()
-                .height(220.dp)
+                .height(IMAGE_HEIGHT)
                 .clip(MaterialTheme.shapes.medium)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .testTag(EditPlantScreenTestTags.PLANT_IMAGE),
@@ -595,11 +609,11 @@ private fun DescriptionFieldSection(
       value = description,
       onValueChange = { onDescriptionChange(it) },
       label = { Text(context.getString(R.string.description)) },
-      minLines = 3,
+      minLines = DESCRIPTION_MIN_LINES,
       isError = isDescriptionError,
       modifier =
           Modifier.fillMaxWidth()
-              .heightIn(min = 100.dp)
+              .heightIn(min = DESCRIPTION_MIN_HEIGHT)
               .testTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
               .onFocusChanged { if (it.isFocused) onTouchedDesc() },
   )
@@ -709,7 +723,7 @@ private fun LastWateredSection(
 ) {
   val context = LocalContext.current
 
-  Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+  Column(verticalArrangement = Arrangement.spacedBy(LAST_WATERED_SPACING)) {
     Text(
         context.getString(R.string.last_time_watered),
         style = MaterialTheme.typography.labelLarge,
@@ -767,7 +781,10 @@ private fun SaveButtonSection(
         onSave()
       },
       enabled = isSaveEnabled,
-      modifier = Modifier.fillMaxWidth().height(56.dp).testTag(EditPlantScreenTestTags.PLANT_SAVE),
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(SAVE_BUTTON_HEIGHT)
+              .testTag(EditPlantScreenTestTags.PLANT_SAVE),
   ) {
     Text(context.getString(R.string.save))
   }
@@ -793,7 +810,7 @@ private fun DeleteSection(
           contentDescription = null,
           tint = MaterialTheme.colorScheme.error,
       )
-      Spacer(Modifier.width(8.dp))
+      Spacer(Modifier.width(DELETE_ICON_SPACING))
       Text(
           context.getString(R.string.delete),
           color = MaterialTheme.colorScheme.error,
