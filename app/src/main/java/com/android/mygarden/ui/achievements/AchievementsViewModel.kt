@@ -22,7 +22,10 @@ import kotlinx.coroutines.launch
 data class AchievementsUIState(
     val plantsNumberLevel: Int = ACHIEVEMENTS_FIRST_LEVEL,
     val friendsNumberLevel: Int = ACHIEVEMENTS_FIRST_LEVEL,
-    val healthyStreakLevel: Int = ACHIEVEMENTS_FIRST_LEVEL
+    val healthyStreakLevel: Int = ACHIEVEMENTS_FIRST_LEVEL,
+    val plantsNumberValue: Int = ACHIEVEMENTS_BASE_VALUE,
+    val friendsNumberValue: Int = ACHIEVEMENTS_BASE_VALUE,
+    val healthyStreakValue: Int = ACHIEVEMENTS_BASE_VALUE,
 )
 
 /**
@@ -44,6 +47,56 @@ class AchievementsViewModel(
     refreshUIState()
   }
 
+  fun getCorrespondingLevel(achievementType: AchievementType, state: AchievementsUIState): Int {
+    return when (achievementType) {
+      AchievementType.PLANTS_NUMBER -> state.plantsNumberLevel
+      AchievementType.FRIENDS_NUMBER -> state.friendsNumberLevel
+      AchievementType.HEALTHY_STREAK -> state.healthyStreakLevel
+    }
+  }
+
+  fun getCorrespondingValue(achievementType: AchievementType, state: AchievementsUIState): Int {
+    return when (achievementType) {
+      AchievementType.PLANTS_NUMBER -> state.plantsNumberValue
+      AchievementType.FRIENDS_NUMBER -> state.friendsNumberValue
+      AchievementType.HEALTHY_STREAK -> state.healthyStreakValue
+    }
+  }
+
+  fun getCorrespondingNeededForNextLevel(
+      achievementType: AchievementType,
+      state: AchievementsUIState
+  ): Int {
+    return when (achievementType) {
+      AchievementType.PLANTS_NUMBER ->
+          Achievements.PLANTS_NUMBER_THRESHOLDS.first { it > state.plantsNumberValue } -
+              state.plantsNumberValue
+      AchievementType.FRIENDS_NUMBER ->
+          Achievements.FRIENDS_NUMBER_THRESHOLDS.first { it > state.friendsNumberValue } -
+              state.friendsNumberValue
+      AchievementType.HEALTHY_STREAK ->
+          Achievements.HEALTHY_STREAK_THRESHOLDS.first { it > state.healthyStreakValue } -
+              state.healthyStreakValue
+    }
+  }
+
+  fun getCorrespondingNextThreshold(
+      achievementType: AchievementType,
+      state: AchievementsUIState
+  ): Int {
+    return try {
+      when (achievementType) {
+        AchievementType.PLANTS_NUMBER ->
+            Achievements.PLANTS_NUMBER_THRESHOLDS.first { it > state.plantsNumberValue }
+        AchievementType.FRIENDS_NUMBER ->
+            Achievements.FRIENDS_NUMBER_THRESHOLDS.first { it > state.friendsNumberValue }
+        AchievementType.HEALTHY_STREAK ->
+            Achievements.HEALTHY_STREAK_THRESHOLDS.first { it > state.healthyStreakValue }
+      }
+    } catch (_: NoSuchElementException) {
+      -1
+    }
+  }
   /**
    * Starts collecting the user's achievement progress from Firestore. Whenever values change, the
    * UI state is updated accordingly directly as it uses Flows.
@@ -79,6 +132,9 @@ class AchievementsViewModel(
     return AchievementsUIState(
         plantsNumberLevel = Achievements.PLANTS_NUMBER.computeLevel(plantsValue),
         friendsNumberLevel = Achievements.FRIENDS_NUMBER.computeLevel(friendsValue),
-        healthyStreakLevel = Achievements.HEALTHY_STREAK.computeLevel(healthyStreakValue))
+        healthyStreakLevel = Achievements.HEALTHY_STREAK.computeLevel(healthyStreakValue),
+        plantsNumberValue = plantsValue,
+        friendsNumberValue = friendsValue,
+        healthyStreakValue = healthyStreakValue)
   }
 }
