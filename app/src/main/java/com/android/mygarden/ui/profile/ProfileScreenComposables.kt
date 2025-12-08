@@ -67,10 +67,8 @@ import com.android.mygarden.ui.utils.handleOfflineClick
 
 // Layout proportions
 private const val HEADER_SECTION_WEIGHT = 0.2f
-private const val CONTENT_SECTION_WEIGHT = 0.3f
 private const val FORM_SECTION_WEIGHT = 0.6f
 private const val SPACER_SECTION_WEIGHT = 0.1f
-private const val AVATAR_WIDTH_FRACTION = 0.25f
 
 // Dimensions
 private val BUTTON_HEIGHT = 56.dp
