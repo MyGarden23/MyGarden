@@ -33,16 +33,36 @@ private const val usersCollection = "users"
 /** Constant value for the collection of plants in firestore. */
 private const val plantsCollection = "plants"
 
+/** Constant value for the authentication error message. */
 private const val AUTH_ERR_MSG = "User not authenticated"
 
+/** Constant value for the plant achievement decrement step. */
 private const val PLANT_ACHIEVEMENT_DECREMENT_STEP = 1
 
+/** File extension for plant images stored in Cloud Storage. */
+private const val IMAGE_FILE_EXTENSION = ".jpg"
+
+/** Log tag for PlantsRepositoryFirestore. */
+private const val LOG_TAG_PLANTS_REPO = "PlantsRepositoryFirestore"
+
+/** Log tag for Cloud Storage operations. */
+private const val LOG_TAG_CLOUD_STORAGE = "Cloud Storage"
+
+/** Error message template for plant not found. */
 private fun plantNotFoundErrMsg(id: String) = "OwnedPlant with id $id not found"
 
+/** Error message template for parsing failure. */
 private fun parsingFailedErrMsg(id: String) = "Failed to parse SerializedOwnedPlant with id $id"
 
+/** Error message template for different IDs. */
 private fun differentIdsErrMsg(id1: String, id2: String) =
     "The id : $id1 is not the same as the id of the owned plant : $id2"
+
+/** Error message for failed local file deletion. */
+private fun failedToDeleteFileMsg(path: String) = "Failed to delete the local file image: $path "
+
+/** Error message for image not found in Cloud Storage. */
+private fun imageNotFoundMsg(message: String?) = "Image not found or already deleted: $message"
 
 /** Repository that implements PlantsRepository but stores the data in Firestore. */
 class PlantsRepositoryFirestore(
@@ -96,7 +116,7 @@ class PlantsRepositoryFirestore(
    */
   private fun storageRef(plantId: String): StorageReference {
     return storage.reference.child(
-        "$usersCollection/${currentUserId()}/$plantsCollection/$plantId.jpg")
+        "$usersCollection/${currentUserId()}/$plantsCollection/$plantId$IMAGE_FILE_EXTENSION")
   }
 
   /** The id of the current user. Throw IllegalStateException if the user is not authenticated. */
@@ -251,9 +271,7 @@ class PlantsRepositoryFirestore(
     if (imageFile.exists()) {
       val deleted = imageFile.delete()
       if (!deleted) {
-        Log.e(
-            "PlantsRepositoryFirestore",
-            "Failed to delete the local file image: ${imageFile.path} ")
+        Log.e(LOG_TAG_PLANTS_REPO, failedToDeleteFileMsg(imageFile.path))
       }
     }
 
@@ -271,7 +289,7 @@ class PlantsRepositoryFirestore(
     try {
       storageReference.delete().await()
     } catch (e: Exception) {
-      Log.e("Cloud Storage", "Image not found or already deleted: ${e.message}")
+      Log.e(LOG_TAG_CLOUD_STORAGE, imageNotFoundMsg(e.message))
     }
   }
 
