@@ -39,6 +39,7 @@ private const val IMAGE_PATH_KEY = "imagePath"
 private const val FROM_KEY = "from"
 private const val OWNED_PLANT_ID_KEY = "ownedPlantId"
 private const val OWNED_PLANT_ID_TO_PLANT_INFO_KEY = "ownedPlantId_to_plantInfo"
+private const val IS_VIEW_MODE_KEY = "isViewMode"
 
 @Composable
 fun AppNavHost(
@@ -163,6 +164,30 @@ fun AppNavHost(
           })
     }
 
+    // Friend Garden
+    composable(
+        route = Screen.FriendGarden.route,
+        arguments =
+            listOf(navArgument(Screen.FriendGarden.ARG_FRIEND_ID) { type = NavType.StringType })) {
+            entry ->
+          val friendId =
+              entry.arguments?.getString(Screen.FriendGarden.ARG_FRIEND_ID) ?: return@composable
+          GardenScreen(
+              friendId = friendId,
+              isViewMode = true,
+              onEditProfile = {},
+              onAddPlant = {},
+              onBackPressed = { navigationActions.navBack() },
+              onPlantClick = { ownedPlant ->
+                navController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
+                navController.currentBackStackEntry?.savedStateHandle?.set(IS_VIEW_MODE_KEY, true)
+                navigationActions.navTo(Screen.PlantInfoFromGarden)
+              },
+              onSignOut = {})
+        }
+
     // Feed
     composable(Screen.Feed.route) {
       FeedScreen(
@@ -183,7 +208,9 @@ fun AppNavHost(
 
     // Friend List
     composable(Screen.FriendList.route) {
-      FriendListScreen(onBackPressed = { navigationActions.navBack() })
+      FriendListScreen(
+          onBackPressed = { navigationActions.navBack() },
+          onFriendClick = { friend -> navigationActions.navTo(Screen.FriendGarden(friend.id)) })
     }
 
     // Plant Info From Garden
