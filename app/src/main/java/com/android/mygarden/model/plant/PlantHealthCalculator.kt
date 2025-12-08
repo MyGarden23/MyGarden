@@ -21,10 +21,17 @@ class PlantHealthCalculator {
     private const val JUST_WATERED_GRACE_PERIOD_DAYS = 0.5 // 12 hours
 
     private const val PERCENTAGE_CALCULATION_UTILITY = 100.0
+
+    /** Initial/default percentage values */
+    private const val INITIAL_PERCENTAGE = 0.0
+    private const val MAX_PERCENTAGE = 1.0
+
+    /** Float conversion value */
+    private const val FLOAT_CONVERSION = 1f
   }
 
   /** Double variable used to track each owned plant's "percentage" inside of its status */
-  private var currentStatusPercentage = 0.0
+  private var currentStatusPercentage = INITIAL_PERCENTAGE
 
   /**
    * Calculates the current health status of a plant based on watering cycle.
@@ -52,7 +59,7 @@ class PlantHealthCalculator {
 
     // Validation: Invalid watering frequency
     if (wateringFrequency <= 0) {
-      currentStatusPercentage = 0.0
+      currentStatusPercentage = INITIAL_PERCENTAGE
       return PlantHealthStatus.UNKNOWN
     }
 
@@ -65,7 +72,8 @@ class PlantHealthCalculator {
     // If this is the first watering (no previous watering) and it's very recent, consider it
     // healthy
     if (daysSinceWatered <= JUST_WATERED_GRACE_PERIOD_DAYS && previousLastWatered == null) {
-      currentStatusPercentage = 0.0 // Full water bar (1.0f in calculateInStatusFloat)
+      currentStatusPercentage =
+          INITIAL_PERCENTAGE // Full water bar (1.0f in calculateInStatusFloat)
       return PlantHealthStatus.HEALTHY
     }
 
@@ -131,11 +139,11 @@ class PlantHealthCalculator {
 
       // Critical - severely dry (>130% of cycle)
       percentageOfCycle > NEEDS_WATER_MAX_THRESHOLD -> {
-        currentStatusPercentage = 1.0
+        currentStatusPercentage = MAX_PERCENTAGE
         PlantHealthStatus.SEVERELY_DRY
       }
       else -> {
-        currentStatusPercentage = 0.0
+        currentStatusPercentage = INITIAL_PERCENTAGE
         PlantHealthStatus.UNKNOWN
       }
     }
@@ -160,7 +168,7 @@ class PlantHealthCalculator {
       currentTime: Timestamp = Timestamp(System.currentTimeMillis())
   ): Float {
     calculateHealthStatus(lastWatered, wateringFrequency, previousLastWatered, currentTime)
-    return 1f - currentStatusPercentage.toFloat()
+    return FLOAT_CONVERSION - currentStatusPercentage.toFloat()
   }
 
   /**
