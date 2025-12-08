@@ -14,9 +14,8 @@ from datetime import datetime, timezone, timedelta
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 import functools, random, logging, time
 
-
+initialize_app()
 # Initialize these globally, but with None, so they don't run on import
-app = None
 db = None
 
 
@@ -75,9 +74,7 @@ def get_firestore_client():
     Returns:
         google.cloud.firestore.Client: The Firestore client instance
     """
-    global app, db
-    if app is None:
-        app = initialize_app()
+    global db
     if db is None:
         db = firestore.client()
     return db
@@ -94,6 +91,7 @@ def _get_user_token(uid: str) -> str | None:
     Returns:
         str | None: The FCM token if present and valid, else None
     """
+    db = get_firestore_client()
     doc = db.collection("users").document(uid).get()
     if not doc.exists:
         return None
