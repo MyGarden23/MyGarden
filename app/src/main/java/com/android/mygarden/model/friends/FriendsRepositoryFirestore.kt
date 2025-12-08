@@ -11,6 +11,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
+// Firestore collection and field names
+private const val COLLECTION_USERS = "users"
+private const val COLLECTION_FRIENDS = "friends"
+private const val FIELD_FRIEND_UID = "friendUid"
+
 // Value used to update the number of friends
 private const val FRIEND_ACHIEVEMENT_INCREMENT_STEP = 1
 
@@ -36,11 +41,11 @@ class FriendsRepositoryFirestore(
    * Path: users/{userId}/friends
    */
   private fun friendsCollection(userId: String) =
-      db.collection("users").document(userId).collection("friends")
+      db.collection(COLLECTION_USERS).document(userId).collection(COLLECTION_FRIENDS)
 
   override suspend fun getFriends(userId: String): List<String> {
     val snapshot = friendsCollection(userId).get().await()
-    val friends = snapshot.documents.mapNotNull { doc -> doc.getString("friendUid") }
+    val friends = snapshot.documents.mapNotNull { doc -> doc.getString(FIELD_FRIEND_UID) }
     friendsCount = friends.size
     return friends
   }
@@ -55,11 +60,11 @@ class FriendsRepositoryFirestore(
     val friendDoc = friendsCollection(friendUserId).document(currentUserId)
 
     val batch = db.batch()
-    batch.set(currentDoc, mapOf("friendUid" to friendUserId))
-    batch.set(friendDoc, mapOf("friendUid" to currentUserId))
+    batch.set(currentDoc, mapOf(FIELD_FRIEND_UID to friendUserId))
+    batch.set(friendDoc, mapOf(FIELD_FRIEND_UID to currentUserId))
     batch.commit().await()
 
-    currentDoc.set(mapOf("friendUid" to friendUserId)).await()
+    currentDoc.set(mapOf(FIELD_FRIEND_UID to friendUserId)).await()
 
     // Get the number of friends and update the friends number achievement
     val newCount = (friendsCount ?: ACHIEVEMENTS_BASE_VALUE) + FRIEND_ACHIEVEMENT_INCREMENT_STEP
@@ -78,7 +83,7 @@ class FriendsRepositoryFirestore(
           }
 
           if (snapshot != null) {
-            val friends = snapshot.documents.mapNotNull { it.getString("friendUid") }
+            val friends = snapshot.documents.mapNotNull { it.getString(FIELD_FRIEND_UID) }
             trySend(friends).isSuccess
           }
         }
