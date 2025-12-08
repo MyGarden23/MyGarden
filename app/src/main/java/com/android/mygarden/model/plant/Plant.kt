@@ -27,17 +27,26 @@ data class Plant(
     val name: String = UNKNOWN_NAME,
     val image: String? = null,
     val latinName: String = UNKNOWN_NAME,
-    val description: String = "No description available",
+    val description: String = DEFAULT_DESCRIPTION,
     val location: PlantLocation = PlantLocation.UNKNOWN,
-    val lightExposure: String = "Unknown",
+    val lightExposure: String = DEFAULT_LIGHT_EXPOSURE,
     val healthStatus: PlantHealthStatus = PlantHealthStatus.UNKNOWN,
-    val healthStatusDescription: String = "No health status description available",
+    val healthStatusDescription: String = DEFAULT_HEALTH_STATUS_DESCRIPTION,
     val wateringFrequency: Int = 0, // in days
     val isRecognized: Boolean = false,
 ) {
   companion object {
     /** Sentinel value used as the default/unknown plant name */
     const val UNKNOWN_NAME = "Unknown"
+
+    /** Default description when no description is available */
+    const val DEFAULT_DESCRIPTION = "No description available"
+
+    /** Default light exposure when information is unknown */
+    const val DEFAULT_LIGHT_EXPOSURE = "Unknown"
+
+    /** Default health status description when no description is available */
+    const val DEFAULT_HEALTH_STATUS_DESCRIPTION = "No health status description available"
   }
 }
 
@@ -81,17 +90,27 @@ enum class PlantHealthStatus(@StringRes val descriptionRes: Int) {
   SEVERELY_DRY(R.string.plant_health_severely_dry),
   UNKNOWN(R.string.plant_health_unknown);
 
+  companion object {
+    private const val DESC_SEVERELY_OVERWATERED = "Severely overwatered 🌊"
+    private const val DESC_OVERWATERED = "Overwatered 💦"
+    private const val DESC_HEALTHY = "The plant is healthy 🌱"
+    private const val DESC_SLIGHTLY_DRY = "A bit dry 🍂"
+    private const val DESC_NEEDS_WATER = "Needs water 💧"
+    private const val DESC_SEVERELY_DRY = "Critically dry 🥀"
+    private const val DESC_UNKNOWN = "Status unknown ❓"
+  }
+
   /** Fallback description in English for contexts without Android Resources. Util for tests. */
   val description: String
     get() =
         when (this) {
-          SEVERELY_OVERWATERED -> "Severely overwatered 🌊"
-          OVERWATERED -> "Overwatered 💦"
-          HEALTHY -> "The plant is healthy 🌱"
-          SLIGHTLY_DRY -> "A bit dry 🍂"
-          NEEDS_WATER -> "Needs water 💧"
-          SEVERELY_DRY -> "Critically dry 🥀"
-          UNKNOWN -> "Status unknown ❓"
+          SEVERELY_OVERWATERED -> DESC_SEVERELY_OVERWATERED
+          OVERWATERED -> DESC_OVERWATERED
+          HEALTHY -> DESC_HEALTHY
+          SLIGHTLY_DRY -> DESC_SLIGHTLY_DRY
+          NEEDS_WATER -> DESC_NEEDS_WATER
+          SEVERELY_DRY -> DESC_SEVERELY_DRY
+          UNKNOWN -> DESC_UNKNOWN
         }
 }
 
@@ -102,5 +121,7 @@ enum class PlantLocation {
   UNKNOWN
 }
 
+private const val TEST_TAG_PREFIX = "plantLocation_"
+
 val PlantLocation.testTag: String
-  get() = "plantLocation_${this.name}"
+  get() = "$TEST_TAG_PREFIX${this.name}"
