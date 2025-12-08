@@ -70,6 +70,13 @@ class FakePlantRepositoryUtils(repoType: PlantRepositoryType) {
       }
 
   /**
+   * Storage for plants organized by userId. Used to mock
+   * [PlantsRepository.getAllOwnedPlantsByUserId] for testing friend gardens.
+   */
+  private val plantsByUser =
+      mutableMapOf<String, MutableList<com.android.mygarden.model.plant.OwnedPlant>>()
+
+  /**
    * A valid JSON response string from the PlantNet API for testing purposes.
    *
    * This mock response represents a successful plant identification for a tomato plant (Solanum
@@ -182,5 +189,42 @@ class FakePlantRepositoryUtils(repoType: PlantRepositoryType) {
    */
   fun mockPlantNetAPI(resJSON: String) {
     coEvery { repository.plantNetAPICall(any(), any()) } returns resJSON
+  }
+
+  /**
+   * Adds a plant for a specific user and configures the mock to return it.
+   *
+   * This method stores the plant in an internal map organized by userId, mimicking how
+   * [PlantsRepositoryFirestore] stores plants in Firestore: `users/{userId}/plants/{plantId}`
+   *
+   * @param userId The ID of the user who owns this plant
+   * @param plant The plant to add
+   * @param id The ID for this owned plant
+   * @param lastWatered When the plant was last watered
+   * @see PlantsRepository.getAllOwnedPlantsByUserId
+   * @see mockGetAllOwnedPlantsByUserId
+   */
+  fun addPlantForUser(userId: String, plant: Plant, id: String, lastWatered: java.sql.Timestamp) {
+    val ownedPlant = com.android.mygarden.model.plant.OwnedPlant(id, plant, lastWatered)
+    plantsByUser.getOrPut(userId) { mutableListOf() }.add(ownedPlant)
+  }
+
+  /**
+   * Mocks [PlantsRepository.getAllOwnedPlantsByUserId] to return plants added via
+   * [addPlantForUser].
+   *
+   * This method configures the repository spy so that when
+   * [PlantsRepository.getAllOwnedPlantsByUserId] is called with a userId, it returns the plants
+   * that were previously added for that user using [addPlantForUser].
+   *
+   * @see addPlantForUser
+   * @see PlantsRepository.getAllOwnedPlantsByUserId
+   */
+  fun mockGetAllOwnedPlantsByUserId() {
+    coEvery { repository.getAllOwnedPlantsByUserId(any()) } answers
+        {
+          val userId = firstArg<String>()
+          plantsByUser[userId]?.toList() ?: emptyList()
+        }
   }
 }
