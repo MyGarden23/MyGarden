@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 /** Minimum number of characters required for a search query */
 private const val MIN_QUERY_LENGTH = 2
@@ -152,18 +153,26 @@ class AddFriendViewModel(
           }
       try {
         requestsRepository.askFriend(userId)
-        val functions = FirebaseFunctions.getInstance()
-        functions
-            .getHttpsCallable("send_friend_request_notification")
-            .call(
-                mapOf(
-                    "targetUid" to userId,
-                    "fromPseudo" to
-                        profileRepository
-                            .getCurrentUserId()
-                            ?.let { userProfileRepository.getUserProfile(it) }
-                            ?.pseudo))
+        val currentUserId = profileRepository.getCurrentUserId()
+        if (currentUserId == null) {
+          onError()
+          return@launch
+        }
 
+        val currentUserProfile = userProfileRepository.getUserProfile(currentUserId)
+        val fromPseudo = currentUserProfile?.pseudo
+
+        if (fromPseudo == null) {
+          onError()
+          return@launch
+        }
+
+        val functions = FirebaseFunctions.getInstance()
+        val result =
+            functions
+                .getHttpsCallable("send_friend_request_notification")
+                .call(mapOf("targetUid" to userId, "fromPseudo" to fromPseudo))
+                .await()
         onSuccess()
       } catch (_: Exception) {
         _uiState.value =
