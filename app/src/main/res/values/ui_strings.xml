@@ -10,6 +10,7 @@
     <string name="authentication_screen_title">Authentication</string>
     <string name="camera_screen_title">Camera</string>
     <string name="garden_screen_title">Garden</string>
+    <string name="friend_garden_screen_title">Friend\'s Garden</string>
     <string name="choose_avatar_screen_title">Choose Avatar</string>
     <string name="feed_screen_title">My Feed</string>
     <string name="add_friend_screen">Add Friend</string>
