@@ -44,6 +44,27 @@ import com.android.mygarden.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
+/** System property key for end-to-end testing */
+private const val E2E_TEST_PROPERTY = "mygarden.e2e"
+
+/** Value indicating end-to-end test mode is enabled */
+private const val E2E_TEST_VALUE = "true"
+
+/** Layout weight constants */
+private const val SPACER_WEIGHT_TOP = 0.3f
+private const val SPACER_HEIGHT_MIDDLE = 0.35f
+
+/** Dimension constants */
+private const val LOGO_WIDTH_FRACTION = 0.9f
+private const val LOGO_ASPECT_RATIO = 1f
+private val LOGO_MAX_HEIGHT = 180.dp
+private val PROGRESS_INDICATOR_SIZE = 48.dp
+private val BUTTON_HEIGHT = 60.dp
+private const val BUTTON_WIDTH_FRACTION = 0.75f
+private val BUTTON_CORNER_RADIUS = 50.dp
+private val GOOGLE_ICON_SIZE = 20.dp
+private val ICON_TEXT_SPACING = 12.dp
+
 /** Semantic for testing */
 val LogoResNameKey = SemanticsPropertyKey<String>("LogoResName")
 var SemanticsPropertyReceiver.logoRes by LogoResNameKey
@@ -104,23 +125,23 @@ fun SignInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             // verticalArrangement = Arrangement.SpaceEvenly
         ) {
-          Spacer(modifier = Modifier.weight(0.3f))
+          Spacer(modifier = Modifier.weight(SPACER_WEIGHT_TOP))
           Image(
               painter = painterResource(id = logoRes),
               contentDescription = context.getString(R.string.description_logo),
               contentScale = ContentScale.Fit,
               modifier =
-                  Modifier.fillMaxWidth(0.9f)
-                      .aspectRatio(1f)
-                      .heightIn(max = 180.dp)
+                  Modifier.fillMaxWidth(LOGO_WIDTH_FRACTION)
+                      .aspectRatio(LOGO_ASPECT_RATIO)
+                      .heightIn(max = LOGO_MAX_HEIGHT)
                       .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_APP_LOGO)
                       .semantics { this.logoRes = resName })
 
-          Spacer(modifier = Modifier.fillMaxHeight(0.35f))
+          Spacer(modifier = Modifier.fillMaxHeight(SPACER_HEIGHT_MIDDLE))
 
           // Authenticate With Google Button
           if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(48.dp))
+            CircularProgressIndicator(modifier = Modifier.size(PROGRESS_INDICATOR_SIZE))
           } else {
             OutlinedButton(
                 onClick = {
@@ -131,10 +152,10 @@ fun SignInScreen(
                   }
                 },
                 modifier =
-                    Modifier.height(60.dp)
-                        .fillMaxWidth(0.75f)
+                    Modifier.height(BUTTON_HEIGHT)
+                        .fillMaxWidth(BUTTON_WIDTH_FRACTION)
                         .testTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON),
-                shape = RoundedCornerShape(50),
+                shape = RoundedCornerShape(BUTTON_CORNER_RADIUS),
                 colors =
                     ButtonDefaults.outlinedButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
@@ -142,20 +163,21 @@ fun SignInScreen(
                       painter = painterResource(R.drawable.google_logo),
                       contentDescription = context.getString(R.string.description_google_icon),
                       tint = Color.Unspecified, // To keep the reel colors of the logo
-                      modifier = Modifier.size(20.dp))
+                      modifier = Modifier.size(GOOGLE_ICON_SIZE))
 
-                  Spacer(modifier = Modifier.width(12.dp))
+                  Spacer(modifier = Modifier.width(ICON_TEXT_SPACING))
 
                   Text(
                       text = context.getString(R.string.sign_in_with_google),
                       color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
-            Spacer(modifier = Modifier.fillMaxHeight(0.35f))
+            Spacer(modifier = Modifier.fillMaxHeight(SPACER_HEIGHT_MIDDLE))
           }
         }
       }
 }
+
 /**
  * Handles login-related error messages by displaying them in a Toast and clearing the error state
  * in the ViewModel.
