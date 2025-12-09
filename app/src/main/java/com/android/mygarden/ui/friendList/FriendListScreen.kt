@@ -55,8 +55,9 @@ object FriendListScreenTestTags {
   const val REQUEST_CARD = "friendRequestCard"
   const val FRIEND_AVATAR = "friendAvatar"
   const val FRIEND_PSEUDO = "friendPseudo"
-  const val DELETE_FRIEND_BUTTON = "DeleteFriendButton"
   const val NO_FRIEND = "noFriendText"
+
+  fun getDelButtonForFriend(friendId: String) = "DeleteFriendButtonForId$friendId"
 }
 
 private object CONSTANTS {
@@ -220,7 +221,7 @@ private fun FriendCard(friend: UserProfile, onConfirmDelete: (UserProfile) -> Un
                     modifier =
                         Modifier.size(CONSTANTS.DEL_BUTTON_SIZE)
                             .clickable(onClick = { showPopup = true })
-                            .testTag(FriendListScreenTestTags.DELETE_FRIEND_BUTTON),
+                            .testTag(FriendListScreenTestTags.getDelButtonForFriend(friend.id)),
                     border =
                         BorderStroke(
                             CONSTANTS.DEL_BUTTON_BORDER_STROKE, MaterialTheme.colorScheme.error),

@@ -140,4 +140,45 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
       cancelAndIgnoreRemainingEvents()
     }
   }
+
+  @Test
+  fun deleteFriendErasesCorrectFriendFromFriendList() = runTest {
+    val friend1 = "test-friend-1"
+    val friend2 = "test-friend-2"
+
+    friendsRepo.addFriend(friend1)
+    friendsRepo.addFriend(friend2)
+
+    val friends = friendsRepo.getFriends(currentUserId)
+    assertEquals(2, friends.size)
+
+    friendsRepo.deleteFriend(friend1)
+
+    val updatedFriends = friendsRepo.getFriends(currentUserId)
+
+    assertEquals(1, updatedFriends.size)
+    assertFalse(updatedFriends.contains(friend1))
+    assertTrue(updatedFriends.contains(friend2))
+  }
+
+  @Test
+  fun deleteFriendKeepsSameListWhenFirestoreCallFails() = runTest {
+    val friend1 = "test-friend-1"
+    val friend2 = "test-friend-2"
+
+    friendsRepo.addFriend(friend1)
+    friendsRepo.addFriend(friend2)
+
+    val friends = friendsRepo.getFriends(currentUserId)
+    assertEquals(2, friends.size)
+
+    // this will throw
+    friendsRepo.deleteFriend("false-uid")
+
+    val updatedFriends = friendsRepo.getFriends(currentUserId)
+
+    assertEquals(2, updatedFriends.size)
+    assertTrue(updatedFriends.contains(friend1))
+    assertTrue(updatedFriends.contains(friend2))
+  }
 }

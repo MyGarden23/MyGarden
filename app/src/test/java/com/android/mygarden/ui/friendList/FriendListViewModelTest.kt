@@ -1,13 +1,16 @@
 package com.android.mygarden.ui.friendList
 
+import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -32,6 +35,7 @@ class FriendListViewModelTest {
 
     val fakeFriends = FakeFriendsRepository()
     val fakeUserProfiles = FakeUserProfileRepository()
+    val fakeAchievements = FakeAchievementsRepository()
 
     // Mock FirebaseAuth.currentUser
     val auth: FirebaseAuth = mock()
@@ -50,7 +54,10 @@ class FriendListViewModelTest {
 
     val vm =
         FriendListViewModel(
-            friendsRepository = fakeFriends, userProfileRepository = fakeUserProfiles, auth = auth)
+            friendsRepository = fakeFriends,
+            userProfileRepository = fakeUserProfiles,
+            auth = auth,
+            achievementsRepo = fakeAchievements)
 
     var onErrorCalled = false
     vm.getFriends(onError = { onErrorCalled = true })
@@ -88,6 +95,7 @@ class FriendListViewModelTest {
         }
 
     val fakeUserProfiles = FakeUserProfileRepository()
+    val fakeAchievements = FakeAchievementsRepository()
 
     val auth: FirebaseAuth = mock()
     val user: FirebaseUser = mock()
@@ -98,7 +106,8 @@ class FriendListViewModelTest {
         FriendListViewModel(
             friendsRepository = throwingFriendsRepo,
             userProfileRepository = fakeUserProfiles,
-            auth = auth)
+            auth = auth,
+            achievementsRepo = fakeAchievements)
 
     var onErrorCalled = false
     vm.getFriends(onError = { onErrorCalled = true })
@@ -106,6 +115,62 @@ class FriendListViewModelTest {
     advanceUntilIdle()
 
     assertTrue(onErrorCalled)
+
+    Dispatchers.resetMain()
+  }
+
+  @Test
+  fun deleteFriendChangesTheList() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
+
+    val fakeFriends = FakeFriendsRepository()
+    val fakeUserProfiles = FakeUserProfileRepository()
+    val fakeAchievements = FakeAchievementsRepository()
+
+    // initialize achievements so view model doesn't throw on delete
+    runBlocking {
+      fakeAchievements.initializeAchievementsForNewUser("fake-uid")
+      fakeAchievements.initializeAchievementsForNewUser("uid-alice")
+      fakeAchievements.initializeAchievementsForNewUser("uid-bob")
+
+      fakeAchievements.updateAchievementValue("fake-uid", AchievementType.FRIENDS_NUMBER, 1)
+      fakeAchievements.updateAchievementValue("uid-alice", AchievementType.FRIENDS_NUMBER, 1)
+      fakeAchievements.updateAchievementValue("uid-bob", AchievementType.FRIENDS_NUMBER, 1)
+    }
+
+    // Mock FirebaseAuth.currentUser
+    val auth: FirebaseAuth = mock()
+    val user: FirebaseUser = mock()
+    whenever(auth.currentUser).thenReturn(user)
+    whenever(user.uid).thenReturn("current-user-id")
+
+    // Configure FakeFriendsRepository: feed friend UIDs via the flow
+    fakeFriends.friendsFlow.value = listOf("uid-alice", "uid-bob")
+
+    // Configure FakeUserProfileRepository: map UID -> UserProfile
+    fakeUserProfiles.profiles["uid-alice"] =
+        UserProfile("uid-alice", "Alice", Avatar.A1, "Beginner", "Rose")
+    fakeUserProfiles.profiles["uid-bob"] =
+        UserProfile("uid-bob", "Bob", Avatar.A2, "Expert", "Cactus")
+
+    val vm =
+        FriendListViewModel(
+            friendsRepository = fakeFriends,
+            userProfileRepository = fakeUserProfiles,
+            auth = auth,
+            achievementsRepo = fakeAchievements)
+
+    vm.getFriends {}
+    advanceUntilIdle()
+
+    assertEquals(2, vm.uiState.value.friends.size)
+
+    vm.deleteFriend(vm.uiState.value.friends[0])
+    advanceUntilIdle()
+
+    assertEquals(1, vm.uiState.value.friends.size)
+    assertEquals("Bob", vm.uiState.value.friends[0].pseudo)
 
     Dispatchers.resetMain()
   }
