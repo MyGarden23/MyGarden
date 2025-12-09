@@ -62,8 +62,9 @@ class AddFriendOnAskTest : FirestoreProfileTest() {
         )
 
     UserProfileRepositoryProvider.repository = fakeUserProfile
+    val fakeNotifier = FakeNotifier()
 
-    val vm = AddFriendViewModel()
+    val vm = AddFriendViewModel(notifier = fakeNotifier)
 
     val latch = CountDownLatch(1)
     var success = false
@@ -84,7 +85,11 @@ class AddFriendOnAskTest : FirestoreProfileTest() {
     assertFalse(error)
     assertTrue(success)
 
+    println("DEBUG fakeRequests size = ${fakeRequests.incomingRequestsFlow.value.size}")
+
     assertEquals(1, fakeRequests.incomingRequestsFlow.value.size)
+    println("DEBUG fakeRequests value = ${fakeRequests.incomingRequestsFlow.value[0].fromUserId}")
+
     assertEquals("target", fakeRequests.incomingRequestsFlow.value[0].fromUserId)
   }
 
