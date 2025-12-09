@@ -23,6 +23,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
+/** Log tag for PlantInfoViewModel */
+private const val LOG_TAG = "PlantInfoViewModel"
+
+/** Error log messages */
+private fun errorLoadingPlantMsg(plantId: String) =
+    "Error loading Plant from repository by ID. $plantId"
+
+private fun errorGeneratingTipsMsg(latinName: String) = "Error generating care tips for $latinName"
+
 /** Enum representing which tab is currently selected in the plant info screen. */
 enum class SelectedPlantInfoTab(val textRes: Int) {
   DESCRIPTION(R.string.description),
@@ -103,7 +112,7 @@ class PlantInfoViewModel(
                   lastTimeWatered = ownedPlant.lastWatered,
                   dateOfCreation = ownedPlant.dateOfCreation)
         } catch (e: Exception) {
-          Log.e("PlantInfoViewModel", "Error loading Plant from repository by ID. $ownedPlantId", e)
+          Log.e(LOG_TAG, errorLoadingPlantMsg(ownedPlantId), e)
           setErrorMsg(R.string.error_failed_load_plant_info)
         }
       } else {
@@ -223,7 +232,7 @@ class PlantInfoViewModel(
                 tipsRepository.addTip(latinName, healthStatus, newTip)
                 newTip
               } catch (e: Exception) {
-                Log.e("plantInfoViewModel", "Error generating care tips for $latinName", e)
+                Log.e(LOG_TAG, errorGeneratingTipsMsg(latinName), e)
                 // Use a placeholder constant instead of a hardcoded user-facing string.
                 // The UI will map this placeholder to a localized string resource.
                 ERROR_GENERATING_TIPS

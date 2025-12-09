@@ -17,6 +17,9 @@ private val cameraIconId = R.drawable.photo_camera_icon
 private val gardenIconId = R.drawable.plant_profile_icon
 private val feedIconId = R.drawable.feed_icon
 
+/** Bottom bar height */
+private val BOTTOM_BAR_HEIGHT = 100.dp
+
 /**
  * Representing a button of the bottom bar
  *
@@ -41,7 +44,8 @@ sealed class Page(val name: String, val destination: Screen, val iconId: Int, va
 fun BottomBar(selectedPage: Page, onSelect: (Page) -> Unit, modifier: Modifier = Modifier) {
   val pages = listOf(Page.Feed, Page.Camera, Page.Garden)
   NavigationBar(
-      modifier = modifier.fillMaxWidth().height(100.dp).testTag(NavigationTestTags.BOTTOM_BAR),
+      modifier =
+          modifier.fillMaxWidth().height(BOTTOM_BAR_HEIGHT).testTag(NavigationTestTags.BOTTOM_BAR),
       containerColor = MaterialTheme.colorScheme.background,
       content = {
         pages.forEach { page ->

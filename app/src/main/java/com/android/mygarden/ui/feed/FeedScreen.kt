@@ -53,11 +53,11 @@ private val BETWEEN_BUTTON_AND_ACTIVITIES_SPACER_PADDING = 20.dp
 private val LAZY_COLUMN_HORIZONTAL_PADDING = 8.dp
 private val VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING = 16.dp
 private val CARD_PADDING = 12.dp
-private val CARD_ELEVATION_PADDING = 6.dp
+private val CARD_ELEVATION = 6.dp
 private val ROUND_CORNER = 6.dp
 private val IN_CARD_ROW_PADDING = 6.dp
-private val IN_CARD_ACTIVITY_ICON_OPACITY = 0.5f
-private val WEIGHT_1 = 1f
+private const val IN_CARD_ACTIVITY_ICON_OPACITY = 0.5f
+private const val WEIGHT_1 = 1f
 private val IN_CARD_TEXT_HORIZONTAL_PADDING = 8.dp
 private val NO_ACTIVITY_MSG_PADDING = 40.dp
 private val BORDER_CARD_WIDTH = 3.dp
@@ -224,7 +224,7 @@ fun ActivityItem(modifier: Modifier = Modifier, activity: GardenActivity) {
               .padding(horizontal = CARD_PADDING)
               .testTag(FeedScreenTestTags.getTestTagForActivity(activity)),
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
-      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION_PADDING),
+      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),
       shape = RoundedCornerShape(ROUND_CORNER),
       content = {
         when (activity) {

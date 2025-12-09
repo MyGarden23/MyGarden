@@ -70,6 +70,48 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
     private val PLANTNET_API_URL =
         "https://my-api.plantnet.org/v2/identify/all?api-key=${BuildConfig.PLANTNET_API_KEY}"
 
+    // HTTP client timeout values
+    private const val HTTP_TIMEOUT_SECONDS = 30L
+
+    // API request constants
+    private const val FORM_DATA_PART_IMAGES = "images"
+    private const val FORM_DATA_PART_ORGANS = "organs"
+    private const val IMAGE_FILENAME = "PlantImage.jpg"
+    private const val IMAGE_MEDIA_TYPE = "image/jpeg"
+    private const val ORGAN_TYPE_AUTO = "auto"
+
+    // JSON field names
+    private const val JSON_FIELD_LOCATION = "location"
+    private const val JSON_FIELD_NAME = "name"
+    private const val JSON_FIELD_DESCRIPTION = "description"
+    private const val JSON_FIELD_LIGHT_EXPOSURE = "lightExposure"
+    private const val JSON_FIELD_WATERING_FREQUENCY = "wateringFrequency"
+    private const val JSON_FIELD_RESULTS = "results"
+    private const val JSON_FIELD_SCORE = "score"
+    private const val JSON_FIELD_SPECIES = "species"
+    private const val JSON_FIELD_SCIENTIFIC_NAME = "scientificNameWithoutAuthor"
+
+    // Default/fallback values
+    private const val DEFAULT_LOCATION = "UNKNOWN"
+    private const val DEFAULT_SCORE = 0.0
+
+    // Error messages
+    private const val ERROR_IMAGE_EMPTY = "Could not be read the image or is empty."
+    private const val ERROR_AI_NO_IDENTIFICATION = "The AI was not able to identify the plant."
+    private const val ERROR_LATIN_NAME_FAILED = "There was an error getting the plant latin name."
+    private const val ERROR_AI_NO_DESCRIPTION =
+        "The AI couldn't generate a description for this plant."
+    private const val ERROR_GENERATING_DETAILS = "Error while generating plant details"
+    private const val ERROR_CARE_TIPS_FALLBACK = "Unable to generate care tips at this time."
+
+    // Log tags
+    private const val LOG_TAG_PLANT_GENERATING = "plantGeneratingLog"
+    private const val LOG_TAG_PLANTNET_API = "plantNetApiLog"
+    private const val LOG_TAG_CARE_TIPS = "plantCareTipsLog"
+
+    // AI model name
+    private const val GEMINI_MODEL_NAME = "gemini-2.5-flash"
+
     /**
      * HTTP client configured for PlantNet API requests.
      *
@@ -77,9 +119,9 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
      */
     val client: OkHttpClient =
         OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(HTTP_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(HTTP_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(HTTP_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .build()
 
     /**
@@ -95,10 +137,10 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
       return okhttp3.MultipartBody.Builder()
           .setType(okhttp3.MultipartBody.FORM)
           .addFormDataPart(
-              "images",
-              "PlantImage.jpg",
-              imageBytes.toRequestBody("image/jpeg".toMediaType(), 0, imageBytes.size))
-          .addFormDataPart("organs", "auto")
+              FORM_DATA_PART_IMAGES,
+              IMAGE_FILENAME,
+              imageBytes.toRequestBody(IMAGE_MEDIA_TYPE.toMediaType(), 0, imageBytes.size))
+          .addFormDataPart(FORM_DATA_PART_ORGANS, ORGAN_TYPE_AUTO)
           .build()
     }
 
@@ -158,17 +200,16 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
         try {
           plantDescriptionCallGemini(prompt)
         } catch (e: Exception) {
-          Log.d("plantGeneratingLog", e.toString())
-          return basePlant.copy(
-              description = "The AI couldn't generate a description for this plant.")
+          Log.d(LOG_TAG_PLANT_GENERATING, e.toString())
+          return basePlant.copy(description = ERROR_AI_NO_DESCRIPTION)
         }
 
-    if (outputStr.isEmpty())
-        return basePlant.copy(description = "Error while generating plant details")
+    if (outputStr.isEmpty()) return basePlant.copy(description = ERROR_GENERATING_DETAILS)
 
     try {
       val jsonObject = Json.parseToJsonElement(outputStr).jsonObject
-      val location = jsonObject["location"]?.jsonPrimitive?.content?.uppercase() ?: "UNKNOWN"
+      val location =
+          jsonObject[JSON_FIELD_LOCATION]?.jsonPrimitive?.content?.uppercase() ?: DEFAULT_LOCATION
       val plantLocation =
           try {
             PlantLocation.valueOf(location)
@@ -177,21 +218,23 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
           }
       val res =
           basePlant.copy(
-              name = jsonObject["name"]?.jsonPrimitive?.content ?: basePlant.name,
+              name = jsonObject[JSON_FIELD_NAME]?.jsonPrimitive?.content ?: basePlant.name,
               description =
-                  jsonObject["description"]?.jsonPrimitive?.content ?: basePlant.description,
+                  jsonObject[JSON_FIELD_DESCRIPTION]?.jsonPrimitive?.content
+                      ?: basePlant.description,
               location = plantLocation,
               lightExposure =
-                  jsonObject["lightExposure"]?.jsonPrimitive?.content ?: basePlant.lightExposure,
+                  jsonObject[JSON_FIELD_LIGHT_EXPOSURE]?.jsonPrimitive?.content
+                      ?: basePlant.lightExposure,
               wateringFrequency =
-                  jsonObject["wateringFrequency"]?.jsonPrimitive?.doubleOrNull?.toInt()
+                  jsonObject[JSON_FIELD_WATERING_FREQUENCY]?.jsonPrimitive?.doubleOrNull?.toInt()
                       ?: basePlant.wateringFrequency,
               isRecognized = true)
 
       return res
     } catch (e: Exception) {
-      Log.d("plantGeneratingLog", e.toString())
-      return basePlant.copy(description = "Error while generating plant details")
+      Log.d(LOG_TAG_PLANT_GENERATING, e.toString())
+      return basePlant.copy(description = ERROR_GENERATING_DETAILS)
     }
   }
 
@@ -207,7 +250,7 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
    */
   override suspend fun plantDescriptionCallGemini(prompt: String): String {
     val model =
-        Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-2.5-flash")
+        Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(GEMINI_MODEL_NAME)
     val response: GenerateContentResponse = model.generateContent(prompt)
     return response.text ?: ""
   }
@@ -232,8 +275,7 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
 
       // If image cannot be read, return a Plant with error description
       if (imageBytes.isEmpty()) {
-        return@withContext Plant(
-            image = path, description = "Could not be read the image or is empty.")
+        return@withContext Plant(image = path, description = ERROR_IMAGE_EMPTY)
       }
 
       // Build multipart request for image upload and API call
@@ -249,33 +291,33 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
         val json = Json.parseToJsonElement(rawBody)
 
         // Get first result from PlantNet and its confidence score
-        val firstResult = json.jsonObject["results"]?.jsonArray?.first()
+        val firstResult = json.jsonObject[JSON_FIELD_RESULTS]?.jsonArray?.first()
 
-        val score = firstResult?.jsonObject?.get("score")?.jsonPrimitive?.doubleOrNull ?: 0.0
+        val score =
+            firstResult?.jsonObject?.get(JSON_FIELD_SCORE)?.jsonPrimitive?.doubleOrNull
+                ?: DEFAULT_SCORE
         if (score < SCORE_THRESHOLD) {
           // Low confidence: let user know identification failed
-          return@withContext Plant(
-              image = path, description = "The AI was not able to identify the plant.")
+          return@withContext Plant(image = path, description = ERROR_AI_NO_IDENTIFICATION)
         }
 
         // Extract Latin name from response JSON
         val latinName =
             firstResult
                 ?.jsonObject
-                ?.get("species")
+                ?.get(JSON_FIELD_SPECIES)
                 ?.jsonObject
-                ?.get("scientificNameWithoutAuthor")
+                ?.get(JSON_FIELD_SCIENTIFIC_NAME)
                 ?.jsonPrimitive
-                ?.content ?: "Unknown"
+                ?.content ?: Plant.UNKNOWN_NAME
 
         return@withContext Plant(latinName = latinName, image = path)
       } catch (e: Exception) {
         // Log and handle API/network errors
-        Log.e("plantNetApiLog", "Error while calling PlantNet API: ", e)
+        Log.e(LOG_TAG_PLANTNET_API, "Error while calling PlantNet API: ", e)
       }
       // Fallback for any errors encountered
-      return@withContext Plant(
-          image = path, description = "There was an error getting the plant latin name.")
+      return@withContext Plant(image = path, description = ERROR_LATIN_NAME_FAILED)
     }
   }
 
@@ -306,7 +348,7 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
   override suspend fun identifyPlant(path: String?): Plant {
     val plantWLatinName = identifyLatinNameWithPlantNet(path)
     if (plantWLatinName.latinName == Plant().latinName) {
-      Log.d("plantNetApiLog", "PlantNet API call failed)")
+      Log.d(LOG_TAG_PLANTNET_API, "PlantNet API call failed)")
       return plantWLatinName
     }
     return generatePlantWithAI(plantWLatinName)
@@ -334,8 +376,8 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
     return try {
       plantDescriptionCallGemini(prompt)
     } catch (e: Exception) {
-      Log.e("plantCareTipsLog", "Error while generating care tips for $latinName", e)
-      return "Unable to generate care tips at this time."
+      Log.e(LOG_TAG_CARE_TIPS, "Error while generating care tips for $latinName", e)
+      return ERROR_CARE_TIPS_FALLBACK
     }
   }
 

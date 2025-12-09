@@ -14,12 +14,23 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
+/** Initial value for the ID counter. */
+private const val INITIAL_COUNTER_VALUE = 0
+
+/** Error message templates for PlantsRepositoryLocal. */
+private const val ERROR_TAG = "PlantsRepositoryLocal"
+
+private fun plantNotFoundError(id: String) = "$ERROR_TAG: OwnedPlant with id $id not found"
+
+private fun idMismatchError(id1: String, id2: String) =
+    "$ERROR_TAG: ID mismatch - parameter id '$id1' does not match newOwnedPlant.id '$id2'"
+
 /** Represents a repository that manages Plant and OwnedPlant objects. */
 class PlantsRepositoryLocal(
     scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 ) : PlantsRepositoryBase() {
 
-  private var counter = 0
+  private var counter = INITIAL_COUNTER_VALUE
   private val healthCalculator = PlantHealthCalculator()
 
   override val tickDelay: Duration = 2.seconds
@@ -62,9 +73,7 @@ class PlantsRepositoryLocal(
 
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
     val ownedPlant =
-        requireNotNull(_plants.value.firstOrNull { it.id == id }) {
-          "PlantsRepositoryLocal: OwnedPlant with id $id not found"
-        }
+        requireNotNull(_plants.value.firstOrNull { it.id == id }) { plantNotFoundError(id) }
 
     return updatePlantHealthStatus(ownedPlant)
   }
@@ -72,15 +81,11 @@ class PlantsRepositoryLocal(
   override suspend fun deleteFromGarden(id: String) {
     val previousListSize = _plants.value.size
     _plants.update { plants -> plants.filterNot { it.id == id } }
-    require(previousListSize != _plants.value.size) {
-      "PlantsRepositoryLocal: OwnedPlant with id $id not found"
-    }
+    require(previousListSize != _plants.value.size) { plantNotFoundError(id) }
   }
 
   override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {
-    require(id == newOwnedPlant.id) {
-      "PlantsRepositoryLocal: ID mismatch - parameter id '$id' does not match newOwnedPlant.id '${newOwnedPlant.id}'"
-    }
+    require(id == newOwnedPlant.id) { idMismatchError(id, newOwnedPlant.id) }
     var found = false
 
     _plants.update { plants ->
@@ -92,14 +97,13 @@ class PlantsRepositoryLocal(
       }
     }
 
-    require(found) { "PlantsRepositoryLocal: OwnedPlant with id $id not found" }
+    require(found) { plantNotFoundError(id) }
   }
 
   override suspend fun waterPlant(id: String, wateringTime: Timestamp) {
     val ownedPlant =
         _plants.value.firstOrNull { it.id == id }
-            ?: throw IllegalArgumentException(
-                "PlantsRepositoryLocal: OwnedPlant with id $id not found")
+            ?: throw IllegalArgumentException(plantNotFoundError(id))
     val previousWatering = ownedPlant.lastWatered
     val updatedPlant =
         ownedPlant.copy(lastWatered = wateringTime, previousLastWatered = previousWatering)

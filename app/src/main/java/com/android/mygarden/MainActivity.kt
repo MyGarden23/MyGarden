@@ -47,7 +47,29 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.PersistentCacheSettings
 import kotlinx.coroutines.launch
 
+private const val JAVA_CLASSPATH_PROPERTY = "java.class.path"
+private const val ANDROID_TEST_PATH = "androidTest"
+private const val ANDROID_JUNIT_RUNNER = "androidx.test.ext.junit.runners.AndroidJUnit4"
+
+/** Log tags */
+private const val LOG_TAG_MAIN_ACTIVITY = "MainActivity"
+private const val LOG_TAG_MYGARDEN = "MyGarden"
+
+/** Log messages */
+private const val LOG_MSG_FIRESTORE_PERSISTENCE_FAILED = "Failed to enable Firestore persistence"
+private const val LOG_MSG_FIREBASE_AUTH_UNAVAILABLE = "FirebaseAuth unavailable; defaulting to Auth"
+
+/** Dimensions */
+private val OFFLINE_INDICATOR_PADDING = 8.dp
+
 class MainActivity : ComponentActivity() {
+
+  companion object {
+    /** System property keys for test environment detection */
+    const val E2E_TEST_PROPERTY = "mygarden.e2e"
+    const val E2E_TEST_VALUE = "true"
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -62,7 +84,7 @@ class MainActivity : ComponentActivity() {
       firestore.firestoreSettings = settings
     } catch (e: Exception) {
       // Persistence may already be enabled or unavailable
-      android.util.Log.w("MainActivity", "Failed to enable Firestore persistence", e)
+      android.util.Log.w(LOG_TAG_MAIN_ACTIVITY, LOG_MSG_FIRESTORE_PERSISTENCE_FAILED, e)
     }
 
     // Initialize offline state manager
@@ -175,7 +197,7 @@ fun MyGardenApp(intent: Intent? = null) {
 @Composable
 fun OfflineIndicator() {
   Snackbar(
-      modifier = Modifier.padding(8.dp),
+      modifier = Modifier.padding(OFFLINE_INDICATOR_PADDING),
       containerColor = MaterialTheme.colorScheme.errorContainer,
       contentColor = MaterialTheme.colorScheme.onErrorContainer) {
         Text(stringResource(R.string.offline_indicator_message))
@@ -196,12 +218,12 @@ fun OfflineIndicator() {
  */
 @Composable
 private fun rememberIsInTestEnvironment(): Boolean = remember {
-  System.getProperty("mygarden.e2e") == "true" ||
-      System.getProperty("java.class.path")?.contains("androidTest") == true ||
+  System.getProperty(MainActivity.E2E_TEST_PROPERTY) == MainActivity.E2E_TEST_VALUE ||
+      System.getProperty(JAVA_CLASSPATH_PROPERTY)?.contains(ANDROID_TEST_PATH) == true ||
       try {
-        Class.forName("androidx.test.ext.junit.runners.AndroidJUnit4")
+        Class.forName(ANDROID_JUNIT_RUNNER)
         true
-      } catch (e: ClassNotFoundException) {
+      } catch (_: ClassNotFoundException) {
         false
       }
 }
@@ -224,9 +246,7 @@ private fun rememberIsInTestEnvironment(): Boolean = remember {
 private fun rememberStartDestination(): String = remember {
   val user =
       runCatching { FirebaseAuth.getInstance().currentUser }
-          .onFailure {
-            android.util.Log.w("MyGarden", "FirebaseAuth unavailable; defaulting to Auth", it)
-          }
+          .onFailure { android.util.Log.w(LOG_TAG_MYGARDEN, LOG_MSG_FIREBASE_AUTH_UNAVAILABLE, it) }
           .getOrNull()
   if (user == null) Screen.Auth.route else Screen.Camera.route
 }

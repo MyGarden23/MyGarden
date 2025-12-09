@@ -67,10 +67,9 @@ import com.android.mygarden.ui.utils.handleOfflineClick
 
 // Layout proportions
 private const val HEADER_SECTION_WEIGHT = 0.2f
-private const val CONTENT_SECTION_WEIGHT = 0.3f
 private const val FORM_SECTION_WEIGHT = 0.6f
 private const val SPACER_SECTION_WEIGHT = 0.1f
-private const val AVATAR_WIDTH_FRACTION = 0.25f
+private const val WEIGHT_1 = 1f
 
 // Dimensions
 private val BUTTON_HEIGHT = 56.dp
@@ -86,8 +85,6 @@ private val STANDARD_PADDING = 16.dp
 private val ITEM_VERTICAL_PADDING = 12.dp
 private val SPACE_SAVE_BUTTON_BOTTOM_SCREEN = (-12.dp)
 
-// Typography
-private val TITLE_FONT_SIZE = 20.sp
 private val BUTTON_FONT_SIZE = 16.sp
 private val CAPTION_FONT_SIZE = 12.sp
 private val BODY_FONT_SIZE = 14.sp
@@ -99,7 +96,8 @@ private const val MAX_COUNTRIES_DISPLAYED = 15
  * Header section displaying the profile creation title and user avatar placeholder.
  *
  * @param modifier Modifier for customizing the layout
- * @param title The title to display (defaults to "New Profile")
+ * @param uiState current ui state
+ * @param onAvatarClick action performed when clicking on an avatar
  */
 @Composable
 private fun ProfileHeader(
@@ -117,7 +115,7 @@ private fun ProfileHeader(
           Box(
               modifier =
                   Modifier.sizeIn(maxWidth = MAX_WIDTH_AVATAR)
-                      .aspectRatio(1f)
+                      .aspectRatio(WEIGHT_1)
                       .clip(CircleShape)
                       .background(MaterialTheme.colorScheme.surfaceVariant)
                       .testTag(ProfileScreenTestTags.AVATAR)
@@ -427,7 +425,7 @@ private fun CountryDropdownMenu(
 /**
  * Save button that validates form and triggers profile saving.
  *
- * @param uiState Current UI state for validation
+ * @param profileViewModel Current profileViewModel for validation
  * @param profileViewModel ViewModel for triggering registration
  * @param onRegisterPressed Callback when registration is successful
  */
