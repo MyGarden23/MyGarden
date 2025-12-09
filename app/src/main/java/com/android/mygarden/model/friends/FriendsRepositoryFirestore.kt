@@ -73,6 +73,20 @@ class FriendsRepositoryFirestore(
         currentUserId, AchievementType.FRIENDS_NUMBER, friendsCount!!)
   }
 
+  /**
+   * Checks whether the given user ID is already listed as a friend of the current user.
+   *
+   * @param friendUserId The UID of the user to check.
+   * @return `true` if the user appears in the current user's friends list, `false` otherwise.
+   * @throws IllegalStateException if no authenticated user is available.
+   */
+  override suspend fun isFriend(friendUserId: String): Boolean {
+    val currentUserId =
+        auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
+    val friends = getFriends(currentUserId)
+    return friends.contains(friendUserId)
+  }
+
   override fun friendsFlow(userId: String): Flow<List<String>> = callbackFlow {
     val registration =
         friendsCollection(userId).addSnapshotListener { snapshot, error ->
