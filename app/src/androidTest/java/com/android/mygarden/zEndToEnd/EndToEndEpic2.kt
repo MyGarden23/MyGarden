@@ -2,6 +2,7 @@ package com.android.mygarden.zEndToEnd
 
 import android.Manifest
 import android.util.Log
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
@@ -91,29 +92,18 @@ class EndToEndEpic2 {
     waitForAppToLoad()
   }
 
-  @After
-  fun tearDown() {
-    // Clean up the activity scenario
-    if (::scenario.isInitialized) {
-      scenario.close()
-    }
-    // Clean up the system property to avoid affecting other tests
-    System.clearProperty("mygarden.e2e")
-  }
-
-  /** Waits for the app to fully load by checking for key UI elements */
-  private fun waitForAppToLoad() {
-    composeTestRule.waitUntil(TIMEOUT) {
-      try {
-        // Check if root is available
-        composeTestRule.onRoot().fetchSemanticsNode()
-        true
-      } catch (_: Throwable) {
-        false
-      }
-    }
-  }
-
+  /**
+   * End to end test for the epic Garden Owner (epic 2).
+   *
+   * Test's flow :
+   *
+   * Create a new profile -> take a picture -> plant info -> edit plant -> save the plant to the
+   * garden. Ensure the user's avatar and username are displayed. Ensure the plant is displayed in
+   * the garden. Click on the plant -> plant info -> edit plant -> change the information of the
+   * plant -> save the modifications -> click again on the plant form the garden -> plant info.
+   * Ensure the information about the plant matches what was filled earlier. -> edit plant -> delete
+   * the plant -> Ensure the plant is not in the garden anymore.
+   */
   @Test
   fun test_end_to_end_epic_2() {
     composeTestRule
@@ -156,9 +146,10 @@ class EndToEndEpic2 {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
     }
 
-    // === EDIT PLANT SCREEN (NEW FLOW SINCE S4) ===
     // Click Next to save plant and navigate to EditPlant
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+
+    // === EDIT PLANT SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
     }
@@ -174,95 +165,146 @@ class EndToEndEpic2 {
     // Click Save to navigate to Garden
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
 
+    // === GARDEN SCREEN ===
+
     // Wait for the garden list to appear
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).isDisplayed()
     }
 
+    // Check that the pseudo and the avatar are displayed
+    composeTestRule
+        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .assertIsDisplayed()
+        .assertTextContains("pseudo")
+    composeTestRule.onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertIsDisplayed()
+
+    // Get the list of ownedPlant in the repository
     val listOfOwnedPlant = runBlocking { PlantsRepositoryProvider.repository.getAllOwnedPlants() }
 
     // Check that the plant is in the garden.
     assert(listOfOwnedPlant.size == 1)
+
     val plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlant.first())
 
-    // click on plant
+    // Click on plant
     composeTestRule.waitUntil(TIMEOUT) { composeTestRule.onNodeWithTag(plantTag).isDisplayed() }
     composeTestRule.onNodeWithTag(plantTag).assertIsDisplayed().performClick()
 
-    // Plant Info
+    // === PLANT INFO SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
     }
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).isDisplayed()
-
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).assertTextContains("Rose")
+    // Check that the plant's name and latin name are displayed and correct
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME)
+        .assertIsDisplayed()
+        .assertTextContains("Rose")
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME)
+        .assertIsDisplayed()
         .assertTextContains("Rosa")
 
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).isDisplayed()
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).performClick()
+    // Click Edit button to navigate to EditPlant
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
 
-    // Edit plant
+    // === EDIT PLANT SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
     }
 
-    // Fill the name, latin name and description
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).performTextClearance()
+    // Fill the name, latin name, description, light exposure and location of the plant
+
+    // Clear and fill plant name
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME)
+        .assertIsDisplayed()
+        .performTextClearance()
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).performTextInput("FakePlant")
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).performTextClearance()
+
+    // Clear and fill plant latin name
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN)
+        .assertIsDisplayed()
+        .performTextClearance()
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN)
         .performTextInput("FakePlantus")
+
+    // Clear and fill plant description
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
+        .assertIsDisplayed()
         .performTextClearance()
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
         .performTextInput("Just a test plant")
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).performTextClearance()
+
+    // Clear and fill plant light exposure
+    composeTestRule
+        .onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE)
+        .assertIsDisplayed()
+        .performTextClearance()
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE)
         .performTextInput("Light exposure")
+
+    // Select the OUTDOOR location
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.LOCATION_DROPDOWN).performClick()
     composeTestRule.onNodeWithTag(PlantLocation.OUTDOOR.testTag).performClick()
 
+    // Click Save to navigate to Garden
     composeTestRule
         .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
         .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_SAVE))
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
-    // Garden
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+
+    // === GARDEN SCREEN ===
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+    }
+
+    // Get the list of ownedPlant in the repository
     val listOfOwnedPlant2 = runBlocking { PlantsRepositoryProvider.repository.getAllOwnedPlants() }
+
     // Check that the plant is in the garden.
     assert(listOfOwnedPlant2.size == 1)
+
     val plantTag2 = GardenScreenTestTags.getTestTagForOwnedPlant(listOfOwnedPlant2.first())
 
-    // click on plant
+    // Click on the plant
     composeTestRule.waitUntil(TIMEOUT) { composeTestRule.onNodeWithTag(plantTag2).isDisplayed() }
     composeTestRule.onNodeWithTag(plantTag).assertIsDisplayed().performClick()
 
-    // Plant Info
+    // === PLANT INFO SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
     }
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).isDisplayed()
 
+    // Check that the information about the plant matches what was filled earlier.
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME)
+        .assertIsDisplayed()
         .assertTextContains("FakePlant")
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME)
+        .assertIsDisplayed()
         .assertTextContains("FakePlantus")
     composeTestRule
         .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
+        .assertIsDisplayed()
         .assertTextContains("Just a test plant")
 
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).isDisplayed()
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).performClick()
+    // Click Edit button to navigate to EditPlant
+    composeTestRule
+        .onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
 
-    // Edit plant
+    // === EDIT PLANT SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
     }
@@ -272,14 +314,46 @@ class EndToEndEpic2 {
         .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
         .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_DELETE))
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_DELETE).performClick()
+
     // Confirm the deletion
     composeTestRule.onNodeWithTag(DeletePlantPopupTestTags.POPUP).isDisplayed()
-    composeTestRule.onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON).performClick()
+    composeTestRule
+        .onNodeWithTag(DeletePlantPopupTestTags.CONFIRM_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
 
-    // Garden
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+    // === GARDEN SCREEN ===
+    composeTestRule.waitUntil(TIMEOUT) {
+      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+    }
+
+    // Get the list of ownedPlant in the repository
     val listOfOwnedPlant3 = runBlocking { PlantsRepositoryProvider.repository.getAllOwnedPlants() }
-    // Check that the plant is in the garden.
+
+    // Check that there is no plant in the garden
     assert(listOfOwnedPlant3.isEmpty())
+  }
+
+  /** Waits for the app to fully load by checking for key UI elements */
+  private fun waitForAppToLoad() {
+    composeTestRule.waitUntil(TIMEOUT) {
+      try {
+        // Check if root is available
+        composeTestRule.onRoot().fetchSemanticsNode()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
+  }
+
+  @After
+  fun tearDown() {
+    // Clean up the activity scenario
+    if (::scenario.isInitialized) {
+      scenario.close()
+    }
+    // Clean up the system property to avoid affecting other tests
+    System.clearProperty("mygarden.e2e")
   }
 }
