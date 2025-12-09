@@ -76,16 +76,16 @@ class EndToEndEpic2 {
   @Before
   fun setUp() = runTest {
     // Set up any necessary configurations or states before each test
-    Log.d("EndToEndM2", "setUpEntry")
+    Log.d("EndToEndEpic2", "setUpEntry")
     firebaseUtils.initialize()
-    Log.d("EndToEndM2", "Initialized and signed out")
+    Log.d("EndToEndEpic2", "Initialized and signed out")
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     fakePlantRepoUtils.setUpMockRepo()
-    Log.d("EndToEndM2", "Set up mock repo")
+    Log.d("EndToEndEpic2", "Set up mock repo")
 
     // Now launch the activity AFTER Firebase is cleaned up
     scenario = ActivityScenario.launch(MainActivity::class.java)
-    Log.d("EndToEndM2", "Activity launched")
+    Log.d("EndToEndEpic2", "Activity launched")
 
     composeTestRule.waitForIdle()
     waitForAppToLoad()
