@@ -1,11 +1,7 @@
 package com.android.mygarden.ui.addFriend
 
-import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.android.mygarden.R
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
@@ -23,10 +19,6 @@ import kotlinx.coroutines.launch
 /** Minimum number of characters required for a search query */
 private const val MIN_QUERY_LENGTH = 2
 
-/** String representations for FriendRelation enum values */
-private const val RELATION_ADD_STRING = "Add"
-private const val RELATION_ADDED_STRING = "Added"
-
 /**
  * UI state container for the *Add Friend* screen.
  *
@@ -42,6 +34,7 @@ data class AddFriendUiState(
     val isSearching: Boolean = false,
     val searchResults: List<UserProfile> = emptyList(),
     val alreadyFriend: List<UserProfile> = emptyList(),
+    val relations: Map<String, FriendRelation> = emptyMap(),
 )
 
 /**
@@ -71,6 +64,7 @@ class AddFriendViewModel(
   fun onQueryChange(newQuery: String) {
     _uiState.value = _uiState.value.copy(query = newQuery)
   }
+
   /**
    * Searches for users whose pseudo starts with the current query.
    *
@@ -98,8 +92,8 @@ class AddFriendViewModel(
           val userProfile = userProfileRepository.getUserProfile(userId) ?: continue
           profiles.add(userProfile)
         }
-
         _uiState.value = _uiState.value.copy(isSearching = false, searchResults = profiles)
+        refreshRelations()
       } catch (_: Exception) {
         onError()
         _uiState.value = _uiState.value.copy(isSearching = false)
@@ -135,42 +129,42 @@ class AddFriendViewModel(
    */
   fun onAsk(userId: String, onError: () -> Unit, onSuccess: () -> Unit) {
     viewModelScope.launch {
+      _uiState.value = _uiState.value.let { state ->
+        state.copy(
+          relations = state.relations + (userId to FriendRelation.PENDING)
+        )
+      }
+
       try {
         requestsRepository.askFriend(userId)
         onSuccess()
       } catch (_: Exception) {
+        _uiState.value = _uiState.value.let { state ->
+          state.copy(
+            relations = state.relations + (userId to FriendRelation.ADD)
+          )
+        }
         onError()
       }
     }
   }
-}
 
-/**
- * Represents the relationship status between the current user and another user's profile.
- *
- * Each relation provides:
- * - A readable string representation via [toString], used for the button of a [FriendCard].
- * - A [color] property that exposes the appropriate color for the given relation.
- */
-enum class FriendRelation(val labelRes: Int) { //
-  /** Indicates that the user can send a friend request. */
-  ADD(R.string.add_enum),
-  /** Indicates that the users are already connected. */
-  ADDED(R.string.added_enum);
+  /**
+   * Updates the friend-relation state for all users in the current search results. Each user's
+   * relation is recomputed (ADD, ADDED, or PENDING) based on repository data.
+   */
+  private suspend fun refreshRelations() {
+    val currentFriends = _uiState.value.searchResults
 
-  override fun toString(): String {
-    return when (this) {
-      ADD -> RELATION_ADD_STRING
-      ADDED -> RELATION_ADDED_STRING
+    val newRelations = currentFriends.associate { friend ->
+      val relation = when {
+        requestsRepository.isInOutgoingRequests(friend.id) -> FriendRelation.PENDING
+        friendsRepository.isFriend(friend.id) -> FriendRelation.ADDED
+        else -> FriendRelation.ADD
+      }
+      friend.id to relation
     }
-  }
 
-  /** A color representing this friend relation. */
-  val color: Color
-    @Composable
-    get() =
-        when (this) {
-          ADD -> colorScheme.primary
-          ADDED -> colorScheme.outline
-        }
+    _uiState.value = _uiState.value.copy(relations = newRelations)
+  }
 }
