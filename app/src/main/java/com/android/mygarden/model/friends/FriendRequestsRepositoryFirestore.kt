@@ -160,6 +160,48 @@ class FriendRequestsRepositoryFirestore(
   }
 
   /**
+   * Deletes a pending friend request from both users' subcollections.
+   *
+   * Only the recipient can delete the request, and the request must be in the PENDING state. The
+   * deletion is done atomically using a Firestore batch.
+   *
+   * @param requestId The ID of the friend request to delete.
+   * @throws IllegalStateException If the user is not authenticated.
+   * @throws IllegalArgumentException If the user is not the recipient or the request is not
+   *   pending.
+   * @throws Exception If the Firestore batch fails.
+   */
+  private suspend fun deleteRequest(requestId: String) {
+    val currentUserId = getCurrentUserId() ?: throw IllegalStateException(NOT_AUTHENTICATED_ERROR)
+
+    // Retrieve the request document from the current user's subcollection
+    val requestDoc = friendRequestsCollection(currentUserId).document(requestId).get().await()
+
+    // Ensure the request exists
+    check(requestDoc.exists()) { ERROR_REQUEST_NOT_FOUND }
+
+    val fromUserId = requestDoc.getString(FIELD_FROM_USER_ID) ?: ""
+    val toUserId = requestDoc.getString(FIELD_TO_USER_ID) ?: ""
+
+    // Ensure the current user is the recipient
+    require(toUserId == currentUserId) { "Only the recipient can modify this friend request" }
+
+    // Ensure the request is still pending
+    val status = requestDoc.getString(FIELD_STATUS)
+    require(status == FriendRequestStatus.PENDING.name) {
+      "Friend request is not pending (current status: $status)"
+    }
+
+    // Delete the request from both users' subcollections using a batch
+    val batch = db.batch()
+    val requestRef = friendRequestsCollection(currentUserId).document(requestId)
+    val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
+    batch.delete(requestRef)
+    batch.delete(requestRefOther)
+    batch.commit().await()
+  }
+
+  /**
    * Returns all friend requests for the current user (both sent and received).
    *
    * This queries both the current user's subcollection and all other users' subcollections where
@@ -275,16 +317,21 @@ class FriendRequestsRepositoryFirestore(
   }
 
   /**
-   * Refuses a friend request.
+   * Deletes a friend request instead of refusing it.
    *
-   * Updates the status to REFUSED in both users' subcollections atomically using a batch.
+   * Removes the request document from both users' subcollections atomically using a batch.
+   */
+  /**
+   * Refuses a friend request by deleting it.
+   *
+   * Deletes the request from both users' subcollections atomically using a batch.
    */
   override suspend fun refuseRequest(requestId: String) {
     try {
-      updateRequestStatus(requestId, FriendRequestStatus.REFUSED)
-      Log.d("FriendRequestsRepo", "Friend request refused successfully")
+      deleteRequest(requestId)
+      Log.d("FriendRequestsRepo", "Friend request deleted successfully")
     } catch (e: Exception) {
-      Log.e("FriendRequestsRepo", "Failed to refuse friend request", e)
+      Log.e("FriendRequestsRepo", "Failed to delete friend request", e)
       throw e
     }
   }

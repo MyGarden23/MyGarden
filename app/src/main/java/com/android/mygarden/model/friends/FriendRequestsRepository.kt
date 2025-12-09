@@ -68,7 +68,7 @@ interface FriendRequestsRepository {
   /**
    * Refuses a friend request.
    *
-   * Updates the request status to REFUSED or deletes the request document.
+   * deletes the request document.
    *
    * @param requestId The ID of the friend request to refuse.
    * @throws IllegalStateException if the current user is not the recipient of the request.
