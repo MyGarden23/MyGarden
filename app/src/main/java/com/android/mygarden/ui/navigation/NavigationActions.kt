@@ -25,6 +25,7 @@ class NavigationActions(private val controller: NavHostController) {
         when (destination) {
           is Screen.EditPlant ->
               Screen.EditPlant.buildRoute(destination.ownedPlantId, destination.from)
+          is Screen.FriendGarden -> Screen.FriendGarden.buildRoute(destination.friendId)
           else -> destination.route
         }
 

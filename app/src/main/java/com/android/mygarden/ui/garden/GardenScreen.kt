@@ -133,25 +133,40 @@ private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
 
 /**
+ * Callbacks for garden screen navigation and actions.
+ *
+ * @param onEditProfile the function to launch when a user clicks on the edit profile button
+ * @param onAddPlant the function to launch when a user clicks on the FAB (add a plant button)
+ * @param onSignOut the function to sign out the user from the app
+ * @param onBackPressed the function to launch when a user clicks on the back button (in view mode)
+ * @param onPlantClick the function to launch when a user clicks on a plant card
+ */
+data class GardenScreenCallbacks(
+    val onEditProfile: () -> Unit,
+    val onAddPlant: () -> Unit,
+    val onSignOut: () -> Unit = {},
+    val onBackPressed: () -> Unit = {},
+    val onPlantClick: (OwnedPlant) -> Unit = {}
+)
+
+/**
  * The screen of the garden with some user profile infos and the list of plants owned by the user.
  *
  * @param modifier the optional modifier of the composable
  * @param gardenViewModel the viewModel that manages the user interactions
- * @param onEditProfile the function to launch when a user clicks on the edit profile button
- * @param onAddPlant the function to launch when a user clicks on the FAB (add a plant button)
- * @param onSignOut the function to sign out the user from the app
- * @param onPlantClick the function to launch when a user clicks on a plant card (default value for
- *   test compatibility)
+ * @param friendId optional ID of a friend whose garden to display (null for own garden)
+ * @param isViewMode if true, disable edit buttons (for viewing a friend's garden)
+ * @param callbacks callbacks for navigation and user actions
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GardenScreen(
     modifier: Modifier = Modifier,
-    gardenViewModel: GardenViewModel = viewModel(),
-    onEditProfile: () -> Unit,
-    onAddPlant: () -> Unit,
-    onSignOut: () -> Unit = {},
-    onPlantClick: (OwnedPlant) -> Unit = {}
+    friendId: String? = null,
+    isViewMode: Boolean = false,
+    gardenViewModel: GardenViewModel =
+        viewModel(factory = GardenViewModelFactory(friendId = friendId)),
+    callbacks: GardenScreenCallbacks
 ) {
 
   val context = LocalContext.current
@@ -179,17 +194,23 @@ fun GardenScreen(
       topBar = {
         TopBar(
             title = context.getString(Screen.Garden.nameResId),
-            hasSignOutButton = true,
-            onSignOut = onSignOut)
+            hasGoBackButton = isViewMode,
+            hasSignOutButton = !isViewMode,
+            onGoBack = callbacks.onBackPressed,
+            onSignOut = callbacks.onSignOut)
       },
-      // The button to add a new plant to the collection
-      floatingActionButton = { AddPlantFloatingButton(onAddPlant, modifier, isOnline) },
+      // The button to add a new plant to the collection (hidden in view mode)
+      floatingActionButton = {
+        if (!isViewMode) {
+          AddPlantFloatingButton(callbacks.onAddPlant, modifier, isOnline)
+        }
+      },
       floatingActionButtonPosition = FabPosition.Start,
       containerColor = MaterialTheme.colorScheme.background,
       content = { pd ->
         Column(modifier = modifier.fillMaxWidth().padding(pd)) {
           // Profile row with user profile picture, username and a button to edit the profile
-          ProfileRow(onEditProfile, modifier, uiState, isOnline)
+          ProfileRow(callbacks.onEditProfile, modifier, uiState, isOnline, isViewMode)
           Spacer(modifier = modifier.height(16.dp))
 
           // Sort and filter bar - only show if there are plants in the garden
@@ -207,10 +228,11 @@ fun GardenScreen(
           GardenContent(
               plants = plants,
               filteredAndSortedPlants = filteredAndSortedPlants,
-              onPlantClick = onPlantClick,
+              onPlantClick = callbacks.onPlantClick,
               gardenViewModel = gardenViewModel,
               modifier = modifier,
-              isOnline = isOnline)
+              isOnline = isOnline,
+              isViewMode = isViewMode)
         }
       })
 }
@@ -222,13 +244,15 @@ fun GardenScreen(
  * @param modifier the modifier for the row
  * @param uiState the UI state
  * @param isOnline whether the device is online
+ * @param isViewMode if true, hide the edit profile button (for viewing a friend's garden)
  */
 @Composable
 fun ProfileRow(
     onEditProfile: () -> Unit,
     modifier: Modifier = Modifier,
     uiState: GardenUIState,
-    isOnline: Boolean
+    isOnline: Boolean,
+    isViewMode: Boolean = false
 ) {
   val context = LocalContext.current
   Row(
@@ -260,27 +284,31 @@ fun ProfileRow(
               text = uiState.userName)
           Spacer(modifier = modifier.weight(1f))
 
-          // Edit profile button
-          IconButton(
-              modifier = modifier.testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON),
-              onClick = {
-                handleOfflineClick(
-                    isOnline = isOnline,
-                    context = context,
-                    offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
-                      onEditProfile()
-                    }
-              }) {
-                Icon(
-                    painter = painterResource(R.drawable.edit_icon),
-                    contentDescription = null,
-                    tint =
-                        if (isOnline) {
-                          MaterialTheme.colorScheme.primary
-                        } else {
-                          MaterialTheme.colorScheme.onSurfaceVariant
-                        })
-              }
+          // Edit profile button (hidden in view mode)
+          if (!isViewMode) {
+            IconButton(
+                modifier = modifier.testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON),
+                onClick = {
+                  handleOfflineClick(
+                      isOnline = isOnline,
+                      context = context,
+                      offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
+                        onEditProfile()
+                      }
+                }) {
+                  Icon(
+                      painter = painterResource(R.drawable.edit_icon),
+                      contentDescription = null,
+                      tint =
+                          if (isOnline) {
+                            MaterialTheme.colorScheme.primary
+                          } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                          })
+                }
+          } else {
+            Spacer(modifier = modifier.width(AVATAR_SIZE))
+          }
         }
       }
 }
@@ -336,6 +364,7 @@ fun AddPlantFloatingButton(
  * @param onClick the callback called when clicked on the plant card
  * @param viewModel the viewModel of the screen (used to update when watering button is pressed)
  * @param isOnline a boolean indicating if the device is online
+ * @param isViewMode if true, disable click on the plant card (for viewing a friend's garden)
  */
 @Composable
 fun PlantCard(
@@ -343,7 +372,8 @@ fun PlantCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     viewModel: GardenViewModel,
-    isOnline: Boolean
+    isOnline: Boolean,
+    isViewMode: Boolean = false
 ) {
   val context = LocalContext.current
   // The color palette of the card depending on the health status of the plant
@@ -370,7 +400,7 @@ fun PlantCard(
           modifier
               .fillMaxWidth()
               .height(PLANT_CARD_HEIGHT)
-              .clickable(onClick = { onClick() })
+              .then(if (!isViewMode) Modifier.clickable(onClick = { onClick() }) else Modifier)
               .testTag(GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)),
       // Color changing
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
@@ -468,7 +498,8 @@ fun PlantCard(
                           viewModel.waterPlant(ownedPlant)
                         }
                   },
-                  isOnline = isOnline)
+                  isOnline = isOnline,
+                  isViewMode = isViewMode)
             }
       })
 }
@@ -480,15 +511,19 @@ fun PlantCard(
  * @param color the color of the button
  * @param onButtonPressed the lambda passed when the button is pressed
  * @param isOnline whether the device is currently online
+ * @param isViewMode if true, disable the button (for viewing a friend's garden)
  */
 @Composable
 fun WaterButton(
     modifier: Modifier = Modifier,
     color: Color,
     onButtonPressed: () -> Unit,
-    isOnline: Boolean
+    isOnline: Boolean,
+    isViewMode: Boolean = false
 ) {
   val context = LocalContext.current
+  // Only allow clicking if not in view mode
+  val canClick = !isViewMode && isOnline
   Box(
       modifier =
           modifier
@@ -496,14 +531,14 @@ fun WaterButton(
               .clip(RoundedCornerShape(PLANT_CARD_ROUND_SHAPING))
               .border(
                   WATER_BUTTON_BORDER_WIDTH,
-                  if (isOnline) color else MaterialTheme.colorScheme.surfaceVariant,
+                  if (canClick) color else MaterialTheme.colorScheme.surfaceVariant,
                   RoundedCornerShape(PLANT_CARD_ROUND_SHAPING))
-              .clickable(onClick = onButtonPressed),
+              .then(if (!isViewMode) Modifier.clickable(onClick = onButtonPressed) else Modifier),
       contentAlignment = Alignment.Center) {
         Icon(
             Icons.Default.WaterDrop,
             contentDescription = context.getString(R.string.water_button_icon_description),
-            tint = if (isOnline) color else MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = if (canClick) color else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(WATER_BUTTON_DROP_ICON_SIZE))
       }
 }
@@ -581,6 +616,7 @@ fun colorsFromHealthStatus(
  * @param gardenViewModel The view model for plant actions
  * @param modifier Optional modifier for the composable
  * @param isOnline a boolean indicating if the device is online
+ * @param isViewMode if true, disable click on plant cards (for viewing a friend's garden)
  */
 @Composable
 fun GardenContent(
@@ -589,7 +625,8 @@ fun GardenContent(
     onPlantClick: (OwnedPlant) -> Unit,
     gardenViewModel: GardenViewModel,
     modifier: Modifier = Modifier,
-    isOnline: Boolean
+    isOnline: Boolean,
+    isViewMode: Boolean = false
 ) {
   if (filteredAndSortedPlants.isNotEmpty()) {
 
@@ -607,7 +644,8 @@ fun GardenContent(
                 modifier,
                 { onPlantClick(filteredAndSortedPlants[index]) },
                 gardenViewModel,
-                isOnline)
+                isOnline,
+                isViewMode)
           }
         }
   } else {

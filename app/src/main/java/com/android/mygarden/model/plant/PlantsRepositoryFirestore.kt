@@ -151,6 +151,19 @@ class PlantsRepositoryFirestore(
     return ownedPlantList.map { p -> updatePlantHealthStatus(p) }
   }
 
+  override suspend fun getAllOwnedPlantsByUserId(userId: String): List<OwnedPlant> {
+    val snapshot =
+        firestore
+            .collection(usersCollection)
+            .document(userId)
+            .collection(plantsCollection)
+            .get()
+            .await()
+    val serializedList = snapshot.toObjects(SerializedOwnedPlant::class.java)
+    val ownedPlantList = serializedList.map(FirestoreMapper::fromSerializedOwnedPlantToOwnedPlant)
+    return ownedPlantList.map { p -> updatePlantHealthStatus(p) }
+  }
+
   override suspend fun getOwnedPlant(id: String): OwnedPlant {
     val document = userPlantsCollection().document(id).get().await()
     require(document.exists()) { plantNotFoundErrMsg(id) }

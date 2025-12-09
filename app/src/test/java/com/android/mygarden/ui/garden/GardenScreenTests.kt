@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
@@ -26,6 +27,7 @@ import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.TestPlants
+import com.google.firebase.FirebaseApp
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.Flow
@@ -97,6 +99,10 @@ class GardenScreenTests {
    */
   @Before
   fun setUp() {
+    // Initialize Firebase for tests
+    if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
+      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+    }
     plantsRepo = PlantsRepositoryLocal()
     profileRepo = FakeProfileRepository()
     ProfileRepositoryProvider.repository = profileRepo
@@ -119,7 +125,9 @@ class GardenScreenTests {
       }
     }
     // Buttons have no use : tests are for the garden screen in isolation
-    composeTestRule.setContent { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
+    composeTestRule.setContent {
+      GardenScreen(callbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
+    }
     composeTestRule.waitForIdle()
   }
 
@@ -259,7 +267,9 @@ class GardenScreenTests {
     var colorScheme: ColorScheme? = null
     var customColors: CustomColors? = null
     composeTestRule.setContent {
-      MyGardenTheme { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
+      MyGardenTheme {
+        GardenScreen(callbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
+      }
       colorScheme = MaterialTheme.colorScheme
       customColors = ExtendedTheme.colors
     }

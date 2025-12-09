@@ -78,12 +78,14 @@ private object CONSTANTS {
  * Displays the friend list screen, showing either the list of friends or an empty-state message.
  *
  * @param onBackPressed callback triggered when the user presses the top bar back button
+ * @param onFriendClick callback triggered when the user clicks on a friend card
  * @param friendListViewModel ViewModel providing the friend list data
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendListScreen(
     onBackPressed: () -> Unit = {},
+    onFriendClick: (UserProfile) -> Unit = {},
     friendListViewModel: FriendListViewModel = viewModel(),
 ) {
   val context = LocalContext.current
@@ -139,6 +141,7 @@ fun FriendListScreen(
                       uiState.friends.forEach { friend ->
                         FriendCard(
                             friend = friend,
+                            onClick = { onFriendClick(friend) },
                             onConfirmDelete = { friendListViewModel.deleteFriend(it) })
                       }
                     }
@@ -158,17 +161,23 @@ fun FriendListScreen(
  * - an icon on the right to delete a friend
  *
  * @param friend user profile to display inside the card
+ * @param onClick callback triggered when the card is clicked
  * @param onConfirmDelete the callback to trigger when the user confirmed the deletion of the friend
  *   via the popup
  */
 @Composable
-private fun FriendCard(friend: UserProfile, onConfirmDelete: (UserProfile) -> Unit) {
+private fun FriendCard(
+    friend: UserProfile,
+    onClick: () -> Unit,
+    onConfirmDelete: (UserProfile) -> Unit
+) {
   val context = LocalContext.current
   val pseudo = friend.pseudo
   val avatar: Avatar = friend.avatar
   var showPopup by remember { mutableStateOf(false) }
 
   Card(
+      onClick = onClick,
       modifier =
           Modifier.fillMaxWidth()
               .height(CONSTANTS.CARD_HEIGHT)

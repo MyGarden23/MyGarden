@@ -148,6 +148,14 @@ interface PlantsRepository {
   suspend fun getAllOwnedPlants(): List<OwnedPlant>
 
   /**
+   * Retrieves all owned plants in a specific user's virtual garden.
+   *
+   * @param userId The unique identifier of the user whose plants to retrieve
+   * @return A list of all OwnedPlant objects in the specified user's garden
+   */
+  suspend fun getAllOwnedPlantsByUserId(userId: String): List<OwnedPlant>
+
+  /**
    * Retrieves a specific owned plant from the user's garden by its unique identifier.
    *
    * @param id The unique identifier of the plant to retrieve
