@@ -81,6 +81,10 @@ class FriendListViewModelTest {
           override fun friendsFlow(userId: String) = FakeFriendsRepository().friendsFlow
 
           override suspend fun addFriend(friendUserId: String) = Unit
+
+          override suspend fun deleteFriend(friendUserId: String) {
+            /* doesn't do anything yet*/
+          }
         }
 
     val fakeUserProfiles = FakeUserProfileRepository()
