@@ -153,7 +153,7 @@ jobs:
         run: |
           if [ -e "firebase.json" ]; then
             echo "Starting Firebase emulators for instrumentation tests..."
-            firebase emulators:start --only auth,firestore,storage --project "${{ steps.firebase_project.outputs.project_id }}" &
+            firebase emulators:start --only auth,firestore,storage,functions --project "${{ steps.firebase_project.outputs.project_id }}" &
             sleep 5
             echo "Firebase emulators started in background"
           else
