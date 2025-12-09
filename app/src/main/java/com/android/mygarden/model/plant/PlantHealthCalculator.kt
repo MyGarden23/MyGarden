@@ -97,7 +97,7 @@ class PlantHealthCalculator {
       percentageOfCycle < SEVERELY_OVERWATERED_THRESHOLD -> {
         currentStatusPercentage =
             calculateRelativePercentage(
-                x = 0.0, y = SEVERELY_OVERWATERED_THRESHOLD, z = percentageOfCycle)
+                x = INITIAL_PERCENTAGE, y = SEVERELY_OVERWATERED_THRESHOLD, z = percentageOfCycle)
         PlantHealthStatus.SEVERELY_OVERWATERED
       }
 
