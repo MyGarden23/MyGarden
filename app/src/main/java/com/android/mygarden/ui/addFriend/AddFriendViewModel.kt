@@ -160,8 +160,8 @@ enum class FriendRelation(val labelRes: Int) { //
 
   override fun toString(): String {
     return when (this) {
-      FriendRelation.ADD -> RELATION_ADD_STRING
-      FriendRelation.ADDED -> RELATION_ADDED_STRING
+      ADD -> RELATION_ADD_STRING
+      ADDED -> RELATION_ADDED_STRING
     }
   }
 
