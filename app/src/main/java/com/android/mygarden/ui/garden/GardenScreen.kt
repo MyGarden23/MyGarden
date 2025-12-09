@@ -133,18 +133,30 @@ private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
 
 /**
+ * Callbacks for garden screen navigation and actions.
+ *
+ * @param onEditProfile the function to launch when a user clicks on the edit profile button
+ * @param onAddPlant the function to launch when a user clicks on the FAB (add a plant button)
+ * @param onSignOut the function to sign out the user from the app
+ * @param onBackPressed the function to launch when a user clicks on the back button (in view mode)
+ * @param onPlantClick the function to launch when a user clicks on a plant card
+ */
+data class GardenScreenCallbacks(
+    val onEditProfile: () -> Unit,
+    val onAddPlant: () -> Unit,
+    val onSignOut: () -> Unit = {},
+    val onBackPressed: () -> Unit = {},
+    val onPlantClick: (OwnedPlant) -> Unit = {}
+)
+
+/**
  * The screen of the garden with some user profile infos and the list of plants owned by the user.
  *
  * @param modifier the optional modifier of the composable
  * @param gardenViewModel the viewModel that manages the user interactions
  * @param friendId optional ID of a friend whose garden to display (null for own garden)
  * @param isViewMode if true, disable edit buttons (for viewing a friend's garden)
- * @param onEditProfile the function to launch when a user clicks on the edit profile button
- * @param onAddPlant the function to launch when a user clicks on the FAB (add a plant button)
- * @param onSignOut the function to sign out the user from the app
- * @param onBackPressed the function to launch when a user clicks on the back button (in view mode)
- * @param onPlantClick the function to launch when a user clicks on a plant card (default value for
- *   test compatibility)
+ * @param callbacks callbacks for navigation and user actions
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,11 +166,7 @@ fun GardenScreen(
     isViewMode: Boolean = false,
     gardenViewModel: GardenViewModel =
         viewModel(factory = GardenViewModelFactory(friendId = friendId)),
-    onEditProfile: () -> Unit,
-    onAddPlant: () -> Unit,
-    onSignOut: () -> Unit = {},
-    onBackPressed: () -> Unit = {},
-    onPlantClick: (OwnedPlant) -> Unit = {}
+    callbacks: GardenScreenCallbacks
 ) {
 
   val context = LocalContext.current
@@ -188,13 +196,13 @@ fun GardenScreen(
             title = context.getString(Screen.Garden.nameResId),
             hasGoBackButton = isViewMode,
             hasSignOutButton = !isViewMode,
-            onGoBack = onBackPressed,
-            onSignOut = onSignOut)
+            onGoBack = callbacks.onBackPressed,
+            onSignOut = callbacks.onSignOut)
       },
       // The button to add a new plant to the collection (hidden in view mode)
       floatingActionButton = {
         if (!isViewMode) {
-          AddPlantFloatingButton(onAddPlant, modifier, isOnline)
+          AddPlantFloatingButton(callbacks.onAddPlant, modifier, isOnline)
         }
       },
       floatingActionButtonPosition = FabPosition.Start,
@@ -202,7 +210,7 @@ fun GardenScreen(
       content = { pd ->
         Column(modifier = modifier.fillMaxWidth().padding(pd)) {
           // Profile row with user profile picture, username and a button to edit the profile
-          ProfileRow(onEditProfile, modifier, uiState, isOnline, isViewMode)
+          ProfileRow(callbacks.onEditProfile, modifier, uiState, isOnline, isViewMode)
           Spacer(modifier = modifier.height(16.dp))
 
           // Sort and filter bar - only show if there are plants in the garden
@@ -220,7 +228,7 @@ fun GardenScreen(
           GardenContent(
               plants = plants,
               filteredAndSortedPlants = filteredAndSortedPlants,
-              onPlantClick = onPlantClick,
+              onPlantClick = callbacks.onPlantClick,
               gardenViewModel = gardenViewModel,
               modifier = modifier,
               isOnline = isOnline,

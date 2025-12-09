@@ -125,7 +125,9 @@ class GardenScreenTests {
       }
     }
     // Buttons have no use : tests are for the garden screen in isolation
-    composeTestRule.setContent { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
+    composeTestRule.setContent {
+      GardenScreen(callbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
+    }
     composeTestRule.waitForIdle()
   }
 
@@ -265,7 +267,9 @@ class GardenScreenTests {
     var colorScheme: ColorScheme? = null
     var customColors: CustomColors? = null
     composeTestRule.setContent {
-      MyGardenTheme { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
+      MyGardenTheme {
+        GardenScreen(callbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
+      }
       colorScheme = MaterialTheme.colorScheme
       customColors = ExtendedTheme.colors
     }
