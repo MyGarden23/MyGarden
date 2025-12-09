@@ -6,9 +6,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class FriendRequestsFirebaseNotifier {
+class FriendRequestsFirebaseNotifierTest {
 
-  @Test fun true1() = { assertTrue(true) }
+  @Test
+  fun knownTest() {
+    assertTrue(true)
+  }
 
   /*private lateinit var notifier: FirebaseFriendRequestNotifier
 
