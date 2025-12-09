@@ -96,7 +96,8 @@ private const val MAX_COUNTRIES_DISPLAYED = 15
  * Header section displaying the profile creation title and user avatar placeholder.
  *
  * @param modifier Modifier for customizing the layout
- * @param title The title to display (defaults to "New Profile")
+ * @param uiState current ui state
+ * @param onAvatarClick action performed when clicking on an avatar
  */
 @Composable
 private fun ProfileHeader(
@@ -424,7 +425,7 @@ private fun CountryDropdownMenu(
 /**
  * Save button that validates form and triggers profile saving.
  *
- * @param uiState Current UI state for validation
+ * @param profileViewModel Current profileViewModel for validation
  * @param profileViewModel ViewModel for triggering registration
  * @param onRegisterPressed Callback when registration is successful
  */
