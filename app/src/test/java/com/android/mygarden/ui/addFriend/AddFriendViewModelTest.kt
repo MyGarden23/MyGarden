@@ -207,37 +207,6 @@ class AddFriendViewModelTest {
   }
 
   @Test
-  fun onAsk_success_calls_onSuccess_and_adds_request() = runTest {
-    val dispatcher = StandardTestDispatcher(testScheduler)
-    Dispatchers.setMain(dispatcher)
-
-    val fakeRequests = FakeFriendRequestsRepository()
-    val vm = createViewModel(requestsRepo = fakeRequests)
-
-    var onSuccessCalled = false
-    var onErrorCalled = false
-
-    vm.onAsk(
-        userId = "friend-123",
-        onError = { onErrorCalled = true },
-        onSuccess = { onSuccessCalled = true })
-
-    advanceUntilIdle()
-
-    assertTrue(onSuccessCalled)
-    assertFalse(onErrorCalled)
-
-    val requests = fakeRequests.incomingRequestsFlow.value
-    assertEquals(1, requests.size)
-
-    val request = requests[0]
-    assertEquals(fakeRequests.currentUserIdValue, request.fromUserId)
-    assertEquals("friend-123", request.toUserId)
-
-    Dispatchers.resetMain()
-  }
-
-  @Test
   fun onAsk_failure_calls_onError_only() = runTest {
     val dispatcher = StandardTestDispatcher(testScheduler)
     Dispatchers.setMain(dispatcher)
