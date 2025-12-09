@@ -589,4 +589,35 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
     val afterCleanup = repository.getAllOwnedPlants()
     assertEquals(3, afterCleanup.size)
   }
+
+  @Test
+  fun getAllOwnedPlantsByUserId_returnsPlantsForGivenUser() = runTest {
+    val otherUserId = "other-user-123"
+    val id1 = "other-1"
+    val id2 = "other-2"
+
+    val ts1 = Timestamp(System.currentTimeMillis())
+    val ts2 = Timestamp(System.currentTimeMillis() + 1000)
+
+    val owned1 = OwnedPlant(id1, plant1, ts1)
+    val owned2 = OwnedPlant(id2, plant2, ts2)
+
+    // Serialize and write directly to the other user's plants collection
+    val s1 = FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant(owned1)
+    val s2 = FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant(owned2)
+
+    db.collection("users").document(otherUserId).collection("plants").document(id1).set(s1).await()
+    db.collection("users").document(otherUserId).collection("plants").document(id2).set(s2).await()
+
+    val plantsFromRepo = repository.getAllOwnedPlantsByUserId(otherUserId)
+
+    val expected =
+        listOf(owned1, owned2).map { p -> updatePlantHealthStatus(p).copy(healthySince = null) }
+
+    assertEquals(expected, plantsFromRepo.map { it.copy(healthySince = null) })
+
+    // Clean up the plants added for the other user
+    db.collection("users").document(otherUserId).collection("plants").document(id1).delete().await()
+    db.collection("users").document(otherUserId).collection("plants").document(id2).delete().await()
+  }
 }

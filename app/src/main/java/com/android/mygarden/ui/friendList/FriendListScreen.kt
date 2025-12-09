@@ -68,12 +68,14 @@ val NUMBER_OF_LINES = 1
  * Displays the friend list screen, showing either the list of friends or an empty-state message.
  *
  * @param onBackPressed callback triggered when the user presses the top bar back button
+ * @param onFriendClick callback triggered when the user clicks on a friend card
  * @param friendListViewModel ViewModel providing the friend list data
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendListScreen(
     onBackPressed: () -> Unit = {},
+    onFriendClick: (UserProfile) -> Unit = {},
     friendListViewModel: FriendListViewModel = viewModel(),
 ) {
   val context = LocalContext.current
@@ -123,7 +125,9 @@ fun FriendListScreen(
                             .padding(horizontal = PADDING_HORIZONTAL, vertical = PADDING_VERTICAL)
                             .testTag(FriendListScreenTestTags.FRIEND_COLUMN),
                     verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT_SPACE)) {
-                      uiState.friends.forEach { friend -> FriendCard(friend = friend) }
+                      uiState.friends.forEach { friend ->
+                        FriendCard(friend = friend, onClick = { onFriendClick(friend) })
+                      }
                     }
               }
             }
@@ -141,14 +145,16 @@ fun FriendListScreen(
  * - an icon on the right (currently a decorative or future action icon)
  *
  * @param friend user profile to display inside the card
+ * @param onClick callback triggered when the card is clicked
  */
 @Composable
-private fun FriendCard(friend: UserProfile) {
+private fun FriendCard(friend: UserProfile, onClick: () -> Unit) {
   val context = LocalContext.current
   val pseudo = friend.pseudo
   val avatar: Avatar = friend.avatar
 
   Card(
+      onClick = onClick,
       modifier =
           Modifier.fillMaxWidth()
               .height(CARD_HEIGHT)

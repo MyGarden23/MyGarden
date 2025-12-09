@@ -100,7 +100,9 @@ class GardenScreenOfflineTests {
     OfflineStateManager.setOnlineState(isOnline)
 
     composeTestRule.setContent {
-      MyGardenTheme { GardenScreen(onEditProfile = {}, onAddPlant = {}) }
+      MyGardenTheme {
+        GardenScreen(callbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
+      }
     }
     composeTestRule.waitForIdle()
   }

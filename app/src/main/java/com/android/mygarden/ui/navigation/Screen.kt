@@ -72,6 +72,35 @@ sealed class Screen(val route: String, val nameResId: Int, val isTopLevel: Boole
   object Garden :
       Screen(route = "garden", nameResId = R.string.garden_screen_title, isTopLevel = true)
 
+  data class FriendGarden(val friendId: String) :
+      Screen(route = buildRoute(friendId), nameResId = R.string.friend_garden_screen_title) {
+
+    /**
+     * Companion object defining constants and utilities for the FriendGarden screen navigation.
+     *
+     * Contains the base route, argument keys, and a helper function to build the complete
+     * navigation route dynamically.
+     *
+     * @property BASE The base route used for the FriendGarden screen.
+     * @property ARG_FRIEND_ID The key for the friend ID argument.
+     * @property route The full navigation route pattern with arguments.
+     */
+    companion object {
+      const val BASE = "friend_garden"
+      const val ARG_FRIEND_ID = "friendId"
+      const val route = "$BASE/{$ARG_FRIEND_ID}"
+
+      /**
+       * Builds the route for the FriendGarden screen.
+       *
+       * @param friendId The ID of the friend whose garden to display.
+       */
+      fun buildRoute(friendId: String): String {
+        return "$BASE/$friendId"
+      }
+    }
+  }
+
   object ChooseAvatar :
       Screen(route = "choose_avatar", nameResId = R.string.choose_avatar_screen_title)
 

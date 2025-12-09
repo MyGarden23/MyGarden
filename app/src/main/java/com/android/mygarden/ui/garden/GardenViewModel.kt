@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.garden
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
 import com.android.mygarden.model.gardenactivity.ActivityRepository
@@ -12,6 +13,8 @@ import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.model.users.UserProfileRepository
+import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.profile.Avatar
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,12 +50,16 @@ data class GardenUIState(
  *
  * @property plantsRepo the repository of the plants to store them
  * @property profileRepo the repository of the profiles used to fetch user information
+ * @property userProfileRepo the repository used to fetch public profile info of other users
  * @property activityRepo the repository of the activities to store them
+ * @property friendId optional ID of a friend whose garden to display (null for own garden)
  */
 class GardenViewModel(
     private val plantsRepo: PlantsRepository = PlantsRepositoryProvider.repository,
     private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
     private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository,
+    private val friendId: String? = null
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(GardenUIState())
   val uiState: StateFlow<GardenUIState> = _uiState.asStateFlow()
@@ -63,10 +70,13 @@ class GardenViewModel(
    */
   init {
     refreshUIState()
-    viewModelScope.launch {
-      plantsRepo.plantsFlow.collect { newList ->
-        _uiState.value = _uiState.value.copy(plants = newList)
-        applyFiltersAndSorting()
+    // Only subscribe to plantsFlow if viewing own garden (not a friend's)
+    if (friendId == null) {
+      viewModelScope.launch {
+        plantsRepo.plantsFlow.collect { newList ->
+          _uiState.value = _uiState.value.copy(plants = newList)
+          applyFiltersAndSorting()
+        }
       }
     }
   }
@@ -76,7 +86,15 @@ class GardenViewModel(
     fetchProfileInfos()
     viewModelScope.launch {
       try {
-        plantsRepo.getAllOwnedPlants()
+        if (friendId != null) {
+          // Load friend's plants and update state (not covered by plantsFlow)
+          val plants = plantsRepo.getAllOwnedPlantsByUserId(friendId)
+          _uiState.value = _uiState.value.copy(plants = plants)
+          applyFiltersAndSorting()
+        } else {
+          // Load own plants - plantsFlow subscription will handle the state update
+          plantsRepo.getAllOwnedPlants()
+        }
       } catch (e: Exception) {
         setErrorMsg(R.string.error_failed_load_plant_edit)
       }
@@ -218,23 +236,60 @@ class GardenViewModel(
   }
 
   /**
-   * Fetches all needed user information from the [profileRepo] or set an error message if the fetch
-   * failed.
+   * Fetches all needed user information from the appropriate repository or set an error message if
+   * the fetch failed.
    */
   private fun fetchProfileInfos() {
     viewModelScope.launch {
       try {
-        profileRepo.getProfile().collect { profile ->
-          if (profile != null) {
+        if (friendId != null) {
+          // Load friend's profile using UserProfileRepository
+          val userProfile = userProfileRepo.getUserProfile(friendId)
+          if (userProfile != null) {
             _uiState.value =
-                _uiState.value.copy(userName = profile.pseudo, userAvatar = profile.avatar)
+                _uiState.value.copy(userName = userProfile.pseudo, userAvatar = userProfile.avatar)
           } else {
             setErrorMsg(R.string.error_failed_get_profile_garden)
+          }
+        } else {
+          // Load own profile using ProfileRepository
+          profileRepo.getProfile().collect { profile ->
+            if (profile != null) {
+              _uiState.value =
+                  _uiState.value.copy(userName = profile.pseudo, userAvatar = profile.avatar)
+            } else {
+              setErrorMsg(R.string.error_failed_get_profile_garden)
+            }
           }
         }
       } catch (_: Exception) {
         setErrorMsg(R.string.error_failed_get_profile_garden)
       }
     }
+  }
+}
+
+/**
+ * Factory for creating GardenViewModel instances with custom parameters.
+ *
+ * @param friendId optional ID of a friend whose garden to display (null for own garden)
+ * @param plantsRepo the repository of the plants to store them
+ * @param profileRepo the repository of the profiles used to fetch user information
+ * @param userProfileRepo the repository used to fetch public profile info of other users
+ * @param activityRepo the repository of the activities to store them
+ */
+class GardenViewModelFactory(
+    private val friendId: String? = null,
+    private val plantsRepo: PlantsRepository = PlantsRepositoryProvider.repository,
+    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
+    private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository
+) : ViewModelProvider.Factory {
+  @Suppress("UNCHECKED_CAST")
+  override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    if (modelClass.isAssignableFrom(GardenViewModel::class.java)) {
+      return GardenViewModel(plantsRepo, profileRepo, userProfileRepo, activityRepo, friendId) as T
+    }
+    throw IllegalArgumentException("Unknown ViewModel class")
   }
 }

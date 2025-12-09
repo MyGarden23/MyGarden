@@ -25,6 +25,7 @@ import com.android.mygarden.ui.feed.FeedScreen
 import com.android.mygarden.ui.friendList.FriendListScreen
 import com.android.mygarden.ui.friendsRequests.FriendsRequestsScreen
 import com.android.mygarden.ui.garden.GardenScreen
+import com.android.mygarden.ui.garden.GardenScreenCallbacks
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
 import com.android.mygarden.ui.profile.Avatar
@@ -39,6 +40,7 @@ private const val IMAGE_PATH_KEY = "imagePath"
 private const val FROM_KEY = "from"
 private const val OWNED_PLANT_ID_KEY = "ownedPlantId"
 private const val OWNED_PLANT_ID_TO_PLANT_INFO_KEY = "ownedPlantId_to_plantInfo"
+private const val IS_VIEW_MODE_KEY = "isViewMode"
 
 @Composable
 fun AppNavHost(
@@ -140,28 +142,58 @@ fun AppNavHost(
     // Garden
     composable(Screen.Garden.route) {
       GardenScreen(
-          onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
-          onAddPlant = { navigationActions.navTo(Screen.Camera) },
-          onPlantClick = { ownedPlant ->
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
-            navigationActions.navTo(Screen.PlantInfoFromGarden)
-          },
-          onSignOut = {
-            PlantsRepositoryProvider.repository.cleanup()
-            ProfileRepositoryProvider.repository.cleanup()
-            ActivityRepositoryProvider.repository.cleanup()
-            FirebaseAuth.getInstance().signOut()
-            // Clear the entire back stack so saved states can't be
-            // restored after logout while keeping `saveState` enabled for normal
-            // tab switching.
-            while (navController.popBackStack()) {
-              // pop until empty
-            }
-            navController.navigate(Screen.Auth.route) { launchSingleTop = true }
-          })
+          callbacks =
+              GardenScreenCallbacks(
+                  onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
+                  onAddPlant = { navigationActions.navTo(Screen.Camera) },
+                  onPlantClick = { ownedPlant ->
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
+                    navigationActions.navTo(Screen.PlantInfoFromGarden)
+                  },
+                  onSignOut = {
+                    PlantsRepositoryProvider.repository.cleanup()
+                    ProfileRepositoryProvider.repository.cleanup()
+                    ActivityRepositoryProvider.repository.cleanup()
+                    FirebaseAuth.getInstance().signOut()
+                    // Clear the entire back stack so saved states can't be
+                    // restored after logout while keeping `saveState` enabled for normal
+                    // tab switching.
+                    while (navController.popBackStack()) {
+                      // pop until empty
+                    }
+                    navController.navigate(Screen.Auth.route) { launchSingleTop = true }
+                  }))
     }
+
+    // Friend Garden
+    composable(
+        route = Screen.FriendGarden.route,
+        arguments =
+            listOf(navArgument(Screen.FriendGarden.ARG_FRIEND_ID) { type = NavType.StringType })) {
+            entry ->
+          val friendId =
+              entry.arguments?.getString(Screen.FriendGarden.ARG_FRIEND_ID) ?: return@composable
+          GardenScreen(
+              friendId = friendId,
+              isViewMode = true,
+              callbacks =
+                  GardenScreenCallbacks(
+                      onEditProfile = {},
+                      onAddPlant = {},
+                      onBackPressed = { navigationActions.navBack() },
+                      onPlantClick = { ownedPlant ->
+                        navController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
+                        navController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(IS_VIEW_MODE_KEY, true)
+                        navigationActions.navTo(Screen.PlantInfoFromGarden)
+                      },
+                      onSignOut = {}))
+        }
 
     // Feed
     composable(Screen.Feed.route) {
@@ -183,7 +215,9 @@ fun AppNavHost(
 
     // Friend List
     composable(Screen.FriendList.route) {
-      FriendListScreen(onBackPressed = { navigationActions.navBack() })
+      FriendListScreen(
+          onBackPressed = { navigationActions.navBack() },
+          onFriendClick = { friend -> navigationActions.navTo(Screen.FriendGarden(friend.id)) })
     }
 
     // Plant Info From Garden
