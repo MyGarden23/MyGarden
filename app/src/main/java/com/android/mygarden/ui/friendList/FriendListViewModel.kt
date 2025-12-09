@@ -108,6 +108,8 @@ class FriendListViewModel(
    * deleted)
    *
    * @param id the id of the user that will see its achievement number decreased
+   * @throws IllegalArgumentException if the function is called with the current number of friends
+   *   in achievement is non-positive
    */
   private suspend fun decreaseFriendNumber(id: String) {
     val oldValue = achievementsRepo.getUserAchievementProgress(id, AchievementType.FRIENDS_NUMBER)
