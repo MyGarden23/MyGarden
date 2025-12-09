@@ -60,8 +60,8 @@ class FriendsRepositoryFirestore(
     val friendDoc = friendsCollection(friendUserId).document(currentUserId)
 
     val batch = db.batch()
-    batch.set(currentDoc, mapOf(FIELD_FRIEND_UID to friendUserId))
-    batch.set(friendDoc, mapOf(FIELD_FRIEND_UID to currentUserId))
+    batch[currentDoc] = mapOf(FIELD_FRIEND_UID to friendUserId)
+    batch[friendDoc] = mapOf(FIELD_FRIEND_UID to currentUserId)
     batch.commit().await()
 
     currentDoc.set(mapOf(FIELD_FRIEND_UID to friendUserId)).await()
