@@ -240,7 +240,6 @@ class FriendRequestsRepositoryFirestore(
     return observeRequestsQuery(query, "outgoing requests")
   }
 
-
   /**
    * Returns whether the current user has a pending outgoing friend request for the given user ID.
    *

@@ -129,21 +129,19 @@ class AddFriendViewModel(
    */
   fun onAsk(userId: String, onError: () -> Unit, onSuccess: () -> Unit) {
     viewModelScope.launch {
-      _uiState.value = _uiState.value.let { state ->
-        state.copy(
-          relations = state.relations + (userId to FriendRelation.PENDING)
-        )
-      }
+      _uiState.value =
+          _uiState.value.let { state ->
+            state.copy(relations = state.relations + (userId to FriendRelation.PENDING))
+          }
 
       try {
         requestsRepository.askFriend(userId)
         onSuccess()
       } catch (_: Exception) {
-        _uiState.value = _uiState.value.let { state ->
-          state.copy(
-            relations = state.relations + (userId to FriendRelation.ADD)
-          )
-        }
+        _uiState.value =
+            _uiState.value.let { state ->
+              state.copy(relations = state.relations + (userId to FriendRelation.ADD))
+            }
         onError()
       }
     }
@@ -156,14 +154,16 @@ class AddFriendViewModel(
   private suspend fun refreshRelations() {
     val currentFriends = _uiState.value.searchResults
 
-    val newRelations = currentFriends.associate { friend ->
-      val relation = when {
-        requestsRepository.isInOutgoingRequests(friend.id) -> FriendRelation.PENDING
-        friendsRepository.isFriend(friend.id) -> FriendRelation.ADDED
-        else -> FriendRelation.ADD
-      }
-      friend.id to relation
-    }
+    val newRelations =
+        currentFriends.associate { friend ->
+          val relation =
+              when {
+                requestsRepository.isInOutgoingRequests(friend.id) -> FriendRelation.PENDING
+                friendsRepository.isFriend(friend.id) -> FriendRelation.ADDED
+                else -> FriendRelation.ADD
+              }
+          friend.id to relation
+        }
 
     _uiState.value = _uiState.value.copy(relations = newRelations)
   }
