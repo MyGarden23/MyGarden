@@ -47,9 +47,6 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.PersistentCacheSettings
 import kotlinx.coroutines.launch
 
-/** System property keys for test environment detection */
-private const val E2E_TEST_PROPERTY = "mygarden.e2e"
-private const val E2E_TEST_VALUE = "true"
 private const val JAVA_CLASSPATH_PROPERTY = "java.class.path"
 private const val ANDROID_TEST_PATH = "androidTest"
 private const val ANDROID_JUNIT_RUNNER = "androidx.test.ext.junit.runners.AndroidJUnit4"
@@ -66,6 +63,13 @@ private const val LOG_MSG_FIREBASE_AUTH_UNAVAILABLE = "FirebaseAuth unavailable;
 private val OFFLINE_INDICATOR_PADDING = 8.dp
 
 class MainActivity : ComponentActivity() {
+
+  companion object {
+    /** System property keys for test environment detection */
+    const val E2E_TEST_PROPERTY = "mygarden.e2e"
+    const val E2E_TEST_VALUE = "true"
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -214,12 +218,12 @@ fun OfflineIndicator() {
  */
 @Composable
 private fun rememberIsInTestEnvironment(): Boolean = remember {
-  System.getProperty(E2E_TEST_PROPERTY) == E2E_TEST_VALUE ||
+  System.getProperty(MainActivity.E2E_TEST_PROPERTY) == MainActivity.E2E_TEST_VALUE ||
       System.getProperty(JAVA_CLASSPATH_PROPERTY)?.contains(ANDROID_TEST_PATH) == true ||
       try {
         Class.forName(ANDROID_JUNIT_RUNNER)
         true
-      } catch (e: ClassNotFoundException) {
+      } catch (_: ClassNotFoundException) {
         false
       }
 }

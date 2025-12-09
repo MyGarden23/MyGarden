@@ -40,15 +40,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.mygarden.MainActivity
 import com.android.mygarden.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-
-/** System property key for end-to-end testing */
-private const val E2E_TEST_PROPERTY = "mygarden.e2e"
-
-/** Value indicating end-to-end test mode is enabled */
-private const val E2E_TEST_VALUE = "true"
 
 /** Layout weight constants */
 private const val SPACER_WEIGHT_TOP = 0.3f
@@ -92,7 +87,8 @@ fun SignInScreen(
 
   val context = LocalContext.current
   val uiState by authViewModel.uiState.collectAsState()
-  val isEndToEndTest = System.getProperty(E2E_TEST_PROPERTY) == E2E_TEST_VALUE
+  val isEndToEndTest =
+      System.getProperty(MainActivity.E2E_TEST_PROPERTY) == MainActivity.E2E_TEST_VALUE
 
   // Show error message if login fails
   LaunchedEffect(uiState.errorMsg) { handleLoginError(uiState.errorMsg, context, authViewModel) }
