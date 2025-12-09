@@ -92,7 +92,7 @@ fun SignInScreen(
 
   val context = LocalContext.current
   val uiState by authViewModel.uiState.collectAsState()
-  val isEndToEndTest = System.getProperty("mygarden.e2e") == "true"
+  val isEndToEndTest = System.getProperty(E2E_TEST_PROPERTY) == E2E_TEST_VALUE
 
   // Show error message if login fails
   LaunchedEffect(uiState.errorMsg) { handleLoginError(uiState.errorMsg, context, authViewModel) }
