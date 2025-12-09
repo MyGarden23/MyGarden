@@ -1,8 +1,10 @@
 package com.android.mygarden.ui.friendList
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,20 +55,23 @@ object FriendListScreenTestTags {
   const val REQUEST_CARD = "friendRequestCard"
   const val FRIEND_AVATAR = "friendAvatar"
   const val FRIEND_PSEUDO = "friendPseudo"
-  const val PLANT_ICON_TO_GARDEN = "plantIconToGarden"
+  const val DELETE_FRIEND_BUTTON = "DeleteFriendButton"
   const val NO_FRIEND = "noFriendText"
 }
 
-const val FRACTION_SPACER = 0.02f
-val PADDING_VERTICAL = 20.dp
-val PADDING_HORIZONTAL = 35.dp
-val VERTICAL_ARRANGEMENT_SPACE = 10.dp
-val CARD_HEIGHT = 80.dp
-const val FRACTION_ROW_WIDTH = 0.94f
-const val FRACTION_BOX_WIDTH = 0.6f
-val TEXT_FONT_SIZE = 20.sp
-
-val NUMBER_OF_LINES = 1
+private object CONSTANTS {
+  const val FRACTION_SPACER = 0.02f
+  val PADDING_VERTICAL = 20.dp
+  val PADDING_HORIZONTAL = 35.dp
+  val VERTICAL_ARRANGEMENT_SPACE = 10.dp
+  val CARD_HEIGHT = 80.dp
+  const val FRACTION_ROW_WIDTH = 0.94f
+  const val FRACTION_BOX_WIDTH = 0.6f
+  val TEXT_FONT_SIZE = 20.sp
+  const val NUMBER_OF_LINES = 1
+  val DEL_BUTTON_BORDER_STROKE = 2.dp
+  val DEL_BUTTON_SIZE = 40.dp
+}
 
 /**
  * Displays the friend list screen, showing either the list of friends or an empty-state message.
@@ -104,7 +113,7 @@ fun FriendListScreen(
                     .padding(paddingValues)
                     .background(MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally) {
-              Spacer(modifier = Modifier.fillMaxHeight(FRACTION_SPACER))
+              Spacer(modifier = Modifier.fillMaxHeight(CONSTANTS.FRACTION_SPACER))
 
               if (uiState.friends.isEmpty()) {
                 Box(
@@ -120,10 +129,17 @@ fun FriendListScreen(
                 Column(
                     modifier =
                         Modifier.fillMaxWidth()
-                            .padding(horizontal = PADDING_HORIZONTAL, vertical = PADDING_VERTICAL)
+                            .padding(
+                                horizontal = CONSTANTS.PADDING_HORIZONTAL,
+                                vertical = CONSTANTS.PADDING_VERTICAL)
                             .testTag(FriendListScreenTestTags.FRIEND_COLUMN),
-                    verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT_SPACE)) {
-                      uiState.friends.forEach { friend -> FriendCard(friend = friend) }
+                    verticalArrangement =
+                        Arrangement.spacedBy(CONSTANTS.VERTICAL_ARRANGEMENT_SPACE)) {
+                      uiState.friends.forEach { friend ->
+                        FriendCard(
+                            friend = friend,
+                            onConfirmDelete = { friendListViewModel.deleteFriend(it) })
+                      }
                     }
               }
             }
@@ -138,31 +154,34 @@ fun FriendListScreen(
  * - their pseudo
  * - their gardening skill
  * - their favorite plant
- * - an icon on the right (currently a decorative or future action icon)
+ * - an icon on the right to delete a friend
  *
  * @param friend user profile to display inside the card
+ * @param onConfirmDelete the callback to trigger when the user confirmed the deletion of the friend
+ *   via the popup
  */
 @Composable
-private fun FriendCard(friend: UserProfile) {
+private fun FriendCard(friend: UserProfile, onConfirmDelete: (UserProfile) -> Unit) {
   val context = LocalContext.current
   val pseudo = friend.pseudo
   val avatar: Avatar = friend.avatar
+  var showPopup by remember { mutableStateOf(false) }
 
   Card(
       modifier =
           Modifier.fillMaxWidth()
-              .height(CARD_HEIGHT)
+              .height(CONSTANTS.CARD_HEIGHT)
               .testTag(FriendListScreenTestTags.REQUEST_CARD)) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
           Row(
-              modifier = Modifier.fillMaxWidth(FRACTION_ROW_WIDTH),
+              modifier = Modifier.fillMaxWidth(CONSTANTS.FRACTION_ROW_WIDTH),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween) {
                 // Avatar
                 Card(
                     modifier =
                         Modifier.clip(CircleShape)
-                            .size(CARD_HEIGHT)
+                            .size(CONSTANTS.CARD_HEIGHT)
                             .testTag(FriendListScreenTestTags.FRIEND_AVATAR)) {
                       Image(
                           painter = painterResource(avatar.resId),
@@ -173,36 +192,61 @@ private fun FriendCard(friend: UserProfile) {
 
                 // Pseudo + details (gardening skill & favorite plant)
                 Box(
-                    modifier = Modifier.fillMaxHeight().fillMaxWidth(FRACTION_BOX_WIDTH),
+                    modifier = Modifier.fillMaxHeight().fillMaxWidth(CONSTANTS.FRACTION_BOX_WIDTH),
                     contentAlignment = Alignment.CenterStart) {
                       Column {
                         Text(
                             text = pseudo,
                             fontWeight = FontWeight.Bold,
-                            fontSize = TEXT_FONT_SIZE,
-                            maxLines = NUMBER_OF_LINES,
+                            fontSize = CONSTANTS.TEXT_FONT_SIZE,
+                            maxLines = CONSTANTS.NUMBER_OF_LINES,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.testTag(FriendListScreenTestTags.FRIEND_PSEUDO))
                         Text(
                             text = friend.gardeningSkill,
                             style = MaterialTheme.typography.bodySmall,
-                            maxLines = NUMBER_OF_LINES,
+                            maxLines = CONSTANTS.NUMBER_OF_LINES,
                             overflow = TextOverflow.Ellipsis)
                         Text(
                             text = friend.favoritePlant,
                             style = MaterialTheme.typography.bodySmall,
-                            maxLines = NUMBER_OF_LINES,
+                            maxLines = CONSTANTS.NUMBER_OF_LINES,
                             overflow = TextOverflow.Ellipsis)
                       }
                     }
 
                 // Garden icon (placeholder for future navigation or action)
-                Icon(
-                    painter = painterResource(R.drawable.potted_plant_icon),
-                    contentDescription =
-                        stringResource(R.string.friend_list_plant_icon_description),
-                    modifier = Modifier.testTag(FriendListScreenTestTags.PLANT_ICON_TO_GARDEN))
+                Card(
+                    modifier =
+                        Modifier.size(CONSTANTS.DEL_BUTTON_SIZE)
+                            .clickable(onClick = { showPopup = true })
+                            .testTag(FriendListScreenTestTags.DELETE_FRIEND_BUTTON),
+                    border =
+                        BorderStroke(
+                            CONSTANTS.DEL_BUTTON_BORDER_STROKE, MaterialTheme.colorScheme.error),
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.error)) {
+                      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(R.drawable.delete_friend_icon),
+                            contentDescription =
+                                stringResource(R.string.friend_list_bin_icon_description),
+                        )
+                      }
+                    }
               }
         }
       }
+  // show the popup if needed and dismiss it when either button is clicked
+  if (showPopup) {
+    DeleteFriendPopup(
+        onDelete = {
+          onConfirmDelete(friend)
+          showPopup = false
+        },
+        onCancel = { showPopup = false },
+        friendPseudo = friend.pseudo)
+  }
 }

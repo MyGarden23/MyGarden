@@ -15,6 +15,15 @@ interface FriendsRepository {
    */
   suspend fun addFriend(friendUserId: String)
 
+  /**
+   * Deletes the friend relationship between currentUserId and friendUserId. Because it's
+   * symmetrically implemented, it deletes it in both list of friends.
+   *
+   * @param friendUserId the id of the friend to delete
+   * @throws IllegalArgumentException if currentUserId == friendUserId
+   */
+  suspend fun deleteFriend(friendUserId: String)
+
   /** Flow of friends */
   fun friendsFlow(userId: String): Flow<List<String>>
 }

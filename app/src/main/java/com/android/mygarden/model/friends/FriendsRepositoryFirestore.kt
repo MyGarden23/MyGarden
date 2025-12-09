@@ -68,6 +68,23 @@ class FriendsRepositoryFirestore(
         currentUserId, AchievementType.FRIENDS_NUMBER, friendsCount!!)
   }
 
+  override suspend fun deleteFriend(friendUserId: String) {
+    // get current user id
+    val currentUserId =
+        auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
+    require(currentUserId != friendUserId) { "You cannot add yourself as a friend." }
+
+    // get both documents we want to delete
+    val currentDoc = friendsCollection(currentUserId).document(friendUserId)
+    val friendDoc = friendsCollection(friendUserId).document(currentUserId)
+
+    // make both deletions atomic with a batch
+    val batch = db.batch()
+    batch.delete(friendDoc)
+    batch.delete(currentDoc)
+    batch.commit().await()
+  }
+
   override fun friendsFlow(userId: String): Flow<List<String>> = callbackFlow {
     val registration =
         friendsCollection(userId).addSnapshotListener { snapshot, error ->
