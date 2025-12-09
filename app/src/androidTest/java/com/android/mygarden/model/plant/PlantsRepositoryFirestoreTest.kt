@@ -615,5 +615,9 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
         listOf(owned1, owned2).map { p -> updatePlantHealthStatus(p).copy(healthySince = null) }
 
     assertEquals(expected, plantsFromRepo.map { it.copy(healthySince = null) })
+
+    // Clean up the plants added for the other user
+    db.collection("users").document(otherUserId).collection("plants").document(id1).delete().await()
+    db.collection("users").document(otherUserId).collection("plants").document(id2).delete().await()
   }
 }

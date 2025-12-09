@@ -1,5 +1,6 @@
 package com.android.mygarden.utils
 
+import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryFirestore
@@ -205,7 +206,7 @@ class FakePlantRepositoryUtils(repoType: PlantRepositoryType) {
    * @see mockGetAllOwnedPlantsByUserId
    */
   fun addPlantForUser(userId: String, plant: Plant, id: String, lastWatered: java.sql.Timestamp) {
-    val ownedPlant = com.android.mygarden.model.plant.OwnedPlant(id, plant, lastWatered)
+    val ownedPlant = OwnedPlant(id, plant, lastWatered)
     plantsByUser.getOrPut(userId) { mutableListOf() }.add(ownedPlant)
   }
 

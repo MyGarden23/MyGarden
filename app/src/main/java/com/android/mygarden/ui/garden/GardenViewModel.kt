@@ -86,16 +86,15 @@ class GardenViewModel(
     fetchProfileInfos()
     viewModelScope.launch {
       try {
-        val plants =
-            if (friendId != null) {
-              // Load friend's plants
-              plantsRepo.getAllOwnedPlantsByUserId(friendId)
-            } else {
-              // Load own plants
-              plantsRepo.getAllOwnedPlants()
-            }
-        _uiState.value = _uiState.value.copy(plants = plants)
-        applyFiltersAndSorting()
+        if (friendId != null) {
+          // Load friend's plants and update state (not covered by plantsFlow)
+          val plants = plantsRepo.getAllOwnedPlantsByUserId(friendId)
+          _uiState.value = _uiState.value.copy(plants = plants)
+          applyFiltersAndSorting()
+        } else {
+          // Load own plants - plantsFlow subscription will handle the state update
+          plantsRepo.getAllOwnedPlants()
+        }
       } catch (e: Exception) {
         setErrorMsg(R.string.error_failed_load_plant_edit)
       }

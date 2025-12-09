@@ -298,6 +298,8 @@ fun ProfileRow(
                             MaterialTheme.colorScheme.onSurfaceVariant
                           })
                 }
+          } else {
+            Spacer(modifier = modifier.width(AVATAR_SIZE))
           }
         }
       }
