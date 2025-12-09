@@ -45,16 +45,15 @@ import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.ui.navigation.TopBar
 
 /**
- * Temporary screen used to manually verify that the Achievements flow emits the correct values.
+ * Screen that displays a card for each [AchievementType] and the corresponding level of the user
+ * for it. Additionally, it displays more information about the achievement (i.e. how to get more
+ * levels in this achievement, what is the current level of the user, how much units of progress are
+ * needed to reach next level, etc.) when users click on one of the card.
  *
- * This UI is intentionally minimal and not intended for end-users, because a proper design will be
- * implemented next week.
+ * This screen provides a user-friendly achievement-tracking feature.
  *
- * The screen observes [AchievementsViewModel.uiState] and shows the current progress levels for
- * each achievement type.
- *
- * @param modifier Optional modifier for layout adjustments.
- * @param viewModel The ViewModel providing achievement state.
+ * @param modifier Optional modifier of the composable.
+ * @param viewModel The ViewModel providing the UI state and useful functions.
  */
 @Composable
 fun AchievementsScreen(
@@ -94,6 +93,17 @@ fun AchievementsScreen(
       })
 }
 
+/**
+ * Generic Card composable that can be used by each achievement type. This card displays the current
+ * level of the user. Each [AchievementCard] should be used with the according
+ * [AchievementDialogInfo] that should display more information about the achievement when the card
+ * is being clicked on.
+ *
+ * @param modifier Optional modifier of the composable
+ * @param onClick The callback that is being called when clicking the Card.
+ * @param achievementType The given [AchievementType] for which the card is being created.
+ * @param currentLevel The current level of the user to be displayed (from the UI state).
+ */
 @Composable
 fun AchievementCard(
     modifier: Modifier = Modifier,
@@ -125,7 +135,7 @@ fun AchievementCard(
                         fontWeight = FontWeight.Bold,
                         fontSize = 23.sp,
                         modifier = modifier.padding(top = 18.dp))
-                    LevelBar(
+                    ProgressBar(
                         modifier = Modifier,
                         currentValue = currentLevel,
                         maxValue = ACHIEVEMENTS_LEVEL_NUMBER,
@@ -142,6 +152,20 @@ fun AchievementCard(
       }
 }
 
+/**
+ * This Dialog brings more information about a certain [AchievementType]. It specifies what is the
+ * goal of the achievement, what is the current level of the user and what unit of progress should
+ * be done to reach the next level in this achievement. It should be used with a corresponding
+ * [AchievementCard].
+ *
+ * @param modifier Optional modifier of the composable.
+ * @param achievementType The given [AchievementType] for which the dialog is being created.
+ * @param currentLevel The current level in the given [AchievementType] (from the UI state).
+ * @param currentValue The current raw value in the given [AchievementType] (from the UI state).
+ * @param neededMore The number of units of progress needed to reach the next level.
+ * @param nextThreshold The total number of units to have to reach the next level.
+ * @param onDismiss The callback that is being called when the Dialog is being dismissed.
+ */
 @Composable
 fun AchievementDialogInfo(
     modifier: Modifier = Modifier,
@@ -196,7 +220,7 @@ fun AchievementDialogInfo(
 
                 if (nextThreshold > 0) {
                   Box() {
-                    LevelBar(
+                    ProgressBar(
                         modifier = modifier,
                         currentValue = currentValue,
                         maxValue = nextThreshold,
@@ -218,9 +242,22 @@ fun AchievementDialogInfo(
   }
 }
 
+/**
+ * Composable that displays the progress of a user in the form of a progress bar. The bar is filled
+ * with the ratio of the given current value divided by the maximum value and filled with the given
+ * Color.
+ *
+ * @param modifier Optional modifier of the composable.
+ * @param currentValue The current value of progress.
+ * @param maxValue The maximum value possible to have (corresponding to a 100% filled bar).
+ * @param color The color used to fill the bar (the background color is the
+ *   'MaterialTheme.colorScheme.background' color.
+ * @throws AssertionError if the [currentValue] is not smaller or equal to the [maxValue] or if the
+ *   [maxValue] is zero.
+ */
 @Composable
-fun LevelBar(modifier: Modifier = Modifier, currentValue: Int, maxValue: Int, color: Color) {
-  assert(currentValue <= 10 && currentValue > 0)
+fun ProgressBar(modifier: Modifier = Modifier, currentValue: Int, maxValue: Int, color: Color) {
+  assert(currentValue <= maxValue && currentValue > 0)
   Box(
       modifier =
           modifier
@@ -239,6 +276,12 @@ fun LevelBar(modifier: Modifier = Modifier, currentValue: Int, maxValue: Int, co
       }
 }
 
+/**
+ * Helper function that retrieves the correct Image given the [AchievementType].
+ *
+ * @param achievementType The [AchievementType] for which the Image should be displayed.
+ * @param modifier Optional modifier of the composable.
+ */
 @Composable
 fun ImageForAchievementType(achievementType: AchievementType, modifier: Modifier = Modifier) {
   val pair =
@@ -259,6 +302,11 @@ fun ImageForAchievementType(achievementType: AchievementType, modifier: Modifier
   Image(modifier = modifier.size(130.dp), painter = pair.first, contentDescription = pair.second)
 }
 
+/**
+ * Helper function that retrieves the correct description text given the [AchievementType].
+ *
+ * @param achievementType The [AchievementType] for which the description text should be displayed.
+ */
 @Composable
 fun DescriptionForAchievementType(achievementType: AchievementType) {
   val text =
@@ -270,6 +318,14 @@ fun DescriptionForAchievementType(achievementType: AchievementType) {
   Text(text = text, textAlign = TextAlign.Justify)
 }
 
+/**
+ * Helper function that retrieves the correct remaining progress text given the [AchievementType].
+ *
+ * @param achievementType The [AchievementType] for which the remaining progress text should be
+ *   displayed.
+ * @param neededMore The number of units of progress needed to reach next level.
+ * @param nextLevel The next level that can be reached by the user.
+ */
 @Composable
 fun RemainingProgressForAchievementType(
     achievementType: AchievementType,
