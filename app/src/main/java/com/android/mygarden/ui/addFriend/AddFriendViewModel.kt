@@ -135,8 +135,6 @@ class AddFriendViewModel(
    * [onError] is invoked.
    *
    * @param userId the user id of the one the current user wants to be friend with
-   * @param receiverPseudo the pseudo of the user to be friend with, we put a default value so that
-   *   the previous tests are still valid
    * @param onError Invoked if the operation fails for any reason.
    * @param onSuccess Invoked if the friend was added successfully.
    */
