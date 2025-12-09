@@ -309,7 +309,7 @@ abstract class PlantsRepositoryBase(private val dispatcher: CoroutineDispatcher 
                 ?.jsonObject
                 ?.get(JSON_FIELD_SCIENTIFIC_NAME)
                 ?.jsonPrimitive
-                ?.content ?: "Unknown"
+                ?.content ?: Plant.UNKNOWN_NAME
 
         return@withContext Plant(latinName = latinName, image = path)
       } catch (e: Exception) {
