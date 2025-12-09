@@ -35,6 +35,14 @@ interface FriendRequestsRepository {
   fun outgoingRequests(): Flow<List<FriendRequest>>
 
   /**
+   * Checks whether the given user has a pending request for the target user.
+   *
+   * @param targetUserId The UID of the user to check.
+   * @return `true` if a pending outGoing request exists for this user, `false` otherwise.
+   */
+  suspend fun isInOutgoingRequests(targetUserId: String): Boolean
+
+  /**
    * Sends a friend request to another user.
    *
    * Creates a new friend request document with status PENDING.

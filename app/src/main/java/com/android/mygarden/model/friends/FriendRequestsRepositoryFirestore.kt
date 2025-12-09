@@ -10,6 +10,7 @@ import com.google.firebase.firestore.WriteBatch
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
 
@@ -237,6 +238,18 @@ class FriendRequestsRepositoryFirestore(
             .orderBy(FIELD_CREATED_AT, Query.Direction.DESCENDING)
 
     return observeRequestsQuery(query, "outgoing requests")
+  }
+
+
+  /**
+   * Returns whether the current user has a pending outgoing friend request for the given user ID.
+   *
+   * @param targetUserId The UID of the user that we want to add.
+   * @return `true` if a pending outgoing request exists from this user, otherwise `false`.
+   */
+  override suspend fun isInOutgoingRequests(targetUserId: String): Boolean {
+    val requests = outgoingRequests().first()
+    return requests.any { it.toUserId == targetUserId }
   }
 
   /**
