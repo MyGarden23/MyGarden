@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.WriteBatch
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -114,64 +115,17 @@ class FriendRequestsRepositoryFirestore(
       }
 
   /**
-   * Updates the status of a friend request in both users' subcollections.
+   * Loads a pending friend request where the current user is the recipient, performs the given
+   * batch operation on both users' subcollections, commits the batch, and returns the fromUserId.
    *
-   * @param requestId The ID of the request to update
-   * @param newStatus The new status to set
-   * @param onSuccess Optional callback to execute after successful status update
    * @throws IllegalStateException if user is not authenticated
-   * @throws IllegalArgumentException if request is not found or user is not the recipient
+   * @throws IllegalArgumentException if request is not found, not pending, or user is not recipient
    */
-  private suspend fun updateRequestStatus(
+  private suspend fun withPendingRequestForRecipient(
       requestId: String,
-      newStatus: FriendRequestStatus,
-      onSuccess: suspend (fromUserId: String) -> Unit = {}
-  ) {
-    val currentUserId = getCurrentUserId() ?: throw IllegalStateException(NOT_AUTHENTICATED_ERROR)
-
-    // Get the request document
-    val requestDoc = friendRequestsCollection(currentUserId).document(requestId).get().await()
-
-    // Check if request exists
-    check(requestDoc.exists()) { ERROR_REQUEST_NOT_FOUND }
-
-    val fromUserId = requestDoc.getString(FIELD_FROM_USER_ID) ?: ""
-    val toUserId = requestDoc.getString(FIELD_TO_USER_ID) ?: ""
-
-    // Verify current user is the receiver
-    require(toUserId == currentUserId) { "Only the recipient can modify this friend request" }
-
-    // Verify the request is still pending
-    val status = requestDoc.getString(FIELD_STATUS)
-    require(status == FriendRequestStatus.PENDING.name) {
-      "Friend request is not pending (current status: $status)"
-    }
-
-    // Update status in both subcollections using a batch
-    val batch = db.batch()
-    val requestRef = friendRequestsCollection(currentUserId).document(requestId)
-    val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
-    batch.update(requestRef, FIELD_STATUS, newStatus.name)
-    batch.update(requestRefOther, FIELD_STATUS, newStatus.name)
-    batch.commit().await()
-
-    // Execute success callback
-    onSuccess(fromUserId)
-  }
-
-  /**
-   * Deletes a pending friend request from both users' subcollections.
-   *
-   * Only the recipient can delete the request, and the request must be in the PENDING state. The
-   * deletion is done atomically using a Firestore batch.
-   *
-   * @param requestId The ID of the friend request to delete.
-   * @throws IllegalStateException If the user is not authenticated.
-   * @throws IllegalArgumentException If the user is not the recipient or the request is not
-   *   pending.
-   * @throws Exception If the Firestore batch fails.
-   */
-  private suspend fun deleteRequest(requestId: String) {
+      block:
+          (batch: WriteBatch, currentUserId: String, fromUserId: String, toUserId: String) -> Unit
+  ): String {
     val currentUserId = getCurrentUserId() ?: throw IllegalStateException(NOT_AUTHENTICATED_ERROR)
 
     // Retrieve the request document from the current user's subcollection
@@ -192,13 +146,58 @@ class FriendRequestsRepositoryFirestore(
       "Friend request is not pending (current status: $status)"
     }
 
-    // Delete the request from both users' subcollections using a batch
+    // Let the caller define the batch operations, then commit
     val batch = db.batch()
-    val requestRef = friendRequestsCollection(currentUserId).document(requestId)
-    val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
-    batch.delete(requestRef)
-    batch.delete(requestRefOther)
+    block(batch, currentUserId, fromUserId, toUserId)
     batch.commit().await()
+
+    return fromUserId
+  }
+
+  /**
+   * Updates the status of a pending friend request.
+   *
+   * @param requestId The ID of the request to update.
+   * @param newStatus The new status to set (e.g., ACCEPTED or REFUSED).
+   * @param onSuccess Callback invoked after a successful update, receiving the sender's UID.
+   * @throws IllegalStateException If the current user is not authenticated.
+   * @throws IllegalArgumentException If the request does not exist, is not pending, or if the
+   *   current user is not the recipient.
+   */
+  private suspend fun updateRequestStatus(
+      requestId: String,
+      newStatus: FriendRequestStatus,
+      onSuccess: suspend (fromUserId: String) -> Unit = {}
+  ) {
+    val fromUserId =
+        withPendingRequestForRecipient(requestId) { batch, currentUserId, fromUserId, _ ->
+          val requestRef = friendRequestsCollection(currentUserId).document(requestId)
+          val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
+
+          batch.update(requestRef, FIELD_STATUS, newStatus.name)
+          batch.update(requestRefOther, FIELD_STATUS, newStatus.name)
+        }
+
+    onSuccess(fromUserId)
+  }
+
+  /**
+   * Deletes a pending friend request.
+   *
+   * @param requestId The ID of the request to delete.
+   * @throws IllegalStateException If the current user is not authenticated.
+   * @throws IllegalArgumentException If the request does not exist, is not pending, or if the
+   *   current user is not the recipient.
+   * @throws Exception If the Firestore batch operation fails.
+   */
+  private suspend fun deleteRequest(requestId: String) {
+    withPendingRequestForRecipient(requestId) { batch, currentUserId, fromUserId, _ ->
+      val requestRef = friendRequestsCollection(currentUserId).document(requestId)
+      val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
+
+      batch.delete(requestRef)
+      batch.delete(requestRefOther)
+    }
   }
 
   /**
