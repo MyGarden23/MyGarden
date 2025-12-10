@@ -185,6 +185,8 @@
     <string name="add_enum">Add</string>
     <string name="added_enum">Added</string>
     <string name="pending_enum">Pending</string>
+    <string name="add_back_enum">Add back</string>
+
 
 
     <!-- Offline Mode Messages -->
