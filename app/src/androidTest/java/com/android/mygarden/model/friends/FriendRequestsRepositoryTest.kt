@@ -295,7 +295,7 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun refuseRequest_updates_status_to_refused() = runTest {
+  fun refuseRequest_deletes_request_from_both_users() = runTest {
     val senderUserId = "sender-user"
 
     // Create a request FROM sender TO currentUser
@@ -321,11 +321,11 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
         .set(requestData)
         .await()
 
-    // Refuse the request
+    // Refuse (delete) the request
     friendRequestsRepo.refuseRequest(docRef.id)
 
-    // Verify status changed to REFUSED
-    val updatedDoc =
+    // Verify the request has been deleted for the receiver
+    val receiverDoc =
         db.collection("users")
             .document(currentUserId)
             .collection("friend_requests")
@@ -333,7 +333,17 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
             .get()
             .await()
 
-    assertEquals("REFUSED", updatedDoc.getString("status"))
+    // Verify the request has been deleted for the sender
+    val senderDoc =
+        db.collection("users")
+            .document(senderUserId)
+            .collection("friend_requests")
+            .document(docRef.id)
+            .get()
+            .await()
+
+    assertFalse(receiverDoc.exists())
+    assertFalse(senderDoc.exists())
   }
 
   @Test
