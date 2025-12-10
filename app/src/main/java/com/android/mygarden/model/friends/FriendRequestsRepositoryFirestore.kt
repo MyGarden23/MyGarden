@@ -257,7 +257,7 @@ class FriendRequestsRepositoryFirestore(
    * @param targetUserId The UID of the user that we want to add.
    * @return `true` if a pending outgoing request exists from this user, otherwise `false`.
    */
-  override suspend fun isInIngoingRequests(targetUserId: String): Boolean {
+  override suspend fun isInIncomingRequests(targetUserId: String): Boolean {
     val requests = incomingRequests().first()
     return requests.any { it.fromUserId == targetUserId }
   }
@@ -275,7 +275,7 @@ class FriendRequestsRepositoryFirestore(
     require(currentUserId != targetUserId) { "Cannot send friend request to yourself" }
 
     try {
-      // 1) Vérifier s'il existe déjà UNE demande ENTRANTE de targetUser -> currentUser
+      //check if there is an incoming request from target -> user
       val incomingSnapshot =
           friendRequestsCollection(currentUserId)
               .whereEqualTo(FIELD_FROM_USER_ID, targetUserId)
@@ -286,11 +286,10 @@ class FriendRequestsRepositoryFirestore(
               .await()
 
       if (!incomingSnapshot.isEmpty) {
-        // L'autre t'a déjà envoyé une demande : on l'accepte et on nettoie
+        //the other has already sent a request, we accepte
         val requestDoc = incomingSnapshot.documents.first()
         val requestId = requestDoc.id
 
-        // acceptRequest devrait déjà gérer l'ajout dans la liste d'amis
         acceptRequest(requestId)
 
         Log.d(
@@ -299,7 +298,7 @@ class FriendRequestsRepositoryFirestore(
         return
       }
 
-      // 2) Sinon, vérifier s'il existe déjà une demande SORTANTE currentUser -> targetUser
+      // check if there already is an outgoing request from current user -> target user
       val existingRequests =
           friendRequestsCollection(currentUserId)
               .whereEqualTo(FIELD_FROM_USER_ID, currentUserId)
@@ -313,7 +312,7 @@ class FriendRequestsRepositoryFirestore(
         return
       }
 
-      // 3) Sinon, on crée une nouvelle demande
+      //new request if none already exist
       val requestData =
           mapOf(
               FIELD_FROM_USER_ID to currentUserId,
@@ -322,7 +321,7 @@ class FriendRequestsRepositoryFirestore(
               FIELD_CREATED_AT to Timestamp.now(),
               FIELD_SEEN_BY_RECEIVER to false)
 
-      // Écrire dans les deux sous-collections avec le même ID
+      // write to both collection with same id
       val batch = db.batch()
       val senderDoc = friendRequestsCollection(currentUserId).document()
       batch.set(senderDoc, requestData)
