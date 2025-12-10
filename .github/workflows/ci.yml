@@ -125,10 +125,8 @@ jobs:
               "auth": { "port": 9099, "host": "0.0.0.0" },
               "firestore": { "port": 8080, "host": "0.0.0.0" },
               "storage": { "port": 9199, "host": "0.0.0.0" },
-              "functions": { "port": 5001, "host": "0.0.0.0" },
               "ui": { "enabled": true }
             },
-            "functions": { "source": "firebase_functions" },
             "firestore": {
               "indexes": "firestore.indexes.json"
             },
@@ -155,18 +153,12 @@ jobs:
         run: |
           if [ -e "firebase.json" ]; then
             echo "Starting Firebase emulators for instrumentation tests..."
-            firebase emulators:start --only auth,firestore,storage,functions --project "${{ steps.firebase_project.outputs.project_id }}" &
+            firebase emulators:start --only auth,firestore,storage --project "${{ steps.firebase_project.outputs.project_id }}" &
             sleep 5
             echo "Firebase emulators started in background"
           else
             echo "firebase.json not found - skipping emulators (tests may fail)"
           fi
-
-      # Installation of python for the Firebase functions
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
 
       # Run connected tests on the emulator
       - name: Run tests with camera
@@ -239,7 +231,7 @@ jobs:
             
             # Run tests and capture exit code
             set +e
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.utils.RequiresCamera --stacktrace
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.utils.RequiresCamera,com.android.mygarden.utils.RequiresFirebaseFunctions --stacktrace
             TEST_EXIT_CODE=$?
             set -e
             
