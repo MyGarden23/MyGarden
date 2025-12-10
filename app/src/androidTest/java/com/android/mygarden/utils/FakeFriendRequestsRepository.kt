@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Minimal fake implementation of [FriendRequestsRepository] for tests. */
 class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyList()) :
-  FriendRequestsRepository {
+    FriendRequestsRepository {
   val incomingRequestsFlow = MutableStateFlow(initialRequests)
   var currentUserIdValue: String? = "test-user-id"
 
@@ -23,6 +23,7 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
     val requests = incomingRequestsFlow.value
     return requests.any { it.fromUserId == targetUserId }
   }
+
   override suspend fun isInOutgoingRequests(targetUserId: String): Boolean {
     val currentUserId = getCurrentUserId() ?: return false
     val requests = incomingRequestsFlow.value
@@ -31,7 +32,6 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
     }
   }
 
-
   override suspend fun askFriend(targetUserId: String) {
     val currentUserId = getCurrentUserId() ?: "test-user-id"
 
@@ -39,10 +39,8 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
       throw IllegalStateException("boom")
     } else {
       incomingRequestsFlow.value =
-        incomingRequestsFlow.value + FriendRequest(
-          fromUserId = currentUserId,
-          toUserId = targetUserId
-        )
+          incomingRequestsFlow.value +
+              FriendRequest(fromUserId = currentUserId, toUserId = targetUserId)
     }
   }
 

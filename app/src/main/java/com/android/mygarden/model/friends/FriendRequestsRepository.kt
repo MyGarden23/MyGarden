@@ -53,9 +53,9 @@ interface FriendRequestsRepository {
   /**
    * Sends a friend request to another user.
    *
-   * Creates a new friend request document with status PENDING.
-   * If the other user already sent a request, this will add both users to each other's friends list,
-   * and mark the request as ACCEPTED.
+   * Creates a new friend request document with status PENDING. If the other user already sent a
+   * request, this will add both users to each other's friends list, and mark the request as
+   * ACCEPTED.
    *
    * @param targetUserId The Firebase Auth UID of the user to send the request to.
    * @throws IllegalStateException if the user is not authenticated.

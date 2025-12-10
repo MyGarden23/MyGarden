@@ -412,67 +412,72 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
 
     assertEquals(true, updatedDoc.getBoolean("seenByReceiver"))
   }
-    @Test
-    fun isInOutgoingRequests_returnsTrue_afterAskFriend() = runTest {
-        val targetUserId = "target-user"
 
-        friendRequestsRepo.askFriend(targetUserId)
+  @Test
+  fun isInOutgoingRequests_returnsTrue_afterAskFriend() = runTest {
+    val targetUserId = "target-user"
 
-        val result = friendRequestsRepo.isInOutgoingRequests(targetUserId)
-        assertTrue(result)
+    friendRequestsRepo.askFriend(targetUserId)
 
-        val other = friendRequestsRepo.isInOutgoingRequests("someone-else")
-        assertFalse(other)
-    }
+    val result = friendRequestsRepo.isInOutgoingRequests(targetUserId)
+    assertTrue(result)
 
-    private suspend fun createIncomingRequest(fromUserId: String, toUserId: String, requestId: String) {
-        val data =
-            mapOf(
-                "fromUserId" to fromUserId,
-                "toUserId" to toUserId,
-                "status" to "PENDING",
-                "createdAt" to com.google.firebase.Timestamp.now(),
-                "seenByReceiver" to false,
-            )
-        db.collection("users")
-            .document(toUserId)
-            .collection("friend_requests")
-            .document(requestId)
-            .set(data)
-            .await()
+    val other = friendRequestsRepo.isInOutgoingRequests("someone-else")
+    assertFalse(other)
+  }
 
-        db.collection("users")
-            .document(fromUserId)
-            .collection("friend_requests")
-            .document(requestId)
-            .set(data)
-            .await()
-    }
+  private suspend fun createIncomingRequest(
+      fromUserId: String,
+      toUserId: String,
+      requestId: String
+  ) {
+    val data =
+        mapOf(
+            "fromUserId" to fromUserId,
+            "toUserId" to toUserId,
+            "status" to "PENDING",
+            "createdAt" to com.google.firebase.Timestamp.now(),
+            "seenByReceiver" to false,
+        )
+    db.collection("users")
+        .document(toUserId)
+        .collection("friend_requests")
+        .document(requestId)
+        .set(data)
+        .await()
 
-    @Test
-    fun isInIncomingRequests_returnsTrue_whenPendingIncomingExists() = runTest {
-        val otherUserId = "other-user"
-        val requestId = "req-1"
+    db.collection("users")
+        .document(fromUserId)
+        .collection("friend_requests")
+        .document(requestId)
+        .set(data)
+        .await()
+  }
 
-        createIncomingRequest(fromUserId = otherUserId, toUserId = currentUserId, requestId = requestId)
+  @Test
+  fun isInIncomingRequests_returnsTrue_whenPendingIncomingExists() = runTest {
+    val otherUserId = "other-user"
+    val requestId = "req-1"
 
-        val result = friendRequestsRepo.isInIncomingRequests(otherUserId)
-        assertTrue(result)
+    createIncomingRequest(fromUserId = otherUserId, toUserId = currentUserId, requestId = requestId)
 
-        val other = friendRequestsRepo.isInIncomingRequests("someone-else")
-        assertFalse(other)
-    }
+    val result = friendRequestsRepo.isInIncomingRequests(otherUserId)
+    assertTrue(result)
 
-    @Test
-    fun askFriend_whenIncomingPendingRequest_exists_acceptsAndCreatesFriendship() = runTest {
-        val otherUserId = "other-user"
-        val requestId = "req-mutual"
+    val other = friendRequestsRepo.isInIncomingRequests("someone-else")
+    assertFalse(other)
+  }
 
-        createIncomingRequest(fromUserId = otherUserId, toUserId = currentUserId, requestId = requestId)
-        assertTrue(friendRequestsRepo.isInIncomingRequests(otherUserId))
+  @Test
+  fun askFriend_whenIncomingPendingRequest_exists_acceptsAndCreatesFriendship() = runTest {
+    val otherUserId = "other-user"
+    val requestId = "req-mutual"
 
-        friendRequestsRepo.askFriend(otherUserId)
-        assertTrue(friendsRepo.isFriend(otherUserId))
-        assertFalse(friendRequestsRepo.isInIncomingRequests(otherUserId))
-    }
+    createIncomingRequest(fromUserId = otherUserId, toUserId = currentUserId, requestId = requestId)
+    assertTrue(friendRequestsRepo.isInIncomingRequests(otherUserId))
+
+    friendRequestsRepo.askFriend(otherUserId)
+    assertTrue(friendsRepo.isFriend(otherUserId))
+    assertFalse(friendRequestsRepo.isInIncomingRequests(otherUserId))
+  }
 }

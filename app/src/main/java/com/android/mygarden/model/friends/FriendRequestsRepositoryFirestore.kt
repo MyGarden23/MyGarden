@@ -275,7 +275,7 @@ class FriendRequestsRepositoryFirestore(
     require(currentUserId != targetUserId) { "Cannot send friend request to yourself" }
 
     try {
-      //check if there is an incoming request from target -> user
+      // check if there is an incoming request from target -> user
       val incomingSnapshot =
           friendRequestsCollection(currentUserId)
               .whereEqualTo(FIELD_FROM_USER_ID, targetUserId)
@@ -286,7 +286,7 @@ class FriendRequestsRepositoryFirestore(
               .await()
 
       if (!incomingSnapshot.isEmpty) {
-        //the other has already sent a request, we accepte
+        // the other has already sent a request, we accepte
         val requestDoc = incomingSnapshot.documents.first()
         val requestId = requestDoc.id
 
@@ -312,7 +312,7 @@ class FriendRequestsRepositoryFirestore(
         return
       }
 
-      //new request if none already exist
+      // new request if none already exist
       val requestData =
           mapOf(
               FIELD_FROM_USER_ID to currentUserId,
