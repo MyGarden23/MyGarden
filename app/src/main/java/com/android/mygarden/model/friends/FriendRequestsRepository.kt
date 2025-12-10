@@ -76,6 +76,13 @@ interface FriendRequestsRepository {
   suspend fun refuseRequest(requestId: String)
 
   /**
+   * Deletes a pending friend request.
+   *
+   * @param requestId The ID of the request to delete.
+   */
+  suspend fun deleteRequest(requestId: String)
+
+  /**
    * Cleans up any active listeners or resources.
    *
    * This should be called before signing out to prevent PERMISSION_DENIED errors from Firestore

@@ -190,7 +190,7 @@ class FriendRequestsRepositoryFirestore(
    *   current user is not the recipient.
    * @throws Exception If the Firestore batch operation fails.
    */
-  private suspend fun deleteRequest(requestId: String) {
+  override suspend fun deleteRequest(requestId: String) {
     withPendingRequestForRecipient(requestId) { batch, currentUserId, fromUserId, _ ->
       val requestRef = friendRequestsCollection(currentUserId).document(requestId)
       val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
