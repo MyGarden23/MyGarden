@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Minimal fake implementation of [FriendRequestsRepository] for tests. */
 class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyList()) :
-    FriendRequestsRepository {
+  FriendRequestsRepository {
   val incomingRequestsFlow = MutableStateFlow(initialRequests)
   var currentUserIdValue: String? = "test-user-id"
 
@@ -23,18 +23,31 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
     val requests = incomingRequestsFlow.value
     return requests.any { it.fromUserId == targetUserId }
   }
+  override suspend fun isInOutgoingRequests(targetUserId: String): Boolean {
+    val currentUserId = getCurrentUserId() ?: return false
+    val requests = incomingRequestsFlow.value
+    return requests.any { request ->
+      request.fromUserId == currentUserId && request.toUserId == targetUserId
+    }
+  }
+
 
   override suspend fun askFriend(targetUserId: String) {
+    val currentUserId = getCurrentUserId() ?: "test-user-id"
+
     if (targetUserId == "boom-user-id") {
       throw IllegalStateException("boom")
     } else {
       incomingRequestsFlow.value =
-          incomingRequestsFlow.value + FriendRequest(fromUserId = targetUserId)
+        incomingRequestsFlow.value + FriendRequest(
+          fromUserId = currentUserId,
+          toUserId = targetUserId
+        )
     }
   }
 
   override suspend fun acceptRequest(requestId: String) {
-    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
+    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
   }
 
   var markedSeen: MutableList<String> = mutableListOf()
@@ -44,7 +57,7 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
   }
 
   override suspend fun refuseRequest(requestId: String) {
-    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
+    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
   }
 
   override suspend fun deleteRequest(requestId: String) {
