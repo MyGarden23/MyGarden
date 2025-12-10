@@ -23,13 +23,26 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
     val requests = incomingRequestsFlow.value
     return requests.any { it.fromUserId == targetUserId }
   }
+  override suspend fun isInOutgoingRequests(targetUserId: String): Boolean {
+    val currentUserId = getCurrentUserId() ?: return false
+    val requests = incomingRequestsFlow.value
+    return requests.any { request ->
+      request.fromUserId == currentUserId && request.toUserId == targetUserId
+    }
+  }
+
 
   override suspend fun askFriend(targetUserId: String) {
+    val currentUserId = getCurrentUserId() ?: "test-user-id"
+
     if (targetUserId == "boom-user-id") {
       throw IllegalStateException("boom")
     } else {
       incomingRequestsFlow.value =
-          incomingRequestsFlow.value + FriendRequest(fromUserId = targetUserId)
+        incomingRequestsFlow.value + FriendRequest(
+          fromUserId = currentUserId,
+          toUserId = targetUserId
+        )
     }
   }
 
