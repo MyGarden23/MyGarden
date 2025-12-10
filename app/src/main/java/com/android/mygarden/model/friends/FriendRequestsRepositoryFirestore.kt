@@ -272,44 +272,72 @@ class FriendRequestsRepositoryFirestore(
    * - users/{targetUserId}/friend_requests/{requestId}
    */
   override suspend fun askFriend(targetUserId: String) {
-    val currentUserId = getCurrentUserId() ?: throw IllegalStateException(NOT_AUTHENTICATED_ERROR)
+      val currentUserId = getCurrentUserId() ?: throw IllegalStateException(NOT_AUTHENTICATED_ERROR)
 
-    require(currentUserId != targetUserId) { "Cannot send friend request to yourself" }
+      require(currentUserId != targetUserId) { "Cannot send friend request to yourself" }
 
-    try {
-      // Check if a request already exists
-      val existingRequests =
-          friendRequestsCollection(currentUserId)
-              .whereEqualTo(FIELD_FROM_USER_ID, currentUserId)
-              .whereEqualTo(FIELD_TO_USER_ID, targetUserId)
-              .get()
-              .await()
+      try {
+          // 1) Vérifier s'il existe déjà UNE demande ENTRANTE de targetUser -> currentUser
+          val incomingSnapshot =
+              friendRequestsCollection(currentUserId)
+                  .whereEqualTo(FIELD_FROM_USER_ID, targetUserId)
+                  .whereEqualTo(FIELD_TO_USER_ID, currentUserId)
+                  .whereEqualTo(FIELD_STATUS, FriendRequestStatus.PENDING.name)
+                  .limit(1)
+                  .get()
+                  .await()
 
-      if (!existingRequests.isEmpty) {
-        Log.w("FriendRequestsRepo", "Friend request already exists")
-        return
+          if (!incomingSnapshot.isEmpty) {
+              // L'autre t'a déjà envoyé une demande : on l'accepte et on nettoie
+              val requestDoc = incomingSnapshot.documents.first()
+              val requestId = requestDoc.id
+
+              // acceptRequest devrait déjà gérer l'ajout dans la liste d'amis
+              acceptRequest(requestId)
+              // puis on supprime la requête des deux sous-collections
+              deleteRequest(requestId)
+
+              Log.d(
+                  "FriendRequestsRepo",
+                  "Existing incoming friend request accepted and deleted; users are now friends")
+              return
+          }
+
+          // 2) Sinon, vérifier s'il existe déjà une demande SORTANTE currentUser -> targetUser
+          val existingRequests =
+              friendRequestsCollection(currentUserId)
+                  .whereEqualTo(FIELD_FROM_USER_ID, currentUserId)
+                  .whereEqualTo(FIELD_TO_USER_ID, targetUserId)
+                  .whereEqualTo(FIELD_STATUS, FriendRequestStatus.PENDING.name)
+                  .get()
+                  .await()
+
+          if (!existingRequests.isEmpty) {
+              Log.w("FriendRequestsRepo", "Friend request already exists")
+              return
+          }
+
+          // 3) Sinon, on crée une nouvelle demande
+          val requestData =
+              mapOf(
+                  FIELD_FROM_USER_ID to currentUserId,
+                  FIELD_TO_USER_ID to targetUserId,
+                  FIELD_STATUS to FriendRequestStatus.PENDING.name,
+                  FIELD_CREATED_AT to Timestamp.now(),
+                  FIELD_SEEN_BY_RECEIVER to false)
+
+          // Écrire dans les deux sous-collections avec le même ID
+          val batch = db.batch()
+          val senderDoc = friendRequestsCollection(currentUserId).document()
+          batch.set(senderDoc, requestData)
+          batch.set(friendRequestsCollection(targetUserId).document(senderDoc.id), requestData)
+          batch.commit().await()
+
+          Log.d("FriendRequestsRepo", "Friend request sent successfully")
+      } catch (e: Exception) {
+          Log.e("FriendRequestsRepo", "Failed to send friend request", e)
+          throw e
       }
-
-      val requestData =
-          mapOf(
-              FIELD_FROM_USER_ID to currentUserId,
-              FIELD_TO_USER_ID to targetUserId,
-              FIELD_STATUS to FriendRequestStatus.PENDING.name,
-              FIELD_CREATED_AT to Timestamp.now(),
-              FIELD_SEEN_BY_RECEIVER to false)
-
-      // Use WriteBatch to write to both subcollections atomically
-      val batch = db.batch()
-      val senderDoc = friendRequestsCollection(currentUserId).document()
-      batch.set(senderDoc, requestData)
-      batch.set(friendRequestsCollection(targetUserId).document(senderDoc.id), requestData)
-      batch.commit().await()
-
-      Log.d("FriendRequestsRepo", "Friend request sent successfully")
-    } catch (e: Exception) {
-      Log.e("FriendRequestsRepo", "Failed to send friend request", e)
-      throw e
-    }
   }
 
   /**
