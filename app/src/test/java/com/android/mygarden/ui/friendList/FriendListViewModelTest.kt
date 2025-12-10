@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.any
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -81,6 +82,9 @@ class FriendListViewModelTest {
           override fun friendsFlow(userId: String) = FakeFriendsRepository().friendsFlow
 
           override suspend fun addFriend(friendUserId: String) = Unit
+          override suspend fun isFriend(friendUserId: String): Boolean {
+            return FakeFriendsRepository().friendsFlow.value.contains(friendUserId)
+          }
         }
 
     val fakeUserProfiles = FakeUserProfileRepository()
