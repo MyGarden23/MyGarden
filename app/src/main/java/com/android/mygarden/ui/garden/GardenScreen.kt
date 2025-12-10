@@ -125,7 +125,6 @@ private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
 
 // Layout weights
-private const val SPACER_WEIGHT = 1f
 private const val PLANT_CHARACTERISTICS_WEIGHT = 1f
 
 // Water level bounds

@@ -42,6 +42,33 @@ import com.android.mygarden.R
 import com.android.mygarden.model.achievements.ACHIEVEMENTS_LEVEL_NUMBER
 import com.android.mygarden.model.achievements.AchievementType
 
+// Padding constants
+private val COLUMN_VERTICAL_PADDING = 20.dp
+private val ACHIEVEMENT_CARD_HORIZONTAL_PADDING = 20.dp
+private val INNER_CARD_PADDING = 14.dp
+private val INNER_CARD_COLUMN_VERTICAL_PADDING = 8.dp
+private val ACHIEVEMENT_NAME_TOP_PADDING = 18.dp
+private val INNER_DIALOG_PADDING = 30.dp
+private val INNER_DIALOG_COLUMN_VERTICAL_PADDING = 10.dp
+private val REMAINING_UNITS_RIGHT_PADDING = 10.dp
+
+// Sizes
+private val ACHIEVEMENT_CARD_HEIGHT = 150.dp
+private val ACHIEVEMENT_CARD_ELEVATION = 8.dp
+private val DIALOG_WIDTH = 300.dp
+private val DIALOG_ROUNDED_SHAPE = 16.dp
+private val CLOSE_BUTTON_SIZE = 30.dp
+private const val Z_INDEX_DIALOG_REMAINING_UNITS = 1f
+private val PROGRESS_BAR_HEIGHT = 22.dp
+private const val PROGRESS_BAR_ROUNDED_SHAPE = 50
+private val ACHIEVEMENT_IMAGE_SIZE = 130.dp
+
+// Font sizes
+private val ACHIEVEMENT_CARD_NAME_FONT_SIZE = 23.sp
+private val DIALOG_NAME_FONT_SIZE = 25.sp
+private val DIALOG_INFO_FONT_SIZE = 20.sp
+private val DIALOG_REMAINING_FONT_SIZE = 14.sp
+
 /**
  * Screen that displays a card for each [AchievementType] and the corresponding level of the user
  * for it. Additionally, it displays more information about the achievement (i.e. how to get more
@@ -69,7 +96,7 @@ fun AchievementsScreen(
 
   Column(
       modifier = modifier,
-      verticalArrangement = Arrangement.spacedBy(20.dp),
+      verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
       horizontalAlignment = Alignment.CenterHorizontally) {
         for (type in AchievementType.entries) {
           AchievementCard(
@@ -113,15 +140,15 @@ fun AchievementCard(
       modifier =
           modifier
               .fillMaxWidth()
-              .height(150.dp)
-              .padding(horizontal = 20.dp)
+              .height(ACHIEVEMENT_CARD_HEIGHT)
+              .padding(horizontal = ACHIEVEMENT_CARD_HORIZONTAL_PADDING)
               .clickable(onClick = onClick),
-      elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+      elevation = CardDefaults.cardElevation(defaultElevation = ACHIEVEMENT_CARD_ELEVATION),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(INNER_CARD_PADDING),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            horizontalArrangement = Arrangement.spacedBy(INNER_CARD_COLUMN_VERTICAL_PADDING)) {
               ImageForAchievementType(achievementType = achievementType, modifier = modifier)
 
               Column(
@@ -131,8 +158,8 @@ fun AchievementCard(
                     Text(
                         text = achievementType.toString(),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 23.sp,
-                        modifier = modifier.padding(top = 18.dp))
+                        fontSize = ACHIEVEMENT_CARD_NAME_FONT_SIZE,
+                        modifier = modifier.padding(top = ACHIEVEMENT_NAME_TOP_PADDING))
                     ProgressBar(
                         modifier = Modifier,
                         currentValue = currentLevel,
@@ -180,11 +207,11 @@ fun AchievementDialogInfo(
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
-        modifier = modifier.width(300.dp).clip(RoundedCornerShape(16.dp))) {
+        modifier = modifier.width(DIALOG_WIDTH).clip(RoundedCornerShape(DIALOG_ROUNDED_SHAPE))) {
           Column(
-              modifier = modifier.padding(30.dp),
+              modifier = modifier.padding(INNER_DIALOG_PADDING),
               horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(10.dp)) {
+              verticalArrangement = Arrangement.spacedBy(INNER_DIALOG_COLUMN_VERTICAL_PADDING)) {
                 Box(modifier = modifier.fillMaxWidth()) {
                   Icon(
                       painter = painterResource(R.drawable.x_circle),
@@ -193,7 +220,7 @@ fun AchievementDialogInfo(
                       tint = MaterialTheme.colorScheme.tertiary,
                       modifier =
                           modifier
-                              .size(30.dp)
+                              .size(CLOSE_BUTTON_SIZE)
                               .align(Alignment.TopStart)
                               .clickable(onClick = onDismiss))
                   ImageForAchievementType(
@@ -203,7 +230,7 @@ fun AchievementDialogInfo(
                 Text(
                     text = achievementType.toString(),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp)
+                    fontSize = DIALOG_NAME_FONT_SIZE)
 
                 DescriptionForAchievementType(achievementType = achievementType)
 
@@ -214,7 +241,7 @@ fun AchievementDialogInfo(
                             currentLevel,
                             ACHIEVEMENTS_LEVEL_NUMBER),
                     fontWeight = FontWeight.Medium,
-                    fontSize = 20.sp)
+                    fontSize = DIALOG_INFO_FONT_SIZE)
 
                 if (nextThreshold > 0) {
                   Box() {
@@ -227,9 +254,12 @@ fun AchievementDialogInfo(
                         text =
                             stringResource(
                                 R.string.left_for_threshold, currentValue, nextThreshold),
-                        fontSize = 14.sp,
+                        fontSize = DIALOG_REMAINING_FONT_SIZE,
                         modifier =
-                            modifier.align(Alignment.CenterEnd).padding(end = 10.dp).zIndex(1f))
+                            modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = REMAINING_UNITS_RIGHT_PADDING)
+                                .zIndex(Z_INDEX_DIALOG_REMAINING_UNITS))
                   }
                 }
                 if (neededMore > 0) {
@@ -265,15 +295,15 @@ fun ProgressBar(modifier: Modifier = Modifier, currentValue: Int, maxValue: Int,
   Box(
       modifier =
           modifier
-              .height(22.dp)
+              .height(PROGRESS_BAR_HEIGHT)
               .fillMaxWidth()
-              .clip(RoundedCornerShape(50))
+              .clip(RoundedCornerShape(PROGRESS_BAR_ROUNDED_SHAPE))
               .background(MaterialTheme.colorScheme.background),
       contentAlignment = Alignment.BottomStart) {
         Box(
             modifier =
                 modifier
-                    .clip(RoundedCornerShape(50))
+                    .clip(RoundedCornerShape(PROGRESS_BAR_ROUNDED_SHAPE))
                     .fillMaxHeight()
                     .fillMaxWidth(width)
                     .background(color))
@@ -303,7 +333,10 @@ fun ImageForAchievementType(achievementType: AchievementType, modifier: Modifier
                 painterResource(R.drawable.healthy_streak_achievement),
                 stringResource(R.string.healthy_streak_achievement))
       }
-  Image(modifier = modifier.size(130.dp), painter = pair.first, contentDescription = pair.second)
+  Image(
+      modifier = modifier.size(ACHIEVEMENT_IMAGE_SIZE),
+      painter = pair.first,
+      contentDescription = pair.second)
 }
 
 /**

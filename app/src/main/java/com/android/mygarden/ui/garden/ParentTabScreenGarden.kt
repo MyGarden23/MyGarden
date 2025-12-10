@@ -54,10 +54,19 @@ import com.android.mygarden.ui.utils.handleOfflineClick
 
 // Padding constants
 private val PROFILE_ROW_HORIZONTAL_PADDING = 30.dp
-private const val SPACER_WEIGHT = 1f
+private val COLUMN_VERTICAL_PADDING = 12.dp
+private val TAB_EXTERNAL_HORIZONTAL_PADDING = 16.dp
+private val TAB_INTERNAL_HORIZONTAL_PADDING = 20.dp
+private val INSIDE_TAB_PADDING = 4.dp
+
+// Weights, percentages, etc.
+private const val FULL_WEIGHT = 1f
+private const val TAB_SHAPE_PERCENTAGE = 50
+private val TAB_TONAL_ELEVATION = 2.dp
 
 // Sizes
 private val AVATAR_SIZE = 40.dp
+private val TAB_HEIGHT = 44.dp
 
 enum class GardenTab(@StringRes val titleRes: Int) {
   GARDEN(R.string.garden_screen_title),
@@ -143,13 +152,16 @@ fun ParentTabScreenGarden(
   ) { innerPadding ->
     Column(
         modifier = modifier.padding(innerPadding),
-        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING)) {
           Surface(
-              modifier = modifier.padding(horizontal = 16.dp).clip(RoundedCornerShape(50)),
+              modifier =
+                  modifier
+                      .padding(horizontal = TAB_EXTERNAL_HORIZONTAL_PADDING)
+                      .clip(RoundedCornerShape(TAB_SHAPE_PERCENTAGE)),
               color = MaterialTheme.colorScheme.background,
-              tonalElevation = 2.dp) {
+              tonalElevation = TAB_TONAL_ELEVATION) {
                 Row(
-                    modifier = modifier.height(44.dp).fillMaxWidth(),
+                    modifier = modifier.height(TAB_HEIGHT).fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically) {
                       GardenTab.entries.forEachIndexed { index, tab ->
                         val selected = index == selectedTab.ordinal
@@ -157,15 +169,15 @@ fun ParentTabScreenGarden(
                         Box(
                             modifier =
                                 modifier
-                                    .weight(1f)
+                                    .weight(FULL_WEIGHT)
                                     .fillMaxHeight()
-                                    .padding(4.dp)
-                                    .clip(RoundedCornerShape(24.dp))
+                                    .padding(INSIDE_TAB_PADDING)
+                                    .clip(RoundedCornerShape(TAB_SHAPE_PERCENTAGE))
                                     .clickable { selectedTab = tab }
                                     .background(
                                         if (selected) MaterialTheme.colorScheme.surface
                                         else Color.Transparent)
-                                    .padding(horizontal = 20.dp),
+                                    .padding(horizontal = TAB_INTERNAL_HORIZONTAL_PADDING),
                             contentAlignment = Alignment.Center) {
                               Text(
                                   text = stringResource(tab.titleRes),
@@ -228,7 +240,7 @@ fun ProfileRow(
           if (!isViewMode) {
             NavigationButton(onClick = onSignOut, isSignOut = true)
           }
-          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
+          Spacer(modifier = modifier.weight(FULL_WEIGHT))
 
           // Username (user can click on it to edit profile)
           Text(
@@ -248,7 +260,7 @@ fun ProfileRow(
               fontWeight = FontWeight.Bold,
               style = MaterialTheme.typography.titleLarge,
               text = uiState.userName)
-          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
+          Spacer(modifier = modifier.weight(FULL_WEIGHT))
 
           // User avatar (user can click on it to edit profile)
           Card(
