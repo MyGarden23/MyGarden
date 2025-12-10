@@ -11,7 +11,7 @@ enum class FriendRelation(@StringRes val labelRes: Int) {
   ADD(R.string.add_enum),
   ADDED(R.string.added_enum),
   PENDING(R.string.pending_enum),
-    ADDBACK(R.string.add_back_enum)
+  ADDBACK(R.string.add_back_enum)
 }
 
 @Composable fun FriendRelation.label(): String = stringResource(labelRes)

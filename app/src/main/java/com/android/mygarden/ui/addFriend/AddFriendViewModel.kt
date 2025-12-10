@@ -131,9 +131,12 @@ class AddFriendViewModel(
     viewModelScope.launch {
       _uiState.value =
           _uiState.value.let { state ->
-            state.copy(relations = state.relations + (userId to FriendRelation.PENDING))
+            if (state.relations.get(userId) == FriendRelation.ADDBACK) {
+              state.copy(relations = state.relations + (userId to FriendRelation.ADDED))
+            } else {
+              state.copy(relations = state.relations + (userId to FriendRelation.PENDING))
+            }
           }
-
       try {
         requestsRepository.askFriend(userId)
         onSuccess()
@@ -159,7 +162,7 @@ class AddFriendViewModel(
           val relation =
               when {
                 requestsRepository.isInOutgoingRequests(friend.id) -> FriendRelation.PENDING
-                  requestsRepository.isInIngoingRequests(friend.id) -> FriendRelation.ADDBACK
+                requestsRepository.isInIngoingRequests(friend.id) -> FriendRelation.ADDBACK
                 friendsRepository.isFriend(friend.id) -> FriendRelation.ADDED
                 else -> FriendRelation.ADD
               }
