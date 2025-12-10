@@ -213,7 +213,10 @@ fun AddFriendButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}, isO
       onClick = onClick,
       containerColor =
           if (isOnline) MaterialTheme.colorScheme.primaryContainer
-          else MaterialTheme.colorScheme.surfaceVariant) {
+          else MaterialTheme.colorScheme.surfaceVariant,
+      contentColor =
+          if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
+          else MaterialTheme.colorScheme.onSurfaceVariant) {
         Text(stringResource(R.string.add_friend_button))
       }
 }

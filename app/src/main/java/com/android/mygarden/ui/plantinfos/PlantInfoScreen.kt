@@ -365,7 +365,9 @@ private fun SavePlantBottomBar(
                         } else {
                           MaterialTheme.colorScheme.surfaceVariant
                         }),
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    contentColor =
+                        if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant)) {
               if (uiState.isSaving) {
                 Row(
