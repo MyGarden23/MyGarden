@@ -1,0 +1,8 @@
+{
+  "name": "firebase-wrapper",
+  "engines": { "node": "20" },
+  "dependencies": {
+    "firebase-functions": "^4.6.0",
+    "firebase-admin": "^11.10.0"
+  }
+}
