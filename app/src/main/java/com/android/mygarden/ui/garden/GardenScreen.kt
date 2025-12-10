@@ -62,9 +62,6 @@ import com.android.mygarden.ui.utils.handleOfflineClick
 
 /** Test tags to test the screen displays */
 object GardenScreenTestTags {
-  const val USER_PROFILE_PICTURE = "UserProfilePicture"
-  const val USERNAME = "Username"
-  const val EDIT_PROFILE_BUTTON = "EditProfileButton"
   const val GARDEN_LIST = "GardenList"
   const val EMPTY_GARDEN_MSG = "EmptyGardenMsg"
   const val EMPTY_FILTER_MSG = "EmptyFilterMsg"

@@ -52,8 +52,24 @@ import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.utils.OfflineMessages
 import com.android.mygarden.ui.utils.handleOfflineClick
 
+object GardenAchievementsParentScreenTestTags {
+  const val AVATAR_EDIT_PROFILE = "UserAvatarEditProfile"
+  const val PSEUDO = "Pseudo"
+  const val GARDEN_TAB = "GardenTab"
+  const val ACHIEVEMENTS_TAB = "AchievementsTab"
+}
+
+/** Retrieves the correct test tag for each Garden Tab */
+fun getAchievementFronTab(tab: GardenTab): String {
+  return when (tab) {
+    GardenTab.ACHIEVEMENTS -> GardenAchievementsParentScreenTestTags.ACHIEVEMENTS_TAB
+    GardenTab.GARDEN -> GardenAchievementsParentScreenTestTags.GARDEN_TAB
+  }
+}
+
 // Padding constants
 private val PROFILE_ROW_HORIZONTAL_PADDING = 30.dp
+private val PROFILE_ROW_VERTICAL_PADDING = 6.dp
 private val COLUMN_VERTICAL_PADDING = 12.dp
 private val TAB_EXTERNAL_HORIZONTAL_PADDING = 16.dp
 private val TAB_INTERNAL_HORIZONTAL_PADDING = 20.dp
@@ -177,7 +193,8 @@ fun ParentTabScreenGarden(
                                     .background(
                                         if (selected) MaterialTheme.colorScheme.surface
                                         else Color.Transparent)
-                                    .padding(horizontal = TAB_INTERNAL_HORIZONTAL_PADDING),
+                                    .padding(horizontal = TAB_INTERNAL_HORIZONTAL_PADDING)
+                                    .testTag(getAchievementFronTab(tab)),
                             contentAlignment = Alignment.Center) {
                               Text(
                                   text = stringResource(tab.titleRes),
@@ -232,7 +249,9 @@ fun ProfileRow(
       modifier =
           modifier
               .fillMaxWidth()
-              .padding(horizontal = PROFILE_ROW_HORIZONTAL_PADDING, vertical = 6.dp),
+              .padding(
+                  horizontal = PROFILE_ROW_HORIZONTAL_PADDING,
+                  vertical = PROFILE_ROW_VERTICAL_PADDING),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -255,7 +274,7 @@ fun ProfileRow(
                                   onEditProfile()
                                 }
                           })
-                      .testTag(GardenScreenTestTags.USERNAME),
+                      .testTag(GardenAchievementsParentScreenTestTags.PSEUDO),
               color = MaterialTheme.colorScheme.primary,
               fontWeight = FontWeight.Bold,
               style = MaterialTheme.typography.titleLarge,
@@ -277,7 +296,7 @@ fun ProfileRow(
                                   onEditProfile()
                                 }
                           })
-                      .testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)) {
+                      .testTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)) {
                 Image(
                     painter = painterResource(uiState.userAvatar.resId),
                     contentDescription =

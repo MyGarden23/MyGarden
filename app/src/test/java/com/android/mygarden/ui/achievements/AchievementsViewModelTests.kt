@@ -49,7 +49,7 @@ class AchievementsViewModelTests {
 
   @Test
   fun uiStateDefaultsToLevelFromZeroProgress() = runTest {
-    val viewModel = AchievementsViewModel(repository)
+    val viewModel = AchievementsViewModel(achievementsRepo = repository)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
@@ -68,7 +68,7 @@ class AchievementsViewModelTests {
   fun getUserAchievementProgressWorkWithInialValues() = runTest {
     repository.initializeAchievementsForNewUser(id)
 
-    val viewModel = AchievementsViewModel(repository)
+    val viewModel = AchievementsViewModel(achievementsRepo = repository)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
@@ -101,7 +101,7 @@ class AchievementsViewModelTests {
     repository.setAchievementValue(id, AchievementType.FRIENDS_NUMBER, friendsValue)
     repository.setAchievementValue(id, AchievementType.HEALTHY_STREAK, healthyValue)
 
-    val viewModel = AchievementsViewModel(repository)
+    val viewModel = AchievementsViewModel(achievementsRepo = repository)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value

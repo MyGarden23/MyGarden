@@ -10,7 +10,7 @@ object NavigationTestTags {
   const val GARDEN_BUTTON = "GardenButton"
   const val FEED_BUTTON = "FeedButton"
   const val CAMERA_SCREEN = "CameraScreen"
-  const val GARDEN_SCREEN = "GardenScreen"
+  const val GARDEN_ACHIEVEMENTS_PARENT_SCREEN = "GardenAchievementsParentScreen"
   const val FEED_SCREEN = "FeedScreen"
   const val EDIT_PLANT_SCREEN = "EditPlantScreen"
   const val ADD_FRIEND_SCREEN = "AddFriendScreen"

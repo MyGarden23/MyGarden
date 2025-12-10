@@ -56,7 +56,7 @@ class NavigationS6TestsBottomBar : FirestoreProfileTest() {
     rule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
     rule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
     rule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    rule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    rule.onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN).assertIsDisplayed()
     // click on bottom bar
     rule.onNodeWithTag(NavigationTestTags.FEED_BUTTON).performClick()
     // navigated to feed
@@ -88,6 +88,6 @@ class NavigationS6TestsBottomBar : FirestoreProfileTest() {
 
     // navigated to garden
     rule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    rule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    rule.onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN).assertIsDisplayed()
   }
 }
