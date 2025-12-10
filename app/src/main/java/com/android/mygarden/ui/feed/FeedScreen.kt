@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,10 +45,13 @@ import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFrie
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
+import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
+import com.android.mygarden.ui.utils.OfflineMessages
+import com.android.mygarden.ui.utils.handleOfflineClick
 
 /*----------------- PADDING / SIZE / OPACITY CONSTANTS ------------------*/
 private val BUTTON_ROW_HORIZONTAL_PADDING = 24.dp
@@ -101,6 +107,11 @@ fun FeedScreen(
   val uiState by feedViewModel.uiState.collectAsState()
   val activities = uiState.activities
 
+  // Collect offline state
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
+
+  val context = LocalContext.current
+
   // Ensures that we start collecting from the repository's list of activities
   LaunchedEffect(Unit) { feedViewModel.refreshUIState() }
 
@@ -108,7 +119,14 @@ fun FeedScreen(
       modifier = modifier.testTag(NavigationTestTags.FEED_SCREEN),
       topBar = { TopBar(title = stringResource(R.string.feed_screen_title)) },
       containerColor = MaterialTheme.colorScheme.background,
-      floatingActionButton = { AddFriendButton(modifier = Modifier, onClick = onAddFriend) },
+      floatingActionButton = {
+        AddFriendButton(
+            modifier = Modifier,
+            onClick = {
+              handleOfflineClick(isOnline, context, OfflineMessages.CANNOT_ADD_FRIENDS, onAddFriend)
+            },
+            isOnline = isOnline)
+      },
       content = { pd ->
         Column(modifier = modifier.fillMaxSize().padding(pd)) {
           // Buttons - we want them below the top bar but above the activities
@@ -189,10 +207,15 @@ fun NotificationButton(
  * @param onClick the callback to be triggered when the user clicks on the button
  */
 @Composable
-fun AddFriendButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
-  Button(modifier = modifier.testTag(FeedScreenTestTags.ADD_FRIEND_BUTTON), onClick = onClick) {
-    Text(stringResource(R.string.add_friend_button))
-  }
+fun AddFriendButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}, isOnline: Boolean) {
+  ExtendedFloatingActionButton(
+      modifier = modifier.testTag(FeedScreenTestTags.ADD_FRIEND_BUTTON),
+      onClick = onClick,
+      containerColor =
+          if (isOnline) MaterialTheme.colorScheme.primaryContainer
+          else MaterialTheme.colorScheme.surfaceVariant) {
+        Text(stringResource(R.string.add_friend_button))
+      }
 }
 
 /**
@@ -203,9 +226,14 @@ fun AddFriendButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
  */
 @Composable
 fun FriendListButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
-  Button(modifier = modifier.testTag(FeedScreenTestTags.FRIEND_LIST_BUTTON), onClick = onClick) {
-    Text(stringResource(R.string.friend_list_button))
-  }
+  Button(
+      modifier = modifier.testTag(FeedScreenTestTags.FRIEND_LIST_BUTTON),
+      onClick = onClick,
+      colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer)) {
+        Text(
+            stringResource(R.string.friend_list_button),
+            color = MaterialTheme.colorScheme.onPrimaryContainer)
+      }
 }
 
 /**
