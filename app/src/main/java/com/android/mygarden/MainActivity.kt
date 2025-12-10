@@ -62,6 +62,10 @@ private const val LOG_MSG_FIREBASE_AUTH_UNAVAILABLE = "FirebaseAuth unavailable;
 /** Dimensions */
 private val OFFLINE_INDICATOR_PADDING = 8.dp
 
+/** Offline indicator timing (in milliseconds) */
+private const val OFFLINE_INDICATOR_VISIBLE_DURATION = 2000L
+private const val OFFLINE_INDICATOR_HIDDEN_DURATION = 3000L
+
 class MainActivity : ComponentActivity() {
 
   companion object {
@@ -201,9 +205,9 @@ fun OfflineIndicator() {
   LaunchedEffect(Unit) {
     while (true) {
       isVisible = true
-      kotlinx.coroutines.delay(2000) // Visible for 2 seconds
+      kotlinx.coroutines.delay(OFFLINE_INDICATOR_VISIBLE_DURATION)
       isVisible = false
-      kotlinx.coroutines.delay(3000) // Hidden for 3 seconds
+      kotlinx.coroutines.delay(OFFLINE_INDICATOR_HIDDEN_DURATION)
     }
   }
 
