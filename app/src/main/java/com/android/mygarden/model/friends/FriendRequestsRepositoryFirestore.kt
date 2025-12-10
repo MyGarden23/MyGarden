@@ -251,6 +251,19 @@ class FriendRequestsRepositoryFirestore(
     return requests.any { it.toUserId == targetUserId }
   }
 
+    /**
+     * Returns whether the target user has a pending outgoing friend request for the current user.
+     *
+     * @param targetUserId The UID of the user that we want to add.
+     * @return `true` if a pending outgoing request exists from this user, otherwise `false`.
+     */
+    override suspend fun isInIngoingRequests(targetUserId: String): Boolean {
+        val requests = incomingRequests().first()
+        return requests.any { it.fromUserId == targetUserId }
+    }
+
+
+
   /**
    * Sends a friend request to another user.
    *
