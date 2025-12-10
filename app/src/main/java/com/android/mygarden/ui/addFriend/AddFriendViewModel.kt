@@ -162,7 +162,7 @@ class AddFriendViewModel(
           val relation =
               when {
                 requestsRepository.isInOutgoingRequests(friend.id) -> FriendRelation.PENDING
-                requestsRepository.isInIngoingRequests(friend.id) -> FriendRelation.ADDBACK
+                requestsRepository.isInIncomingRequests(friend.id) -> FriendRelation.ADDBACK
                 friendsRepository.isFriend(friend.id) -> FriendRelation.ADDED
                 else -> FriendRelation.ADD
               }
