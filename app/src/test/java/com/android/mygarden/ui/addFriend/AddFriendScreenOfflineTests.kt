@@ -111,4 +111,30 @@ class AddFriendScreenOfflineTests {
     val toastText = ShadowToast.getTextOfLatestToast()
     assertEquals("Cannot search friends while offline", toastText)
   }
+
+  /** Test that searching doesn't actually execute the search when offline */
+  @Test
+  fun searchingDoesNotExecuteWhenOffline() {
+    setContent(isOnline = false)
+
+    // Reset the counter before the test
+    (pseudoRepo as FakePseudoRepository).resetCounters()
+    val initialCallCount = (pseudoRepo as FakePseudoRepository).searchCallCount
+
+    // Enter some search text
+    composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_TEXT).performTextInput("testuser")
+
+    // Try to search while offline
+    composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_BUTTON).performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Verify that the repository search method was NOT called
+    val finalCallCount = (pseudoRepo as FakePseudoRepository).searchCallCount
+    assertEquals("Search should not be executed when offline", initialCallCount, finalCallCount)
+
+    // Verify the toast was shown (indicating offline mode prevented the search)
+    val toastText = ShadowToast.getTextOfLatestToast()
+    assertEquals("Cannot search friends while offline", toastText)
+  }
 }
