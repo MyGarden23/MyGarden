@@ -125,7 +125,6 @@ jobs:
               "auth": { "port": 9099, "host": "0.0.0.0" },
               "firestore": { "port": 8080, "host": "0.0.0.0" },
               "storage": { "port": 9199, "host": "0.0.0.0" },
-              "functions": { "port": 5001, "host": "0.0.0.0" },
               "ui": { "enabled": true }
             },
             "firestore": {
@@ -154,12 +153,34 @@ jobs:
         run: |
           if [ -e "firebase.json" ]; then
             echo "Starting Firebase emulators for instrumentation tests..."
-            firebase emulators:start --only auth,firestore,storage,functions --project "${{ steps.firebase_project.outputs.project_id }}" &
+            firebase emulators:start --only auth,firestore,storage --project "${{ steps.firebase_project.outputs.project_id }}" &
             sleep 5
             echo "Firebase emulators started in background"
           else
             echo "firebase.json not found - skipping emulators (tests may fail)"
           fi
+
+      - name: Setup Python 3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python function dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r functions/requirements.txt functions-framework
+
+      - name: Start Python Cloud Functions (Functions Framework)
+        run: |
+          echo "Starting Python functions service (Functions Framework) on port 5001..."
+          # Ensure the functions process connects to the local emulators
+          export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+          export FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099
+          export STORAGE_EMULATOR_HOST=127.0.0.1:9199 || true
+          # Start the Functions Framework serving the callable function named `send_friend_request_notification`
+          nohup functions-framework --target=send_friend_request_notification --source=functions/main.py --port=5001 --host=0.0.0.0 > ff.log 2>&1 &
+          sleep 2
+          echo "Python functions started (logs -> ff.log)"
       # Run connected tests on the emulator
       - name: Run tests with camera
         uses: reactivecircus/android-emulator-runner@v2
