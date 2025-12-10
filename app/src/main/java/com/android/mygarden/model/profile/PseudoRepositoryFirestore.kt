@@ -10,6 +10,12 @@ private const val PSEUDO_COLLECTION_PATH = "pseudos"
 /** Field that associates each pseudo to its user */
 private const val USER_ID_FIELD = "userID"
 
+/** Unicode character used for Firestore range query end boundary */
+private const val UNICODE_END_BOUNDARY = "\uf8ff"
+
+/** Error message for pseudo already taken */
+private const val ERROR_PSEUDO_TAKEN = "Pseudo already taken"
+
 /** Repository that implements PseudoRepository but stores the data in Firestore. */
 class PseudoRepositoryFirestore(private val db: FirebaseFirestore) : PseudoRepository {
 
@@ -24,7 +30,7 @@ class PseudoRepositoryFirestore(private val db: FirebaseFirestore) : PseudoRepos
   override suspend fun savePseudo(pseudo: String, userId: String) {
     val pseudoRef = pseudoRef(pseudo)
 
-    check(!(pseudoRef.get().await().exists())) { "Pseudo already taken" }
+    check(!(pseudoRef.get().await().exists())) { ERROR_PSEUDO_TAKEN }
 
     pseudoRef.set(mapOf(USER_ID_FIELD to userId)).await()
   }
@@ -41,7 +47,7 @@ class PseudoRepositoryFirestore(private val db: FirebaseFirestore) : PseudoRepos
         db.collection(PSEUDO_COLLECTION_PATH)
             .orderBy(FieldPath.documentId())
             .startAt(q)
-            .endAt(q + "\uf8ff")
+            .endAt(q + UNICODE_END_BOUNDARY)
             .get()
             .await()
 
@@ -71,7 +77,7 @@ class PseudoRepositoryFirestore(private val db: FirebaseFirestore) : PseudoRepos
               }
             }
 
-            check(!(newPseudo.exists())) { "Pseudo already taken" }
+            check(!(newPseudo.exists())) { ERROR_PSEUDO_TAKEN }
             transaction.set(newRef, mapOf(USER_ID_FIELD to userId))
           }
           .await()

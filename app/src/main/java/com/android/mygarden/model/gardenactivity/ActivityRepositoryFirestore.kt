@@ -23,6 +23,8 @@ class ActivityRepositoryFirestore(
     private const val COLLECTION_USERS = "users"
     private const val COLLECTION_ACTIVITIES = "activities"
     private const val ACTIVITIES_ORDER_BY = "createdAt"
+    private const val FIELD_TYPE = "type"
+    private const val LOG_TAG = "ActivityRepositoryFirestore"
   }
 
   // Keep track of active listeners so we can clean them up
@@ -136,7 +138,7 @@ class ActivityRepositoryFirestore(
       val serializedActivity = ActivityMapper.fromActivityToSerializedActivity(activity)
       userActivities(activity.userId).add(serializedActivity).await()
     } catch (e: Exception) {
-      Log.e("ActivityRepositoryFirestore", "Failed to add activity", e)
+      Log.e(LOG_TAG, "Failed to add activity", e)
     }
   }
 
@@ -145,13 +147,13 @@ class ActivityRepositoryFirestore(
    * the "type" field to determine which class to deserialize to.
    */
   private fun DocumentSnapshot.toSerializedActivity(): SerializedActivity? {
-    val type = this.getString("type") ?: return null
+    val type = this.getString(FIELD_TYPE) ?: return null
 
     return try {
       val clazz = ActivityMapper.mapTypeToSerializedClass(type) ?: return null
       this.toObject(clazz)
     } catch (e: Exception) {
-      Log.e("ActivityRepositoryFirestore", "Failed to deserialize activity of type $type", e)
+      Log.e(LOG_TAG, "Failed to deserialize activity of type $type", e)
       null
     }
   }

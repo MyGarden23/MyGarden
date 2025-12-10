@@ -128,9 +128,25 @@ private val WATER_BAR_HEIGHT = 14.dp
 private val WATER_BAR_WRAPPER_HEIGHT = 14.dp
 private val AVATAR_SIZE = 40.dp
 
+// Spacer heights
+private val SPACER_HEIGHT_SMALL = 12.dp
+private val SPACER_HEIGHT_MEDIUM = 16.dp
+private val SPACER_BETWEEN_NAME_LATIN = 10.dp
+
 // Font sizes
 private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
+
+// Layout weights
+private const val SPACER_WEIGHT = 1f
+private const val PLANT_CHARACTERISTICS_WEIGHT = 1f
+
+// Water level bounds
+private const val WATER_LEVEL_MIN = 0f
+private const val WATER_LEVEL_MAX = 1f
+
+// Aspect ratio
+private const val IMAGE_ASPECT_RATIO = 1f
 
 /**
  * Callbacks for garden screen navigation and actions.
@@ -211,7 +227,7 @@ fun GardenScreen(
         Column(modifier = modifier.fillMaxWidth().padding(pd)) {
           // Profile row with user profile picture, username and a button to edit the profile
           ProfileRow(callbacks.onEditProfile, modifier, uiState, isOnline, isViewMode)
-          Spacer(modifier = modifier.height(16.dp))
+          Spacer(modifier = modifier.height(SPACER_HEIGHT_MEDIUM))
 
           // Sort and filter bar - only show if there are plants in the garden
           if (plants.isNotEmpty()) {
@@ -221,7 +237,7 @@ fun GardenScreen(
                 onSortChange = { gardenViewModel.setSortOption(it) },
                 onFilterChange = { gardenViewModel.setFilterOption(it) },
                 modifier = modifier)
-            Spacer(modifier = modifier.height(12.dp))
+            Spacer(modifier = modifier.height(SPACER_HEIGHT_SMALL))
           }
 
           // Display the garden content (list or empty message)
@@ -273,7 +289,7 @@ fun ProfileRow(
                         context.getString(R.string.avatar_description, uiState.userAvatar.name),
                     modifier = modifier.fillMaxSize())
               }
-          Spacer(modifier = modifier.weight(1f))
+          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
 
           // Username
           Text(
@@ -282,7 +298,7 @@ fun ProfileRow(
               fontWeight = FontWeight.Bold,
               style = MaterialTheme.typography.titleLarge,
               text = uiState.userName)
-          Spacer(modifier = modifier.weight(1f))
+          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
 
           // Edit profile button (hidden in view mode)
           if (!isViewMode) {
@@ -422,7 +438,7 @@ fun PlantCard(
                     modifier =
                         modifier
                             .fillMaxHeight()
-                            .aspectRatio(1f)
+                            .aspectRatio(IMAGE_ASPECT_RATIO)
                             .clip(RoundedCornerShape(PLANT_CARD_ROUND_SHAPING))
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                             .testTag(GardenScreenTestTags.getTestTagForOwnedPlantImage(ownedPlant)),
@@ -434,7 +450,7 @@ fun PlantCard(
                   modifier =
                       modifier
                           .fillMaxHeight()
-                          .weight(1f)
+                          .weight(PLANT_CHARACTERISTICS_WEIGHT)
                           .padding(horizontal = PLANT_CHARACTERISTICS_COL_HORIZONTAL_PADDING),
                   verticalArrangement = Arrangement.SpaceAround) {
                     Row(verticalAlignment = Alignment.Bottom) {
@@ -451,7 +467,7 @@ fun PlantCard(
                                       GardenScreenTestTags.getTestTagForOwnedPlantName(ownedPlant)),
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis)
-                      Spacer(modifier = modifier.width(10.dp))
+                      Spacer(modifier = modifier.width(SPACER_BETWEEN_NAME_LATIN))
                       Text(
                           text = ownedPlant.plant.latinName,
                           fontStyle = FontStyle.Italic,
@@ -559,7 +575,7 @@ fun WaterBar(
     color: Color,
     ownedPlant: OwnedPlant
 ) {
-  assert(waterLevel >= 0f && waterLevel <= 1f)
+  assert(waterLevel >= WATER_LEVEL_MIN && waterLevel <= WATER_LEVEL_MAX)
   Box(
       modifier =
           modifier

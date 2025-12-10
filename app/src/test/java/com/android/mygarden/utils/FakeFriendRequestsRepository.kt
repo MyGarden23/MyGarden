@@ -42,5 +42,9 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
     incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
   }
 
+  override suspend fun deleteRequest(requestId: String) {
+    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
+  }
+
   override fun cleanup() {}
 }

@@ -6,6 +6,15 @@ import kotlinx.coroutines.tasks.await
 
 private const val COLLECTION_USERS = "users"
 
+/** Firestore field names */
+private const val FIELD_PSEUDO = "pseudo"
+private const val FIELD_AVATAR = "avatar"
+private const val FIELD_GARDENING_SKILL = "gardeningSkill"
+private const val FIELD_FAVORITE_PLANT = "favoritePlant"
+
+/** Default avatar value */
+private val DEFAULT_AVATAR = Avatar.A1
+
 /**
  * Firestore-backed implementation of [UserProfileRepository].
  *
@@ -19,15 +28,15 @@ class UserProfileRepositoryFirestore(private val db: FirebaseFirestore) : UserPr
 
     if (!snapshot.exists()) return null
 
-    val pseudo = snapshot.getString("pseudo") ?: return null
+    val pseudo = snapshot.getString(FIELD_PSEUDO) ?: return null
 
     val avatar =
-        snapshot.getString("avatar")?.let { avatarString ->
+        snapshot.getString(FIELD_AVATAR)?.let { avatarString ->
           runCatching { Avatar.valueOf(avatarString) }.getOrNull()
-        } ?: Avatar.A1
+        } ?: DEFAULT_AVATAR
 
-    val gardeningSkill = snapshot.getString("gardeningSkill") ?: return null
-    val favoritePlant = snapshot.getString("favoritePlant") ?: return null
+    val gardeningSkill = snapshot.getString(FIELD_GARDENING_SKILL) ?: return null
+    val favoritePlant = snapshot.getString(FIELD_FAVORITE_PLANT) ?: return null
 
     return UserProfile(id = userId, pseudo = pseudo, avatar = avatar, gardeningSkill, favoritePlant)
   }

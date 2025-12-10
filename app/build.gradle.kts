@@ -100,6 +100,9 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+            all {
+                it.maxHeapSize = "2g"
+            }
         }
 
         // Add arguments for instrumentation tests
@@ -267,6 +270,10 @@ tasks.withType<Test> {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
     }
+
+    // Increase heap size to prevent OutOfMemoryError in tests
+    maxHeapSize = "2g"
+
     jvmArgs(
         "--add-opens=java.base/java.io=ALL-UNNAMED",
         "--add-opens=java.base/java.lang=ALL-UNNAMED",

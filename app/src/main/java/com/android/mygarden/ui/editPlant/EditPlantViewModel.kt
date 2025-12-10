@@ -14,6 +14,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/** Log tag for EditPlantViewModel */
+private const val LOG_TAG = "EditPlantViewModel"
+
+/** Error log messages */
+private fun errorLoadingPlantMsg(plantId: String) = "Error loading Plant by ID. $plantId"
+
+private const val ERROR_DELETE_PLANT = "Failed to delete plant."
+private const val ERROR_PLANT_NOT_LOADED = "Failed to edit plant (Plant not loaded)."
+private const val ERROR_NO_DESCRIPTION = "Failed to edit plant. (no description selected)."
+private const val ERROR_NO_NAME = "Failed to edit plant. (no name selected)."
+private const val ERROR_NO_LATIN_NAME = "Failed to edit plant. (no latin name selected)."
+private const val ERROR_NO_LAST_WATERED = "Failed to edit plant. (no last time watered selected)."
+private const val ERROR_SAVE_CHANGES = "Failed to save changes"
+
 /**
  * Represents the UI state of the Edit Plant screen.
  *
@@ -85,7 +99,7 @@ class EditPlantViewModel(
                 location = plant.location,
                 lightExposure = plant.lightExposure)
       } catch (e: Exception) {
-        Log.e("EditPlantViewModel", "Error loading Plant by ID. $ownedPlantId", e)
+        Log.e(LOG_TAG, errorLoadingPlantMsg(ownedPlantId), e)
         setErrorMsg(R.string.error_failed_load_plant_edit)
       }
     }
@@ -120,7 +134,7 @@ class EditPlantViewModel(
       try {
         repository.deleteFromGarden(ownedPlantId)
       } catch (e: Exception) {
-        Log.e("EditPlantViewModel", "Failed to delete plant.", e)
+        Log.e(LOG_TAG, ERROR_DELETE_PLANT, e)
         setErrorMsg(R.string.error_failed_delete_plant_edit)
       }
     }
@@ -138,35 +152,35 @@ class EditPlantViewModel(
     val exposure = state.lightExposure
 
     if (newPlant == null) {
-      Log.e("EditPlantViewModel", "Failed to edit plant (Plant not loaded).")
+      Log.e(LOG_TAG, ERROR_PLANT_NOT_LOADED)
       setErrorMsg(R.string.error_plant_not_loaded)
       return
     }
 
     // Cannot have a blank description
     if (description.isBlank()) {
-      Log.e("EditPlantViewModel", "Failed to edit plant. (no description selected).")
+      Log.e(LOG_TAG, ERROR_NO_DESCRIPTION)
       setErrorMsg(R.string.error_description_blank)
       return
     }
 
     // Cannot have a blank name
     if (name.isBlank()) {
-      Log.e("EditPlantViewModel", "Failed to edit plant. (no name selected).")
+      Log.e(LOG_TAG, ERROR_NO_NAME)
       setErrorMsg(R.string.error_name_blank)
       return
     }
 
     // Cannot have a blank latin name
     if (latinName.isBlank()) {
-      Log.e("EditPlantViewModel", "Failed to edit plant. (no latin name selected).")
+      Log.e(LOG_TAG, ERROR_NO_LATIN_NAME)
       setErrorMsg(R.string.error_latin_name_blank)
       return
     }
 
     // Not suppose to occur with the workflow of the app.
     if (watered == null) {
-      Log.e("EditPlantViewModel", "Failed to edit plant. (no last time watered selected).")
+      Log.e(LOG_TAG, ERROR_NO_LAST_WATERED)
       setErrorMsg(R.string.error_last_watered_missing)
       return
     }
@@ -186,7 +200,7 @@ class EditPlantViewModel(
       try {
         repository.editOwnedPlant(ownedPlantId, updated)
       } catch (e: Exception) {
-        Log.e("EditPlantViewModel", "Failed to save changes", e)
+        Log.e(LOG_TAG, ERROR_SAVE_CHANGES, e)
         _uiState.value = _uiState.value.copy(errorMsg = R.string.error_failed_save_changes_edit)
       }
     }

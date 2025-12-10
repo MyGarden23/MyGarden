@@ -21,6 +21,30 @@ class ProfileRepositoryFirestore(
 
   companion object {
     private const val COLLECTION_USERS = "users"
+
+    // Firestore field names
+    private const val FIELD_FIRST_NAME = "firstName"
+    private const val FIELD_LAST_NAME = "lastName"
+    private const val FIELD_PSEUDO = "pseudo"
+    private const val FIELD_GARDENING_SKILL = "gardeningSkill"
+    private const val FIELD_FAVORITE_PLANT = "favoritePlant"
+    private const val FIELD_COUNTRY = "country"
+    private const val FIELD_HAS_SIGNED_IN = "hasSignedIn"
+    private const val FIELD_AVATAR = "avatar"
+
+    // Default values
+    private const val DEFAULT_AVATAR = "A1"
+
+    // Error messages
+    private const val ERROR_USER_NOT_AUTHENTICATED = "User not authenticated"
+
+    // Log tag
+    private const val LOG_TAG = "FirestoreProfile"
+
+    // Log messages
+    private fun attachTokenFailedMsg(uid: String) = "Failed to attach FCM token to user $uid"
+
+    private fun fetchTokenFailedMsg(uid: String) = "Failed to fetch FCM token for user $uid"
   }
 
   // Keep track of active listeners so we can clean them up
@@ -33,7 +57,8 @@ class ProfileRepositoryFirestore(
   private val userProfile
     get() =
         db.collection(COLLECTION_USERS)
-            .document(getCurrentUserId() ?: throw IllegalStateException("User not authenticated"))
+            .document(
+                getCurrentUserId() ?: throw IllegalStateException(ERROR_USER_NOT_AUTHENTICATED))
 
   // Listen to the user's profile in Firestore as a Flow (real-time updates)
   override fun getProfile(): Flow<Profile?> {
@@ -90,7 +115,7 @@ class ProfileRepositoryFirestore(
           .await()
       true
     } catch (e: Exception) {
-      Log.e("FirestoreProfile", "Failed to attach FCM token to user $uid", e)
+      Log.e(LOG_TAG, attachTokenFailedMsg(uid), e)
       false
     }
   }
@@ -108,7 +133,7 @@ class ProfileRepositoryFirestore(
       val snap = userProfile.get().await()
       snap.getString(PushNotificationsService.FIRESTORE_FCM_TOKEN_ID)
     } catch (e: Exception) {
-      Log.e("FirestoreProfile", "Failed to fetch FCM token for user $uid", e)
+      Log.e(LOG_TAG, fetchTokenFailedMsg(uid), e)
       null
     }
   }
@@ -117,22 +142,22 @@ class ProfileRepositoryFirestore(
   private fun DocumentSnapshot.toProfileOrNull(): Profile? {
     val data = this.data ?: return null
 
-    val firstName = data["firstName"] as? String ?: return null
-    val lastName = data["lastName"] as? String ?: return null
-    val pseudo = data["pseudo"] as? String ?: return null
-    val favoritePlant = data["favoritePlant"] as? String ?: return null
-    val country = data["country"] as? String ?: return null
+    val firstName = data[FIELD_FIRST_NAME] as? String ?: return null
+    val lastName = data[FIELD_LAST_NAME] as? String ?: return null
+    val pseudo = data[FIELD_PSEUDO] as? String ?: return null
+    val favoritePlant = data[FIELD_FAVORITE_PLANT] as? String ?: return null
+    val country = data[FIELD_COUNTRY] as? String ?: return null
 
     // Try to read the gardening skill; fallback to NOVICE if invalid
-    val gardeningSkillName = data["gardeningSkill"] as? String ?: return null
+    val gardeningSkillName = data[FIELD_GARDENING_SKILL] as? String ?: return null
     val gardeningSkill =
         runCatching { GardeningSkill.valueOf(gardeningSkillName) }
             .getOrElse { GardeningSkill.BEGINNER }
 
-    val hasSignedIn = data["hasSignedIn"] as? Boolean ?: false
+    val hasSignedIn = data[FIELD_HAS_SIGNED_IN] as? Boolean ?: false
 
     // Deserialize the avatar string (default value is A1)
-    val avatarString = data["avatar"] as? String ?: "A1"
+    val avatarString = data[FIELD_AVATAR] as? String ?: DEFAULT_AVATAR
     val avatar = runCatching { Avatar.valueOf(avatarString) }.getOrElse { Avatar.A1 }
 
     return Profile(
@@ -149,14 +174,14 @@ class ProfileRepositoryFirestore(
   // Converts a Profile object into a Firestore-friendly Map
   private fun Profile.toMap(): Map<String, Any> =
       mapOf(
-          "firstName" to firstName,
-          "lastName" to lastName,
-          "pseudo" to pseudo,
-          "gardeningSkill" to gardeningSkill.name, // store enum as String
-          "favoritePlant" to favoritePlant,
-          "country" to country,
-          "hasSignedIn" to hasSignedIn,
-          "avatar" to avatar.name) // avatar is stored as string like "A1"
+          FIELD_FIRST_NAME to firstName,
+          FIELD_LAST_NAME to lastName,
+          FIELD_PSEUDO to pseudo,
+          FIELD_GARDENING_SKILL to gardeningSkill.name, // store enum as String
+          FIELD_FAVORITE_PLANT to favoritePlant,
+          FIELD_COUNTRY to country,
+          FIELD_HAS_SIGNED_IN to hasSignedIn,
+          FIELD_AVATAR to avatar.name) // avatar is stored as string like "A1"
 
   // Cleanup method to remove active listeners before logout
   override fun cleanup() {
