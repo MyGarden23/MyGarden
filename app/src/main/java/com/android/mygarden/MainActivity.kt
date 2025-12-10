@@ -196,12 +196,25 @@ fun MyGardenApp(intent: Intent? = null) {
 /** Composable that displays an offline mode indicator at the top of the screen. */
 @Composable
 fun OfflineIndicator() {
-  Snackbar(
-      modifier = Modifier.padding(OFFLINE_INDICATOR_PADDING),
-      containerColor = MaterialTheme.colorScheme.errorContainer,
-      contentColor = MaterialTheme.colorScheme.onErrorContainer) {
-        Text(stringResource(R.string.offline_indicator_message))
-      }
+  var isVisible by remember { mutableStateOf(true) }
+
+  LaunchedEffect(Unit) {
+    while (true) {
+      isVisible = true
+      kotlinx.coroutines.delay(2000) // Visible for 2 seconds
+      isVisible = false
+      kotlinx.coroutines.delay(3000) // Hidden for 3 seconds
+    }
+  }
+
+  if (isVisible) {
+    Snackbar(
+        modifier = Modifier.padding(OFFLINE_INDICATOR_PADDING),
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer) {
+          Text(stringResource(R.string.offline_indicator_message))
+        }
+  }
 }
 
 /**
