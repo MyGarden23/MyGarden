@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WaterDrop
@@ -57,7 +56,6 @@ import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthCalculator
 import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.ui.navigation.NavigationButton
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.utils.OfflineMessages
@@ -104,7 +102,6 @@ data class PlantCardColorPalette(val backgroundColor: Color, val wateringColor: 
 
 // All paddings (excepts the spacers)
 private val PLANT_ITEM_HORIZONTAL_PADDING = 30.dp
-private val PROFILE_ROW_HORIZONTAL_PADDING = 30.dp
 private val EMPTY_LIST_MESSAGE_PADDING = 40.dp
 private val PLANT_CHARACTERISTICS_COL_HORIZONTAL_PADDING = 10.dp
 private val PLANT_CARD_INNER_ROW_PADDING = 12.dp
@@ -119,7 +116,6 @@ private val WATER_BUTTON_BORDER_WIDTH = 2.dp
 private val WATER_BUTTON_DROP_ICON_SIZE = 20.dp
 private val WATER_BAR_HEIGHT = 14.dp
 private val WATER_BAR_WRAPPER_HEIGHT = 14.dp
-private val AVATAR_SIZE = 40.dp
 
 // Spacer heights
 private val SPACER_HEIGHT_SMALL = 12.dp
@@ -217,87 +213,6 @@ fun GardenScreen(
         isOnline = isOnline,
         isViewMode = isViewMode)
   }
-}
-
-/**
- * The profile row with the user profile picture, its username and a button to sign out.
- *
- * @param onEditProfile the callback called when the edit button is clicked on
- * @param onSignOut the callback called when pressed on the log out button
- * @param modifier the modifier for the row
- * @param uiState the UI state
- * @param isOnline whether the device is online
- * @param isViewMode if true, hide the log out button (for viewing a friend's garden)
- */
-@Composable
-fun ProfileRow(
-    onEditProfile: () -> Unit,
-    onSignOut: () -> Unit,
-    modifier: Modifier = Modifier,
-    uiState: GardenUIState,
-    isOnline: Boolean,
-    isViewMode: Boolean = false
-) {
-  val context = LocalContext.current
-
-  Row(
-      modifier =
-          modifier
-              .fillMaxWidth()
-              .padding(horizontal = PROFILE_ROW_HORIZONTAL_PADDING, vertical = 6.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          // Sign out button (hidden in view mode)
-          if (!isViewMode) {
-            NavigationButton(onClick = onSignOut, isSignOut = true)
-          }
-          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
-
-          // Username (user can click on it to edit profile)
-          Text(
-              modifier =
-                  modifier
-                      .clickable(
-                          onClick = {
-                            handleOfflineClick(
-                                isOnline = isOnline,
-                                context = context,
-                                offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
-                                  onEditProfile()
-                                }
-                          })
-                      .testTag(GardenScreenTestTags.USERNAME),
-              color = MaterialTheme.colorScheme.primary,
-              fontWeight = FontWeight.Bold,
-              style = MaterialTheme.typography.titleLarge,
-              text = uiState.userName)
-          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
-
-          // User avatar (user can click on it to edit profile)
-          Card(
-              modifier =
-                  modifier
-                      .clip(CircleShape)
-                      .size(AVATAR_SIZE)
-                      .clickable(
-                          onClick = {
-                            handleOfflineClick(
-                                isOnline = isOnline,
-                                context = context,
-                                offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
-                                  onEditProfile()
-                                }
-                          })
-                      .testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)) {
-                Image(
-                    painter = painterResource(uiState.userAvatar.resId),
-                    contentDescription =
-                        context.getString(R.string.avatar_description, uiState.userAvatar.name),
-                    modifier = modifier.fillMaxSize())
-              }
-        }
-      }
 }
 
 /**

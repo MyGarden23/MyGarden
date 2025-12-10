@@ -1,17 +1,23 @@
 package com.android.mygarden.ui.garden
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -31,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,12 +49,47 @@ import com.android.mygarden.ui.achievements.AchievementsViewModel
 import com.android.mygarden.ui.achievements.AchievementsViewModelFactory
 import com.android.mygarden.ui.navigation.NavigationButton
 import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.utils.OfflineMessages
+import com.android.mygarden.ui.utils.handleOfflineClick
+
+// Padding constants
+private val PROFILE_ROW_HORIZONTAL_PADDING = 30.dp
+private const val SPACER_WEIGHT = 1f
+
+// Sizes
+private val AVATAR_SIZE = 40.dp
 
 enum class GardenTab(@StringRes val titleRes: Int) {
   GARDEN(R.string.garden_screen_title),
   ACHIEVEMENTS(R.string.achievements_screen_title)
 }
 
+/**
+ * Parent screen for the Garden section that hosts both the Garden and Achievements tabs.
+ *
+ * This composable:
+ * - Shows a shared top app bar with the user's profile information (avatar, pseudo)
+ * - Switches between the Garden and Achievements using a styled tab row
+ * - Displays a FAB to add a plant only on the Garden tab and only when not in view mode
+ *
+ * Online/offline information is read from [OfflineStateManager] to enable/disable actions accordingly in both tabs.
+ *
+ * @param modifier Optional modifier used to adjust the layout or styling of the root Scaffold.
+ * @param friendId Optional ID of a friend whose garden is being viewed. If null, shows the
+ * current user's garden.
+ * @param isViewMode If true, the screen runs in read-only mode with changes:
+ * - The back button is shown in the top bar instead of the log out button
+ * - The "add plant" FAB is hidden
+ * - Actions on the plant and the profile are disabled by the child screens
+ * @param gardenCallbacks Callbacks for navigation and actions in the Garden flow
+ * (editing profile, signing out, adding a plant, navigating back, etc.).
+ * @param gardenViewModel ViewModel that exposes the garden UI state, including the profile
+ * information shown in the top bar. Defaults to a [GardenViewModel] created via
+ * [GardenViewModelFactory] for the given [friendId].
+ * @param achievementsViewModel ViewModel providing the achievements UI state for the
+ * [AchievementsScreen]. Defaults to an [AchievementsViewModel] created via
+ * [AchievementsViewModelFactory] for the given [friendId].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ParentTabScreenGarden(
@@ -60,7 +102,6 @@ fun ParentTabScreenGarden(
     achievementsViewModel: AchievementsViewModel =
         viewModel(factory = AchievementsViewModelFactory(friendId = friendId))
 ) {
-  val context = LocalContext.current
   var selectedTab by remember { mutableStateOf(GardenTab.GARDEN) }
 
   val isOnline by OfflineStateManager.isOnline.collectAsState()
@@ -150,4 +191,85 @@ fun ParentTabScreenGarden(
           }
         }
   }
+}
+
+/**
+ * The profile row with the user profile picture, its username and a button to sign out.
+ *
+ * @param onEditProfile the callback called when the edit button is clicked on
+ * @param onSignOut the callback called when pressed on the log out button
+ * @param modifier the modifier for the row
+ * @param uiState the UI state
+ * @param isOnline whether the device is online
+ * @param isViewMode if true, hide the log out button (for viewing a friend's garden)
+ */
+@Composable
+fun ProfileRow(
+    onEditProfile: () -> Unit,
+    onSignOut: () -> Unit,
+    modifier: Modifier = Modifier,
+    uiState: GardenUIState,
+    isOnline: Boolean,
+    isViewMode: Boolean = false
+) {
+    val context = LocalContext.current
+
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = PROFILE_ROW_HORIZONTAL_PADDING, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Sign out button (hidden in view mode)
+            if (!isViewMode) {
+                NavigationButton(onClick = onSignOut, isSignOut = true)
+            }
+            Spacer(modifier = modifier.weight(SPACER_WEIGHT))
+
+            // Username (user can click on it to edit profile)
+            Text(
+                modifier =
+                    modifier
+                        .clickable(
+                            onClick = {
+                                handleOfflineClick(
+                                    isOnline = isOnline,
+                                    context = context,
+                                    offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
+                                    onEditProfile()
+                                }
+                            })
+                        .testTag(GardenScreenTestTags.USERNAME),
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
+                text = uiState.userName)
+            Spacer(modifier = modifier.weight(SPACER_WEIGHT))
+
+            // User avatar (user can click on it to edit profile)
+            Card(
+                modifier =
+                    modifier
+                        .clip(CircleShape)
+                        .size(AVATAR_SIZE)
+                        .clickable(
+                            onClick = {
+                                handleOfflineClick(
+                                    isOnline = isOnline,
+                                    context = context,
+                                    offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
+                                    onEditProfile()
+                                }
+                            })
+                        .testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)) {
+                Image(
+                    painter = painterResource(uiState.userAvatar.resId),
+                    contentDescription =
+                        context.getString(R.string.avatar_description, uiState.userAvatar.name),
+                    modifier = modifier.fillMaxSize())
+            }
+        }
+    }
 }
