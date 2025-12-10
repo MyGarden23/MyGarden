@@ -215,6 +215,7 @@
     <string name="error_loading_friends">An error occurred while loading your friends.</string>
 
     <!-- Achievements Screen -->
+    <string name="achievements_screen_title">Achievements</string>
     <string name="plants_number_achievement">Plants number level: %1$s</string>
     <string name="friends_number_achievement">Friends number level: %1$</string>
     <string name="healthy_streak_achievement">Healthy streak level: %1$s</string>

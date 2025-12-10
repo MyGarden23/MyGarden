@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.achievements
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.achievements.ACHIEVEMENTS_BASE_VALUE
 import com.android.mygarden.model.achievements.ACHIEVEMENTS_FIRST_LEVEL
@@ -34,9 +35,12 @@ data class AchievementsUIState(
  * [AchievementsRepository] and transforms raw values into user-facing values and levels using the
  * logic defined in [Achievements].
  *
+ * @property friendId Either the id of the friend we want to see the achievements for or null to get
+ *   for the current user
  * @property achievementsRepo The repository that contains the user's achievements.
  */
 class AchievementsViewModel(
+    private val friendId: String? = null,
     private val achievementsRepo: AchievementsRepository = AchievementsRepositoryProvider.repository
 ) : ViewModel() {
 
@@ -72,8 +76,8 @@ class AchievementsViewModel(
               thresholds = { Achievements.PLANTS_NUMBER_THRESHOLDS })
       AchievementType.FRIENDS_NUMBER ->
           AchievementDataMapper(
-              level = { it.healthyStreakLevel },
-              value = { it.healthyStreakValue },
+              level = { it.friendsNumberLevel },
+              value = { it.friendsNumberValue },
               thresholds = { Achievements.FRIENDS_NUMBER_THRESHOLDS })
       AchievementType.HEALTHY_STREAK ->
           AchievementDataMapper(
@@ -85,6 +89,27 @@ class AchievementsViewModel(
 
   init {
     refreshUIState()
+  }
+
+  /**
+   * Starts collecting the achievement progress from Firestore for the user or the given friend id
+   * (if not null). Whenever values change, the UI state is updated accordingly directly as it uses
+   * Flows.
+   */
+  fun refreshUIState() {
+    val userId = achievementsRepo.getCurrentUserId() ?: return
+
+    viewModelScope.launch {
+      if (friendId != null) {
+        achievementsRepo.getAllUserAchievementProgress(friendId).collect { list ->
+          _uiState.value = mapToAchievementsUIState(list)
+        }
+      } else {
+        achievementsRepo.getAllUserAchievementProgress(userId).collect { list ->
+          _uiState.value = mapToAchievementsUIState(list)
+        }
+      }
+    }
   }
 
   /**
@@ -147,19 +172,6 @@ class AchievementsViewModel(
     val value = data.value(state)
     return data.thresholds(state).firstOrNull { it > value } ?: -1
   }
-  /**
-   * Starts collecting the user's achievement progress from Firestore. Whenever values change, the
-   * UI state is updated accordingly directly as it uses Flows.
-   */
-  private fun refreshUIState() {
-    val userId = achievementsRepo.getCurrentUserId() ?: return
-
-    viewModelScope.launch {
-      achievementsRepo.getAllUserAchievementProgress(userId).collect { list ->
-        _uiState.value = mapToAchievementsUIState(list)
-      }
-    }
-  }
 
   /**
    * Converts a list of raw achievement progress values into the [AchievementsUIState] used by the
@@ -186,5 +198,24 @@ class AchievementsViewModel(
         plantsNumberValue = plantsValue,
         friendsNumberValue = friendsValue,
         healthyStreakValue = healthyStreakValue)
+  }
+}
+
+/**
+ * Factory for creating AchievementsViewModel instances with custom parameters.
+ *
+ * @param friendId optional ID of a friend whose achievements to display (null for own)
+ * @param achievementsRepo the repository of the activities to store them
+ */
+class AchievementsViewModelFactory(
+    private val friendId: String? = null,
+    private val achievementsRepo: AchievementsRepository = AchievementsRepositoryProvider.repository
+) : ViewModelProvider.Factory {
+  @Suppress("UNCHECKED_CAST")
+  override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    if (modelClass.isAssignableFrom(AchievementsViewModel::class.java)) {
+      return AchievementsViewModel(friendId, achievementsRepo) as T
+    }
+    throw IllegalArgumentException("Unknown ViewModel class")
   }
 }

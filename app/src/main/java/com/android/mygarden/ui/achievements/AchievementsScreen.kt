@@ -18,7 +18,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,7 +41,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
 import com.android.mygarden.model.achievements.ACHIEVEMENTS_LEVEL_NUMBER
 import com.android.mygarden.model.achievements.AchievementType
-import com.android.mygarden.ui.navigation.TopBar
 
 /**
  * Screen that displays a card for each [AchievementType] and the corresponding level of the user
@@ -53,44 +51,44 @@ import com.android.mygarden.ui.navigation.TopBar
  * This screen provides a user-friendly achievement-tracking feature.
  *
  * @param modifier Optional modifier of the composable.
+ * @param friendId Either the id of the friend we want to see the achievements or null for the
+ *   current user.
  * @param viewModel The ViewModel providing the UI state and useful functions.
+ * @param isOnline Whether the device is online (given by parent screen).
  */
 @Composable
 fun AchievementsScreen(
     modifier: Modifier = Modifier,
-    viewModel: AchievementsViewModel = viewModel(),
-    onGoBack: () -> Unit = {}
+    friendId: String? = null,
+    viewModel: AchievementsViewModel =
+        viewModel(factory = AchievementsViewModelFactory(friendId = friendId)),
+    isOnline: Boolean
 ) {
-  Scaffold(
-      topBar = { TopBar(title = "Achievements", hasGoBackButton = true, onGoBack = onGoBack) },
-      modifier = modifier,
-      content = { paddingValues ->
-        val uiState by viewModel.uiState.collectAsState()
-        var showAchievementInfo by remember { mutableStateOf<AchievementType?>(null) }
+  val uiState by viewModel.uiState.collectAsState()
+  var showAchievementInfo by remember { mutableStateOf<AchievementType?>(null) }
 
-        Column(
-            modifier = modifier.padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              for (type in AchievementType.entries) {
-                AchievementCard(
-                    achievementType = type,
-                    currentLevel = viewModel.getCorrespondingLevel(type, uiState),
-                    onClick = { showAchievementInfo = type })
-                if (showAchievementInfo == type) {
-                  AchievementDialogInfo(
-                      modifier = modifier,
-                      achievementType = type,
-                      currentLevel = viewModel.getCorrespondingLevel(type, uiState),
-                      currentValue = viewModel.getCorrespondingValue(type, uiState),
-                      neededMore = viewModel.getCorrespondingNeededForNextLevel(type, uiState),
-                      nextThreshold = viewModel.getCorrespondingNextThreshold(type, uiState),
-                      onDismiss = { showAchievementInfo = null },
-                  )
-                }
-              }
-            }
-      })
+  Column(
+      modifier = modifier,
+      verticalArrangement = Arrangement.spacedBy(20.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        for (type in AchievementType.entries) {
+          AchievementCard(
+              achievementType = type,
+              currentLevel = viewModel.getCorrespondingLevel(type, uiState),
+              onClick = { showAchievementInfo = type })
+          if (showAchievementInfo == type) {
+            AchievementDialogInfo(
+                modifier = modifier,
+                achievementType = type,
+                currentLevel = viewModel.getCorrespondingLevel(type, uiState),
+                currentValue = viewModel.getCorrespondingValue(type, uiState),
+                neededMore = viewModel.getCorrespondingNeededForNextLevel(type, uiState),
+                nextThreshold = viewModel.getCorrespondingNextThreshold(type, uiState),
+                onDismiss = { showAchievementInfo = null },
+            )
+          }
+        }
+      }
 }
 
 /**
@@ -245,19 +243,25 @@ fun AchievementDialogInfo(
 /**
  * Composable that displays the progress of a user in the form of a progress bar. The bar is filled
  * with the ratio of the given current value divided by the maximum value and filled with the given
- * Color.
+ * Color. If the [currentValue] is greater than the [maxValue] fills the bar and it the [maxValue]
+ * is zero empty the bar.
  *
  * @param modifier Optional modifier of the composable.
  * @param currentValue The current value of progress.
  * @param maxValue The maximum value possible to have (corresponding to a 100% filled bar).
  * @param color The color used to fill the bar (the background color is the
  *   'MaterialTheme.colorScheme.background' color.
- * @throws AssertionError if the [currentValue] is not smaller or equal to the [maxValue] or if the
- *   [maxValue] is zero.
  */
 @Composable
 fun ProgressBar(modifier: Modifier = Modifier, currentValue: Int, maxValue: Int, color: Color) {
-  assert(currentValue <= maxValue && currentValue > 0)
+  // Eliminate error case with default values
+  val width =
+      when {
+        currentValue > maxValue -> maxValue.toFloat()
+        maxValue == 0 -> 0f
+        else -> currentValue.toFloat() / maxValue
+      }
+
   Box(
       modifier =
           modifier
@@ -271,7 +275,7 @@ fun ProgressBar(modifier: Modifier = Modifier, currentValue: Int, maxValue: Int,
                 modifier
                     .clip(RoundedCornerShape(50))
                     .fillMaxHeight()
-                    .fillMaxWidth((currentValue.toFloat() / maxValue))
+                    .fillMaxWidth(width)
                     .background(color))
       }
 }
