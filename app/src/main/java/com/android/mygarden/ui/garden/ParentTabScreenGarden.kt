@@ -72,23 +72,25 @@ enum class GardenTab(@StringRes val titleRes: Int) {
  * - Switches between the Garden and Achievements using a styled tab row
  * - Displays a FAB to add a plant only on the Garden tab and only when not in view mode
  *
- * Online/offline information is read from [OfflineStateManager] to enable/disable actions accordingly in both tabs.
+ * Online/offline information is read from [OfflineStateManager] to enable/disable actions
+ * accordingly in both tabs.
  *
  * @param modifier Optional modifier used to adjust the layout or styling of the root Scaffold.
- * @param friendId Optional ID of a friend whose garden is being viewed. If null, shows the
- * current user's garden.
+ * @param friendId Optional ID of a friend whose garden is being viewed. If null, shows the current
+ *   user's garden.
  * @param isViewMode If true, the screen runs in read-only mode with changes:
  * - The back button is shown in the top bar instead of the log out button
  * - The "add plant" FAB is hidden
  * - Actions on the plant and the profile are disabled by the child screens
- * @param gardenCallbacks Callbacks for navigation and actions in the Garden flow
- * (editing profile, signing out, adding a plant, navigating back, etc.).
+ *
+ * @param gardenCallbacks Callbacks for navigation and actions in the Garden flow (editing profile,
+ *   signing out, adding a plant, navigating back, etc.).
  * @param gardenViewModel ViewModel that exposes the garden UI state, including the profile
- * information shown in the top bar. Defaults to a [GardenViewModel] created via
- * [GardenViewModelFactory] for the given [friendId].
+ *   information shown in the top bar. Defaults to a [GardenViewModel] created via
+ *   [GardenViewModelFactory] for the given [friendId].
  * @param achievementsViewModel ViewModel providing the achievements UI state for the
- * [AchievementsScreen]. Defaults to an [AchievementsViewModel] created via
- * [AchievementsViewModelFactory] for the given [friendId].
+ *   [AchievementsScreen]. Defaults to an [AchievementsViewModel] created via
+ *   [AchievementsViewModelFactory] for the given [friendId].
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -212,64 +214,64 @@ fun ProfileRow(
     isOnline: Boolean,
     isViewMode: Boolean = false
 ) {
-    val context = LocalContext.current
+  val context = LocalContext.current
 
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = PROFILE_ROW_HORIZONTAL_PADDING, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween) {
+  Row(
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .padding(horizontal = PROFILE_ROW_HORIZONTAL_PADDING, vertical = 6.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Sign out button (hidden in view mode)
-            if (!isViewMode) {
-                NavigationButton(onClick = onSignOut, isSignOut = true)
-            }
-            Spacer(modifier = modifier.weight(SPACER_WEIGHT))
+          // Sign out button (hidden in view mode)
+          if (!isViewMode) {
+            NavigationButton(onClick = onSignOut, isSignOut = true)
+          }
+          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
 
-            // Username (user can click on it to edit profile)
-            Text(
-                modifier =
-                    modifier
-                        .clickable(
-                            onClick = {
-                                handleOfflineClick(
-                                    isOnline = isOnline,
-                                    context = context,
-                                    offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
-                                    onEditProfile()
+          // Username (user can click on it to edit profile)
+          Text(
+              modifier =
+                  modifier
+                      .clickable(
+                          onClick = {
+                            handleOfflineClick(
+                                isOnline = isOnline,
+                                context = context,
+                                offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
+                                  onEditProfile()
                                 }
-                            })
-                        .testTag(GardenScreenTestTags.USERNAME),
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleLarge,
-                text = uiState.userName)
-            Spacer(modifier = modifier.weight(SPACER_WEIGHT))
+                          })
+                      .testTag(GardenScreenTestTags.USERNAME),
+              color = MaterialTheme.colorScheme.primary,
+              fontWeight = FontWeight.Bold,
+              style = MaterialTheme.typography.titleLarge,
+              text = uiState.userName)
+          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
 
-            // User avatar (user can click on it to edit profile)
-            Card(
-                modifier =
-                    modifier
-                        .clip(CircleShape)
-                        .size(AVATAR_SIZE)
-                        .clickable(
-                            onClick = {
-                                handleOfflineClick(
-                                    isOnline = isOnline,
-                                    context = context,
-                                    offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
-                                    onEditProfile()
+          // User avatar (user can click on it to edit profile)
+          Card(
+              modifier =
+                  modifier
+                      .clip(CircleShape)
+                      .size(AVATAR_SIZE)
+                      .clickable(
+                          onClick = {
+                            handleOfflineClick(
+                                isOnline = isOnline,
+                                context = context,
+                                offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
+                                  onEditProfile()
                                 }
-                            })
-                        .testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)) {
+                          })
+                      .testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)) {
                 Image(
                     painter = painterResource(uiState.userAvatar.resId),
                     contentDescription =
                         context.getString(R.string.avatar_description, uiState.userAvatar.name),
                     modifier = modifier.fillMaxSize())
-            }
+              }
         }
-    }
+      }
 }
