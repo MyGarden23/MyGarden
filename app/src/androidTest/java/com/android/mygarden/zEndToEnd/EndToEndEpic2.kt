@@ -20,6 +20,8 @@ import com.android.mygarden.MainActivity
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.plant.testTag
+import com.android.mygarden.model.users.UserProfileRepositoryFirestore
+import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
@@ -87,8 +89,11 @@ class EndToEndEpic2 {
     firebaseUtils.initialize()
     Log.d("EndToEndEpic2", "Initialized and signed out")
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
-    fakePlantRepoUtils.setUpMockRepo()
     Log.d("EndToEndEpic2", "Set up mock repo")
+    fakePlantRepoUtils.setUpMockRepo()
+    Log.d("EndToEndEpic2", "Set up the UserProfileRepository")
+    // Set up the UserProfileRepository but with the FirebaseFirestore of the emulators
+    UserProfileRepositoryProvider.repository = UserProfileRepositoryFirestore(firebaseUtils.db)
 
     // Now launch the activity AFTER Firebase is cleaned up
     scenario = ActivityScenario.launch(MainActivity::class.java)
