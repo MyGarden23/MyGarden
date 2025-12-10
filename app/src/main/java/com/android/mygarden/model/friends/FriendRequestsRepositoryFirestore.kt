@@ -123,6 +123,7 @@ class FriendRequestsRepositoryFirestore(
    */
   private suspend fun withPendingRequestForRecipient(
       requestId: String,
+      isDeleting: Boolean = false,
       block:
           (batch: WriteBatch, currentUserId: String, fromUserId: String, toUserId: String) -> Unit
   ): String {
@@ -138,11 +139,13 @@ class FriendRequestsRepositoryFirestore(
     val toUserId = requestDoc.getString(FIELD_TO_USER_ID) ?: ""
 
     // Ensure the current user is the recipient
-    require(toUserId == currentUserId) { "Only the recipient can modify this friend request" }
+    require(toUserId == currentUserId || isDeleting) {
+      "Only the recipient can modify this friend request"
+    }
 
     // Ensure the request is still pending
     val status = requestDoc.getString(FIELD_STATUS)
-    require(status == FriendRequestStatus.PENDING.name) {
+    require(status == FriendRequestStatus.PENDING.name || isDeleting) {
       "Friend request is not pending (current status: $status)"
     }
 
@@ -191,7 +194,11 @@ class FriendRequestsRepositoryFirestore(
    * @throws Exception If the Firestore batch operation fails.
    */
   override suspend fun deleteRequest(requestId: String) {
-    withPendingRequestForRecipient(requestId) { batch, currentUserId, fromUserId, _ ->
+    withPendingRequestForRecipient(requestId, isDeleting = true) {
+        batch,
+        currentUserId,
+        fromUserId,
+        _ ->
       val requestRef = friendRequestsCollection(currentUserId).document(requestId)
       val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
 

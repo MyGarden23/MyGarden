@@ -11,6 +11,7 @@ import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeAchievementsRepository
+import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -36,6 +37,7 @@ class FriendListScreenTests {
   ): FriendListViewModel {
     val fakeFriends = FakeFriendsRepository().apply { friendsFlow.value = friends }
     val fakeProfiles = FakeUserProfileRepository().apply { this.profiles.putAll(profiles) }
+    val fakeRequest = FakeFriendRequestsRepository()
     val fakeAchievements = FakeAchievementsRepository()
     val auth: FirebaseAuth = mock()
     val user: FirebaseUser = mock()
@@ -55,6 +57,7 @@ class FriendListScreenTests {
     return FriendListViewModel(
         friendsRepository = fakeFriends,
         userProfileRepository = fakeProfiles,
+        requestRepo = fakeRequest,
         auth = auth,
         achievementsRepo = fakeAchievements)
   }

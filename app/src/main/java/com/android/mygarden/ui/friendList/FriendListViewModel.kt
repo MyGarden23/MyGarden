@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.achievements.AchievementsRepository
 import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
+import com.android.mygarden.model.friends.FriendRequest
+import com.android.mygarden.model.friends.FriendRequestsRepository
+import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.users.UserProfile
@@ -40,14 +43,23 @@ class FriendListViewModel(
         UserProfileRepositoryProvider.repository,
     private val achievementsRepo: AchievementsRepository =
         AchievementsRepositoryProvider.repository,
+    private val requestRepo: FriendRequestsRepository = FriendRequestsRepositoryProvider.repository,
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FriendListUiState())
   val uiState: StateFlow<FriendListUiState> = _uiState.asStateFlow()
+  private var myRequests: List<FriendRequest> = emptyList()
 
   /** The currently authenticated Firebase user. */
   val currentUser = auth.currentUser!!
+
+  init {
+    viewModelScope.launch {
+      // constantly refresh the requests of the current user
+      requestRepo.myRequests().collect { requests -> myRequests = requests }
+    }
+  }
 
   /**
    * Loads the list of friends for the current user.
@@ -92,6 +104,12 @@ class FriendListViewModel(
       try {
         // deletes the friend in both lists
         friendsRepository.deleteFriend(friend.id)
+
+        /* Deletes all found requests regarding the deleted friend,
+         * independently of which user asked the other */
+        myRequests
+            .filter { it.fromUserId == friend.id || it.toUserId == friend.id }
+            .forEach { requestRepo.deleteRequest(it.id) }
 
         // updates the friend numbers achievements in both user's achievements
         decreaseFriendNumber(currentUser.uid)

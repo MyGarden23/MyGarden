@@ -4,6 +4,7 @@ import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeAchievementsRepository
+import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -36,6 +37,7 @@ class FriendListViewModelTest {
     val fakeFriends = FakeFriendsRepository()
     val fakeUserProfiles = FakeUserProfileRepository()
     val fakeAchievements = FakeAchievementsRepository()
+    val fakeRequest = FakeFriendRequestsRepository()
 
     // Mock FirebaseAuth.currentUser
     val auth: FirebaseAuth = mock()
@@ -56,6 +58,7 @@ class FriendListViewModelTest {
         FriendListViewModel(
             friendsRepository = fakeFriends,
             userProfileRepository = fakeUserProfiles,
+            requestRepo = fakeRequest,
             auth = auth,
             achievementsRepo = fakeAchievements)
 
@@ -96,6 +99,7 @@ class FriendListViewModelTest {
 
     val fakeUserProfiles = FakeUserProfileRepository()
     val fakeAchievements = FakeAchievementsRepository()
+    val fakeRequest = FakeFriendRequestsRepository()
 
     val auth: FirebaseAuth = mock()
     val user: FirebaseUser = mock()
@@ -106,6 +110,7 @@ class FriendListViewModelTest {
         FriendListViewModel(
             friendsRepository = throwingFriendsRepo,
             userProfileRepository = fakeUserProfiles,
+            requestRepo = fakeRequest,
             auth = auth,
             achievementsRepo = fakeAchievements)
 
@@ -127,6 +132,7 @@ class FriendListViewModelTest {
     val fakeFriends = FakeFriendsRepository()
     val fakeUserProfiles = FakeUserProfileRepository()
     val fakeAchievements = FakeAchievementsRepository()
+    val fakeRequest = FakeFriendRequestsRepository()
 
     // initialize achievements so view model doesn't throw on delete
     runBlocking {
@@ -158,6 +164,7 @@ class FriendListViewModelTest {
         FriendListViewModel(
             friendsRepository = fakeFriends,
             userProfileRepository = fakeUserProfiles,
+            requestRepo = fakeRequest,
             auth = auth,
             achievementsRepo = fakeAchievements)
 
