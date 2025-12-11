@@ -28,6 +28,10 @@ class FriendsRepositoryFirestore(
     private val achievementsRep: AchievementsRepository = AchievementsRepositoryProvider.repository
 ) : FriendsRepository {
 
+  // Variable that stores locally the friends count to avoid repeating calls to the database
+  private var friendsCount: Int? = null
+  private val nonAuthErrorMessage = "User not authenticated"
+
   /**
    * Returns a reference to the authenticated user's "friends" subcollection.
    *
@@ -42,8 +46,7 @@ class FriendsRepositoryFirestore(
   }
 
   override suspend fun addFriend(friendUserId: String) {
-    val currentUserId =
-        auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
+    val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException(nonAuthErrorMessage)
     require(currentUserId != friendUserId) { "You cannot add yourself as a friend." }
 
     // Add friend in both users' lists (bidirectional friendship) using a batch
@@ -75,10 +78,25 @@ class FriendsRepositoryFirestore(
    * @throws IllegalStateException if no authenticated user is available.
    */
   override suspend fun isFriend(friendUserId: String): Boolean {
-    val currentUserId =
-        auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
+    val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException(nonAuthErrorMessage)
     val friends = getFriends(currentUserId)
     return friends.contains(friendUserId)
+  }
+
+  override suspend fun deleteFriend(friendUserId: String) {
+    // get current user id
+    val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException(nonAuthErrorMessage)
+    require(currentUserId != friendUserId) { "You cannot delete yourself." }
+
+    // get both documents we want to delete
+    val currentDoc = friendsCollection(currentUserId).document(friendUserId)
+    val friendDoc = friendsCollection(friendUserId).document(currentUserId)
+
+    // make both deletions atomic with a batch
+    val batch = db.batch()
+    batch.delete(friendDoc)
+    batch.delete(currentDoc)
+    batch.commit().await()
   }
 
   override fun friendsFlow(userId: String): Flow<List<String>> = callbackFlow {
