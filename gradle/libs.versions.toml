@@ -48,6 +48,7 @@ cameraX = "1.4.2"
 
 # Material Icons extended
 materialIconsExtended = "1.7.8"
+firebaseFunctionsKtx = "22.1.0"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }
@@ -66,6 +67,7 @@ firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "f
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
+firebase-functions = { module = "com.google.firebase:firebase-functions" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
@@ -112,6 +114,7 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleCompose" }
+firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -275,6 +275,7 @@ private fun rememberStartDestination(): String = remember {
  * - If running in a test environment, this is disabled to avoid flaky navigation.
  * - If the intent contains a `"NOTIFICATIONS_TYPE_IDENTIFIER"`:
  *     - For WATER_PLANT → navigate to the Garden screen.
+ *     - For FRIEND_REQUEST → navigate to the Friend Requests screen.
  *     - The intent key is removed afterward to avoid repeated triggers.
  *
  * Navigation occurs inside a `LaunchedEffect` tied to the intent.
@@ -294,10 +295,17 @@ private fun HandleNotificationNavigation(
   LaunchedEffect(intent) {
     val notificationType =
         intent.getStringExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
-    if (notificationType == PushNotificationsService.NOTIFICATIONS_TYPE_WATER_PLANT) {
-      actions.navTo(Screen.Garden)
-      intent.removeExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
+
+    when (notificationType) {
+      PushNotificationsService.NOTIFICATIONS_TYPE_WATER_PLANT -> {
+        actions.navTo(Screen.Garden)
+      }
+      PushNotificationsService.NOTIFICATIONS_TYPE_FRIEND_REQUEST -> {
+        actions.navTo(Screen.FriendsRequests)
+      }
     }
+
+    intent.removeExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
   }
 }
 
