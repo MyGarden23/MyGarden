@@ -50,7 +50,7 @@ data class AddFriendUiState(
  * - [FriendsRepository] for adding a user to the current user's friend list.
  * - [FriendRequestsRepository] for sending a friend request to a user.
  * - [ProfileRepository] for retrieving the current user's profile and pseudo.
- * - [notifier] for sending a friend request notification to a user.
+ * - [FriendRequestNotifier] for sending a friend request notification to a user.
  *
  * The ViewModel maintains a small UI state ([AddFriendUiState]) containing the search query,
  * loading status, and search results. The logic for showing visual feedback is delegated to the UI
@@ -64,7 +64,7 @@ class AddFriendViewModel(
         UserProfileRepositoryProvider.repository,
     private val pseudoRepository: PseudoRepository = PseudoRepositoryProvider.repository,
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
-    private val notifier: FriendRequestNotifier = FirebaseFriendRequestNotifier()
+    private val friendRequestNotifier: FriendRequestNotifier = FirebaseFriendRequestNotifier()
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(AddFriendUiState())
   val uiState: StateFlow<AddFriendUiState> = _uiState.asStateFlow()
@@ -136,9 +136,11 @@ class AddFriendViewModel(
    * PENDING. On success, [onSuccess] is called; on failure, the relation reverts to ADD and
    * [onError] is invoked.
    *
-   * @param userId the user id of the one the current user wants to be friend with
+   * @param userId The Firestore ID of the user to send a friend request to.
    * @param onError Invoked if the operation fails for any reason.
-   * @param onSuccess Invoked if the friend was added successfully.
+   * @param onSuccess Invoked if the friend request was sent successfully.
+   *
+   * This function uses the [FriendRequestNotifier] to send a notification to the user.
    */
   fun onAsk(userId: String, onError: () -> Unit, onSuccess: () -> Unit) {
 
@@ -167,7 +169,7 @@ class AddFriendViewModel(
           return@launch
         }
 
-        notifier.notifyRequestSent(userId, fromPseudo)
+        friendRequestNotifier.notifyRequestSent(userId, fromPseudo)
         onSuccess()
       } catch (_: Exception) {
         _uiState.value =

@@ -12,6 +12,7 @@ import com.android.mygarden.model.users.UserProfileRepositoryFirestore
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.*
+import com.android.mygarden.utils.FakeFriendsRepository
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.flowOf
@@ -49,7 +50,6 @@ class AddFriendOnAskTest : FirestoreProfileTest() {
   @Test
   fun onAsk_success() {
     val uid = auth.currentUser!!.uid
-    println("DEBUG currentUserId in test = $uid")
 
     val fakeUserProfile = FakeUserProfileRepository()
     fakeUserProfile.profiles[uid] =
@@ -64,7 +64,7 @@ class AddFriendOnAskTest : FirestoreProfileTest() {
     UserProfileRepositoryProvider.repository = fakeUserProfile
     val fakeNotifier = FakeNotifier()
 
-    val vm = AddFriendViewModel(notifier = fakeNotifier)
+    val vm = AddFriendViewModel(friendRequestNotifier = fakeNotifier)
 
     val latch = CountDownLatch(1)
     var success = false
@@ -85,10 +85,7 @@ class AddFriendOnAskTest : FirestoreProfileTest() {
     assertFalse(error)
     assertTrue(success)
 
-    println("DEBUG fakeRequests size = ${fakeRequests.incomingRequestsFlow.value.size}")
-
     assertEquals(1, fakeRequests.incomingRequestsFlow.value.size)
-    println("DEBUG fakeRequests value = ${fakeRequests.incomingRequestsFlow.value[0].fromUserId}")
 
     assertEquals("target", fakeRequests.incomingRequestsFlow.value[0].fromUserId)
   }

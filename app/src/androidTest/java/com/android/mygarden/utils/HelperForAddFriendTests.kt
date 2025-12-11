@@ -17,14 +17,14 @@ fun createViewModel(
     requestsRepo: FriendRequestsRepository = FakeFriendRequestsRepository(),
     userProfileRepo: UserProfileRepository = FakeUserProfileRepository(),
     pseudoRepo: PseudoRepository = FakePseudoRepository(),
-    profilRepo: ProfileRepository = FakeProfileRepository(),
+    profileRepo: ProfileRepository = FakeProfileRepository(),
 ): AddFriendViewModel =
     AddFriendViewModel(
         friendsRepository = friendsRepo,
         requestsRepository = requestsRepo,
         userProfileRepository = userProfileRepo,
         pseudoRepository = pseudoRepo,
-        profileRepository = profilRepo)
+        profileRepository = profileRepo)
 
 /**
  * Test-only fake implementation of [PseudoRepository] used in this test class.
