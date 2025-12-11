@@ -71,7 +71,7 @@ class AddFriendOnAskTest : FirestoreProfileTest() {
     var error = false
 
     vm.onAsk(
-        userId = "target",
+        userId = "friend-123",
         onSuccess = {
           success = true
           latch.countDown()
@@ -85,9 +85,12 @@ class AddFriendOnAskTest : FirestoreProfileTest() {
     assertFalse(error)
     assertTrue(success)
 
-    assertEquals(1, fakeRequests.incomingRequestsFlow.value.size)
+    val requests = fakeRequests.incomingRequestsFlow.value
+    assertEquals(1, requests.size)
 
-    assertEquals("target", fakeRequests.incomingRequestsFlow.value[0].fromUserId)
+    val request = requests[0]
+    assertEquals(fakeRequests.currentUserIdValue, request.fromUserId)
+    assertEquals("friend-123", request.toUserId)
   }
 
   /** Fail Case (currentUserId == null) */
