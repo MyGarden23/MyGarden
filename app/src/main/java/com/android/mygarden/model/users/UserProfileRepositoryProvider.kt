@@ -15,11 +15,12 @@ object UserProfileRepositoryProvider {
 
   // Public reference to the current repository.
   var repository: UserProfileRepository
-    get() =
-        overrideRepo
-            ?: _overrideRepositoryTest
-            ?: UserProfileRepositoryFirestore(Firebase.firestore)
+    get() = overrideRepo ?: getOrCreateDefault()
     set(value) {
       _overrideRepositoryTest = value
     }
+
+  private fun getOrCreateDefault(): UserProfileRepository {
+    return _overrideRepositoryTest ?: UserProfileRepositoryFirestore(Firebase.firestore)
+  }
 }
