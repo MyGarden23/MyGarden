@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,10 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
+import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.theme.ExtendedTheme
+import com.android.mygarden.ui.utils.OfflineMessages
+import com.android.mygarden.ui.utils.handleOfflineClick
 
 /** All constants needed for padding or sizes of the composables below */
 private object CONSTANTS {
@@ -156,6 +160,8 @@ fun RequestItem(
     onRefuse: () -> Unit = {},
     onAccept: () -> Unit = {}
 ) {
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
+  val context = LocalContext.current
   Card(
       modifier =
           modifier
@@ -200,14 +206,20 @@ fun RequestItem(
                         FriendsRequestsScreenTestTags.getRequestDeclineButtonFromUser(
                             potentialNewFriend.pseudo)),
                 accept = false,
-                onClick = onRefuse)
+                onClick = {
+                  handleOfflineClick(
+                      isOnline, context, OfflineMessages.CANNOT_ACCEPT_OR_REJECT_FRIENDS, onRefuse)
+                })
             RequestButton(
                 modifier =
                     modifier.testTag(
                         FriendsRequestsScreenTestTags.getRequestAcceptButtonFromUser(
                             potentialNewFriend.pseudo)),
                 accept = true,
-                onClick = onAccept)
+                onClick = {
+                  handleOfflineClick(
+                      isOnline, context, OfflineMessages.CANNOT_ACCEPT_OR_REJECT_FRIENDS, onAccept)
+                })
           }
         }
       }

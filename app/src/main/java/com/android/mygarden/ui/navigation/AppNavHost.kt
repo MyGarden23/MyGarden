@@ -24,8 +24,8 @@ import com.android.mygarden.ui.editPlant.EditPlantViewModel
 import com.android.mygarden.ui.feed.FeedScreen
 import com.android.mygarden.ui.friendList.FriendListScreen
 import com.android.mygarden.ui.friendsRequests.FriendsRequestsScreen
-import com.android.mygarden.ui.garden.GardenScreen
 import com.android.mygarden.ui.garden.GardenScreenCallbacks
+import com.android.mygarden.ui.garden.ParentTabScreenGarden
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
 import com.android.mygarden.ui.profile.Avatar
@@ -141,8 +141,8 @@ fun AppNavHost(
 
     // Garden
     composable(Screen.Garden.route) {
-      GardenScreen(
-          callbacks =
+      ParentTabScreenGarden(
+          gardenCallbacks =
               GardenScreenCallbacks(
                   onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
                   onAddPlant = { navigationActions.navTo(Screen.Camera) },
@@ -175,10 +175,11 @@ fun AppNavHost(
             entry ->
           val friendId =
               entry.arguments?.getString(Screen.FriendGarden.ARG_FRIEND_ID) ?: return@composable
-          GardenScreen(
+
+          ParentTabScreenGarden(
               friendId = friendId,
               isViewMode = true,
-              callbacks =
+              gardenCallbacks =
                   GardenScreenCallbacks(
                       onEditProfile = {},
                       onAddPlant = {},

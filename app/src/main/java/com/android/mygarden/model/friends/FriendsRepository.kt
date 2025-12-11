@@ -15,6 +15,13 @@ interface FriendsRepository {
    */
   suspend fun addFriend(friendUserId: String)
 
+  /**
+   * Checks whether the given user ID is in the current in-memory friends list.
+   *
+   * @param friendUserId The UID to check.
+   */
+  suspend fun isFriend(friendUserId: String): Boolean
+
   /** Flow of friends */
   fun friendsFlow(userId: String): Flow<List<String>>
 }

@@ -1,15 +1,15 @@
 package com.android.mygarden.ui.addFriend
 
-import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.android.mygarden.R
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
+import com.android.mygarden.model.notifications.FirebaseFriendRequestNotifier
+import com.android.mygarden.model.notifications.FriendRequestNotifier
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.profile.PseudoRepository
 import com.android.mygarden.model.profile.PseudoRepositoryProvider
 import com.android.mygarden.model.users.UserProfile
@@ -22,10 +22,6 @@ import kotlinx.coroutines.launch
 
 /** Minimum number of characters required for a search query */
 private const val MIN_QUERY_LENGTH = 2
-
-/** String representations for FriendRelation enum values */
-private const val RELATION_ADD_STRING = "Add"
-private const val RELATION_ADDED_STRING = "Added"
 
 /**
  * UI state container for the *Add Friend* screen.
@@ -42,6 +38,7 @@ data class AddFriendUiState(
     val isSearching: Boolean = false,
     val searchResults: List<UserProfile> = emptyList(),
     val alreadyFriend: List<UserProfile> = emptyList(),
+    val relations: Map<String, FriendRelation> = emptyMap(),
 )
 
 /**
@@ -51,6 +48,9 @@ data class AddFriendUiState(
  * - [PseudoRepository] for searching users by pseudo prefix,
  * - [UserProfileRepository] for retrieving public user profiles (pseudo + avatar),
  * - [FriendsRepository] for adding a user to the current user's friend list.
+ * - [FriendRequestsRepository] for sending a friend request to a user.
+ * - [ProfileRepository] for retrieving the current user's profile and pseudo.
+ * - [FriendRequestNotifier] for sending a friend request notification to a user.
  *
  * The ViewModel maintains a small UI state ([AddFriendUiState]) containing the search query,
  * loading status, and search results. The logic for showing visual feedback is delegated to the UI
@@ -63,6 +63,8 @@ class AddFriendViewModel(
     private val userProfileRepository: UserProfileRepository =
         UserProfileRepositoryProvider.repository,
     private val pseudoRepository: PseudoRepository = PseudoRepositoryProvider.repository,
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val friendRequestNotifier: FriendRequestNotifier = FirebaseFriendRequestNotifier()
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(AddFriendUiState())
   val uiState: StateFlow<AddFriendUiState> = _uiState.asStateFlow()
@@ -71,6 +73,7 @@ class AddFriendViewModel(
   fun onQueryChange(newQuery: String) {
     _uiState.value = _uiState.value.copy(query = newQuery)
   }
+
   /**
    * Searches for users whose pseudo starts with the current query.
    *
@@ -98,8 +101,8 @@ class AddFriendViewModel(
           val userProfile = userProfileRepository.getUserProfile(userId) ?: continue
           profiles.add(userProfile)
         }
-
         _uiState.value = _uiState.value.copy(isSearching = false, searchResults = profiles)
+        refreshRelations()
       } catch (_: Exception) {
         onError()
         _uiState.value = _uiState.value.copy(isSearching = false)
@@ -127,50 +130,76 @@ class AddFriendViewModel(
   }
 
   /**
-   * Asks the user [userId] to be friend. Note that the error handling
+   * Sends a friend request to [userId] and updates the local relation state immediately.
    *
-   * @param userId the user id of the one the current user wants to be friend with
+   * If the current relation is ADDBACK, the user is marked as ADDED; otherwise the state becomes
+   * PENDING. On success, [onSuccess] is called; on failure, the relation reverts to ADD and
+   * [onError] is invoked.
+   *
+   * @param userId The Firestore ID of the user to send a friend request to.
    * @param onError Invoked if the operation fails for any reason.
-   * @param onSuccess Invoked if the friend was added successfully.
+   * @param onSuccess Invoked if the friend request was sent successfully.
+   *
+   * This function uses the [FriendRequestNotifier] to send a notification to the user.
    */
   fun onAsk(userId: String, onError: () -> Unit, onSuccess: () -> Unit) {
+
     viewModelScope.launch {
+      _uiState.value =
+          _uiState.value.let { state ->
+            if (state.relations.get(userId) == FriendRelation.ADDBACK) {
+              state.copy(relations = state.relations + (userId to FriendRelation.ADDED))
+            } else {
+              state.copy(relations = state.relations + (userId to FriendRelation.PENDING))
+            }
+          }
       try {
         requestsRepository.askFriend(userId)
+        val currentUserId = profileRepository.getCurrentUserId()
+        if (currentUserId == null) {
+          onError()
+          return@launch
+        }
+
+        val currentUserProfile = userProfileRepository.getUserProfile(currentUserId)
+        val fromPseudo = currentUserProfile?.pseudo
+
+        if (fromPseudo == null) {
+          onError()
+          return@launch
+        }
+
+        friendRequestNotifier.notifyRequestSent(userId, fromPseudo)
         onSuccess()
       } catch (_: Exception) {
+        _uiState.value =
+            _uiState.value.let { state ->
+              state.copy(relations = state.relations + (userId to FriendRelation.ADD))
+            }
         onError()
       }
     }
   }
-}
 
-/**
- * Represents the relationship status between the current user and another user's profile.
- *
- * Each relation provides:
- * - A readable string representation via [toString], used for the button of a [FriendCard].
- * - A [color] property that exposes the appropriate color for the given relation.
- */
-enum class FriendRelation(val labelRes: Int) { //
-  /** Indicates that the user can send a friend request. */
-  ADD(R.string.add_enum),
-  /** Indicates that the users are already connected. */
-  ADDED(R.string.added_enum);
+  /**
+   * Updates the friend-relation state for all users in the current search results. Each user's
+   * relation is recomputed (ADD, ADDED, or PENDING) based on repository data.
+   */
+  private suspend fun refreshRelations() {
+    val currentFriends = _uiState.value.searchResults
 
-  override fun toString(): String {
-    return when (this) {
-      ADD -> RELATION_ADD_STRING
-      ADDED -> RELATION_ADDED_STRING
-    }
-  }
-
-  /** A color representing this friend relation. */
-  val color: Color
-    @Composable
-    get() =
-        when (this) {
-          ADD -> colorScheme.primary
-          ADDED -> colorScheme.outline
+    val newRelations =
+        currentFriends.associate { friend ->
+          val relation =
+              when {
+                requestsRepository.isInOutgoingRequests(friend.id) -> FriendRelation.PENDING
+                requestsRepository.isInIncomingRequests(friend.id) -> FriendRelation.ADDBACK
+                friendsRepository.isFriend(friend.id) -> FriendRelation.ADDED
+                else -> FriendRelation.ADD
+              }
+          friend.id to relation
         }
+
+    _uiState.value = _uiState.value.copy(relations = newRelations)
+  }
 }

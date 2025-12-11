@@ -15,7 +15,7 @@ import com.android.mygarden.R
 import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.profile.PseudoRepositoryProvider
-import com.android.mygarden.ui.garden.GardenScreenTestTags
+import com.android.mygarden.ui.garden.GardenAchievementsParentScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
@@ -55,7 +55,7 @@ class NavigationS4TestsEditProfile {
   @Test
   fun canGofromGardenToEditProfileAndBackToGardenWithSave() {
     composeTestRule
-        .onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
         .assertIsDisplayed()
         .performClick()
     composeTestRule
@@ -68,16 +68,20 @@ class NavigationS4TestsEditProfile {
         .onNodeWithTag(ProfileScreenTestTags.COUNTRY_FIELD)
         .performTextInput("Switzerland")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
   }
 
   @Test
   fun canGofromGardenToEditProfileAndBackToGardenWithBack() {
     composeTestRule
-        .onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
         .assertIsDisplayed()
         .performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
+        .assertIsDisplayed()
   }
 }

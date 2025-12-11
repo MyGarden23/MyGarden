@@ -37,4 +37,7 @@ object OfflineMessages {
   @StringRes val CANNOT_EDIT_PROFILE = R.string.offline_cannot_edit_profile
   @StringRes val CANNOT_SAVE_PROFILE = R.string.offline_cannot_save_profile
   @StringRes val CANNOT_LOAD_TIPS = R.string.offline_cannot_load_tips
+  @StringRes val CANNOT_ADD_FRIENDS = R.string.offline_cannot_add_friends
+  @StringRes val CANNOT_SEARCH_FRIENDS = R.string.offline_cannot_search_friends
+  @StringRes val CANNOT_ACCEPT_OR_REJECT_FRIENDS = R.string.offline_cannot_accept_or_reject_friends
 }

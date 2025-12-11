@@ -12,6 +12,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
+import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
@@ -21,11 +23,15 @@ import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeAchievementsRepository
+import com.android.mygarden.utils.FakeActivityRepository
+import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPlants
 import com.google.firebase.FirebaseApp
 import java.sql.Timestamp
@@ -107,6 +113,9 @@ class GardenScreenTests {
     profileRepo = FakeProfileRepository()
     ProfileRepositoryProvider.repository = profileRepo
     PlantsRepositoryProvider.repository = plantsRepo
+    UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
+    ActivityRepositoryProvider.repository = FakeActivityRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
   }
 
   /**
@@ -126,7 +135,8 @@ class GardenScreenTests {
     }
     // Buttons have no use : tests are for the garden screen in isolation
     composeTestRule.setContent {
-      GardenScreen(callbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
+      ParentTabScreenGarden(
+          gardenCallbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
     }
     composeTestRule.waitForIdle()
   }
@@ -139,9 +149,9 @@ class GardenScreenTests {
 
   /** Ensures that all profile-related components are currently displayed */
   fun ComposeTestRule.userRowIsDisplayed() {
-    onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertIsDisplayed()
-    onNodeWithTag(GardenScreenTestTags.USERNAME).assertIsDisplayed()
-    onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsDisplayed()
+    onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE).assertIsDisplayed()
+    onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).assertIsDisplayed()
+    onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertIsDisplayed()
   }
 
   /** Ensures that all plants currently on the [plantsRepo] are displayed on the screen */
@@ -174,7 +184,6 @@ class GardenScreenTests {
   @Test
   fun correctDisplayWhenEmptyGarden() {
     setContent()
-    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertHasClickAction()
     composeTestRule.userRowIsDisplayed()
@@ -190,7 +199,6 @@ class GardenScreenTests {
   fun correctDisplayWhenNonEmptyGarden() {
     val plants = listOf(plant1, plant2, plant3, plant4)
     setContent(plants)
-    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertHasClickAction()
     composeTestRule.userRowIsDisplayed()
@@ -204,7 +212,9 @@ class GardenScreenTests {
   fun buttonsAreClickable() {
     val plants = listOf(plant1, plant2, plant3, plant4)
     setContent(plants)
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsEnabled()
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
+        .assertIsEnabled()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.ADD_PLANT_FAB).assertIsEnabled()
 
     // Check that all watering button are clickable

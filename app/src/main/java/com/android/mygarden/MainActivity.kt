@@ -62,6 +62,10 @@ private const val LOG_MSG_FIREBASE_AUTH_UNAVAILABLE = "FirebaseAuth unavailable;
 /** Dimensions */
 private val OFFLINE_INDICATOR_PADDING = 8.dp
 
+/** Offline indicator timing (in milliseconds) */
+private const val OFFLINE_INDICATOR_VISIBLE_DURATION = 2000L
+private const val OFFLINE_INDICATOR_HIDDEN_DURATION = 3000L
+
 class MainActivity : ComponentActivity() {
 
   companion object {
@@ -196,12 +200,25 @@ fun MyGardenApp(intent: Intent? = null) {
 /** Composable that displays an offline mode indicator at the top of the screen. */
 @Composable
 fun OfflineIndicator() {
-  Snackbar(
-      modifier = Modifier.padding(OFFLINE_INDICATOR_PADDING),
-      containerColor = MaterialTheme.colorScheme.errorContainer,
-      contentColor = MaterialTheme.colorScheme.onErrorContainer) {
-        Text(stringResource(R.string.offline_indicator_message))
-      }
+  var isVisible by remember { mutableStateOf(true) }
+
+  LaunchedEffect(Unit) {
+    while (true) {
+      isVisible = true
+      kotlinx.coroutines.delay(OFFLINE_INDICATOR_VISIBLE_DURATION)
+      isVisible = false
+      kotlinx.coroutines.delay(OFFLINE_INDICATOR_HIDDEN_DURATION)
+    }
+  }
+
+  if (isVisible) {
+    Snackbar(
+        modifier = Modifier.padding(OFFLINE_INDICATOR_PADDING),
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer) {
+          Text(stringResource(R.string.offline_indicator_message))
+        }
+  }
 }
 
 /**
@@ -258,6 +275,7 @@ private fun rememberStartDestination(): String = remember {
  * - If running in a test environment, this is disabled to avoid flaky navigation.
  * - If the intent contains a `"NOTIFICATIONS_TYPE_IDENTIFIER"`:
  *     - For WATER_PLANT → navigate to the Garden screen.
+ *     - For FRIEND_REQUEST → navigate to the Friend Requests screen.
  *     - The intent key is removed afterward to avoid repeated triggers.
  *
  * Navigation occurs inside a `LaunchedEffect` tied to the intent.
@@ -277,10 +295,17 @@ private fun HandleNotificationNavigation(
   LaunchedEffect(intent) {
     val notificationType =
         intent.getStringExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
-    if (notificationType == PushNotificationsService.NOTIFICATIONS_TYPE_WATER_PLANT) {
-      actions.navTo(Screen.Garden)
-      intent.removeExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
+
+    when (notificationType) {
+      PushNotificationsService.NOTIFICATIONS_TYPE_WATER_PLANT -> {
+        actions.navTo(Screen.Garden)
+      }
+      PushNotificationsService.NOTIFICATIONS_TYPE_FRIEND_REQUEST -> {
+        actions.navTo(Screen.FriendsRequests)
+      }
     }
+
+    intent.removeExtra(PushNotificationsService.NOTIFICATIONS_TYPE_IDENTIFIER)
   }
 }
 

@@ -22,7 +22,9 @@ import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
+import com.android.mygarden.ui.garden.GardenAchievementsParentScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
+import com.android.mygarden.ui.garden.GardenTab
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
@@ -123,17 +125,30 @@ class EndToEndM2 {
 
     // goto MyGarden
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).isDisplayed()
+      composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
     }
     composeTestRule
-        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
         .assertIsDisplayed()
         .assertTextContains("pseudo")
 
+    // Verify both tabs are displayed
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.getTestTagForTab(GardenTab.GARDEN))
+        .assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(
+            GardenAchievementsParentScreenTestTags.getTestTagForTab(GardenTab.ACHIEVEMENTS))
+        .assertIsDisplayed()
+
     // goto edit profile screen
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).performClick()
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
+        .performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).isDisplayed()
     }
@@ -141,13 +156,15 @@ class EndToEndM2 {
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("Ada")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+      composeTestRule
+          .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+          .isDisplayed()
     }
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).isDisplayed()
+      composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
     }
     composeTestRule
-        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
         .assertIsDisplayed()
         .assertTextContains("pseudo")
 
@@ -200,9 +217,12 @@ class EndToEndM2 {
 
     // === GARDEN SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+      composeTestRule
+          .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+          .isDisplayed()
     }
 
+    // Check that we are on the Garden Tab
     // Wait for the garden list to appear in the UI (confirms plant data has loaded)
     composeTestRule.waitUntil(TIMEOUT) {
       try {
@@ -237,7 +257,9 @@ class EndToEndM2 {
     // goto garden
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+      composeTestRule
+          .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+          .isDisplayed()
     }
 
     // this part has to be improved I Couldn't make it on time

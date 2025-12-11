@@ -200,6 +200,7 @@ dependencies {
     // Firebase AI Logic (Gemini/Imagen)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ai)
+    implementation(libs.firebase.functions)
 
     // Credential Manager
     implementation(libs.androidx.credentials)

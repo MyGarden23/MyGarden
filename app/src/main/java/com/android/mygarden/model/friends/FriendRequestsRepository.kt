@@ -35,9 +35,27 @@ interface FriendRequestsRepository {
   fun outgoingRequests(): Flow<List<FriendRequest>>
 
   /**
+   * Checks whether the given user has a pending request for the target user.
+   *
+   * @param targetUserId The UID of the user to check.
+   * @return `true` if a pending outGoing request exists for this user, `false` otherwise.
+   */
+  suspend fun isInOutgoingRequests(targetUserId: String): Boolean
+
+  /**
+   * Checks whether the target user has a pending request for the current user.
+   *
+   * @param targetUserId The UID of the user to check.
+   * @return `true` if a pending outGoing request exists for this user, `false` otherwise.
+   */
+  suspend fun isInIncomingRequests(targetUserId: String): Boolean
+
+  /**
    * Sends a friend request to another user.
    *
-   * Creates a new friend request document with status PENDING.
+   * Creates a new friend request document with status PENDING. If the other user already sent a
+   * request, this will add both users to each other's friends list, and mark the request as
+   * ACCEPTED.
    *
    * @param targetUserId The Firebase Auth UID of the user to send the request to.
    * @throws IllegalStateException if the user is not authenticated.

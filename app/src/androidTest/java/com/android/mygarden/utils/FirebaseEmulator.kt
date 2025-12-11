@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.MemoryCacheSettings
 import com.google.firebase.firestore.MemoryEagerGcSettings
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -55,6 +56,7 @@ object FirebaseEmulator {
   const val AUTH_PORT = 9099
   const val FIRESTORE_PORT = 8080
   const val STORAGE_PORT = 9199
+  const val FUNCTIONS_PORT = 5001
 
   // ---------- Firebase app / project ----------
   private val projectId: String by lazy {
@@ -145,6 +147,15 @@ object FirebaseEmulator {
       Log.i("FirebaseEmulator", "Storage -> emulator at $HOST:$STORAGE_PORT, bucket=$storageBucket")
     }
     return storage
+  }
+
+  fun connectFunctions(): FirebaseFunctions {
+    val ctx: Context = ApplicationProvider.getApplicationContext()
+    if (FirebaseApp.getApps(ctx).isEmpty()) FirebaseApp.initializeApp(ctx)
+
+    val functions = FirebaseFunctions.getInstance()
+    functions.useEmulator(HOST, FUNCTIONS_PORT)
+    return functions
   }
 
   // ---------- REST endpoints for wipes ----------

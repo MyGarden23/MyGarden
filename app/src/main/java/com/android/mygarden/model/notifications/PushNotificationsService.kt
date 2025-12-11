@@ -23,8 +23,10 @@ class PushNotificationsService : FirebaseMessagingService() {
     var isAppInForeGround = false
     /** Notification type identifier used to retrieve the intent */
     const val NOTIFICATIONS_TYPE_IDENTIFIER = "type"
-    /** Notification type for watering a plant; used to retrieve the intent */
+    /** Notification type for watering a plant and friend request; used to retrieve the intent */
     const val NOTIFICATIONS_TYPE_WATER_PLANT = "WATER_PLANT"
+    const val NOTIFICATIONS_TYPE_FRIEND_REQUEST = "FRIEND_REQUEST"
+
     /** Notification shared preferences */
     const val NOTIFICATIONS_SHARED_PREFS = "notifications_prefs"
     /** FCM token identifier in the notifications shared preferences */

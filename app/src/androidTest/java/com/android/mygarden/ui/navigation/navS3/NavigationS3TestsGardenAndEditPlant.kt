@@ -93,7 +93,9 @@ class NavigationS3TestsGardenAndEditPlant {
   /** Tests navigation from the Garden to EditPlant and return by saving. */
   @Test
   fun navigateFromGardenToPlantInfoToEditScreenAndReturnWithSaving() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
 
     val plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)
 
@@ -117,13 +119,17 @@ class NavigationS3TestsGardenAndEditPlant {
         .performClick()
 
     // Verify we are back on the Garden screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
   }
 
   /** Tests navigation from the Garden to EditPlant and return by deleting. */
   @Test
   fun navigateFromGardenToEditScreenAndReturnWithDeleting() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
 
     val plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)
 
@@ -153,13 +159,17 @@ class NavigationS3TestsGardenAndEditPlant {
 
     composeTestRule.waitForIdle()
     // Verify we are back on the Garden screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
   }
 
   /** Tests navigation from the Garden to EditPlant and return by pressing back button. */
   @Test
   fun navigateFromGardenToEditScreenAndReturnWithBackArrow() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
 
     val plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)
 
@@ -189,7 +199,9 @@ class NavigationS3TestsGardenAndEditPlant {
         .performClick()
 
     // Verify we are back on the Garden screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
   }
 
   /**
@@ -198,7 +210,9 @@ class NavigationS3TestsGardenAndEditPlant {
    */
   @Test
   fun navigateFromGardenToEditScreenAndKeepInGarden() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
 
     val plantTag = GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)
 

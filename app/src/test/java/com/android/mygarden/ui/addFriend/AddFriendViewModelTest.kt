@@ -1,10 +1,12 @@
 package com.android.mygarden.ui.addFriend
 
+import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
+import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPseudoRepository
 import com.android.mygarden.utils.createViewModel
@@ -45,6 +47,7 @@ class AddFriendViewModelTest {
     val fakeFriends = FakeFriendsRepository()
     val fakeRequests = FakeFriendRequestsRepository()
     val fakeUserProfile = FakeUserProfileRepository()
+    val fakeProfile = FakeProfileRepository()
     val fakePseudo =
         TestPseudoRepository().apply {
           searchResults = listOf("alice")
@@ -63,7 +66,8 @@ class AddFriendViewModelTest {
             friendsRepository = fakeFriends,
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
-            pseudoRepository = fakePseudo)
+            pseudoRepository = fakePseudo,
+            profileRepository = fakeProfile)
 
     // First: perform a search to populate results
     vm.onQueryChange("al")
@@ -107,6 +111,7 @@ class AddFriendViewModelTest {
     val fakeUserProfile = FakeUserProfileRepository()
     val fakeFriends = FakeFriendsRepository()
     val fakeRequests = FakeFriendRequestsRepository()
+    val fakeProfile = FakeProfileRepository()
 
     // Configure a test-specific pseudo repository that returns a single match.
     val fakePseudo =
@@ -129,7 +134,8 @@ class AddFriendViewModelTest {
             friendsRepository = fakeFriends,
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
-            pseudoRepository = fakePseudo)
+            pseudoRepository = fakePseudo,
+            profileRepository = fakeProfile)
 
     vm.onQueryChange("al")
 
@@ -201,32 +207,6 @@ class AddFriendViewModelTest {
   }
 
   @Test
-  fun onAsk_success_calls_onSuccess_and_adds_request() = runTest {
-    val dispatcher = StandardTestDispatcher(testScheduler)
-    Dispatchers.setMain(dispatcher)
-
-    val fakeRequests = FakeFriendRequestsRepository()
-    val vm = createViewModel(requestsRepo = fakeRequests)
-
-    var onSuccessCalled = false
-    var onErrorCalled = false
-
-    vm.onAsk(
-        userId = "friend-123",
-        onError = { onErrorCalled = true },
-        onSuccess = { onSuccessCalled = true })
-
-    advanceUntilIdle()
-
-    assertTrue(onSuccessCalled)
-    assertFalse(onErrorCalled)
-    assertEquals(1, fakeRequests.incomingRequestsFlow.value.size)
-    assertEquals("friend-123", fakeRequests.incomingRequestsFlow.value[0].fromUserId)
-
-    Dispatchers.resetMain()
-  }
-
-  @Test
   fun onAsk_failure_calls_onError_only() = runTest {
     val dispatcher = StandardTestDispatcher(testScheduler)
     Dispatchers.setMain(dispatcher)
@@ -242,5 +222,174 @@ class AddFriendViewModelTest {
 
     assertTrue(onErrorCalled)
     assertFalse(onSuccessCalled)
+  }
+
+  @Test
+  fun searchResult_userNotFriendAndNoRequest_relationIsAdd() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
+
+    val fakeFriends = FakeFriendsRepository()
+    val fakeRequests = FakeFriendRequestsRepository()
+    val fakeUserProfile = FakeUserProfileRepository()
+    val fakePseudo =
+        TestPseudoRepository().apply {
+          searchResults = listOf("alice")
+          uidMap["alice"] = "uid-alice"
+        }
+    fakeUserProfile.profiles["uid-alice"] =
+        UserProfile(
+            id = "uid-alice",
+            pseudo = "alice",
+            avatar = Avatar.A1,
+            GardeningSkill.NOVICE.name,
+            "rose")
+
+    val vm =
+        AddFriendViewModel(
+            friendsRepository = fakeFriends,
+            requestsRepository = fakeRequests,
+            userProfileRepository = fakeUserProfile,
+            pseudoRepository = fakePseudo)
+
+    vm.onQueryChange("al")
+    vm.onSearch(onError = {})
+
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+    assertEquals(FriendRelation.ADD, state.relations["uid-alice"])
+
+    Dispatchers.resetMain()
+  }
+
+  @Test
+  fun searchResult_userAlreadyFriend_relationIsAdded() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
+
+    val fakeFriends = FakeFriendsRepository().apply { friendsFlow.value = listOf("uid-alice") }
+    val fakeRequests = FakeFriendRequestsRepository()
+    val fakeUserProfile = FakeUserProfileRepository()
+    val fakePseudo =
+        TestPseudoRepository().apply {
+          searchResults = listOf("alice")
+          uidMap["alice"] = "uid-alice"
+        }
+    fakeUserProfile.profiles["uid-alice"] =
+        UserProfile(
+            id = "uid-alice",
+            pseudo = "alice",
+            avatar = Avatar.A1,
+            GardeningSkill.NOVICE.name,
+            "rose")
+
+    val vm =
+        AddFriendViewModel(
+            friendsRepository = fakeFriends,
+            requestsRepository = fakeRequests,
+            userProfileRepository = fakeUserProfile,
+            pseudoRepository = fakePseudo)
+
+    vm.onQueryChange("al")
+    vm.onSearch(onError = {})
+
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+    assertEquals(FriendRelation.ADDED, state.relations["uid-alice"])
+
+    Dispatchers.resetMain()
+  }
+
+  @Test
+  fun searchResult_outgoingRequestExists_relationIsPending() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
+
+    val fakeFriends = FakeFriendsRepository()
+    val fakeRequests =
+        FakeFriendRequestsRepository(
+            initialRequests =
+                listOf(FriendRequest(fromUserId = "test-user-id", toUserId = "uid-alice")))
+    val fakeUserProfile = FakeUserProfileRepository()
+    val fakePseudo =
+        TestPseudoRepository().apply {
+          searchResults = listOf("alice")
+          uidMap["alice"] = "uid-alice"
+        }
+    fakeUserProfile.profiles["uid-alice"] =
+        UserProfile(
+            id = "uid-alice",
+            pseudo = "alice",
+            avatar = Avatar.A1,
+            GardeningSkill.NOVICE.name,
+            "rose")
+
+    val vm =
+        AddFriendViewModel(
+            friendsRepository = fakeFriends,
+            requestsRepository = fakeRequests,
+            userProfileRepository = fakeUserProfile,
+            pseudoRepository = fakePseudo)
+
+    vm.onQueryChange("al")
+    vm.onSearch(onError = {})
+
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+    assertEquals(FriendRelation.PENDING, state.relations["uid-alice"])
+
+    Dispatchers.resetMain()
+  }
+
+  @Test
+  fun searchResult_incomingRequestExists_relationIsAddBack() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    Dispatchers.setMain(dispatcher)
+
+    val fakeFriends = FakeFriendsRepository()
+
+    val fakeRequests =
+        FakeFriendRequestsRepository(
+            initialRequests =
+                listOf(
+                    FriendRequest(
+                        fromUserId = "uid-alice",
+                        toUserId = "test-user-id",
+                    )))
+
+    val fakeUserProfile = FakeUserProfileRepository()
+    val fakePseudo =
+        TestPseudoRepository().apply {
+          searchResults = listOf("alice")
+          uidMap["alice"] = "uid-alice"
+        }
+
+    fakeUserProfile.profiles["uid-alice"] =
+        UserProfile(
+            id = "uid-alice",
+            pseudo = "alice",
+            avatar = Avatar.A1,
+            GardeningSkill.NOVICE.name,
+            "rose")
+
+    val vm =
+        AddFriendViewModel(
+            friendsRepository = fakeFriends,
+            requestsRepository = fakeRequests,
+            userProfileRepository = fakeUserProfile,
+            pseudoRepository = fakePseudo)
+
+    vm.onQueryChange("al")
+    vm.onSearch(onError = {})
+
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+    assertEquals(FriendRelation.ADDBACK, state.relations["uid-alice"])
+
+    Dispatchers.resetMain()
   }
 }

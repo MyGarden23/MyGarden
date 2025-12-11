@@ -8,14 +8,14 @@ This module:
 
 from enum import Enum
 from firebase_functions import scheduler_fn
+from firebase_functions import https_fn
 from firebase_admin import initialize_app, firestore, messaging
 from datetime import datetime, timezone, timedelta
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 import functools, random, logging, time
 
-
-# Initialize these globally, but with None, so they don't run on import
-app = None
+initialize_app()
+# Initialize the database globally, but with None, so it don't run on import
 db = None
 
 
@@ -74,9 +74,7 @@ def get_firestore_client():
     Returns:
         google.cloud.firestore.Client: The Firestore client instance
     """
-    global app, db
-    if app is None:
-        app = initialize_app()
+    global db
     if db is None:
         db = firestore.client()
     return db
@@ -93,12 +91,66 @@ def _get_user_token(uid: str) -> str | None:
     Returns:
         str | None: The FCM token if present and valid, else None
     """
+    db = get_firestore_client()
     doc = db.collection("users").document(uid).get()
     if not doc.exists:
         return None
     data = doc.to_dict() or {}
     token = data.get("fcmToken") or None
     return token if isinstance(token, str) else None
+
+def _send_friend_request_notification(target_uid: str, from_pseudo: str) -> bool:
+    """
+    Send a push notification to the user with UID `target_uid`
+    telling them that `from_pseudo` sent a friend request.
+
+    Args:
+        target_uid (str): The user receiving the friend request
+        from_pseudo (str): The pseudo of the user who sent the request
+
+    Returns:
+        bool: True if notification sent successfully, False otherwise
+    """
+    token = _get_user_token(target_uid)
+    if token is None:
+        logging.info(f"No valid FCM token found for user {target_uid}. No friend request notification sent.")
+        return False
+
+    message = messaging.Message(
+        token=token,
+        notification=messaging.Notification(
+            title="New Friend Request 🤝",
+            body=f"{from_pseudo} wants to be your friend!"
+        ),
+        data={
+            "type": "FRIEND_REQUEST",
+            "fromPseudo": from_pseudo,
+        }
+    )
+
+    return _send_fcm_notification(target_uid, message, "_send_friend_request_notification")
+
+
+
+@https_fn.on_call()
+def send_friend_request_notification(req: https_fn.CallableRequest):
+    """
+    Firebase Callable Function that the Android app calls.
+    It triggers sending a friend request push notification.
+    """
+    data = req.data
+    target_uid = data.get("targetUid")
+    from_pseudo = data.get("fromPseudo")
+
+    if not target_uid or not from_pseudo:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message="Missing targetUid or fromPseudo"
+        )
+
+    success = _send_friend_request_notification(target_uid, from_pseudo)
+    return { "success": success }
+
 
 def _send_water_notification(uid: str, plant_id: str, plant_name: str, new_status: PlantHealthStatus) -> bool:
     """
@@ -142,35 +194,69 @@ def _send_water_notification(uid: str, plant_id: str, plant_name: str, new_statu
         }
     )
 
+    return _send_fcm_notification(uid, message, "_send_water_notification")
+
+
+def _send_fcm_notification(
+    uid: str,
+    message: messaging.Message,
+    notification_context: str
+) -> bool:
+    """
+     Function that sends a FCM notification with retry logic, token cleanup, and logging.
+
+    Args:
+        uid (str): Target user ID
+        message (messaging.Message): FCM message
+        notification_context (str): Function that calls the notification (e.g. "friend_request", "water_status")
+
+    Returns:
+        bool: True if notification sent, False otherwise
+    """
     # Try to send the notification a maximum of MAX_RETRY_ATTEMPTS times
     for attempt in range(1, MAX_RETRY_ATTEMPTS + 1):
-        # Try to send the notification to the given token
+    # Try to send the notification to the given token
         try:
             response = messaging.send(message)
-            logging.info(f"Valid notification was sent to user {uid} on attempt {attempt} | response={response}")
+            logging.info(
+                f"[{notification_context}] Notification sent to {uid} "
+                f"on attempt {attempt} | response={response}"
+            )
             return True
 
         # If an UnregisteredError happens, the token is not valid -> delete from Firestore
         except messaging.UnregisteredError as e:
-            logging.warning(f"Token for user {uid} is no longer valid | error = {e}")
-            db.collection("users").document(uid).update({"fcmToken": firestore.DELETE_FIELD})
+            logging.warning(
+                f"[{notification_context}] Unregistered FCM token for user {uid} | {e}"
+            )
+            # Remove invalid token from Firestore
+            db.collection("users").document(uid).update({
+                "fcmToken": firestore.DELETE_FIELD
+            })
             return False
-        
-        # Only try again if the execption recieved is QuotaExceededError or InternalError
+
+        # Only try again if the exception received is QuotaExceededError or InternalError
         except (messaging.QuotaExceededError, messaging.InternalError) as e:
             if attempt < MAX_RETRY_ATTEMPTS:
-                logging.warning(f"Failed to send notification to user {uid} | error = {e}")
-                logging.warning(f"Try again: current attempt: {attempt}/{MAX_RETRY_ATTEMPTS}.")
+                logging.warning(
+                    f"[{notification_context}] Retryable error for user {uid}: {e} "
+                    f"| retry {attempt}/{MAX_RETRY_ATTEMPTS}"
+                )
 
                 # Try 1, 2 and 4 seconds later to let the system time to adapt (max 8s)
                 backoff_time = BACKOFF_SECONDS * (2 ** (attempt - 1))
                 time.sleep(min(backoff_time, 8))
             else:
-                logging.exception(f"Failed to send notification to user {uid} after {MAX_RETRY_ATTEMPTS} attempts | error = {e}")
+                logging.exception(
+                    f"[{notification_context}] Failed after {MAX_RETRY_ATTEMPTS} attempts "
+                    f"for user {uid} | {e}"
+                )
                 return False
 
         except Exception as e:
-            logging.exception(f"Failed to send notification to user {uid} | error = {e}")
+            logging.exception(
+                f"[{notification_context}] Unexpected error sending FCM to user {uid} | {e}"
+            )
             return False
 
 

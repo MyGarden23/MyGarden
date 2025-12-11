@@ -114,7 +114,9 @@ class NavigationS4TestsEditPlantFromPlantInfo {
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
 
     // Verify navigation to Garden screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
   }
 
   /**

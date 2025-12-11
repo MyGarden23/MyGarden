@@ -105,6 +105,9 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
     assertTrue(friends.contains(friend1))
     assertTrue(friends.contains(friend2))
     assertEquals(2, friends.size)
+
+    val isFriend = friendsRepo.isFriend(friend1)
+    assertTrue(isFriend)
   }
 
   @Test
