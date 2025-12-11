@@ -193,11 +193,15 @@
     <string name="offline_indicator_message">⚠️ You are offline. Some features are disabled.</string>
     <string name="offline_cannot_water_plants">Cannot water plants while offline</string>
     <string name="offline_cannot_add_plants">Cannot add plants while offline</string>
+    <string name="offline_cannot_add_friends">Cannot add friends while offline</string>
     <string name="offline_cannot_save_plant">Cannot save plant while offline</string>
     <string name="offline_cannot_delete_plant">Cannot delete plant while offline</string>
     <string name="offline_cannot_edit_profile">Cannot edit profile while offline</string>
     <string name="offline_cannot_save_profile">Cannot save profile while offline</string>
     <string name="offline_cannot_load_tips">Cannot load tips while offline</string>
+    <string name="offline_cannot_search_friends">Cannot search friends while offline</string>
+    <string name="offline_cannot_accept_or_reject_friends">Cannot accept or reject friend requests while offline</string>
+
 
     <!-- Friends Requests Screen -->
     <string name="request_screen_title">My Requests</string>

@@ -43,9 +43,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
+import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.ui.utils.OfflineMessages
+import com.android.mygarden.ui.utils.handleOfflineClick
 
 /** Contains all test tags used within the Add Friend screen UI. */
 object AddFriendTestTags {
@@ -96,6 +99,9 @@ fun AddFriendScreen(
 ) {
   val context = LocalContext.current
   val uiState by addFriendViewModel.uiState.collectAsState()
+  // Collect offline state
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
+
   Scaffold(
       topBar = {
         TopBar(
@@ -126,20 +132,33 @@ fun AddFriendScreen(
             Button(
                 modifier = Modifier.testTag(AddFriendTestTags.SEARCH_BUTTON),
                 onClick = {
-                  addFriendViewModel.onSearch({ // Start the research
-                    Toast.makeText(
-                            context,
-                            context.getString(R.string.error_failed_search),
-                            Toast.LENGTH_SHORT)
-                        .show()
-                  })
+                  handleOfflineClick(
+                      isOnline = isOnline,
+                      context = context,
+                      offlineMessageResId = OfflineMessages.CANNOT_SEARCH_FRIENDS,
+                      onlineAction = {
+                        addFriendViewModel.onSearch({ // Start the research
+                          Toast.makeText(
+                                  context,
+                                  context.getString(R.string.error_failed_search),
+                                  Toast.LENGTH_SHORT)
+                              .show()
+                        })
+                      })
                 },
-            ) {
-              Text(
-                  text = context.getString(R.string.search_button),
-                  maxLines = MAX_LINE,
-              )
-            }
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor =
+                            if (isOnline) {
+                              colorScheme.primaryContainer
+                            } else {
+                              colorScheme.surfaceVariant
+                            })) {
+                  Text(
+                      text = context.getString(R.string.search_button),
+                      maxLines = MAX_LINE,
+                      color = colorScheme.onPrimaryContainer)
+                }
           }
 
           // List of user results
