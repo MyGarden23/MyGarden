@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.offline.OfflineStateManager
@@ -15,10 +16,13 @@ import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeActivityRepository
 import com.android.mygarden.utils.FakeProfileRepository
+import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
@@ -74,6 +78,8 @@ class GardenScreenOfflineTests {
     ProfileRepositoryProvider.repository = profileRepo
     PlantsRepositoryProvider.repository = plantsRepo
     ActivityRepositoryProvider.repository = activityRepo
+    UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
 
     // Ensure we start with online state
     OfflineStateManager.setOnlineState(true)
@@ -101,7 +107,8 @@ class GardenScreenOfflineTests {
 
     composeTestRule.setContent {
       MyGardenTheme {
-        GardenScreen(callbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
+        ParentTabScreenGarden(
+            gardenCallbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
       }
     }
     composeTestRule.waitForIdle()
@@ -121,7 +128,7 @@ class GardenScreenOfflineTests {
 
     // Click the edit profile button
     composeTestRule
-        .onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON)
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
         .assertIsDisplayed()
         .performClick()
 

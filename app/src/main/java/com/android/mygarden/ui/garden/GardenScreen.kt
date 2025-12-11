@@ -1,7 +1,6 @@
 package com.android.mygarden.ui.garden
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WaterDrop
@@ -28,11 +26,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,13 +52,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.mygarden.R
-import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthCalculator
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.ui.navigation.NavigationTestTags
-import com.android.mygarden.ui.navigation.Screen
-import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.utils.OfflineMessages
@@ -71,9 +63,6 @@ import com.android.mygarden.ui.utils.handleOfflineClick
 
 /** Test tags to test the screen displays */
 object GardenScreenTestTags {
-  const val USER_PROFILE_PICTURE = "UserProfilePicture"
-  const val USERNAME = "Username"
-  const val EDIT_PROFILE_BUTTON = "EditProfileButton"
   const val GARDEN_LIST = "GardenList"
   const val EMPTY_GARDEN_MSG = "EmptyGardenMsg"
   const val EMPTY_FILTER_MSG = "EmptyFilterMsg"
@@ -110,11 +99,9 @@ data class PlantCardColorPalette(val backgroundColor: Color, val wateringColor: 
 
 // All paddings (excepts the spacers)
 private val PLANT_ITEM_HORIZONTAL_PADDING = 30.dp
-private val PROFILE_ROW_HORIZONTAL_PADDING = 30.dp
 private val EMPTY_LIST_MESSAGE_PADDING = 40.dp
 private val PLANT_CHARACTERISTICS_COL_HORIZONTAL_PADDING = 10.dp
 private val PLANT_CARD_INNER_ROW_PADDING = 12.dp
-private val LOGOUT_BUTTON_PADDING = 10.dp
 
 // Other used dimensions
 private val PLANT_LIST_ITEM_SPACING = 10.dp
@@ -126,11 +113,9 @@ private val WATER_BUTTON_BORDER_WIDTH = 2.dp
 private val WATER_BUTTON_DROP_ICON_SIZE = 20.dp
 private val WATER_BAR_HEIGHT = 14.dp
 private val WATER_BAR_WRAPPER_HEIGHT = 14.dp
-private val AVATAR_SIZE = 40.dp
 
 // Spacer heights
 private val SPACER_HEIGHT_SMALL = 12.dp
-private val SPACER_HEIGHT_MEDIUM = 16.dp
 private val SPACER_BETWEEN_NAME_LATIN = 10.dp
 
 // Font sizes
@@ -138,7 +123,6 @@ private val PLANT_NAME_FONT_SIZE = 20.sp
 private val PLANT_CARD_INFO_FONT_SIZE = 14.sp
 
 // Layout weights
-private const val SPACER_WEIGHT = 1f
 private const val PLANT_CHARACTERISTICS_WEIGHT = 1f
 
 // Water level bounds
@@ -173,6 +157,7 @@ data class GardenScreenCallbacks(
  * @param friendId optional ID of a friend whose garden to display (null for own garden)
  * @param isViewMode if true, disable edit buttons (for viewing a friend's garden)
  * @param callbacks callbacks for navigation and user actions
+ * @param isOnline whether the device is online (given by parent screen)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -182,16 +167,13 @@ fun GardenScreen(
     isViewMode: Boolean = false,
     gardenViewModel: GardenViewModel =
         viewModel(factory = GardenViewModelFactory(friendId = friendId)),
-    callbacks: GardenScreenCallbacks
+    callbacks: GardenScreenCallbacks,
+    isOnline: Boolean = true
 ) {
-
   val context = LocalContext.current
   val uiState by gardenViewModel.uiState.collectAsState()
   val plants = uiState.plants
   val filteredAndSortedPlants = uiState.filteredAndSortedPlants
-
-  // Collect offline state
-  val isOnline by OfflineStateManager.isOnline.collectAsState()
 
   // Fetch correct owned plants list at each recomposition of the screen
   LaunchedEffect(Unit) { gardenViewModel.refreshUIState() }
@@ -204,129 +186,29 @@ fun GardenScreen(
     }
   }
 
-  Scaffold(
-      modifier = modifier.testTag(NavigationTestTags.GARDEN_SCREEN),
-      // The top bar is only used to display the title of the screen
-      topBar = {
-        TopBar(
-            title = context.getString(Screen.Garden.nameResId),
-            hasGoBackButton = isViewMode,
-            hasSignOutButton = !isViewMode,
-            onGoBack = callbacks.onBackPressed,
-            onSignOut = callbacks.onSignOut)
-      },
-      // The button to add a new plant to the collection (hidden in view mode)
-      floatingActionButton = {
-        if (!isViewMode) {
-          AddPlantFloatingButton(callbacks.onAddPlant, modifier, isOnline)
-        }
-      },
-      floatingActionButtonPosition = FabPosition.Start,
-      containerColor = MaterialTheme.colorScheme.background,
-      content = { pd ->
-        Column(modifier = modifier.fillMaxWidth().padding(pd)) {
-          // Profile row with user profile picture, username and a button to edit the profile
-          ProfileRow(callbacks.onEditProfile, modifier, uiState, isOnline, isViewMode)
-          Spacer(modifier = modifier.height(SPACER_HEIGHT_MEDIUM))
+  Column(modifier = modifier.fillMaxWidth().testTag(NavigationTestTags.INTERNAL_GARDEN_SCREEN)) {
 
-          // Sort and filter bar - only show if there are plants in the garden
-          if (plants.isNotEmpty()) {
-            SortFilterBar(
-                currentSort = uiState.currentSortOption,
-                currentFilter = uiState.currentFilterOption,
-                onSortChange = { gardenViewModel.setSortOption(it) },
-                onFilterChange = { gardenViewModel.setFilterOption(it) },
-                modifier = modifier)
-            Spacer(modifier = modifier.height(SPACER_HEIGHT_SMALL))
-          }
+    // Sort and filter bar - only show if there are plants in the garden
+    if (plants.isNotEmpty()) {
+      SortFilterBar(
+          currentSort = uiState.currentSortOption,
+          currentFilter = uiState.currentFilterOption,
+          onSortChange = { gardenViewModel.setSortOption(it) },
+          onFilterChange = { gardenViewModel.setFilterOption(it) },
+          modifier = modifier)
+      Spacer(modifier = modifier.height(SPACER_HEIGHT_SMALL))
+    }
 
-          // Display the garden content (list or empty message)
-          GardenContent(
-              plants = plants,
-              filteredAndSortedPlants = filteredAndSortedPlants,
-              onPlantClick = callbacks.onPlantClick,
-              gardenViewModel = gardenViewModel,
-              modifier = modifier,
-              isOnline = isOnline,
-              isViewMode = isViewMode)
-        }
-      })
-}
-
-/**
- * The profile row with the user profile picture, its username and a button to edit the profile.
- *
- * @param onEditProfile the function to launch when the edit button is clicked on
- * @param modifier the modifier for the row
- * @param uiState the UI state
- * @param isOnline whether the device is online
- * @param isViewMode if true, hide the edit profile button (for viewing a friend's garden)
- */
-@Composable
-fun ProfileRow(
-    onEditProfile: () -> Unit,
-    modifier: Modifier = Modifier,
-    uiState: GardenUIState,
-    isOnline: Boolean,
-    isViewMode: Boolean = false
-) {
-  val context = LocalContext.current
-  Row(
-      modifier = modifier.fillMaxWidth().padding(horizontal = PROFILE_ROW_HORIZONTAL_PADDING),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          // User avatar
-          Card(
-              modifier =
-                  modifier
-                      .clip(CircleShape)
-                      .size(AVATAR_SIZE)
-                      .testTag(GardenScreenTestTags.USER_PROFILE_PICTURE)) {
-                Image(
-                    painter = painterResource(uiState.userAvatar.resId),
-                    contentDescription =
-                        context.getString(R.string.avatar_description, uiState.userAvatar.name),
-                    modifier = modifier.fillMaxSize())
-              }
-          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
-
-          // Username
-          Text(
-              modifier = modifier.testTag(GardenScreenTestTags.USERNAME),
-              color = MaterialTheme.colorScheme.primary,
-              fontWeight = FontWeight.Bold,
-              style = MaterialTheme.typography.titleLarge,
-              text = uiState.userName)
-          Spacer(modifier = modifier.weight(SPACER_WEIGHT))
-
-          // Edit profile button (hidden in view mode)
-          if (!isViewMode) {
-            IconButton(
-                modifier = modifier.testTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON),
-                onClick = {
-                  handleOfflineClick(
-                      isOnline = isOnline,
-                      context = context,
-                      offlineMessageResId = OfflineMessages.CANNOT_EDIT_PROFILE) {
-                        onEditProfile()
-                      }
-                }) {
-                  Icon(
-                      painter = painterResource(R.drawable.edit_icon),
-                      contentDescription = null,
-                      tint =
-                          if (isOnline) {
-                            MaterialTheme.colorScheme.primary
-                          } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                          })
-                }
-          } else {
-            Spacer(modifier = modifier.width(AVATAR_SIZE))
-          }
-        }
-      }
+    // Display the garden content (list or empty message)
+    GardenContent(
+        plants = plants,
+        filteredAndSortedPlants = filteredAndSortedPlants,
+        onPlantClick = callbacks.onPlantClick,
+        gardenViewModel = gardenViewModel,
+        modifier = modifier,
+        isOnline = isOnline,
+        isViewMode = isViewMode)
+  }
 }
 
 /**

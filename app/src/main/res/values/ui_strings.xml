@@ -215,8 +215,21 @@
     <string name="error_loading_friends">An error occurred while loading your friends.</string>
 
     <!-- Achievements Screen -->
+    <string name="achievements_screen_title">Achievements</string>
     <string name="plants_number_achievement">Plants number level: %1$s</string>
     <string name="friends_number_achievement">Friends number level: %1$</string>
     <string name="healthy_streak_achievement">Healthy streak level: %1$s</string>
+    <string name="level_for_achievement">Level %1$d/%2$d</string>
+    <string name="image_plants_number_achievement">Plants number achievement image</string>
+    <string name="image_friends_number_achievement">Friends number achievement image</string>
+    <string name="image_healthy_streak_achievement">Healthy streak achievement image</string>
+    <string name="level_for_achievement_info">Level %1$d of %2$d</string>
+    <string name="plants_number_description">This achievement tracks how many plants you have grown in your garden. Increase your total plant count to progress to higher levels!</string>
+    <string name="friends_number_description">This achievement tracks how many friends you have in MyGarden. Socialize and add new friends to progress to higher levels!</string>
+    <string name="healthy_streak_description">This achievement rewards you for keeping your plants healthy over multiple watering cycles. Grow a streak by keeping one of your plant healthy for as long as you can!</string>
+    <string name="plants_number_next_level">+ %1$d plants to reach Level %2$d</string>
+    <string name="friends_number_next_level">+ %1$d friends to reach Level %2$d</string>
+    <string name="healthy_streak_next_level">+ %1$d days to reach Level %2$d</string>
+    <string name="left_for_threshold">%1$d/%2$d</string>
 
 </resources>
