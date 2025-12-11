@@ -33,7 +33,6 @@ import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
 import com.android.mygarden.utils.RequiresCamera
 import com.android.mygarden.utils.TestPlants
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -117,10 +116,10 @@ class EndToEndEpic2 {
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
         .performClick()
-    runBlocking {
-      firebaseUtils.signIn()
-      firebaseUtils.waitForAuthReady()
-    }
+
+    firebaseUtils.signIn()
+    firebaseUtils.waitForAuthReady()
+
     // === NEW PROFILE SCREEN ===
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput(john)
