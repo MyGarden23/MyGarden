@@ -132,6 +132,29 @@ class EndToEndEpic2 {
       composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
     }
 
+    // === CRITICAL FIX: Visit Garden screen first to ensure UserProfile is properly loaded ===
+    // This ensures GardenViewModel initializes with the newly created user profile
+    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
+
+    // Wait for Garden screen to fully load with user profile
+    composeTestRule.waitUntil(TIMEOUT) {
+      try {
+        composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).isDisplayed()
+        true
+      } catch (e: AssertionError) {
+        false
+      }
+    }
+
+    // Verify user profile is displayed
+    composeTestRule
+        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .assertIsDisplayed()
+        .assertTextContains(user_pseudo)
+
+    // Now navigate to camera
+    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
+
     // === CAMERA SCREEN ===
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
 
