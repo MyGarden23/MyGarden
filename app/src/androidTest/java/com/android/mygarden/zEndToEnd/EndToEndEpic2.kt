@@ -1,6 +1,46 @@
 package com.android.mygarden.zEndToEnd
 
-/*
+import android.Manifest
+import android.util.Log
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
+import androidx.test.core.app.ActivityScenario
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
+import com.android.mygarden.MainActivity
+import com.android.mygarden.model.plant.PlantLocation
+import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.plant.testTag
+import com.android.mygarden.ui.authentication.SignInScreenTestTags
+import com.android.mygarden.ui.camera.CameraScreenTestTags
+import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
+import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
+import com.android.mygarden.ui.garden.GardenScreenTestTags
+import com.android.mygarden.ui.navigation.NavigationTestTags
+import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
+import com.android.mygarden.ui.profile.ProfileScreenTestTags
+import com.android.mygarden.utils.FakePlantRepositoryUtils
+import com.android.mygarden.utils.FirebaseUtils
+import com.android.mygarden.utils.PlantRepositoryType
+import com.android.mygarden.utils.RequiresCamera
+import com.android.mygarden.utils.TestPlants
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
 const val john = "John"
 const val doe = "Doe"
 const val user_pseudo = "pseudo"
@@ -50,9 +90,6 @@ class EndToEndEpic2 {
     Log.d("EndToEndEpic2", "Set up mock repo")
     fakePlantRepoUtils.setUpMockRepo()
     Log.d("EndToEndEpic2", "Set up the UserProfileRepository")
-    // Set up the UserProfileRepository but with the FirebaseFirestore of the emulators
-    UserProfileRepositoryProvider.resetForTest()
-    UserProfileRepositoryProvider.repository = UserProfileRepositoryFirestore(firebaseUtils.db)
 
     // Now launch the activity AFTER Firebase is cleaned up
     scenario = ActivityScenario.launch(MainActivity::class.java)
@@ -327,4 +364,3 @@ class EndToEndEpic2 {
     System.clearProperty("mygarden.e2e")
   }
 }
-*/
