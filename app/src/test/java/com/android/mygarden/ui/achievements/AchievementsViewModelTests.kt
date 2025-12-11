@@ -110,4 +110,126 @@ class AchievementsViewModelTests {
     assertEquals(Achievements.FRIENDS_NUMBER.computeLevel(friendsValue), state.friendsNumberLevel)
     assertEquals(Achievements.HEALTHY_STREAK.computeLevel(healthyValue), state.healthyStreakLevel)
   }
+
+  @Test
+  fun getCorrespondingLevelReturnsLevelFromGivenState() = runTest {
+    val viewModel = AchievementsViewModel(achievementsRepo = repository)
+
+    val customState =
+        AchievementsUIState(
+            plantsNumberLevel = 2,
+            friendsNumberLevel = 5,
+            healthyStreakLevel = 7,
+            plantsNumberValue = 10,
+            friendsNumberValue = 20,
+            healthyStreakValue = 30)
+
+    assertEquals(2, viewModel.getCorrespondingLevel(AchievementType.PLANTS_NUMBER, customState))
+    assertEquals(5, viewModel.getCorrespondingLevel(AchievementType.FRIENDS_NUMBER, customState))
+    assertEquals(7, viewModel.getCorrespondingLevel(AchievementType.HEALTHY_STREAK, customState))
+  }
+
+  @Test
+  fun getCorrespondingValueReturnsValueFromGivenState() = runTest {
+    val viewModel = AchievementsViewModel(achievementsRepo = repository)
+
+    val customState =
+        AchievementsUIState(
+            plantsNumberLevel = 1,
+            friendsNumberLevel = 1,
+            healthyStreakLevel = 1,
+            plantsNumberValue = 42,
+            friendsNumberValue = 17,
+            healthyStreakValue = 99)
+
+    assertEquals(42, viewModel.getCorrespondingValue(AchievementType.PLANTS_NUMBER, customState))
+    assertEquals(17, viewModel.getCorrespondingValue(AchievementType.FRIENDS_NUMBER, customState))
+    assertEquals(99, viewModel.getCorrespondingValue(AchievementType.HEALTHY_STREAK, customState))
+  }
+
+  @Test
+  fun getCorrespondingNextThresholdReturnsNextStrictlyGreaterThreshold() = runTest {
+    val viewModel = AchievementsViewModel(achievementsRepo = repository)
+
+    val thresholds = Achievements.PLANTS_NUMBER_THRESHOLDS
+    val currentValue = thresholds[0]
+    val expectedNext = thresholds[1]
+
+    val state =
+        AchievementsUIState(
+            plantsNumberLevel = 1,
+            friendsNumberLevel = 1,
+            healthyStreakLevel = 1,
+            plantsNumberValue = currentValue,
+            friendsNumberValue = 0,
+            healthyStreakValue = 0)
+
+    val next = viewModel.getCorrespondingNextThreshold(AchievementType.PLANTS_NUMBER, state)
+
+    assertEquals(expectedNext, next)
+  }
+
+  @Test
+  fun getCorrespondingNextThresholdReturnsMinusOneWhenBeyondLastThreshold() = runTest {
+    val viewModel = AchievementsViewModel(achievementsRepo = repository)
+
+    val plantsLast = Achievements.PLANTS_NUMBER_THRESHOLDS.last()
+    val friendsLast = Achievements.FRIENDS_NUMBER_THRESHOLDS.last()
+    val streakLast = Achievements.HEALTHY_STREAK_THRESHOLDS.last()
+
+    val state =
+        AchievementsUIState(
+            plantsNumberLevel = 1,
+            friendsNumberLevel = 1,
+            healthyStreakLevel = 1,
+            plantsNumberValue = plantsLast,
+            friendsNumberValue = friendsLast,
+            healthyStreakValue = streakLast)
+
+    assertEquals(-1, viewModel.getCorrespondingNextThreshold(AchievementType.PLANTS_NUMBER, state))
+    assertEquals(-1, viewModel.getCorrespondingNextThreshold(AchievementType.FRIENDS_NUMBER, state))
+    assertEquals(-1, viewModel.getCorrespondingNextThreshold(AchievementType.HEALTHY_STREAK, state))
+  }
+
+  @Test
+  fun getCorrespondingNeededForNextLevelReturnsDifferenceToNextThreshold() = runTest {
+    val viewModel = AchievementsViewModel(achievementsRepo = repository)
+
+    val thresholds = Achievements.PLANTS_NUMBER_THRESHOLDS
+    val currentValue = thresholds[0]
+    val nextThreshold = thresholds[1]
+    val expectedNeeded = nextThreshold - currentValue
+
+    val state =
+        AchievementsUIState(
+            plantsNumberLevel = 1,
+            friendsNumberLevel = 1,
+            healthyStreakLevel = 1,
+            plantsNumberValue = currentValue,
+            friendsNumberValue = 0,
+            healthyStreakValue = 0)
+
+    val needed = viewModel.getCorrespondingNeededForNextLevel(AchievementType.PLANTS_NUMBER, state)
+
+    assertEquals(expectedNeeded, needed)
+  }
+
+  @Test
+  fun getCorrespondingNeededForNextLevelReturnsMinusOneWhenNoHigherThreshold() = runTest {
+    val viewModel = AchievementsViewModel(achievementsRepo = repository)
+
+    val plantsLast = Achievements.PLANTS_NUMBER_THRESHOLDS.last()
+    val state =
+        AchievementsUIState(
+            plantsNumberLevel = 1,
+            friendsNumberLevel = 1,
+            healthyStreakLevel = 1,
+            plantsNumberValue = plantsLast,
+            friendsNumberValue = 0,
+            healthyStreakValue = 0)
+
+    val needed = viewModel.getCorrespondingNeededForNextLevel(AchievementType.PLANTS_NUMBER, state)
+
+    assertEquals(-1, needed)
+  }
 }
