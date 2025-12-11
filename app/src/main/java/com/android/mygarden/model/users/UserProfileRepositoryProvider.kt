@@ -7,23 +7,18 @@ import com.google.firebase.firestore.firestore
 // Basically, this gives easy access to one shared instance across the app.
 object UserProfileRepositoryProvider {
 
-  // Repository that we can override in tests
-  private var overrideRepo: UserProfileRepository? = null
+  // Lazily create the Firestore-backed repository when first used.
+  private val _repository: UserProfileRepository by lazy {
+    UserProfileRepositoryFirestore(Firebase.firestore)
+  }
 
-  // Instead of using `lazy`, we use a nullable field and initialize it on first access.
-  private var defaultRepo: UserProfileRepository? = null
+  // Repository that we can override in tests
+  private var _overrideRepositoryTest: UserProfileRepository? = null
 
   // Public reference to the current repository.
   var repository: UserProfileRepository
-    get() = overrideRepo ?: getOrCreateDefault()
+    get() = _overrideRepositoryTest ?: _repository
     set(value) {
-      overrideRepo = value
+      _overrideRepositoryTest = value
     }
-
-  private fun getOrCreateDefault(): UserProfileRepository {
-    if (defaultRepo == null) {
-      defaultRepo = UserProfileRepositoryFirestore(Firebase.firestore)
-    }
-    return defaultRepo!!
-  }
 }

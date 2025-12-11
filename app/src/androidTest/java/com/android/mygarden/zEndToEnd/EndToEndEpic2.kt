@@ -88,7 +88,6 @@ class EndToEndEpic2 {
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     Log.d("EndToEndEpic2", "Set up mock repo")
     fakePlantRepoUtils.setUpMockRepo()
-    Log.d("EndToEndEpic2", "Set up the UserProfileRepository")
 
     // Now launch the activity AFTER Firebase is cleaned up
     scenario = ActivityScenario.launch(MainActivity::class.java)
