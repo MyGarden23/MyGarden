@@ -11,16 +11,19 @@ object UserProfileRepositoryProvider {
   private var overrideRepo: UserProfileRepository? = null
 
   // Instead of using `lazy`, we use a nullable field and initialize it on first access.
-  private var _overrideRepositoryTest: UserProfileRepository? = null
+  private var defaultRepo: UserProfileRepository? = null
 
   // Public reference to the current repository.
   var repository: UserProfileRepository
     get() = overrideRepo ?: getOrCreateDefault()
     set(value) {
-      _overrideRepositoryTest = value
+      overrideRepo = value
     }
 
   private fun getOrCreateDefault(): UserProfileRepository {
-    return _overrideRepositoryTest ?: UserProfileRepositoryFirestore(Firebase.firestore)
+    if (defaultRepo == null) {
+      defaultRepo = UserProfileRepositoryFirestore(Firebase.firestore)
+    }
+    return defaultRepo!!
   }
 }
