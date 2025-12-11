@@ -172,7 +172,6 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
     val friends = friendsRepo.getFriends(currentUserId)
     assertEquals(2, friends.size)
 
-    // this will throw
     friendsRepo.deleteFriend("false-uid")
 
     val updatedFriends = friendsRepo.getFriends(currentUserId)

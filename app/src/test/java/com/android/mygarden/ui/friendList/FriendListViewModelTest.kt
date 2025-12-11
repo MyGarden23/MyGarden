@@ -11,7 +11,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -135,15 +134,13 @@ class FriendListViewModelTest {
     val fakeRequest = FakeFriendRequestsRepository()
 
     // initialize achievements so view model doesn't throw on delete
-    runBlocking {
-      fakeAchievements.initializeAchievementsForNewUser("fake-uid")
-      fakeAchievements.initializeAchievementsForNewUser("uid-alice")
-      fakeAchievements.initializeAchievementsForNewUser("uid-bob")
+    fakeAchievements.initializeAchievementsForNewUser("fake-uid")
+    fakeAchievements.initializeAchievementsForNewUser("uid-alice")
+    fakeAchievements.initializeAchievementsForNewUser("uid-bob")
 
-      fakeAchievements.updateAchievementValue("fake-uid", AchievementType.FRIENDS_NUMBER, 1)
-      fakeAchievements.updateAchievementValue("uid-alice", AchievementType.FRIENDS_NUMBER, 1)
-      fakeAchievements.updateAchievementValue("uid-bob", AchievementType.FRIENDS_NUMBER, 1)
-    }
+    fakeAchievements.updateAchievementValue("fake-uid", AchievementType.FRIENDS_NUMBER, 1)
+    fakeAchievements.updateAchievementValue("uid-alice", AchievementType.FRIENDS_NUMBER, 1)
+    fakeAchievements.updateAchievementValue("uid-bob", AchievementType.FRIENDS_NUMBER, 1)
 
     // Mock FirebaseAuth.currentUser
     val auth: FirebaseAuth = mock()

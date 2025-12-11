@@ -77,7 +77,7 @@ class FriendsRepositoryFirestore(
     // get current user id
     val currentUserId =
         auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
-    require(currentUserId != friendUserId) { "You cannot add yourself as a friend." }
+    require(currentUserId != friendUserId) { "You cannot delete yourself." }
 
     // get both documents we want to delete
     val currentDoc = friendsCollection(currentUserId).document(friendUserId)

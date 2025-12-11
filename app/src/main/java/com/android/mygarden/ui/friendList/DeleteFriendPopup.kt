@@ -111,7 +111,7 @@ fun DeleteFriendPopup(
 }
 
 /**
- * Template function for the two buttons of the DeletePlantPopup composable.
+ * Template function for the two buttons of the DeleteFriendPopup composable.
  *
  * @param onClick the callback called on click of the button
  * @param colors all the colors used for this button

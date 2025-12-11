@@ -122,7 +122,7 @@ class FriendRequestsRepositoryFirestore(
    * @throws IllegalArgumentException if request is not found, not pending, or user is not recipient
    *   (when not deleting a request only)
    */
-  private suspend fun withPendingRequestForRecipient(
+  private suspend fun handleRequest(
       requestId: String,
       isDeleting: Boolean = false,
       block:
@@ -174,7 +174,7 @@ class FriendRequestsRepositoryFirestore(
       onSuccess: suspend (fromUserId: String) -> Unit = {}
   ) {
     val fromUserId =
-        withPendingRequestForRecipient(requestId) { batch, currentUserId, fromUserId, _ ->
+        handleRequest(requestId) { batch, currentUserId, fromUserId, _ ->
           val requestRef = friendRequestsCollection(currentUserId).document(requestId)
           val requestRefOther = friendRequestsCollection(fromUserId).document(requestId)
 
@@ -195,7 +195,7 @@ class FriendRequestsRepositoryFirestore(
    * @throws Exception If the Firestore batch operation fails.
    */
   override suspend fun deleteRequest(requestId: String) {
-    withPendingRequestForRecipient(requestId, isDeleting = true) { batch, _, fromUserId, toUserId ->
+    handleRequest(requestId, isDeleting = true) { batch, _, fromUserId, toUserId ->
       val fromUserRef = friendRequestsCollection(fromUserId).document(requestId)
       val toUserRef = friendRequestsCollection(toUserId).document(requestId)
 
