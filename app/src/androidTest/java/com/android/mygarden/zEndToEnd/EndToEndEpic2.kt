@@ -112,7 +112,7 @@ class EndToEndEpic2 {
    * the plant -> Ensure the plant is not in the garden anymore.
    */
   @Test
-  fun test_end_to_end_epic_2() {
+  fun test_end_to_end_epic_2() = runTest {
     composeTestRule
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
@@ -208,7 +208,7 @@ class EndToEndEpic2 {
     composeTestRule.onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertIsDisplayed()
 
     // Get the list of ownedPlant in the repository
-    val listOfOwnedPlant = runBlocking { PlantsRepositoryProvider.repository.getAllOwnedPlants() }
+    val listOfOwnedPlant = PlantsRepositoryProvider.repository.getAllOwnedPlants()
 
     // Check that the plant is in the garden.
     assert(listOfOwnedPlant.size == 1)
@@ -298,7 +298,7 @@ class EndToEndEpic2 {
     }
 
     // Get the list of ownedPlant in the repository
-    val listOfOwnedPlant2 = runBlocking { PlantsRepositoryProvider.repository.getAllOwnedPlants() }
+    val listOfOwnedPlant2 = PlantsRepositoryProvider.repository.getAllOwnedPlants()
 
     // Check that the plant is in the garden.
     assert(listOfOwnedPlant2.size == 1)
@@ -358,7 +358,7 @@ class EndToEndEpic2 {
     }
 
     // Get the list of ownedPlant in the repository
-    val listOfOwnedPlant3 = runBlocking { PlantsRepositoryProvider.repository.getAllOwnedPlants() }
+    val listOfOwnedPlant3 = PlantsRepositoryProvider.repository.getAllOwnedPlants()
 
     // Check that there is no plant in the garden
     assert(listOfOwnedPlant3.isEmpty())
