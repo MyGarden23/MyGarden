@@ -159,6 +159,7 @@ jobs:
           else
             echo "firebase.json not found - skipping emulators (tests may fail)"
           fi
+
       # Run connected tests on the emulator
       - name: Run tests with camera
         uses: reactivecircus/android-emulator-runner@v2
@@ -230,7 +231,7 @@ jobs:
             
             # Run tests and capture exit code
             set +e
-            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.utils.RequiresCamera --stacktrace
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.utils.RequiresCamera,com.android.mygarden.utils.RequiresFirebaseFunctions --stacktrace
             TEST_EXIT_CODE=$?
             set -e
             
