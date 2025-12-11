@@ -6,16 +6,22 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
+import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.utils.FakeAchievementsRepository
+import com.android.mygarden.utils.FakeActivityRepository
+import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
@@ -78,8 +84,11 @@ class GardenFilterSortScreenTests {
 
   @Before
   fun setUp() {
-    // Set up fake profile repository
+    // Inject fake repositories needed for testing
     ProfileRepositoryProvider.repository = FakeProfileRepository()
+    UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
+    ActivityRepositoryProvider.repository = FakeActivityRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
 
     // Set up local plants repository for testing
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
@@ -128,7 +137,9 @@ class GardenFilterSortScreenTests {
   @Test
   fun allFilterOptionsHaveTestTags() {
     // Verify we're on Garden screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
     composeTestRule.waitForIdle()
 
     // Open filter dropdown
@@ -200,7 +211,9 @@ class GardenFilterSortScreenTests {
   @Test
   fun allSortOptionsHaveTestTags() {
     // Verify we're on Garden screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
     composeTestRule.waitForIdle()
 
     // Open sort dropdown and test "Plant Name" option
@@ -259,7 +272,9 @@ class GardenFilterSortScreenTests {
   @Test
   fun sortAndFilterDropdownsAreDisplayed() {
     // Verify we're on Garden screen
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
     composeTestRule.waitForIdle()
 
     // Verify sort and filter bar is displayed

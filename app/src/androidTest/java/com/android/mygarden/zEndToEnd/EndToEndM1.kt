@@ -20,7 +20,9 @@ import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
+import com.android.mygarden.ui.garden.GardenAchievementsParentScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
+import com.android.mygarden.ui.garden.GardenTab
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
@@ -215,19 +217,32 @@ class EndToEndM1 {
     // Verify navigation to garden after saving from EditPlant
     composeTestRule.waitForIdle()
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+      composeTestRule
+          .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+          .isDisplayed()
     }
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
 
     // Verify garden elements
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
+        .assertIsDisplayed()
     // assertExists and not assertIsDisplayed because the username is an empty string for this test.
     // Hence the Node exists but is not displayed
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).assertExists()
+
+    // Then verify both tabs in the parent screen
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.getTestTagForTab(GardenTab.GARDEN))
+        .assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(
+            GardenAchievementsParentScreenTestTags.getTestTagForTab(GardenTab.ACHIEVEMENTS))
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).assertExists()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.ADD_PLANT_FAB).assertIsDisplayed()
 
     // Test FAB navigation
@@ -239,7 +254,9 @@ class EndToEndM1 {
 
     // Test garden button
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
 
     // Test camera button
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()

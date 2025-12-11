@@ -20,6 +20,7 @@ import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
+import com.android.mygarden.ui.garden.GardenAchievementsParentScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
@@ -113,7 +114,7 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
     compose.waitForIdle()
 
     // Verify we're on the FriendGarden screen
-    compose.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    compose.onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN).assertIsDisplayed()
 
     // Verify friend's username is displayed
     compose.onNodeWithText(friendPseudo).assertIsDisplayed()
@@ -201,7 +202,7 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
   }
 
   @Test
-  fun friendGarden_editProfileButtonHidden() = runTest {
+  fun friendGarden_editProfileButtonIsNotEnabled() = runTest {
     compose.setContent {
       val navController = rememberNavController()
       AppNavHost(
@@ -211,8 +212,12 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
 
     compose.waitForIdle()
 
-    // Verify the Edit Profile button is not displayed
-    compose.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertDoesNotExist()
+    // Verify the Edit Profile button (i.e. the friend avatar) is not clickable to go and edit
+    compose
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
+        .assertIsDisplayed()
+        .performClick()
+    compose.onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN).assertIsDisplayed()
   }
 
   @Test
@@ -272,7 +277,7 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
     compose.onNodeWithText(friendPseudo).assertIsDisplayed()
 
     // Verify the avatar is displayed (we can't directly test Avatar but the profile row exists)
-    compose.onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertExists()
+    compose.onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE).assertExists()
   }
 
   @Test
@@ -341,7 +346,7 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
     compose.runOnIdle { assertTrue(currentRoute?.contains(Screen.FriendGarden.BASE) == true) }
 
     // Verify the friend's garden is displayed
-    compose.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    compose.onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN).assertIsDisplayed()
     compose.onNodeWithText(friendPseudo).assertIsDisplayed()
 
     // Verify plants are displayed

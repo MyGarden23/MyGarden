@@ -38,7 +38,7 @@ class NavigationS1Tests {
   @Composable
   fun FictionalGardenScreen(navActions: NavigationActions? = null) {
     Scaffold(
-        modifier = Modifier.testTag(NavigationTestTags.GARDEN_SCREEN),
+        modifier = Modifier.testTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN),
         bottomBar = {
           BottomBar(
               selectedPage = Page.Garden,
@@ -104,7 +104,9 @@ class NavigationS1Tests {
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
   }
 
@@ -112,14 +114,18 @@ class NavigationS1Tests {
   fun canNavigateFromCameraToProfileUsingBottomBar() {
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
   }
 
   @Test
   fun canNavigateFromProfileToCameraUsingBottomBar() {
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
   }
