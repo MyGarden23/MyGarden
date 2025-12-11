@@ -10,6 +10,7 @@ import com.google.firebase.firestore.WriteBatch
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
 
@@ -240,6 +241,28 @@ class FriendRequestsRepositoryFirestore(
   }
 
   /**
+   * Returns whether the current user has a pending outgoing friend request for the given user ID.
+   *
+   * @param targetUserId The UID of the user that we want to add.
+   * @return `true` if a pending outgoing request exists from this user, otherwise `false`.
+   */
+  override suspend fun isInOutgoingRequests(targetUserId: String): Boolean {
+    val requests = outgoingRequests().first()
+    return requests.any { it.toUserId == targetUserId }
+  }
+
+  /**
+   * Returns whether the target user has a pending outgoing friend request for the current user.
+   *
+   * @param targetUserId The UID of the user that we want to add.
+   * @return `true` if a pending outgoing request exists from this user, otherwise `false`.
+   */
+  override suspend fun isInIncomingRequests(targetUserId: String): Boolean {
+    val requests = incomingRequests().first()
+    return requests.any { it.fromUserId == targetUserId }
+  }
+
+  /**
    * Sends a friend request to another user.
    *
    * Creates the request in BOTH users' subcollections atomically using a WriteBatch:
@@ -252,11 +275,35 @@ class FriendRequestsRepositoryFirestore(
     require(currentUserId != targetUserId) { "Cannot send friend request to yourself" }
 
     try {
-      // Check if a request already exists
+      // check if there is an incoming request from target -> user
+      val incomingSnapshot =
+          friendRequestsCollection(currentUserId)
+              .whereEqualTo(FIELD_FROM_USER_ID, targetUserId)
+              .whereEqualTo(FIELD_TO_USER_ID, currentUserId)
+              .whereEqualTo(FIELD_STATUS, FriendRequestStatus.PENDING.name)
+              .limit(1)
+              .get()
+              .await()
+
+      if (!incomingSnapshot.isEmpty) {
+        // the other has already sent a request, we accepte
+        val requestDoc = incomingSnapshot.documents.first()
+        val requestId = requestDoc.id
+
+        acceptRequest(requestId)
+
+        Log.d(
+            "FriendRequestsRepo",
+            "Existing incoming friend request accepted and deleted; users are now friends")
+        return
+      }
+
+      // check if there already is an outgoing request from current user -> target user
       val existingRequests =
           friendRequestsCollection(currentUserId)
               .whereEqualTo(FIELD_FROM_USER_ID, currentUserId)
               .whereEqualTo(FIELD_TO_USER_ID, targetUserId)
+              .whereEqualTo(FIELD_STATUS, FriendRequestStatus.PENDING.name)
               .get()
               .await()
 
@@ -265,6 +312,7 @@ class FriendRequestsRepositoryFirestore(
         return
       }
 
+      // new request if none already exist
       val requestData =
           mapOf(
               FIELD_FROM_USER_ID to currentUserId,
@@ -273,7 +321,7 @@ class FriendRequestsRepositoryFirestore(
               FIELD_CREATED_AT to Timestamp.now(),
               FIELD_SEEN_BY_RECEIVER to false)
 
-      // Use WriteBatch to write to both subcollections atomically
+      // write to both collection with same id
       val batch = db.batch()
       val senderDoc = friendRequestsCollection(currentUserId).document()
       batch.set(senderDoc, requestData)

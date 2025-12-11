@@ -1,16 +1,20 @@
 package com.android.mygarden.ui.addFriend
 
+import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.core.app.ApplicationProvider
+import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPseudoRepository
@@ -27,29 +31,34 @@ class AddFriendScreenTests {
 
   @get:Rule val composeTestRule = createComposeRule()
 
-  /** Set the AddFriendScreen with a default viewModel. */
-  fun setupWithEmptyRepos() {
+  private val pseudoAlice = "alice"
+  private val uidAlice = "uid-alice"
+  private val currentUserId = "test-user-id" // même valeur que dans FakeFriendRequestsRepository
+
+  /** Sets the AddFriendScreen with a default ViewModel. */
+  private fun setupWithEmptyRepos() {
     composeTestRule.setContent {
       MyGardenTheme { AddFriendScreen(addFriendViewModel = createViewModel()) }
     }
   }
 
-  /** Set the AddFriendScreen with repositories containing the user alice. */
-  fun setupWithNotEmptyRepos() {
+  /** Base repositories where Alice can be found by search and has a valid profile. */
+  private fun buildBaseRepos():
+      Triple<TestPseudoRepository, FakeUserProfileRepository, FakeFriendsRepository> {
 
     val fakePseudo =
         TestPseudoRepository().apply {
           // User types "al", search returns "alice"
-          searchResults = listOf("alice")
-          uidMap["alice"] = "uid-alice"
+          searchResults = listOf(pseudoAlice)
+          uidMap[pseudoAlice] = uidAlice
         }
 
     val fakeUserProfile =
         FakeUserProfileRepository().apply {
-          profiles["uid-alice"] =
+          profiles[uidAlice] =
               UserProfile(
-                  id = "uid-alice",
-                  pseudo = "alice",
+                  id = uidAlice,
+                  pseudo = pseudoAlice,
                   avatar = Avatar.A1,
                   GardeningSkill.NOVICE.name,
                   "rose")
@@ -57,7 +66,13 @@ class AddFriendScreenTests {
 
     val fakeFriends = FakeFriendsRepository()
 
-    // Create the viewModel with the fake repos
+    return Triple(fakePseudo, fakeUserProfile, fakeFriends)
+  }
+
+  /** Alice is found, but no relation exists → button must display ADD. */
+  private fun setupWithAliceAndNoRelation() {
+    val (fakePseudo, fakeUserProfile, fakeFriends) = buildBaseRepos()
+
     val viewModel =
         createViewModel(
             friendsRepo = fakeFriends, userProfileRepo = fakeUserProfile, pseudoRepo = fakePseudo)
@@ -65,7 +80,46 @@ class AddFriendScreenTests {
     composeTestRule.setContent { MyGardenTheme { AddFriendScreen(addFriendViewModel = viewModel) } }
   }
 
-  /** Check that everything that should be displayed before searching is displayed. */
+  /** Alice is already a friend → button must display ADDED. */
+  private fun setupWithAliceAlreadyFriend() {
+    val (fakePseudo, fakeUserProfile, fakeFriends) = buildBaseRepos()
+
+    // Alice already present in the friend list
+    fakeFriends.friendsFlow.value = listOf(uidAlice)
+
+    val viewModel =
+        createViewModel(
+            friendsRepo = fakeFriends, userProfileRepo = fakeUserProfile, pseudoRepo = fakePseudo)
+
+    composeTestRule.setContent { MyGardenTheme { AddFriendScreen(addFriendViewModel = viewModel) } }
+  }
+
+  /** There is an outgoing pending request toward Alice → button must display PENDING. */
+  private fun setupWithAlicePendingRequest() {
+    val (fakePseudo, fakeUserProfile, fakeFriends) = buildBaseRepos()
+
+    // Simulate an outgoing request currentUserId -> uidAlice
+    val fakeRequests =
+        FakeFriendRequestsRepository(
+            initialRequests =
+                listOf(
+                    FriendRequest(
+                        fromUserId = currentUserId,
+                        toUserId = uidAlice,
+                    )))
+
+    val viewModel =
+        createViewModel(
+            friendsRepo = fakeFriends,
+            userProfileRepo = fakeUserProfile,
+            pseudoRepo = fakePseudo,
+            requestsRepo = fakeRequests,
+        )
+
+    composeTestRule.setContent { MyGardenTheme { AddFriendScreen(addFriendViewModel = viewModel) } }
+  }
+
+  /** Checks that all initial UI elements are displayed before searching. */
   @Test
   fun beforeSearchingEverythingIsDisplayed() {
     setupWithEmptyRepos()
@@ -75,46 +129,58 @@ class AddFriendScreenTests {
     composeTestRule.onNodeWithTag(AddFriendTestTags.FRIEND_COLUMN).assertIsDisplayed()
   }
 
-  /** Check that a FriendCard with all its elements is displayed when searching a correct pseudo. */
+  /** ADD: no relation exists → button must display ADD after searching. */
   @Test
-  fun afterSearchingAValidPseudo_FriendCardIsDisplayed() {
+  fun afterSearchingValidPseudo_whenNoRelation_buttonShowsAdd() {
+    setupWithAliceAndNoRelation()
 
-    setupWithNotEmptyRepos()
-
-    // Type "al"
     composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_TEXT).performTextInput("al")
-
-    // Click search
     composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_BUTTON).performClick()
-
     composeTestRule.waitForIdle()
 
-    val pseudo = "alice"
-
-    // Assert all the elements of the FriendCard for alice is displayed
-
     composeTestRule
-        .onNodeWithTag(AddFriendTestTags.getTestTagForFriendCard(pseudo))
+        .onNodeWithTag(AddFriendTestTags.getTestTagForFriendCard(pseudoAlice))
         .assertIsDisplayed()
 
-    composeTestRule
-        .onNodeWithTag(AddFriendTestTags.getTestTagForRowOnFriendCard(pseudo))
-        .assertIsDisplayed()
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val expectedText = context.getString(FriendRelation.ADD.labelRes)
 
     composeTestRule
-        .onNodeWithTag(AddFriendTestTags.getTestTagForAvatarOnFriendCard(pseudo))
-        .assertIsDisplayed()
+        .onNodeWithTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudoAlice))
+        .assertTextContains(expectedText)
+  }
+
+  /** ADDED: Alice is already a friend → button must display ADDED. */
+  @Test
+  fun afterSearchingValidPseudo_whenAlreadyFriend_buttonShowsAdded() {
+    setupWithAliceAlreadyFriend()
+
+    composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_TEXT).performTextInput("al")
+    composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val expectedText = context.getString(FriendRelation.ADDED.labelRes)
 
     composeTestRule
-        .onNodeWithTag(AddFriendTestTags.getTestTagForPseudoOnFriendCard(pseudo))
-        .assertIsDisplayed()
+        .onNodeWithTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudoAlice))
+        .assertTextContains(expectedText)
+  }
+
+  /** PENDING: an outgoing request exists → button must display PENDING. */
+  @Test
+  fun afterSearchingValidPseudo_whenPendingRequest_buttonShowsPending() {
+    setupWithAlicePendingRequest()
+
+    composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_TEXT).performTextInput("al")
+    composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val expectedText = context.getString(FriendRelation.PENDING.labelRes)
 
     composeTestRule
-        .onNodeWithTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudo))
-        .assertIsDisplayed()
-
-    composeTestRule
-        .onNodeWithTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudo))
-        .assertTextContains(FriendRelation.ADD.toString())
+        .onNodeWithTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(pseudoAlice))
+        .assertTextContains(expectedText)
   }
 }

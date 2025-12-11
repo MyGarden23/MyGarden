@@ -19,17 +19,33 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
 
   override fun outgoingRequests(): Flow<List<FriendRequest>> = MutableStateFlow(emptyList())
 
+  override suspend fun isInIncomingRequests(targetUserId: String): Boolean {
+    val requests = incomingRequestsFlow.value
+    return requests.any { it.fromUserId == targetUserId }
+  }
+
+  override suspend fun isInOutgoingRequests(targetUserId: String): Boolean {
+    val currentUserId = getCurrentUserId() ?: return false
+    val requests = incomingRequestsFlow.value
+    return requests.any { request ->
+      request.fromUserId == currentUserId && request.toUserId == targetUserId
+    }
+  }
+
   override suspend fun askFriend(targetUserId: String) {
+    val currentUserId = getCurrentUserId() ?: "test-user-id"
+
     if (targetUserId == "boom-user-id") {
       throw IllegalStateException("boom")
     } else {
       incomingRequestsFlow.value =
-          incomingRequestsFlow.value + FriendRequest(fromUserId = targetUserId)
+          incomingRequestsFlow.value +
+              FriendRequest(fromUserId = currentUserId, toUserId = targetUserId)
     }
   }
 
   override suspend fun acceptRequest(requestId: String) {
-    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
+    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
   }
 
   var markedSeen: MutableList<String> = mutableListOf()
@@ -39,7 +55,7 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
   }
 
   override suspend fun refuseRequest(requestId: String) {
-    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
+    incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
   }
 
   override suspend fun deleteRequest(requestId: String) {
