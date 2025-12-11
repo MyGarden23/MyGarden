@@ -132,21 +132,12 @@ fun ParentTabScreenGarden(
       modifier = modifier.testTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN),
       topBar = {
         // One common top bar for both tabs
-        CenterAlignedTopAppBar(
-            title = {
-              ProfileRow(
-                  gardenCallbacks.onEditProfile,
-                  gardenCallbacks.onSignOut,
-                  modifier,
-                  gardenUiState,
-                  isOnline,
-                  isViewMode)
-            },
-            navigationIcon = {
-              if (isViewMode) {
-                NavigationButton(gardenCallbacks.onBackPressed)
-              }
-            })
+        TopBarGardenParent(
+            gardenCallbacks = gardenCallbacks,
+            gardenUiState = gardenUiState,
+            isOnline = isOnline,
+            isViewMode = isViewMode,
+            modifier = modifier)
       },
       floatingActionButton = {
         // FAB only on Garden tab and only when not in view mode
@@ -161,43 +152,8 @@ fun ParentTabScreenGarden(
     Column(
         modifier = modifier.padding(innerPadding),
         verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING)) {
-          Surface(
-              modifier =
-                  modifier
-                      .padding(horizontal = TAB_EXTERNAL_HORIZONTAL_PADDING)
-                      .clip(RoundedCornerShape(TAB_SHAPE_PERCENTAGE)),
-              color = MaterialTheme.colorScheme.background,
-              tonalElevation = TAB_TONAL_ELEVATION) {
-                Row(
-                    modifier = modifier.height(TAB_HEIGHT).fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically) {
-                      GardenTab.entries.forEachIndexed { index, tab ->
-                        val selected = index == selectedTab.ordinal
-
-                        Box(
-                            modifier =
-                                modifier
-                                    .weight(FULL_WEIGHT)
-                                    .fillMaxHeight()
-                                    .padding(INSIDE_TAB_PADDING)
-                                    .clip(RoundedCornerShape(TAB_SHAPE_PERCENTAGE))
-                                    .clickable { selectedTab = tab }
-                                    .background(
-                                        if (selected) MaterialTheme.colorScheme.surface
-                                        else Color.Transparent)
-                                    .padding(horizontal = TAB_INTERNAL_HORIZONTAL_PADDING)
-                                    .testTag(
-                                        GardenAchievementsParentScreenTestTags.getTestTagForTab(
-                                            tab)),
-                            contentAlignment = Alignment.Center) {
-                              Text(
-                                  text = stringResource(tab.titleRes),
-                                  style = MaterialTheme.typography.bodyLarge,
-                                  fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
-                            }
-                      }
-                    }
-              }
+          TableRowGardenParent(
+              selectedTab = selectedTab, onTabClick = { selectedTab = it }, modifier = modifier)
 
           when (selectedTab) {
             GardenTab.GARDEN -> {
@@ -216,6 +172,97 @@ fun ParentTabScreenGarden(
           }
         }
   }
+}
+
+/**
+ * Top app bar used by the [ParentTabScreenGarden]. Displays the [ProfileRow] with the user's
+ * avatar, pseudo and sign-out button. Moreover, this composable shows a back navigation button when
+ * the screen is in view mode.
+ *
+ * @param gardenCallbacks Callbacks for navigation and actions in the Garden flow (editing profile,
+ *   signing out, navigating back, etc.).
+ * @param gardenUiState UI state of the garden used for the the profile row.
+ * @param isOnline Whether the device is currently online.
+ * @param isViewMode If true, displays the back button instead of the sign out button.
+ * @param modifier Optional modifier of the composable.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBarGardenParent(
+    gardenCallbacks: GardenScreenCallbacks,
+    gardenUiState: GardenUIState,
+    isOnline: Boolean,
+    isViewMode: Boolean,
+    modifier: Modifier = Modifier
+) {
+  CenterAlignedTopAppBar(
+      title = {
+        ProfileRow(
+            gardenCallbacks.onEditProfile,
+            gardenCallbacks.onSignOut,
+            modifier,
+            gardenUiState,
+            isOnline,
+            isViewMode)
+      },
+      navigationIcon = {
+        if (isViewMode) {
+          NavigationButton(gardenCallbacks.onBackPressed)
+        }
+      })
+}
+
+/**
+ * Tab row used by [ParentTabScreenGarden] to switch between the Garden/Achievements content. Render
+ * a smooth rounded-shaped TableRow with one tab per [GardenTab] entry.
+ *
+ * Each tab is tagged by the corresponding test tag (getTestTagForTab) for testing.
+ *
+ * @param selectedTab The currently selected [GardenTab].
+ * @param onTabClick Callback called when the user selects a tab.
+ * @param modifier Optional modifier of the composable.
+ */
+@Composable
+fun TableRowGardenParent(
+    selectedTab: GardenTab,
+    onTabClick: (GardenTab) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+  Surface(
+      modifier =
+          modifier
+              .padding(horizontal = TAB_EXTERNAL_HORIZONTAL_PADDING)
+              .clip(RoundedCornerShape(TAB_SHAPE_PERCENTAGE)),
+      color = MaterialTheme.colorScheme.background,
+      tonalElevation = TAB_TONAL_ELEVATION) {
+        Row(
+            modifier = modifier.height(TAB_HEIGHT).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically) {
+              GardenTab.entries.forEachIndexed { index, tab ->
+                val selected = index == selectedTab.ordinal
+
+                Box(
+                    modifier =
+                        modifier
+                            .weight(FULL_WEIGHT)
+                            .fillMaxHeight()
+                            .padding(INSIDE_TAB_PADDING)
+                            .clip(RoundedCornerShape(TAB_SHAPE_PERCENTAGE))
+                            .clickable { onTabClick(tab) }
+                            .background(
+                                if (selected) MaterialTheme.colorScheme.surface
+                                else Color.Transparent)
+                            .padding(horizontal = TAB_INTERNAL_HORIZONTAL_PADDING)
+                            .testTag(GardenAchievementsParentScreenTestTags.getTestTagForTab(tab)),
+                    contentAlignment = Alignment.Center) {
+                      Text(
+                          text = stringResource(tab.titleRes),
+                          style = MaterialTheme.typography.bodyLarge,
+                          fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                    }
+              }
+            }
+      }
 }
 
 /**
