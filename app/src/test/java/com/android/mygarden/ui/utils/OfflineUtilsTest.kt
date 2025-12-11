@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.android.mygarden.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -49,7 +50,7 @@ class OfflineUtilsTest {
 
     // Verify no toast was shown
     val toastText = ShadowToast.getTextOfLatestToast()
-    assertEquals("No toast should be shown when online", null, toastText)
+    assertNull("No toast should be shown when online", toastText)
   }
 
   /** Test that a toast is shown when offline */
