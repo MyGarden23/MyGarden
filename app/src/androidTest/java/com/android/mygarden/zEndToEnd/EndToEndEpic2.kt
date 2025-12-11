@@ -93,6 +93,7 @@ class EndToEndEpic2 {
     fakePlantRepoUtils.setUpMockRepo()
     Log.d("EndToEndEpic2", "Set up the UserProfileRepository")
     // Set up the UserProfileRepository but with the FirebaseFirestore of the emulators
+    UserProfileRepositoryProvider.resetForTest()
     UserProfileRepositoryProvider.repository = UserProfileRepositoryFirestore(firebaseUtils.db)
 
     // Now launch the activity AFTER Firebase is cleaned up
