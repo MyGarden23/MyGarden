@@ -15,9 +15,6 @@ private const val COLLECTION_USERS = "users"
 private const val COLLECTION_FRIENDS = "friends"
 private const val FIELD_FRIEND_UID = "friendUid"
 
-// Value used to update the number of friends
-private const val FRIEND_ACHIEVEMENT_INCREMENT_STEP = 1
-
 /**
  * Firestore-backed implementation of [FriendsRepository].
  *
