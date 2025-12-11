@@ -121,7 +121,11 @@ class AddFriendViewModel(
   }
 
   /**
-   * Asks the user [userId] to be friend. Note that the error handling
+   * Sends a friend request to [userId] and updates the local relation state immediately.
+   *
+   * If the current relation is ADDBACK, the user is marked as ADDED; otherwise the state becomes
+   * PENDING. On success, [onSuccess] is called; on failure, the relation reverts to ADD and
+   * [onError] is invoked.
    *
    * @param userId the user id of the one the current user wants to be friend with
    * @param onError Invoked if the operation fails for any reason.

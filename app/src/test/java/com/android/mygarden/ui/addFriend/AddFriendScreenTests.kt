@@ -35,19 +35,20 @@ class AddFriendScreenTests {
   private val uidAlice = "uid-alice"
   private val currentUserId = "test-user-id" // même valeur que dans FakeFriendRequestsRepository
 
-  /** Set the AddFriendScreen with a default viewModel. */
+  /** Sets the AddFriendScreen with a default ViewModel. */
   private fun setupWithEmptyRepos() {
     composeTestRule.setContent {
       MyGardenTheme { AddFriendScreen(addFriendViewModel = createViewModel()) }
     }
   }
 
-  /** Repos de base avec alice trouvable par recherche et avec un profil. */
+  /** Base repositories where Alice can be found by search and has a valid profile. */
   private fun buildBaseRepos():
       Triple<TestPseudoRepository, FakeUserProfileRepository, FakeFriendsRepository> {
+
     val fakePseudo =
         TestPseudoRepository().apply {
-          // User tape "al", search retourne "alice"
+          // User types "al", search returns "alice"
           searchResults = listOf(pseudoAlice)
           uidMap[pseudoAlice] = uidAlice
         }
@@ -68,7 +69,7 @@ class AddFriendScreenTests {
     return Triple(fakePseudo, fakeUserProfile, fakeFriends)
   }
 
-  /** Alice est trouvable, aucune relation → bouton doit afficher ADD. */
+  /** Alice is found, but no relation exists → button must display ADD. */
   private fun setupWithAliceAndNoRelation() {
     val (fakePseudo, fakeUserProfile, fakeFriends) = buildBaseRepos()
 
@@ -79,11 +80,11 @@ class AddFriendScreenTests {
     composeTestRule.setContent { MyGardenTheme { AddFriendScreen(addFriendViewModel = viewModel) } }
   }
 
-  /** Alice est déjà amie → bouton doit afficher ADDED. */
+  /** Alice is already a friend → button must display ADDED. */
   private fun setupWithAliceAlreadyFriend() {
     val (fakePseudo, fakeUserProfile, fakeFriends) = buildBaseRepos()
 
-    // alice déjà dans la friend list
+    // Alice already present in the friend list
     fakeFriends.friendsFlow.value = listOf(uidAlice)
 
     val viewModel =
@@ -93,11 +94,11 @@ class AddFriendScreenTests {
     composeTestRule.setContent { MyGardenTheme { AddFriendScreen(addFriendViewModel = viewModel) } }
   }
 
-  /** Il existe une requête sortante en attente vers alice → bouton doit afficher PENDING. */
+  /** There is an outgoing pending request toward Alice → button must display PENDING. */
   private fun setupWithAlicePendingRequest() {
     val (fakePseudo, fakeUserProfile, fakeFriends) = buildBaseRepos()
 
-    // On simule une requête sortante currentUserId -> uidAlice
+    // Simulate an outgoing request currentUserId -> uidAlice
     val fakeRequests =
         FakeFriendRequestsRepository(
             initialRequests =
@@ -118,7 +119,7 @@ class AddFriendScreenTests {
     composeTestRule.setContent { MyGardenTheme { AddFriendScreen(addFriendViewModel = viewModel) } }
   }
 
-  /** Check que tout ce qui doit être affiché avant la recherche est là. */
+  /** Checks that all initial UI elements are displayed before searching. */
   @Test
   fun beforeSearchingEverythingIsDisplayed() {
     setupWithEmptyRepos()
@@ -128,14 +129,12 @@ class AddFriendScreenTests {
     composeTestRule.onNodeWithTag(AddFriendTestTags.FRIEND_COLUMN).assertIsDisplayed()
   }
 
-  /** ADD : aucune relation → le bouton montre ADD après recherche. */
+  /** ADD: no relation exists → button must display ADD after searching. */
   @Test
   fun afterSearchingValidPseudo_whenNoRelation_buttonShowsAdd() {
     setupWithAliceAndNoRelation()
 
-    // Tape "al"
     composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_TEXT).performTextInput("al")
-    // Clique sur search
     composeTestRule.onNodeWithTag(AddFriendTestTags.SEARCH_BUTTON).performClick()
     composeTestRule.waitForIdle()
 
@@ -151,7 +150,7 @@ class AddFriendScreenTests {
         .assertTextContains(expectedText)
   }
 
-  /** ADDED : alice est déjà amie → le bouton montre ADDED. */
+  /** ADDED: Alice is already a friend → button must display ADDED. */
   @Test
   fun afterSearchingValidPseudo_whenAlreadyFriend_buttonShowsAdded() {
     setupWithAliceAlreadyFriend()
@@ -168,7 +167,7 @@ class AddFriendScreenTests {
         .assertTextContains(expectedText)
   }
 
-  /** PENDING : il y a une requête sortante vers alice → le bouton montre PENDING. */
+  /** PENDING: an outgoing request exists → button must display PENDING. */
   @Test
   fun afterSearchingValidPseudo_whenPendingRequest_buttonShowsPending() {
     setupWithAlicePendingRequest()
