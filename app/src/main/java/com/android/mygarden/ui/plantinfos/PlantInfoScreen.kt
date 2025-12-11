@@ -227,8 +227,8 @@ fun PlantInfosScreen(
                     colors =
                         if (isOnline) {
                           ButtonDefaults.buttonColors(
-                              containerColor = MaterialTheme.colorScheme.primary,
-                              contentColor = MaterialTheme.colorScheme.onPrimary)
+                              containerColor = MaterialTheme.colorScheme.primaryContainer,
+                              contentColor = MaterialTheme.colorScheme.onPrimaryContainer)
                         } else {
                           ButtonDefaults.buttonColors(
                               containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -343,6 +343,7 @@ private fun CareTipsDialog(uiState: PlantInfoUIState, onDismiss: () -> Unit) {
 private fun SavePlantBottomBar(
     uiState: PlantInfoUIState,
     onSavePlant: () -> Unit,
+    isOnline: Boolean
 ) {
   val context = LocalContext.current
   val testTagButton =
@@ -358,8 +359,15 @@ private fun SavePlantBottomBar(
             enabled = !uiState.isSaving,
             colors =
                 ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor =
+                        (if (isOnline) {
+                          MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                          MaterialTheme.colorScheme.surfaceVariant
+                        }),
+                    contentColor =
+                        if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant)) {
               if (uiState.isSaving) {
                 Row(
@@ -469,6 +477,7 @@ private fun PlantInfoBottomBar(
   val context = LocalContext.current
   SavePlantBottomBar(
       uiState = uiState,
+      isOnline = isOnline,
       onSavePlant = {
         handleOfflineClick(
             isOnline = isOnline,

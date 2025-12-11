@@ -62,6 +62,10 @@ private const val LOG_MSG_FIREBASE_AUTH_UNAVAILABLE = "FirebaseAuth unavailable;
 /** Dimensions */
 private val OFFLINE_INDICATOR_PADDING = 8.dp
 
+/** Offline indicator timing (in milliseconds) */
+private const val OFFLINE_INDICATOR_VISIBLE_DURATION = 2000L
+private const val OFFLINE_INDICATOR_HIDDEN_DURATION = 3000L
+
 class MainActivity : ComponentActivity() {
 
   companion object {
@@ -196,12 +200,25 @@ fun MyGardenApp(intent: Intent? = null) {
 /** Composable that displays an offline mode indicator at the top of the screen. */
 @Composable
 fun OfflineIndicator() {
-  Snackbar(
-      modifier = Modifier.padding(OFFLINE_INDICATOR_PADDING),
-      containerColor = MaterialTheme.colorScheme.errorContainer,
-      contentColor = MaterialTheme.colorScheme.onErrorContainer) {
-        Text(stringResource(R.string.offline_indicator_message))
-      }
+  var isVisible by remember { mutableStateOf(true) }
+
+  LaunchedEffect(Unit) {
+    while (true) {
+      isVisible = true
+      kotlinx.coroutines.delay(OFFLINE_INDICATOR_VISIBLE_DURATION)
+      isVisible = false
+      kotlinx.coroutines.delay(OFFLINE_INDICATOR_HIDDEN_DURATION)
+    }
+  }
+
+  if (isVisible) {
+    Snackbar(
+        modifier = Modifier.padding(OFFLINE_INDICATOR_PADDING),
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer) {
+          Text(stringResource(R.string.offline_indicator_message))
+        }
+  }
 }
 
 /**
