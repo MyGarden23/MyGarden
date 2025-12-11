@@ -46,4 +46,8 @@ class FakeFriendsRepository : FriendsRepository {
   }
 
   override fun friendsFlow(userId: String): Flow<List<String>> = friendsFlow
+
+  override suspend fun isFriend(friendUserId: String): Boolean {
+    return friendsFlow.value.contains(friendUserId)
+  }
 }

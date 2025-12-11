@@ -16,6 +16,13 @@ interface FriendsRepository {
   suspend fun addFriend(friendUserId: String)
 
   /**
+   * Checks whether the given user ID is in the current in-memory friends list.
+   *
+   * @param friendUserId The UID to check.
+   */
+  suspend fun isFriend(friendUserId: String): Boolean
+
+  /**
    * Deletes the friend relationship between currentUserId and friendUserId. Because it's
    * symmetrically implemented, it deletes it in both list of friends.
    *

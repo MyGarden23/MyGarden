@@ -188,6 +188,10 @@
     <string name="ask_friend_failed">Failed to ask %1$s to be your friend</string>
     <string name="add_enum">Add</string>
     <string name="added_enum">Added</string>
+    <string name="pending_enum">Pending</string>
+    <string name="add_back_enum">Add back</string>
+
+
 
     <!-- Offline Mode Messages -->
     <string name="offline_indicator_message">⚠️ You are offline. Some features are disabled.</string>
