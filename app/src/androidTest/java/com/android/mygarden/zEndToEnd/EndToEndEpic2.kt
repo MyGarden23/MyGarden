@@ -24,6 +24,7 @@ import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
+import com.android.mygarden.ui.garden.GardenAchievementsParentScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
@@ -137,7 +138,7 @@ class EndToEndEpic2 {
     // Wait for Garden screen to fully load with user profile
     composeTestRule.waitUntil(TIMEOUT) {
       try {
-        composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).isDisplayed()
+        composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
         true
       } catch (e: AssertionError) {
         false
@@ -146,7 +147,7 @@ class EndToEndEpic2 {
 
     // Verify user profile is displayed
     composeTestRule
-        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
         .assertIsDisplayed()
         .assertTextContains(user_pseudo)
 
@@ -200,10 +201,12 @@ class EndToEndEpic2 {
 
     // Check that the pseudo and the avatar are displayed
     composeTestRule
-        .onNodeWithTag(GardenScreenTestTags.USERNAME)
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
         .assertIsDisplayed()
         .assertTextContains(user_pseudo)
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
+        .assertIsDisplayed()
 
     // Get the list of ownedPlant in the repository
     val listOfOwnedPlant = PlantsRepositoryProvider.repository.getAllOwnedPlants()
@@ -292,7 +295,9 @@ class EndToEndEpic2 {
 
     // === GARDEN SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+      composeTestRule
+          .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+          .isDisplayed()
     }
 
     // Get the list of ownedPlant in the repository
@@ -352,7 +357,9 @@ class EndToEndEpic2 {
 
     // === GARDEN SCREEN ===
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+      composeTestRule
+          .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+          .isDisplayed()
     }
 
     // Get the list of ownedPlant in the repository
