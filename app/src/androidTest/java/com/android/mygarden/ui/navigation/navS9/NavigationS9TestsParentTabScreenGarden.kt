@@ -55,7 +55,7 @@ class NavigationS9TestsParentTabScreenGarden : FirestoreProfileTest() {
     composeTestRule.waitForIdle()
   }
 
-    /** Base case: start garden screen with garden content */
+  /** Base case: start garden screen with garden content */
   @Test
   fun gardenTabRowStartsInGardenScreen() {
     composeTestRule
@@ -67,7 +67,7 @@ class NavigationS9TestsParentTabScreenGarden : FirestoreProfileTest() {
         .assertIsNotDisplayed()
   }
 
-    /** Clicking on the tab row actually make the content change */
+  /** Clicking on the tab row actually make the content change */
   @Test
   fun gardenTabRowDoesSwitchBetweenGardenAndAchievements() {
     composeTestRule
@@ -96,7 +96,7 @@ class NavigationS9TestsParentTabScreenGarden : FirestoreProfileTest() {
         .assertIsDisplayed()
   }
 
-    /** The profile row that is in the parent screen stays with both content */
+  /** The profile row that is in the parent screen stays with both content */
   @Test
   fun profileRowInfoStaysInBothScreens() {
     composeTestRule
