@@ -4,7 +4,7 @@ import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.achievements.AchievementsRepository
 import com.android.mygarden.model.achievements.UserAchievementProgress
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * This fake repository is used in many tests to make sure there is no interaction with Firestore
@@ -15,6 +15,7 @@ class FakeAchievementsRepository : AchievementsRepository {
   override fun getCurrentUserId(): String = "fake-uid"
 
   val addedAchievements = mutableListOf<UserAchievementProgress>()
+  private val _flow = MutableStateFlow<List<UserAchievementProgress>>(emptyList())
 
   override suspend fun getUserAchievementProgress(
       userId: String,
@@ -24,7 +25,7 @@ class FakeAchievementsRepository : AchievementsRepository {
   }
 
   override fun getAllUserAchievementProgress(userId: String): Flow<List<UserAchievementProgress>> {
-    return flowOf(addedAchievements)
+    return _flow
   }
 
   override suspend fun setAchievementValue(
@@ -37,13 +38,18 @@ class FakeAchievementsRepository : AchievementsRepository {
       val v = addedAchievements[index]
       val newVal = v.copy(currentValue = value)
       addedAchievements[index] = newVal
+    } else {
+      addedAchievements.add(UserAchievementProgress(achievementType, value))
     }
+    _flow.value = addedAchievements.toList()
   }
 
   override suspend fun initializeAchievementsForNewUser(userId: String) {
+    addedAchievements.clear()
     for (type in AchievementType.entries) {
       addedAchievements.add(UserAchievementProgress(type, 0))
     }
+    _flow.value = addedAchievements.toList()
   }
 
   override suspend fun updateAchievementValue(

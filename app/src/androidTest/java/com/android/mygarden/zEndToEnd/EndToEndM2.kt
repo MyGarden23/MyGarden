@@ -24,6 +24,7 @@ import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.garden.GardenAchievementsParentScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
+import com.android.mygarden.ui.garden.GardenTab
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
@@ -137,10 +138,11 @@ class EndToEndM2 {
 
     // Verify both tabs are displayed
     composeTestRule
-        .onNodeWithTag(GardenAchievementsParentScreenTestTags.GARDEN_TAB)
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.getTestTagForTab(GardenTab.GARDEN))
         .assertIsDisplayed()
     composeTestRule
-        .onNodeWithTag(GardenAchievementsParentScreenTestTags.ACHIEVEMENTS_TAB)
+        .onNodeWithTag(
+            GardenAchievementsParentScreenTestTags.getTestTagForTab(GardenTab.ACHIEVEMENTS))
         .assertIsDisplayed()
 
     // goto edit profile screen

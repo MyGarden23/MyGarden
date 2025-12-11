@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +42,25 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
 import com.android.mygarden.model.achievements.ACHIEVEMENTS_LEVEL_NUMBER
 import com.android.mygarden.model.achievements.AchievementType
+import com.android.mygarden.ui.navigation.NavigationTestTags
+
+/** Object used for compose UI testing */
+object AchievementsScreenTestTags {
+  fun getTestTagForAchievementCard(achievementType: AchievementType) =
+      "AchievementCard_${achievementType.name}"
+
+  fun getTestTagForCardLevel(achievementType: AchievementType) =
+      "CurrentLevel_${achievementType.name}"
+
+  fun getTestTagForPopup(achievementType: AchievementType) =
+      "AchievementPopup_${achievementType.name}"
+
+  fun getTestTagClosingButton(achievementType: AchievementType) =
+      "ClosingDialogButton_${achievementType.name}"
+
+  fun getTestTagForRemainingUnits(achievementType: AchievementType) =
+      "RemainingUnits_${achievementType.name}"
+}
 
 // Padding constants
 private val COLUMN_VERTICAL_PADDING = 20.dp
@@ -81,7 +101,7 @@ private val DIALOG_REMAINING_FONT_SIZE = 14.sp
  * @param friendId Either the id of the friend we want to see the achievements or null for the
  *   current user.
  * @param viewModel The ViewModel providing the UI state and useful functions.
- * @param isOnline Whether the device is online (given by parent screen).
+ * @param isOnline Whether the device is online (given by parent screen with default value false).
  */
 @Composable
 fun AchievementsScreen(
@@ -89,24 +109,24 @@ fun AchievementsScreen(
     friendId: String? = null,
     viewModel: AchievementsViewModel =
         viewModel(factory = AchievementsViewModelFactory(friendId = friendId)),
-    isOnline: Boolean
+    isOnline: Boolean = true
 ) {
   val uiState by viewModel.uiState.collectAsState()
   var showAchievementInfo by remember { mutableStateOf<AchievementType?>(null) }
 
   Column(
-      modifier = modifier,
+      modifier = modifier.testTag(NavigationTestTags.INTERNAL_ACHIEVEMENTS_SCREEN),
       verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
       horizontalAlignment = Alignment.CenterHorizontally) {
         for (type in AchievementType.entries) {
           AchievementCard(
-              achievementType = type,
+              type = type,
               currentLevel = viewModel.getCorrespondingLevel(type, uiState),
               onClick = { showAchievementInfo = type })
           if (showAchievementInfo == type) {
             AchievementDialogInfo(
                 modifier = modifier,
-                achievementType = type,
+                type = type,
                 currentLevel = viewModel.getCorrespondingLevel(type, uiState),
                 currentValue = viewModel.getCorrespondingValue(type, uiState),
                 neededMore = viewModel.getCorrespondingNeededForNextLevel(type, uiState),
@@ -126,14 +146,14 @@ fun AchievementsScreen(
  *
  * @param modifier Optional modifier of the composable
  * @param onClick The callback that is being called when clicking the Card.
- * @param achievementType The given [AchievementType] for which the card is being created.
+ * @param type The given [AchievementType] for which the card is being created.
  * @param currentLevel The current level of the user to be displayed (from the UI state).
  */
 @Composable
 fun AchievementCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    achievementType: AchievementType,
+    type: AchievementType,
     currentLevel: Int,
 ) {
   Card(
@@ -142,21 +162,22 @@ fun AchievementCard(
               .fillMaxWidth()
               .height(ACHIEVEMENT_CARD_HEIGHT)
               .padding(horizontal = ACHIEVEMENT_CARD_HORIZONTAL_PADDING)
-              .clickable(onClick = onClick),
+              .clickable(onClick = onClick)
+              .testTag(AchievementsScreenTestTags.getTestTagForAchievementCard(type)),
       elevation = CardDefaults.cardElevation(defaultElevation = ACHIEVEMENT_CARD_ELEVATION),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)) {
         Row(
             modifier = Modifier.padding(INNER_CARD_PADDING),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(INNER_CARD_COLUMN_VERTICAL_PADDING)) {
-              ImageForAchievementType(achievementType = achievementType, modifier = modifier)
+              ImageForAchievementType(achievementType = type, modifier = modifier)
 
               Column(
                   modifier = Modifier.fillMaxHeight(),
                   verticalArrangement = Arrangement.SpaceAround,
                   horizontalAlignment = Alignment.Start) {
                     Text(
-                        text = achievementType.toString(),
+                        text = type.toString(),
                         fontWeight = FontWeight.Bold,
                         fontSize = ACHIEVEMENT_CARD_NAME_FONT_SIZE,
                         modifier = modifier.padding(top = ACHIEVEMENT_NAME_TOP_PADDING))
@@ -171,7 +192,10 @@ fun AchievementCard(
                                 R.string.level_for_achievement,
                                 currentLevel,
                                 ACHIEVEMENTS_LEVEL_NUMBER),
-                        fontWeight = FontWeight.Medium)
+                        fontWeight = FontWeight.Medium,
+                        modifier =
+                            modifier.testTag(
+                                AchievementsScreenTestTags.getTestTagForCardLevel(type)))
                   }
             }
       }
@@ -184,7 +208,7 @@ fun AchievementCard(
  * [AchievementCard].
  *
  * @param modifier Optional modifier of the composable.
- * @param achievementType The given [AchievementType] for which the dialog is being created.
+ * @param type The given [AchievementType] for which the dialog is being created.
  * @param currentLevel The current level in the given [AchievementType] (from the UI state).
  * @param currentValue The current raw value in the given [AchievementType] (from the UI state).
  * @param neededMore The number of units of progress needed to reach the next level.
@@ -194,7 +218,7 @@ fun AchievementCard(
 @Composable
 fun AchievementDialogInfo(
     modifier: Modifier = Modifier,
-    achievementType: AchievementType,
+    type: AchievementType,
     currentLevel: Int,
     currentValue: Int,
     neededMore: Int,
@@ -207,7 +231,11 @@ fun AchievementDialogInfo(
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
-        modifier = modifier.width(DIALOG_WIDTH).clip(RoundedCornerShape(DIALOG_ROUNDED_SHAPE))) {
+        modifier =
+            modifier
+                .width(DIALOG_WIDTH)
+                .clip(RoundedCornerShape(DIALOG_ROUNDED_SHAPE))
+                .testTag(AchievementsScreenTestTags.getTestTagForPopup(type))) {
           Column(
               modifier = modifier.padding(INNER_DIALOG_PADDING),
               horizontalAlignment = Alignment.CenterHorizontally,
@@ -222,17 +250,17 @@ fun AchievementDialogInfo(
                           modifier
                               .size(CLOSE_BUTTON_SIZE)
                               .align(Alignment.TopStart)
-                              .clickable(onClick = onDismiss))
-                  ImageForAchievementType(
-                      achievementType, modifier = modifier.align(Alignment.Center))
+                              .clickable(onClick = onDismiss)
+                              .testTag(AchievementsScreenTestTags.getTestTagClosingButton(type)))
+                  ImageForAchievementType(type, modifier = modifier.align(Alignment.Center))
                 }
 
                 Text(
-                    text = achievementType.toString(),
+                    text = type.toString(),
                     fontWeight = FontWeight.Bold,
                     fontSize = DIALOG_NAME_FONT_SIZE)
 
-                DescriptionForAchievementType(achievementType = achievementType)
+                DescriptionForAchievementType(achievementType = type)
 
                 Text(
                     text =
@@ -263,7 +291,7 @@ fun AchievementDialogInfo(
                   }
                 }
                 if (neededMore > 0) {
-                  RemainingProgressForAchievementType(achievementType, neededMore, currentLevel + 1)
+                  RemainingProgressForAchievementType(type, neededMore, currentLevel + 1, modifier)
                 }
               }
         }
@@ -362,12 +390,14 @@ fun DescriptionForAchievementType(achievementType: AchievementType) {
  *   displayed.
  * @param neededMore The number of units of progress needed to reach next level.
  * @param nextLevel The next level that can be reached by the user.
+ * @param modifier Optional modifier of the composable.
  */
 @Composable
 fun RemainingProgressForAchievementType(
     achievementType: AchievementType,
     neededMore: Int,
-    nextLevel: Int
+    nextLevel: Int,
+    modifier: Modifier = Modifier
 ) {
   val text =
       when (achievementType) {
@@ -378,5 +408,9 @@ fun RemainingProgressForAchievementType(
         AchievementType.HEALTHY_STREAK ->
             stringResource(R.string.healthy_streak_next_level, neededMore, nextLevel)
       }
-  Text(text = text, fontWeight = FontWeight.Medium)
+  Text(
+      text = text,
+      fontWeight = FontWeight.Medium,
+      modifier =
+          modifier.testTag(AchievementsScreenTestTags.getTestTagForRemainingUnits(achievementType)))
 }

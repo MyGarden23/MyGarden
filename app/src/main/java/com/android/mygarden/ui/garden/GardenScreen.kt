@@ -55,6 +55,7 @@ import com.android.mygarden.R
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthCalculator
 import com.android.mygarden.model.plant.PlantHealthStatus
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.utils.OfflineMessages
@@ -167,7 +168,7 @@ fun GardenScreen(
     gardenViewModel: GardenViewModel =
         viewModel(factory = GardenViewModelFactory(friendId = friendId)),
     callbacks: GardenScreenCallbacks,
-    isOnline: Boolean = false
+    isOnline: Boolean = true
 ) {
   val context = LocalContext.current
   val uiState by gardenViewModel.uiState.collectAsState()
@@ -185,7 +186,7 @@ fun GardenScreen(
     }
   }
 
-  Column(modifier = modifier.fillMaxWidth()) {
+  Column(modifier = modifier.fillMaxWidth().testTag(NavigationTestTags.INTERNAL_GARDEN_SCREEN)) {
 
     // Sort and filter bar - only show if there are plants in the garden
     if (plants.isNotEmpty()) {
