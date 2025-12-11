@@ -106,6 +106,10 @@
     <string name="delete_plant_description">This action can’t be undone.</string>
     <string name="keep_button_text">Keep in my garden</string>
 
+    <!-- Delete Friend Pop Up -->
+    <string name="delete_friend_title">Delete %1$s?</string>
+    <string name="delete_friend_description">You can request them again afterwards</string>
+    <string name="keep_friend_button_text">Keep as friend</string>
 
     <!-- Profile Screen Base -->
     <string name="avatar_picture_description">Profile Avatar</string>
@@ -211,7 +215,7 @@
 
     <!-- Friend List Screen -->
     <string name="friend_list_no_friend">You don’t have any friend for the moment. You can see them once you have added them!</string>
-    <string name="friend_list_plant_icon_description">Open friend garden</string>
+    <string name="friend_list_bin_icon_description">Delete this friend button</string>
     <string name="error_loading_friends">An error occurred while loading your friends.</string>
 
     <!-- Achievements Screen -->

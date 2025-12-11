@@ -40,6 +40,11 @@ class FakeFriendsRepository : FriendsRepository {
     friendsFlow.value = friendsFlow.value + friendUserId
   }
 
+  override suspend fun deleteFriend(friendUserId: String) {
+    addedFriends -= friendUserId
+    friendsFlow.value = friendsFlow.value - friendUserId
+  }
+
   override fun friendsFlow(userId: String): Flow<List<String>> = friendsFlow
 
   override suspend fun isFriend(friendUserId: String): Boolean {

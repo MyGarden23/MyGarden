@@ -1,16 +1,22 @@
 package com.android.mygarden.ui.friendList
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeAchievementsRepository
+import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,14 +37,29 @@ class FriendListScreenTests {
   ): FriendListViewModel {
     val fakeFriends = FakeFriendsRepository().apply { friendsFlow.value = friends }
     val fakeProfiles = FakeUserProfileRepository().apply { this.profiles.putAll(profiles) }
-
+    val fakeRequest = FakeFriendRequestsRepository()
+    val fakeAchievements = FakeAchievementsRepository()
     val auth: FirebaseAuth = mock()
     val user: FirebaseUser = mock()
     whenever(auth.currentUser).thenReturn(user)
     whenever(user.uid).thenReturn("current-user-id")
 
+    runBlocking {
+      fakeAchievements.initializeAchievementsForNewUser("fake-uid")
+      fakeAchievements.initializeAchievementsForNewUser("uid-alice")
+      fakeAchievements.initializeAchievementsForNewUser("uid-bob")
+
+      fakeAchievements.updateAchievementValue("fake-uid", AchievementType.FRIENDS_NUMBER, 1)
+      fakeAchievements.updateAchievementValue("uid-alice", AchievementType.FRIENDS_NUMBER, 1)
+      fakeAchievements.updateAchievementValue("uid-bob", AchievementType.FRIENDS_NUMBER, 1)
+    }
+
     return FriendListViewModel(
-        friendsRepository = fakeFriends, userProfileRepository = fakeProfiles, auth = auth)
+        friendsRepository = fakeFriends,
+        userProfileRepository = fakeProfiles,
+        requestRepo = fakeRequest,
+        auth = auth,
+        achievementsRepo = fakeAchievements)
   }
 
   /** Setup with an empty list of friends. */
@@ -83,5 +104,75 @@ class FriendListScreenTests {
     // Pseudos are visible
     composeTestRule.onNodeWithText("Alice").assertIsDisplayed()
     composeTestRule.onNodeWithText("Bob").assertIsDisplayed()
+  }
+
+  @Test
+  fun allFriendsHaveDeleteButton() {
+    setupWithFriends()
+
+    composeTestRule
+        .onNodeWithTag(FriendListScreenTestTags.getDelButtonForFriend("uid-alice"))
+        .assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(FriendListScreenTestTags.getDelButtonForFriend("uid-bob"))
+        .assertIsDisplayed()
+  }
+
+  @Test
+  fun clickingOnDeleteButtonDisplaysPopup() {
+    setupWithFriends()
+
+    // click on del button
+    composeTestRule
+        .onNodeWithTag(FriendListScreenTestTags.getDelButtonForFriend("uid-alice"))
+        .performClick()
+
+    // all components of popup
+    composeTestRule.onNodeWithTag(DeleteFriendPopupTestTags.POPUP).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(DeleteFriendPopupTestTags.DELETE_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(DeleteFriendPopupTestTags.CANCEL_BUTTON).assertIsDisplayed()
+  }
+
+  @Test
+  fun popupCancelButtonsDismissesPopup() {
+    setupWithFriends()
+
+    // click on del button
+    composeTestRule
+        .onNodeWithTag(FriendListScreenTestTags.getDelButtonForFriend("uid-alice"))
+        .performClick()
+    // click on cancel popup
+    composeTestRule.onNodeWithTag(DeleteFriendPopupTestTags.CANCEL_BUTTON).performClick()
+
+    // verify display
+    composeTestRule
+        .onNodeWithTag(FriendListScreenTestTags.getDelButtonForFriend("uid-alice"))
+        .assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(FriendListScreenTestTags.getDelButtonForFriend("uid-bob"))
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(DeleteFriendPopupTestTags.POPUP).assertIsNotDisplayed()
+  }
+
+  @Test
+  fun popupConfirmButtonDismissesPopupAndRemoveFriend() {
+    setupWithFriends()
+
+    // click on del button
+    composeTestRule
+        .onNodeWithTag(FriendListScreenTestTags.getDelButtonForFriend("uid-alice"))
+        .performClick()
+    // click on confirm button
+    composeTestRule.onNodeWithTag(DeleteFriendPopupTestTags.DELETE_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+
+    // verify display
+    composeTestRule
+        .onNodeWithTag(FriendListScreenTestTags.getDelButtonForFriend("uid-alice"))
+        .assertIsNotDisplayed()
+    composeTestRule
+        .onNodeWithTag(FriendListScreenTestTags.getDelButtonForFriend("uid-bob"))
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(DeleteFriendPopupTestTags.POPUP).assertIsNotDisplayed()
   }
 }
