@@ -17,11 +17,9 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
-import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.plant.testTag
-import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
@@ -31,9 +29,7 @@ import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
-import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakePlantRepositoryUtils
-import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
 import com.android.mygarden.utils.RequiresCamera
@@ -94,8 +90,6 @@ class EndToEndEpic2 {
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     Log.d("EndToEndEpic2", "Set up mock repo")
     fakePlantRepoUtils.setUpMockRepo()
-    UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
-    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
 
     // Now launch the activity AFTER Firebase is cleaned up
     scenario = ActivityScenario.launch(MainActivity::class.java)
@@ -179,7 +173,6 @@ class EndToEndEpic2 {
         composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).assertIsDisplayed()
         composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).assertIsDisplayed()
-
         composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
 
         // === PLANT INFO SCREEN ===
@@ -210,7 +203,9 @@ class EndToEndEpic2 {
 
         // Wait for the garden list to appear
         composeTestRule.waitUntil(TIMEOUT) {
-          composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).isDisplayed()
+          composeTestRule
+              .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+              .isDisplayed()
         }
 
         // Check that the pseudo and the avatar are displayed
