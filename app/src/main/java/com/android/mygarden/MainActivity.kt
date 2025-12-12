@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -385,6 +387,22 @@ private fun NewFriendRequestPopup(
     friendRequestPopupVM: FriendsRequestsPopupViewModel = viewModel(),
 ) {
   var currentFriendRequest by remember { mutableStateOf<FriendRequestUiModel?>(null) }
+
+  val lifecycle = ProcessLifecycleOwner.get().lifecycle
+
+  DisposableEffect(Unit) {
+    val observer =
+        object : DefaultLifecycleObserver {
+
+          override fun onStart(owner: LifecycleOwner) {
+            // App is returning to foreground → clear all queued popup data
+            currentFriendRequest = null
+          }
+        }
+
+    lifecycle.addObserver(observer)
+    onDispose { lifecycle.removeObserver(observer) }
+  }
 
   LaunchedEffect(Unit) {
     friendRequestPopupVM.newRequests.collect { friendRequestUIModel ->
