@@ -77,7 +77,7 @@ class EndToEndEpic2 {
   private val newMockPlant = TestPlants.samplePlant1
 
   private val firebaseUtils: FirebaseUtils = FirebaseUtils()
-  private val fakePlantRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoFirestore)
+  private val fakePlantRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoLocal)
 
   private lateinit var scenario: ActivityScenario<MainActivity>
 
