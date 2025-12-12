@@ -8,14 +8,14 @@ This module:
 
 from enum import Enum
 from firebase_functions import scheduler_fn
-from firebase_functions import https_fn
+from firebase_functions import https_fn, options
 from firebase_admin import initialize_app, firestore, messaging
 from datetime import datetime, timezone, timedelta
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 import functools, random, logging, time
 
 initialize_app()
-# Initialize the database globally, but with None, so it don't run on import
+# Initialize these globally, but with None, so they don't run on import
 db = None
 
 
@@ -123,13 +123,43 @@ def _send_friend_request_notification(target_uid: str, from_pseudo: str) -> bool
             body=f"{from_pseudo} wants to be your friend!"
         ),
         data={
-            "type": "FRIEND_REQUEST",
+                "type": "FRIEND_REQUEST",
             "fromPseudo": from_pseudo,
         }
     )
 
-    return _send_fcm_notification(target_uid, message, "_send_friend_request_notification")
+    for attempt in range(1, MAX_RETRY_ATTEMPTS + 1):
+        try:
+            response = messaging.send(message)
+            logging.info(
+                f"Friend request notification sent to {target_uid} "
+                f"on attempt {attempt} | response={response}"
+            )
+            return True
 
+        except messaging.UnregisteredError as e:
+            logging.warning(f"Unregistered token for user {target_uid} | {e}")
+            db.collection("users").document(target_uid).update({"fcmToken": firestore.DELETE_FIELD})
+            return False
+
+        except (messaging.QuotaExceededError, messaging.InternalError) as e:
+            if attempt < MAX_RETRY_ATTEMPTS:
+                logging.warning(
+                    f"Failed to send friend request notification to {target_uid}: {e} "
+                    f"| retry {attempt}/{MAX_RETRY_ATTEMPTS}"
+                )
+                backoff_time = BACKOFF_SECONDS * (2 ** (attempt - 1))
+                time.sleep(min(backoff_time, 8))
+            else:
+                logging.exception(
+                    f"Failed to send friend request notification to user {target_uid} "
+                    f"after {MAX_RETRY_ATTEMPTS} attempts | {e}"
+                )
+                return False
+
+        except Exception as e:
+            logging.exception(f"Error sending friend request notification to {target_uid} | {e}")
+            return False
 
 
 @https_fn.on_call()
@@ -194,69 +224,35 @@ def _send_water_notification(uid: str, plant_id: str, plant_name: str, new_statu
         }
     )
 
-    return _send_fcm_notification(uid, message, "_send_water_notification")
-
-
-def _send_fcm_notification(
-    uid: str,
-    message: messaging.Message,
-    notification_context: str
-) -> bool:
-    """
-     Function that sends a FCM notification with retry logic, token cleanup, and logging.
-
-    Args:
-        uid (str): Target user ID
-        message (messaging.Message): FCM message
-        notification_context (str): Function that calls the notification (e.g. "friend_request", "water_status")
-
-    Returns:
-        bool: True if notification sent, False otherwise
-    """
     # Try to send the notification a maximum of MAX_RETRY_ATTEMPTS times
     for attempt in range(1, MAX_RETRY_ATTEMPTS + 1):
-    # Try to send the notification to the given token
+        # Try to send the notification to the given token
         try:
             response = messaging.send(message)
-            logging.info(
-                f"[{notification_context}] Notification sent to {uid} "
-                f"on attempt {attempt} | response={response}"
-            )
+            logging.info(f"Valid notification was sent to user {uid} on attempt {attempt} | response={response}")
             return True
 
         # If an UnregisteredError happens, the token is not valid -> delete from Firestore
         except messaging.UnregisteredError as e:
-            logging.warning(
-                f"[{notification_context}] Unregistered FCM token for user {uid} | {e}"
-            )
-            # Remove invalid token from Firestore
-            db.collection("users").document(uid).update({
-                "fcmToken": firestore.DELETE_FIELD
-            })
+            logging.warning(f"Token for user {uid} is no longer valid | error = {e}")
+            db.collection("users").document(uid).update({"fcmToken": firestore.DELETE_FIELD})
             return False
-
-        # Only try again if the exception received is QuotaExceededError or InternalError
+        
+        # Only try again if the execption recieved is QuotaExceededError or InternalError
         except (messaging.QuotaExceededError, messaging.InternalError) as e:
             if attempt < MAX_RETRY_ATTEMPTS:
-                logging.warning(
-                    f"[{notification_context}] Retryable error for user {uid}: {e} "
-                    f"| retry {attempt}/{MAX_RETRY_ATTEMPTS}"
-                )
+                logging.warning(f"Failed to send notification to user {uid} | error = {e}")
+                logging.warning(f"Try again: current attempt: {attempt}/{MAX_RETRY_ATTEMPTS}.")
 
                 # Try 1, 2 and 4 seconds later to let the system time to adapt (max 8s)
                 backoff_time = BACKOFF_SECONDS * (2 ** (attempt - 1))
                 time.sleep(min(backoff_time, 8))
             else:
-                logging.exception(
-                    f"[{notification_context}] Failed after {MAX_RETRY_ATTEMPTS} attempts "
-                    f"for user {uid} | {e}"
-                )
+                logging.exception(f"Failed to send notification to user {uid} after {MAX_RETRY_ATTEMPTS} attempts | error = {e}")
                 return False
 
         except Exception as e:
-            logging.exception(
-                f"[{notification_context}] Unexpected error sending FCM to user {uid} | {e}"
-            )
+            logging.exception(f"Failed to send notification to user {uid} | error = {e}")
             return False
 
 
