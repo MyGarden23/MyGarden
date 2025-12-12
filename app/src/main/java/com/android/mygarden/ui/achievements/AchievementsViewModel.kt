@@ -205,16 +205,16 @@ class AchievementsViewModel(
  * Factory for creating AchievementsViewModel instances with custom parameters.
  *
  * @param friendId optional ID of a friend whose achievements to display (null for own)
- * @param achievementsRepo the repository of the activities to store them
  */
 class AchievementsViewModelFactory(
     private val friendId: String? = null,
-    private val achievementsRepo: AchievementsRepository = AchievementsRepositoryProvider.repository
 ) : ViewModelProvider.Factory {
   @Suppress("UNCHECKED_CAST")
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     if (modelClass.isAssignableFrom(AchievementsViewModel::class.java)) {
-      return AchievementsViewModel(friendId, achievementsRepo) as T
+      return AchievementsViewModel(
+          friendId = friendId, achievementsRepo = AchievementsRepositoryProvider.repository)
+          as T
     }
     throw IllegalArgumentException("Unknown ViewModel class")
   }

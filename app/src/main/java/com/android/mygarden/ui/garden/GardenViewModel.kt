@@ -273,22 +273,20 @@ class GardenViewModel(
  * Factory for creating GardenViewModel instances with custom parameters.
  *
  * @param friendId optional ID of a friend whose garden to display (null for own garden)
- * @param plantsRepo the repository of the plants to store them
- * @param profileRepo the repository of the profiles used to fetch user information
- * @param userProfileRepo the repository used to fetch public profile info of other users
- * @param activityRepo the repository of the activities to store them
  */
 class GardenViewModelFactory(
     private val friendId: String? = null,
-    private val plantsRepo: PlantsRepository = PlantsRepositoryProvider.repository,
-    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
-    private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
-    private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository
 ) : ViewModelProvider.Factory {
   @Suppress("UNCHECKED_CAST")
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     if (modelClass.isAssignableFrom(GardenViewModel::class.java)) {
-      return GardenViewModel(plantsRepo, profileRepo, userProfileRepo, activityRepo, friendId) as T
+      return GardenViewModel(
+          plantsRepo = PlantsRepositoryProvider.repository,
+          profileRepo = ProfileRepositoryProvider.repository,
+          userProfileRepo = UserProfileRepositoryProvider.repository,
+          activityRepo = ActivityRepositoryProvider.repository,
+          friendId = friendId)
+          as T
     }
     throw IllegalArgumentException("Unknown ViewModel class")
   }
