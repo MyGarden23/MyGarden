@@ -20,6 +20,7 @@ object UserProfileRepositoryProvider {
       overrideRepo = value
     }
 
+  /** Reset the repository if needed. */
   private fun getOrCreateDefault(): UserProfileRepository {
     if (defaultRepo == null) {
       defaultRepo = UserProfileRepositoryFirestore(Firebase.firestore)
