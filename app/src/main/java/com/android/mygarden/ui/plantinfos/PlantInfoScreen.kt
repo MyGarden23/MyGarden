@@ -140,7 +140,9 @@ fun PlantInfosScreen(
     ownedPlantId: String? = null,
     plantInfoViewModel: PlantInfoViewModel = viewModel(),
     onBackPressed: () -> Unit,
-    onNextPlant: (String) -> Unit = {}
+    onNextPlant: (String) -> Unit = {},
+    isViewMode: Boolean = false,
+    friendId: String? = null
 ) {
   val context = LocalContext.current
   // Observe UI state from ViewModel
@@ -155,9 +157,10 @@ fun PlantInfosScreen(
   val healthScrollState = rememberScrollState()
 
   // Initialize UI state when plant changes
-  LaunchedEffect(plant) {
+  // Use ownedPlantId as key to avoid re-initialization when friendId is cleared
+  LaunchedEffect(ownedPlantId) {
     val loadingText = context.getString(R.string.loading_plant_infos)
-    plantInfoViewModel.initializeUIState(plant, loadingText, ownedPlantId)
+    plantInfoViewModel.initializeUIState(plant, loadingText, ownedPlantId, isViewMode, friendId)
   }
 
   // Display the error message if fetching the ownedPlant from the repository failed
@@ -459,6 +462,7 @@ private fun PlantInfoHeader(
  * The behavior depends on the navigation origin :
  * - If the user comes from the camera, the plant is saved before navigating.
  * - If the user comes from the garden, the existing ownedPlantId is used.
+ * - If in view mode (friend's plant), the button is hidden.
  *
  * @param uiState The current UI state.
  * @param ownedPlantId The ID of the owned plant when coming from the garden.
@@ -474,6 +478,11 @@ private fun PlantInfoBottomBar(
     onNextPlant: (String) -> Unit,
     isOnline: Boolean
 ) {
+  // Don't show the button in view mode
+  if (uiState.isViewMode) {
+    return
+  }
+
   val context = LocalContext.current
   SavePlantBottomBar(
       uiState = uiState,

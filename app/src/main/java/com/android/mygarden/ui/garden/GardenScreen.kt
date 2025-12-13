@@ -298,7 +298,7 @@ fun PlantCard(
           modifier
               .fillMaxWidth()
               .height(PLANT_CARD_HEIGHT)
-              .then(if (!isViewMode) Modifier.clickable(onClick = { onClick() }) else Modifier)
+              .clickable(onClick = { onClick() })
               .testTag(GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)),
       // Color changing
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),

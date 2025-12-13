@@ -58,7 +58,8 @@ data class PlantInfoUIState(
     val showCareTipsDialog: Boolean = false,
     val careTips: String = "",
     val lastTimeWatered: Timestamp? = null,
-    val dateOfCreation: Timestamp? = null
+    val dateOfCreation: Timestamp? = null,
+    val isViewMode: Boolean = false
 ) {
   fun savePlant(): Plant {
     return Plant(
@@ -89,12 +90,29 @@ class PlantInfoViewModel(
   val uiState: StateFlow<PlantInfoUIState> = _uiState.asStateFlow()
 
   /** Initialize the UI state with plant data. Called when the screen is first displayed. */
-  fun initializeUIState(plant: Plant, loadingText: String, ownedPlantId: String? = null) {
+  fun initializeUIState(
+      plant: Plant,
+      loadingText: String,
+      ownedPlantId: String? = null,
+      isViewMode: Boolean = false,
+      friendId: String? = null
+  ) {
     viewModelScope.launch {
       // If the ownedPlantId is not null, the user is coming from the garden.
       if (ownedPlantId != null) {
         try {
-          val ownedPlant = plantsRepository.getOwnedPlant(ownedPlantId)
+          // If friendId is provided, we're viewing a friend's plant
+          val ownedPlant =
+              if (friendId != null) {
+                // Get all plants of the friend and find the specific one
+                val friendPlants = plantsRepository.getAllOwnedPlantsByUserId(friendId)
+                friendPlants.find { it.id == ownedPlantId }
+                    ?: throw IllegalArgumentException("Plant not found in friend's garden")
+              } else {
+                // Get the plant from the current user's garden
+                plantsRepository.getOwnedPlant(ownedPlantId)
+              }
+
           val plant = ownedPlant.plant
           _uiState.value =
               PlantInfoUIState(
@@ -110,7 +128,8 @@ class PlantInfoViewModel(
                   isRecognized = plant.isRecognized,
                   isFromGarden = true,
                   lastTimeWatered = ownedPlant.lastWatered,
-                  dateOfCreation = ownedPlant.dateOfCreation)
+                  dateOfCreation = ownedPlant.dateOfCreation,
+                  isViewMode = isViewMode)
         } catch (e: Exception) {
           Log.e(LOG_TAG, errorLoadingPlantMsg(ownedPlantId), e)
           setErrorMsg(R.string.error_failed_load_plant_info)
@@ -137,7 +156,7 @@ class PlantInfoViewModel(
                 generatedPlant.wateringFrequency,
                 isRecognized = generatedPlant.isRecognized,
                 isFromGarden = false,
-            )
+                isViewMode = isViewMode)
       }
     }
   }

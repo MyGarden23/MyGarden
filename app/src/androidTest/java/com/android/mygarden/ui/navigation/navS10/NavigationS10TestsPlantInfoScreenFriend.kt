@@ -1,4 +1,4 @@
-package com.android.mygarden.ui.navigation.navS9
+package com.android.mygarden.ui.navigation.navS10
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.LaunchedEffect
@@ -20,11 +20,10 @@ import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
-import com.android.mygarden.ui.garden.GardenAchievementsParentScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
-import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
+import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeFriendsRepository
 import com.android.mygarden.utils.FakePlantRepositoryUtils
@@ -45,18 +44,18 @@ import org.junit.runner.RunWith
 private const val DEFAULT_WAIT_MS = 5_000L
 
 @RunWith(AndroidJUnit4::class)
-class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
+class NavigationS10TestsPlantInfoScreenFriend : FirestoreProfileTest() {
 
   @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
-  private val friendId = "friend-test-user-123"
-  private val friendPseudo = "TestFriend"
+  private val friendId = "friend-test-user-456"
+  private val friendPseudo = "TestFriendForPlantInfo"
   private lateinit var originalFriendsRepo: FriendsRepository
   private lateinit var originalUserProfileRepo: UserProfileRepository
   private lateinit var originalPlantsRepo: PlantsRepository
 
   @Before
-  fun setupFriendGardenTest() = runTest {
+  fun setupFriendPlantInfoTest() = runTest {
     super.setUp()
 
     originalFriendsRepo = FriendsRepositoryProvider.repository
@@ -79,7 +78,7 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
     val fakeUserProfiles = FakeUserProfileRepository()
     fakeUserProfiles.profiles[friendId] =
         com.android.mygarden.model.users.UserProfile(
-            friendId, friendPseudo, Avatar.A2, "INTERMEDIATE", "Rose")
+            friendId, friendPseudo, Avatar.A3, "EXPERT", "Tomato")
     UserProfileRepositoryProvider.repository = fakeUserProfiles
   }
 
@@ -92,7 +91,7 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
   }
 
   @Test
-  fun friendGarden_displaysCorrectly() = runTest {
+  fun friendGarden_clickPlant_navigatesToPlantInfo() = runTest {
     var currentRoute: String? = null
 
     compose.setContent {
@@ -110,164 +109,183 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
           startDestination = Screen.FriendGarden.buildRoute(friendId))
     }
 
-    // Wait for the screen to load
     compose.waitForIdle()
-
-    // Verify we're on the FriendGarden screen
-    compose.onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN).assertIsDisplayed()
-
-    // Verify friend's username is displayed
-    compose.onNodeWithText(friendPseudo).assertIsDisplayed()
-
-    // Verify plants are displayed
-    val plant1Tag =
-        GardenScreenTestTags.getTestTagForOwnedPlant(
-            OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
-    compose.onNodeWithTag(plant1Tag).assertIsDisplayed()
-  }
-
-  @Test
-  fun friendGarden_waterButtonDisabled() = runTest {
-    compose.setContent {
-      val navController = rememberNavController()
-      AppNavHost(
-          navController = navController,
-          startDestination = Screen.FriendGarden.buildRoute(friendId))
-    }
-
-    compose.waitForIdle()
-
-    // Get the tag for the water button of the first plant
-    val waterButtonTag =
-        GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(
-            OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
-
-    compose.onNodeWithTag(waterButtonTag).assertDoesNotExist()
-  }
-
-  @Test
-  fun friendGarden_addPlantButtonHidden() = runTest {
-    compose.setContent {
-      val navController = rememberNavController()
-      AppNavHost(
-          navController = navController,
-          startDestination = Screen.FriendGarden.buildRoute(friendId))
-    }
-
-    compose.waitForIdle()
-
-    // Verify the Add Plant FAB is not displayed
-    compose.onNodeWithTag(GardenScreenTestTags.ADD_PLANT_FAB).assertDoesNotExist()
-  }
-
-  @Test
-  fun friendGarden_editProfileButtonIsNotEnabled() = runTest {
-    compose.setContent {
-      val navController = rememberNavController()
-      AppNavHost(
-          navController = navController,
-          startDestination = Screen.FriendGarden.buildRoute(friendId))
-    }
-
-    compose.waitForIdle()
-
-    // Verify the Edit Profile button (i.e. the friend avatar) is not clickable to go and edit
-    compose
-        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
-        .assertIsDisplayed()
-        .performClick()
-    compose.onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN).assertIsDisplayed()
-  }
-
-  @Test
-  fun friendGarden_backButtonWorks() = runTest {
-    var currentRoute: String? = null
-
-    compose.setContent {
-      val navController = rememberNavController()
-      val backEntry by navController.currentBackStackEntryAsState()
-      val route = remember { mutableStateOf<String?>(null) }
-
-      LaunchedEffect(backEntry) {
-        route.value = backEntry?.destination?.route
-        currentRoute = route.value
-      }
-
-      // Start at FriendList, then navigate to FriendGarden
-      AppNavHost(navController = navController, startDestination = Screen.FriendList.route)
-
-      // Navigate to friend's garden after compose is set up
-      LaunchedEffect(Unit) { navController.navigate(Screen.FriendGarden.buildRoute(friendId)) }
-    }
-
-    // Wait for navigation to FriendGarden to complete
-    compose.waitForIdle()
-    compose.waitUntil(DEFAULT_WAIT_MS) { currentRoute?.contains(Screen.FriendGarden.BASE) == true }
 
     // Verify we're on FriendGarden
     compose.runOnIdle { assertTrue(currentRoute?.contains(Screen.FriendGarden.BASE) == true) }
 
-    // Click the back button to navigate back to FriendList
-    compose
-        .onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON)
-        .assertIsDisplayed()
-        .performClick()
-
-    // Wait for navigation back to FriendList
-    compose.waitForIdle()
-    compose.waitUntil(DEFAULT_WAIT_MS) { currentRoute == Screen.FriendList.route }
-
-    // Verify we're back on FriendList
-    compose.runOnIdle { assertEquals(Screen.FriendList.route, currentRoute) }
-  }
-
-  @Test
-  fun friendGarden_loadsUserProfileFromUserProfileRepository() = runTest {
-    compose.setContent {
-      val navController = rememberNavController()
-      AppNavHost(
-          navController = navController,
-          startDestination = Screen.FriendGarden.buildRoute(friendId))
-    }
-
-    compose.waitForIdle()
-
-    // Verify that the friend's pseudo is displayed (loaded via UserProfileRepository)
-    compose.onNodeWithText(friendPseudo).assertIsDisplayed()
-
-    // Verify the avatar is displayed (we can't directly test Avatar but the profile row exists)
-    compose.onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE).assertExists()
-  }
-
-  @Test
-  fun friendGarden_loadsPlantsFromCorrectUserId() = runTest {
-    compose.setContent {
-      val navController = rememberNavController()
-      AppNavHost(
-          navController = navController,
-          startDestination = Screen.FriendGarden.buildRoute(friendId))
-    }
-
-    compose.waitForIdle()
-
-    // Verify both plants are displayed (loaded via getAllOwnedPlantsByUserId)
+    // Click on the first plant card
     val plant1Tag =
         GardenScreenTestTags.getTestTagForOwnedPlant(
             OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
-    val plant2Tag =
-        GardenScreenTestTags.getTestTagForOwnedPlant(
-            OwnedPlant("friend-plant-2", TestPlants.plant2, Timestamp(0)))
+    compose.onNodeWithTag(plant1Tag).assertIsDisplayed().performClick()
 
-    compose.onNodeWithTag(plant1Tag).assertExists()
-    compose.onNodeWithTag(plant2Tag).assertExists()
+    // Wait for navigation to PlantInfoFromGarden
+    compose.waitForIdle()
+    compose.waitUntil(DEFAULT_WAIT_MS) { currentRoute == Screen.PlantInfoFromGarden.route }
+
+    // Verify we're now on PlantInfo screen
+    compose.runOnIdle { assertEquals(Screen.PlantInfoFromGarden.route, currentRoute) }
+    compose.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
   }
 
   @Test
-  fun navigateFromFriendListToFriendGarden() = runTest {
+  fun friendPlantInfo_displaysCorrectPlantData() = runTest {
+    compose.setContent {
+      val navController = rememberNavController()
+      AppNavHost(
+          navController = navController,
+          startDestination = Screen.FriendGarden.buildRoute(friendId))
+    }
+
+    compose.waitForIdle()
+
+    // Click on plant to navigate to PlantInfo
+    val plant1Tag =
+        GardenScreenTestTags.getTestTagForOwnedPlant(
+            OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
+    compose.onNodeWithTag(plant1Tag).performClick()
+
+    compose.waitForIdle()
+
+    // Verify plant data is displayed
+    compose.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).assertIsDisplayed()
+    compose.onNodeWithText(TestPlants.plant1.name).assertIsDisplayed()
+    compose.onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME).assertIsDisplayed()
+  }
+
+  @Test
+  fun friendPlantInfo_editButtonIsHidden() = runTest {
+    compose.setContent {
+      val navController = rememberNavController()
+      AppNavHost(
+          navController = navController,
+          startDestination = Screen.FriendGarden.buildRoute(friendId))
+    }
+
+    compose.waitForIdle()
+
+    // Navigate to PlantInfo
+    val plant1Tag =
+        GardenScreenTestTags.getTestTagForOwnedPlant(
+            OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
+    compose.onNodeWithTag(plant1Tag).performClick()
+
+    compose.waitForIdle()
+
+    // Verify Edit/Next button does NOT exist
+    compose.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).assertDoesNotExist()
+    compose.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).assertDoesNotExist()
+  }
+
+  @Test
+  fun friendPlantInfo_backButton_returnsToFriendGarden() = runTest {
     var currentRoute: String? = null
 
-    // Configure FakeFriendsRepository ONLY for this test
-    // because it's the only one that needs to display FriendList screen
+    compose.setContent {
+      val navController = rememberNavController()
+      val backEntry by navController.currentBackStackEntryAsState()
+      val route = remember { mutableStateOf<String?>(null) }
+
+      LaunchedEffect(backEntry) {
+        route.value = backEntry?.destination?.route
+        currentRoute = route.value
+      }
+
+      AppNavHost(
+          navController = navController,
+          startDestination = Screen.FriendGarden.buildRoute(friendId))
+    }
+
+    compose.waitForIdle()
+
+    // Navigate to PlantInfo
+    val plant1Tag =
+        GardenScreenTestTags.getTestTagForOwnedPlant(
+            OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
+    compose.onNodeWithTag(plant1Tag).performClick()
+
+    compose.waitForIdle()
+    compose.waitUntil(DEFAULT_WAIT_MS) { currentRoute == Screen.PlantInfoFromGarden.route }
+
+    // Verify we're on PlantInfo
+    compose.runOnIdle { assertEquals(Screen.PlantInfoFromGarden.route, currentRoute) }
+
+    // Click back button
+    compose.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).assertIsDisplayed().performClick()
+
+    // Wait for navigation back to FriendGarden
+    compose.waitForIdle()
+    compose.waitUntil(DEFAULT_WAIT_MS) { currentRoute?.contains(Screen.FriendGarden.BASE) == true }
+
+    // Verify we're back on FriendGarden
+    compose.runOnIdle { assertTrue(currentRoute?.contains(Screen.FriendGarden.BASE) == true) }
+  }
+
+  @Test
+  fun friendPlantInfo_displaysAllTabs() = runTest {
+    compose.setContent {
+      val navController = rememberNavController()
+      AppNavHost(
+          navController = navController,
+          startDestination = Screen.FriendGarden.buildRoute(friendId))
+    }
+
+    compose.waitForIdle()
+
+    // Navigate to PlantInfo
+    val plant1Tag =
+        GardenScreenTestTags.getTestTagForOwnedPlant(
+            OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
+    compose.onNodeWithTag(plant1Tag).performClick()
+
+    compose.waitForIdle()
+
+    // Verify all three tabs are displayed
+    compose.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TAB).assertIsDisplayed()
+    compose.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).assertIsDisplayed()
+    compose.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).assertIsDisplayed()
+
+    // Test clicking on Health tab
+    compose.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
+    compose.waitForIdle()
+    compose.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).assertIsDisplayed()
+
+    // Test clicking on Location tab
+    compose.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TAB).performClick()
+    compose.waitForIdle()
+    compose.onNodeWithTag(PlantInfoScreenTestTags.LOCATION_TEXT).assertIsDisplayed()
+  }
+
+  @Test
+  fun friendPlantInfo_loadsPlantFromFriendRepository() = runTest {
+    compose.setContent {
+      val navController = rememberNavController()
+      AppNavHost(
+          navController = navController,
+          startDestination = Screen.FriendGarden.buildRoute(friendId))
+    }
+
+    compose.waitForIdle()
+
+    // Navigate to PlantInfo for plant2
+    val plant2Tag =
+        GardenScreenTestTags.getTestTagForOwnedPlant(
+            OwnedPlant("friend-plant-2", TestPlants.plant2, Timestamp(0)))
+    compose.onNodeWithTag(plant2Tag).performClick()
+
+    compose.waitForIdle()
+
+    // Verify correct plant data is loaded (plant2, not plant1)
+    compose.onNodeWithText(TestPlants.plant2.name).assertIsDisplayed()
+    compose.onNodeWithText(TestPlants.plant2.latinName).assertIsDisplayed()
+  }
+
+  @Test
+  fun navigateFromFriendListToFriendGardenToPlantInfo() = runTest {
+    var currentRoute: String? = null
+
+    // Configure FakeFriendsRepository for this test
     val fakeFriends = FakeFriendsRepository()
     fakeFriends.friendsFlow.value = listOf(friendId)
     FriendsRepositoryProvider.repository = fakeFriends
@@ -289,29 +307,37 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
     compose.waitForIdle()
     compose.waitUntil(DEFAULT_WAIT_MS) { currentRoute == Screen.FriendList.route }
 
-    // Verify we're on FriendList screen
+    // Verify we're on FriendList
     compose.runOnIdle { assertEquals(Screen.FriendList.route, currentRoute) }
 
-    // Click on the friend card to navigate to their garden
-    // The friend card should display the pseudo
-    compose.onNodeWithText(friendPseudo).assertIsDisplayed()
-    compose.onNodeWithText(friendPseudo).performClick()
+    // Click on friend to navigate to their garden
+    compose.onNodeWithText(friendPseudo).assertIsDisplayed().performClick()
 
     // Wait for navigation to FriendGarden
     compose.waitForIdle()
     compose.waitUntil(DEFAULT_WAIT_MS) { currentRoute?.contains(Screen.FriendGarden.BASE) == true }
 
-    // Verify we're now on FriendGarden screen
+    // Verify we're on FriendGarden
     compose.runOnIdle { assertTrue(currentRoute?.contains(Screen.FriendGarden.BASE) == true) }
 
-    // Verify the friend's garden is displayed
-    compose.onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN).assertIsDisplayed()
-    compose.onNodeWithText(friendPseudo).assertIsDisplayed()
-
-    // Verify plants are displayed
+    // Click on a plant to navigate to PlantInfo
     val plant1Tag =
         GardenScreenTestTags.getTestTagForOwnedPlant(
             OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
-    compose.onNodeWithTag(plant1Tag).assertIsDisplayed()
+    compose.onNodeWithTag(plant1Tag).assertIsDisplayed().performClick()
+
+    // Wait for navigation to PlantInfo
+    compose.waitForIdle()
+    compose.waitUntil(DEFAULT_WAIT_MS) { currentRoute == Screen.PlantInfoFromGarden.route }
+
+    // Verify we're on PlantInfo
+    compose.runOnIdle { assertEquals(Screen.PlantInfoFromGarden.route, currentRoute) }
+
+    // Verify plant data is displayed
+    compose.onNodeWithText(TestPlants.plant1.name).assertIsDisplayed()
+
+    // Verify buttons are in correct state (view mode)
+    compose.onNodeWithTag(PlantInfoScreenTestTags.EDIT_BUTTON).assertDoesNotExist()
+    compose.onNodeWithTag(PlantInfoScreenTestTags.TIPS_BUTTON).assertIsDisplayed()
   }
 }
