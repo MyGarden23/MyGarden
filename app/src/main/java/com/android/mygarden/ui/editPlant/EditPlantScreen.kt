@@ -193,9 +193,7 @@ fun EditPlantScreen(
           isNameError = errorFlags.isNameError,
           onTouchedName = { touchedName = true },
           onNameChange = { newName ->
-            if (!plantUIState.isRecognized) {
-              editPlantViewModel.setName(newName)
-            }
+            plantUIState.whenEditable { editPlantViewModel.setName(newName) }
           },
       )
 
@@ -206,9 +204,7 @@ fun EditPlantScreen(
           isLatinNameError = errorFlags.isLatinNameError,
           onTouchedLatinName = { touchedLatinName = true },
           onLatinNameChange = { newLatinName ->
-            if (!plantUIState.isRecognized) {
-              editPlantViewModel.setLatinName(newLatinName)
-            }
+            plantUIState.whenEditable { editPlantViewModel.setLatinName(newLatinName) }
           },
       )
 
@@ -233,7 +229,7 @@ fun EditPlantScreen(
           isPlantRecognized = plantUIState.isRecognized,
           onTouchedLight = { touchedLight = true },
           onLightExposureChange = {
-            if (!plantUIState.isRecognized) editPlantViewModel.setLightExposure(it)
+            plantUIState.whenEditable { editPlantViewModel.setLightExposure(it) }
           })
 
       // ------- Last watered -------
@@ -340,6 +336,19 @@ private data class TouchedFlags(
     val touchedLastWatered: Boolean,
     val touchedLight: Boolean
 )
+
+/**
+ * This function is used to execute a block of code only when the plant is not recognized by the
+ * API.
+ *
+ * @param block The block of code to execute when the plant is not recognized.
+ *
+ * Note: The function is mainly used to make the field of the plant editable only when it is not
+ * recognized by the API (unknown plant).
+ */
+private inline fun EditPlantUIState.whenEditable(block: () -> Unit) {
+  if (!isRecognized) block()
+}
 
 /**
  * Handles the result returned by the date picker.
