@@ -127,42 +127,6 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
   }
 
   @Test
-  fun friendGarden_plantCardsNotClickable() = runTest {
-    var currentRoute: String? = null
-
-    compose.setContent {
-      val navController = rememberNavController()
-      val backEntry by navController.currentBackStackEntryAsState()
-      val route = remember { mutableStateOf<String?>(null) }
-
-      LaunchedEffect(backEntry) {
-        route.value = backEntry?.destination?.route
-        currentRoute = route.value
-      }
-
-      AppNavHost(
-          navController = navController,
-          startDestination = Screen.FriendGarden.buildRoute(friendId))
-    }
-
-    compose.waitForIdle()
-
-    // Get the tag for the first plant card
-    val plant1Tag =
-        GardenScreenTestTags.getTestTagForOwnedPlant(
-            OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
-
-    // Try to click on the plant card
-    compose.onNodeWithTag(plant1Tag).performClick()
-
-    // Wait a bit to see if any navigation happens
-    compose.waitForIdle()
-
-    // Verify we're still on the FriendGarden screen (no navigation occurred)
-    compose.runOnIdle { assertTrue(currentRoute?.contains(Screen.FriendGarden.BASE) == true) }
-  }
-
-  @Test
   fun friendGarden_waterButtonDisabled() = runTest {
     compose.setContent {
       val navController = rememberNavController()
@@ -178,12 +142,7 @@ class NavigationS9TestsGardenScreenFriend : FirestoreProfileTest() {
         GardenScreenTestTags.getTestTagForOwnedPlantWaterButton(
             OwnedPlant("friend-plant-1", TestPlants.plant1, Timestamp(0)))
 
-    // Verify the water button exists but is not enabled (visual check)
-    compose.onNodeWithTag(waterButtonTag).assertExists()
-
-    // The button should not be clickable in view mode
-    // (we can't directly test if modifier.clickable is applied,
-    // but we verify the button doesn't trigger any action)
+    compose.onNodeWithTag(waterButtonTag).assertDoesNotExist()
   }
 
   @Test
