@@ -8,14 +8,14 @@ This module:
 
 from enum import Enum
 from firebase_functions import scheduler_fn
-from firebase_functions import https_fn, options
+from firebase_functions import https_fn
 from firebase_admin import initialize_app, firestore, messaging
 from datetime import datetime, timezone, timedelta
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 import functools, random, logging, time
 
 initialize_app()
-# Initialize these globally, but with None, so they don't run on import
+# Initialize the database globally, but with None, so it don't run on import
 db = None
 
 
@@ -123,7 +123,7 @@ def _send_friend_request_notification(target_uid: str, from_pseudo: str) -> bool
             body=f"{from_pseudo} wants to be your friend!"
         ),
         data={
-                "type": "FRIEND_REQUEST",
+            "type": "FRIEND_REQUEST",
             "fromPseudo": from_pseudo,
         }
     )
