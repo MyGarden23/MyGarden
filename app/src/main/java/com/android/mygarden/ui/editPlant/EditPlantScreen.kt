@@ -147,18 +147,16 @@ fun EditPlantScreen(
                 touchedLight = touchedLight)
           }
 
-  showDatePicker
-      .takeIf { it }
-      ?.let {
-        EditPlantDatePickerDialog(
-            initialMillis = plantUIState.lastWatered?.time,
-            onConfirm = { millis ->
-              handleDatePicked(millis, editPlantViewModel)
-              showDatePicker = false
-            },
-            onDismiss = { showDatePicker = false },
-        )
-      }
+  if (showDatePicker) {
+    EditPlantDatePickerDialog(
+        initialMillis = plantUIState.lastWatered?.time,
+        onConfirm = { millis ->
+          handleDatePicked(millis, editPlantViewModel)
+          showDatePicker = false
+        },
+        onDismiss = { showDatePicker = false },
+    )
+  }
 
   // Enable the Save button if the plant has been recognized by the API and the
   // lastWatered field is set and description is not blank or if the fields are all
