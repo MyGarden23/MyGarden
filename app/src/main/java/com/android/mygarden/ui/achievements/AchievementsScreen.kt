@@ -113,7 +113,6 @@ fun AchievementsScreen(
 ) {
   /* Unused variable to avoid SonarIssue -> isOnline will be used next week
   for offline mode implementation for achievements */
-  val doNothing = isOnline
   val uiState by viewModel.uiState.collectAsState()
   var showAchievementInfo by remember { mutableStateOf<AchievementType?>(null) }
 
