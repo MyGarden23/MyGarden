@@ -41,6 +41,7 @@ private const val FROM_KEY = "from"
 private const val OWNED_PLANT_ID_KEY = "ownedPlantId"
 private const val OWNED_PLANT_ID_TO_PLANT_INFO_KEY = "ownedPlantId_to_plantInfo"
 private const val IS_VIEW_MODE_KEY = "isViewMode"
+private const val FRIEND_ID_KEY = "friendId"
 
 @Composable
 fun AppNavHost(
@@ -191,6 +192,9 @@ fun AppNavHost(
                         navController.currentBackStackEntry
                             ?.savedStateHandle
                             ?.set(IS_VIEW_MODE_KEY, true)
+                        navController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(FRIEND_ID_KEY, friendId)
                         navigationActions.navTo(Screen.PlantInfoFromGarden)
                       },
                       onSignOut = {}))
@@ -228,6 +232,17 @@ fun AppNavHost(
           navController.previousBackStackEntry
               ?.savedStateHandle
               ?.get<String>(OWNED_PLANT_ID_TO_PLANT_INFO_KEY)
+      val isViewMode: Boolean =
+          navController.previousBackStackEntry?.savedStateHandle?.get<Boolean>(IS_VIEW_MODE_KEY)
+              ?: false
+      val friendId: String? =
+          navController.previousBackStackEntry?.savedStateHandle?.get<String>(FRIEND_ID_KEY)
+
+      // Clear the flags after reading them to avoid persistence
+      LaunchedEffect(Unit) {
+        navController.previousBackStackEntry?.savedStateHandle?.remove<Boolean>(IS_VIEW_MODE_KEY)
+        navController.previousBackStackEntry?.savedStateHandle?.remove<String>(FRIEND_ID_KEY)
+      }
 
       PlantInfosScreen(
           plant = Plant(),
@@ -237,7 +252,8 @@ fun AppNavHost(
           onNextPlant = { plantId ->
             navigationActions.navTo(Screen.EditPlant(plantId, Screen.Garden.route))
           },
-      )
+          isViewMode = isViewMode,
+          friendId = friendId)
     }
 
     // Plant Info
