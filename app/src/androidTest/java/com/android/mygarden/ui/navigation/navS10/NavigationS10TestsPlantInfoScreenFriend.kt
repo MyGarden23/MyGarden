@@ -1,10 +1,9 @@
 package com.android.mygarden.ui.navigation.navS10
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -54,6 +53,28 @@ class NavigationS10TestsPlantInfoScreenFriend : FirestoreProfileTest() {
   private lateinit var originalUserProfileRepo: UserProfileRepository
   private lateinit var originalPlantsRepo: PlantsRepository
 
+  /**
+   * Helper composable that sets up a NavController and tracks the current navigation route.
+   *
+   * @param onRouteChanged Callback invoked when the route changes, receives the new route
+   * @param content Composable content that receives the NavHostController
+   */
+  @Composable
+  private fun SetupNavControllerWithRouteTracking(
+      onRouteChanged: (String?) -> Unit,
+      content: @Composable (androidx.navigation.NavHostController) -> Unit
+  ) {
+    val navController = rememberNavController()
+    val backEntry by navController.currentBackStackEntryAsState()
+
+    LaunchedEffect(backEntry) {
+      val route = backEntry?.destination?.route
+      onRouteChanged(route)
+    }
+
+    content(navController)
+  }
+
   @Before
   fun setupFriendPlantInfoTest() = runTest {
     super.setUp()
@@ -95,18 +116,11 @@ class NavigationS10TestsPlantInfoScreenFriend : FirestoreProfileTest() {
     var currentRoute: String? = null
 
     compose.setContent {
-      val navController = rememberNavController()
-      val backEntry by navController.currentBackStackEntryAsState()
-      val route = remember { mutableStateOf<String?>(null) }
-
-      LaunchedEffect(backEntry) {
-        route.value = backEntry?.destination?.route
-        currentRoute = route.value
+      SetupNavControllerWithRouteTracking(onRouteChanged = { currentRoute = it }) { navController ->
+        AppNavHost(
+            navController = navController,
+            startDestination = Screen.FriendGarden.buildRoute(friendId))
       }
-
-      AppNavHost(
-          navController = navController,
-          startDestination = Screen.FriendGarden.buildRoute(friendId))
     }
 
     compose.waitForIdle()
@@ -148,10 +162,11 @@ class NavigationS10TestsPlantInfoScreenFriend : FirestoreProfileTest() {
 
     compose.waitForIdle()
 
-    // Verify plant data is displayed
+    // Verify correct plant data is displayed
     compose.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).assertIsDisplayed()
     compose.onNodeWithText(TestPlants.plant1.name).assertIsDisplayed()
     compose.onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME).assertIsDisplayed()
+    compose.onNodeWithText(TestPlants.plant1.latinName).assertIsDisplayed()
   }
 
   @Test
@@ -183,18 +198,11 @@ class NavigationS10TestsPlantInfoScreenFriend : FirestoreProfileTest() {
     var currentRoute: String? = null
 
     compose.setContent {
-      val navController = rememberNavController()
-      val backEntry by navController.currentBackStackEntryAsState()
-      val route = remember { mutableStateOf<String?>(null) }
-
-      LaunchedEffect(backEntry) {
-        route.value = backEntry?.destination?.route
-        currentRoute = route.value
+      SetupNavControllerWithRouteTracking(onRouteChanged = { currentRoute = it }) { navController ->
+        AppNavHost(
+            navController = navController,
+            startDestination = Screen.FriendGarden.buildRoute(friendId))
       }
-
-      AppNavHost(
-          navController = navController,
-          startDestination = Screen.FriendGarden.buildRoute(friendId))
     }
 
     compose.waitForIdle()
@@ -291,16 +299,9 @@ class NavigationS10TestsPlantInfoScreenFriend : FirestoreProfileTest() {
     FriendsRepositoryProvider.repository = fakeFriends
 
     compose.setContent {
-      val navController = rememberNavController()
-      val backEntry by navController.currentBackStackEntryAsState()
-      val route = remember { mutableStateOf<String?>(null) }
-
-      LaunchedEffect(backEntry) {
-        route.value = backEntry?.destination?.route
-        currentRoute = route.value
+      SetupNavControllerWithRouteTracking(onRouteChanged = { currentRoute = it }) { navController ->
+        AppNavHost(navController = navController, startDestination = Screen.FriendList.route)
       }
-
-      AppNavHost(navController = navController, startDestination = Screen.FriendList.route)
     }
 
     // Wait for FriendList to load

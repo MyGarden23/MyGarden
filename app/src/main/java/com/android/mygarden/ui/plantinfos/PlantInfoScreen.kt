@@ -132,6 +132,8 @@ private val NAMES_TIPS_BUTTON_SPACE_WIDTH = 8.dp
  * @param plantInfoViewModel ViewModel managing the UI state
  * @param onBackPressed Callback when the back button is pressed
  * @param onNextPlant Callback when the Save Plant button is clicked, receives the plant ID
+ * @param isViewMode If true, displays the plant in read-only mode (disables edit/save actions)
+ * @param friendId Optional ID of the friend whose plant is being viewed (null for own plants)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,8 +158,7 @@ fun PlantInfosScreen(
   val descriptionScrollState = rememberScrollState()
   val healthScrollState = rememberScrollState()
 
-  // Initialize UI state when plant changes
-  // Use ownedPlantId as key to avoid re-initialization when friendId is cleared
+  // Initialize UI state when plant or friend changes
   LaunchedEffect(ownedPlantId) {
     val loadingText = context.getString(R.string.loading_plant_infos)
     plantInfoViewModel.initializeUIState(plant, loadingText, ownedPlantId, isViewMode, friendId)
