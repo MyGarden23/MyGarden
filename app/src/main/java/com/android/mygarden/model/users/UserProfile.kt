@@ -18,3 +18,13 @@ data class UserProfile(
     val gardeningSkill: String,
     val favoritePlant: String
 )
+
+object UserProfileLoading {
+  val profile: UserProfile =
+      UserProfile(
+          id = "Loading",
+          pseudo = "Loading",
+          avatar = Avatar.A1,
+          gardeningSkill = "Loading",
+          favoritePlant = "Loading")
+}
