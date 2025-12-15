@@ -239,11 +239,11 @@ class AddFriendViewModelTest {
     val dispatcher = StandardTestDispatcher(testScheduler)
     Dispatchers.setMain(dispatcher)
 
+    val fakeProfile = FakeProfileRepository()
     val fakeFriends = FakeFriendsRepository()
     val fakeRequests = FakeFriendRequestsRepository()
     val fakeUserProfile = FakeUserProfileRepository()
     val fakeAchievements = FakeAchievementsRepository()
-    val profileRepo = FakeProfileRepository()
     val fakePseudo =
         TestPseudoRepository().apply {
           searchResults = listOf("alice")
@@ -263,7 +263,7 @@ class AddFriendViewModelTest {
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
             pseudoRepository = fakePseudo,
-            profileRepository = profileRepo,
+            profileRepository = fakeProfile,
             achievementsRepository = fakeAchievements)
 
     vm.onQueryChange("al")

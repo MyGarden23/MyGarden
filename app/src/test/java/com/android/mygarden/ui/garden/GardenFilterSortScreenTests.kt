@@ -11,6 +11,7 @@ import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.LikesRepositoryProvider
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
@@ -21,6 +22,7 @@ import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeActivityRepository
+import com.android.mygarden.utils.FakeLikesRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPlants
 import java.sql.Timestamp
@@ -93,6 +95,7 @@ class GardenFilterSortScreenTests {
     UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
     ActivityRepositoryProvider.repository = FakeActivityRepository()
     AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
+    LikesRepositoryProvider.repository = FakeLikesRepository()
 
     // Set up local plants repository for testing
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
