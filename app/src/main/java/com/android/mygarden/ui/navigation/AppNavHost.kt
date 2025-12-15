@@ -17,6 +17,8 @@ import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
@@ -221,7 +223,31 @@ fun AppNavHost(
       FeedScreen(
           onAddFriend = { navigationActions.navTo(Screen.AddFriend) },
           onFriendList = { navigationActions.navTo(Screen.FriendList) },
-          onNotifClick = { navigationActions.navTo(Screen.FriendsRequests) })
+          onNotifClick = { navigationActions.navTo(Screen.FriendsRequests) },
+          onActivityClick = { activity ->
+            when (activity) {
+              is ActivityAddedPlant,
+              is ActivityWaterPlant -> {
+                val ownedPlantId =
+                    when (activity) {
+                      is ActivityAddedPlant -> activity.ownedPlant.id
+                      is ActivityWaterPlant -> activity.ownedPlant.id
+                      else -> null
+                    }
+                if (ownedPlantId != null) {
+                  navController.currentBackStackEntry
+                      ?.savedStateHandle
+                      ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlantId)
+                  navController.currentBackStackEntry?.savedStateHandle?.set(IS_VIEW_MODE_KEY, true)
+                  navController.currentBackStackEntry
+                      ?.savedStateHandle
+                      ?.set(FRIEND_ID_KEY, activity.userId)
+                  navigationActions.navTo(Screen.PlantInfoFromGarden)
+                }
+              }
+              else -> {}
+            }
+          })
     }
 
     // Friends Requests
