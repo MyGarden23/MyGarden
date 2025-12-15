@@ -2,6 +2,7 @@ package com.android.mygarden.model.achievements
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +27,9 @@ class AchievementsRepositoryFirestore(
     private const val COLLECTION_ACHIEVEMENTS = "achievements"
     private const val VALUE_FIELD = "value"
   }
+
+  // Keep track of active listeners so we can clean them up
+  private val activeAchievementsListeners = mutableListOf<ListenerRegistration>()
 
   /** Returns the current authenticated user's UID, or null if not signed in. */
   override fun getCurrentUserId(): String? = auth.currentUser?.uid
@@ -75,7 +79,12 @@ class AchievementsRepositoryFirestore(
               trySend(progresses)
             }
 
-        awaitClose { registration.remove() }
+        activeAchievementsListeners.add(registration)
+
+        awaitClose {
+          registration.remove()
+          activeAchievementsListeners.remove(registration)
+        }
       }
 
   /** Writes or overwrites an achievement's value using merge semantics. */
@@ -104,5 +113,11 @@ class AchievementsRepositoryFirestore(
     val currentVal = getUserAchievementProgress(userId, achievementType)
     if (newValue > (currentVal?.currentValue ?: return))
         setAchievementValue(userId, achievementType, newValue)
+  }
+
+  /** Cleanup method to remove active listeners before logout. */
+  override fun cleanup() {
+    activeAchievementsListeners.forEach { it.remove() }
+    activeAchievementsListeners.clear()
   }
 }
