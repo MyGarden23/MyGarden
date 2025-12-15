@@ -29,6 +29,7 @@ data class ProfileUIState(
     val favoritePlant: String = "",
     val country: String = "",
     val registerPressed: Boolean = false,
+    val hasFocusedPseudoField: Boolean = false,
     val avatar: Avatar = Avatar.A1, // By default 1st avatar
 )
 
@@ -61,7 +62,7 @@ class ProfileViewModel(
    * Initializes the profile form state.
    *
    * This function is called when the form needs to be prefilled by the current profile values or
-   * defualts values if there is no current profile
+   * defaults values if there is no current profile
    */
   fun initialize() {
     if (initialized) return
@@ -113,8 +114,6 @@ class ProfileViewModel(
   fun setPseudo(pseudo: String, previous: Boolean) {
     if (previous) _uiState.value = _uiState.value.copy(previousPseudo = pseudo, pseudo = pseudo)
     else _uiState.value = _uiState.value.copy(pseudo = pseudo)
-
-    _pseudoAvailable.value = true
   }
 
   /**
@@ -187,11 +186,13 @@ class ProfileViewModel(
   private suspend fun checkPseudoAvailability() {
     val pseudo = _uiState.value.pseudo.trim()
 
-    if (pseudo.isBlank() || pseudo == _uiState.value.previousPseudo) {
-      _pseudoAvailable.value = true
-      return
+    when (pseudo.isBlank()) {
+      // pseudo is 'available' if empty when the user hasn't touched the text field yet
+      true -> _pseudoAvailable.value = !_uiState.value.hasFocusedPseudoField
+      false ->
+          _pseudoAvailable.value =
+              pseudoRepository.isPseudoAvailable(pseudo) || pseudo == _uiState.value.previousPseudo
     }
-    _pseudoAvailable.value = pseudoRepository.isPseudoAvailable(pseudo)
   }
 
   // ======== VALIDATORS to validate all the filed of the profile =========
@@ -261,15 +262,8 @@ class ProfileViewModel(
     return _uiState.value.registerPressed && !lastNameValid()
   }
 
-  /**
-   * Determines if the pseudo field should show an error
-   *
-   * @return true if register was pressed and pseudo is invalid
-   */
-  fun pseudoIsError(): Boolean {
-    return (!pseudoValid() && _uiState.value.registerPressed) ||
-        !_pseudoAvailable.value ||
-        _uiState.value.pseudo.isBlank()
+  fun hasFocusedPseudoField() {
+    _uiState.value = _uiState.value.copy(hasFocusedPseudoField = true)
   }
 
   /**
