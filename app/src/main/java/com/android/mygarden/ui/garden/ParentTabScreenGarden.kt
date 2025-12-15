@@ -17,10 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -137,6 +141,7 @@ fun ParentTabScreenGarden(
             gardenUiState = gardenUiState,
             isOnline = isOnline,
             isViewMode = isViewMode,
+            onLikeClick = { gardenViewModel.toggleLike() },
             modifier = modifier)
       },
       floatingActionButton = {
@@ -192,6 +197,7 @@ fun TopBarGardenParent(
     gardenUiState: GardenUIState,
     isOnline: Boolean,
     isViewMode: Boolean,
+    onLikeClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
   CenterAlignedTopAppBar(
@@ -202,7 +208,8 @@ fun TopBarGardenParent(
             modifier,
             gardenUiState,
             isOnline,
-            isViewMode)
+            isViewMode,
+            onLikeClick)
       },
       navigationIcon = {
         if (isViewMode) {
@@ -273,6 +280,7 @@ fun TableRowGardenParent(
  * @param uiState the UI state
  * @param isOnline whether the device is online
  * @param isViewMode if true, hide the log out button (for viewing a friend's garden)
+ * @param onLikeClick if clicked toggle the like button
  */
 @Composable
 fun ProfileRow(
@@ -281,7 +289,8 @@ fun ProfileRow(
     modifier: Modifier = Modifier,
     uiState: GardenUIState,
     isOnline: Boolean,
-    isViewMode: Boolean = false
+    isViewMode: Boolean = false,
+    onLikeClick: () -> Unit
 ) {
   val context = LocalContext.current
 
@@ -319,6 +328,36 @@ fun ProfileRow(
               fontWeight = FontWeight.Bold,
               style = MaterialTheme.typography.titleLarge,
               text = uiState.userName)
+
+          Spacer(modifier = modifier.weight(FULL_WEIGHT))
+
+          // Like button
+          val likeEnabled = isViewMode && isOnline && !uiState.isLikeUpdating
+
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier =
+                  Modifier.then(
+                      if (likeEnabled) Modifier.clickable { onLikeClick() } else Modifier)) {
+                Icon(
+                    imageVector =
+                        if (uiState.hasLiked) Icons.Filled.Favorite
+                        else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (uiState.hasLiked) "Liked" else "Not liked",
+                    tint =
+                        if (uiState.hasLiked) MaterialTheme.colorScheme.error
+                        else if (likeEnabled) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp))
+
+                Spacer(modifier = Modifier.size(6.dp))
+
+                Text(
+                    text = uiState.likesCount.toString(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface)
+              }
+
           Spacer(modifier = modifier.weight(FULL_WEIGHT))
 
           // User avatar (user can click on it to edit profile)
