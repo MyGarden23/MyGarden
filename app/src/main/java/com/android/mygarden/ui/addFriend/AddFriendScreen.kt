@@ -76,6 +76,7 @@ val PADDING_VERTICAL = 20.dp
 val PADDING_HORIZONTAL = 35.dp
 val VERTICAL_ARRANGEMENT_SPACE = 10.dp
 val CARD_HEIGHT = 80.dp
+val AVATAR_SIZE = 70.dp
 const val FRACTION_ROW_WIDTH = 0.94f
 const val FRACTION_BOX_WIDTH = 0.6f
 val TEXT_FONT_SIZE = 20.sp
@@ -229,7 +230,7 @@ fun FriendCard(
                 Card(
                     modifier =
                         Modifier.clip(CircleShape)
-                            .size(CARD_HEIGHT)
+                            .size(AVATAR_SIZE)
                             .testTag(AddFriendTestTags.getTestTagForAvatarOnFriendCard(pseudo))) {
                       Image(
                           painter = painterResource(avatar.resId),
