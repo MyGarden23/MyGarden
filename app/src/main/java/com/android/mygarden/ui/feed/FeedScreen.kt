@@ -55,7 +55,6 @@ import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.ui.navigation.NavigationActions
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
-import com.android.mygarden.ui.popup.FriendsPopup
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.utils.OfflineMessages
@@ -128,6 +127,12 @@ fun FeedScreen(
 
   // Ensures that we start collecting from the repository's list of activities
   LaunchedEffect(Unit) { feedViewModel.refreshUIState() }
+
+  if (uiState.isWatchingFriendsActivity) {
+    FriendsPopup(
+        onDismiss = { feedViewModel.setIsWatchingFriendsActivity(false) },
+        feedViewModel = feedViewModel)
+  }
 
   Scaffold(
       modifier = modifier.testTag(NavigationTestTags.FEED_SCREEN),
