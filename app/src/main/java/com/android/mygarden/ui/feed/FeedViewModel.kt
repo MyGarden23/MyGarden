@@ -14,6 +14,10 @@ import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFrie
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
+import com.android.mygarden.model.users.UserProfile
+import com.android.mygarden.model.users.UserProfileLoading
+import com.android.mygarden.model.users.UserProfileRepository
+import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.navigation.NavHostUtils
 import com.android.mygarden.ui.navigation.NavigationActions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,7 +38,9 @@ import kotlinx.coroutines.launch
 data class FeedUIState(
     val activities: List<GardenActivity> = emptyList(),
     val hasRequests: Boolean = false,
-    val isWatchingFriendsActivity: Boolean = false
+    val isWatchingFriendsActivity: Boolean = false,
+    val watchedUser1: UserProfile? = null,
+    val watchedUser2: UserProfile? = null,
 )
 
 /**
@@ -50,7 +56,8 @@ class FeedViewModel(
     private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository,
     private val friendsRepo: FriendsRepository = FriendsRepositoryProvider.repository,
     private val friendsRequestsRepo: FriendRequestsRepository =
-        FriendRequestsRepositoryProvider.repository
+        FriendRequestsRepositoryProvider.repository,
+    private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FeedUIState())
@@ -86,6 +93,15 @@ class FeedViewModel(
     }
   }
 
+  fun setIsWatchingFriendsActivity(isWatchingFriendsActivity: Boolean) {
+    _uiState.value = _uiState.value.copy(isWatchingFriendsActivity = isWatchingFriendsActivity)
+  }
+
+  fun setWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
+    _uiState.value = _uiState.value.copy(watchedUser1 = watchedFriend1)
+    _uiState.value = _uiState.value.copy(watchedUser2 = watchedFriend2)
+  }
+
   /**
    * Function that handles the click on an activity card
    *
@@ -108,7 +124,16 @@ class FeedViewModel(
             navController, navigationActions, activity.ownedPlant.id, true, activity.userId)
       }
       is ActivityAchievement -> {}
-      is ActivityAddFriend -> {}
+      is ActivityAddFriend -> {
+        setIsWatchingFriendsActivity(true)
+        // So it resets everytime while loading
+        setWatchedFriends(UserProfileLoading.profile, UserProfileLoading.profile)
+        viewModelScope.launch {
+          setWatchedFriends(
+              userProfileRepo.getUserProfile(activity.userId),
+              userProfileRepo.getUserProfile(activity.friendUserId))
+        }
+      }
     }
   }
 }
