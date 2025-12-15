@@ -11,6 +11,8 @@ import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.profile.LikesRepository
+import com.android.mygarden.model.profile.LikesRepositoryProvider
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.users.UserProfileRepository
@@ -34,6 +36,9 @@ import kotlinx.coroutines.launch
  *   model with the repository doesn't work
  * @property userName the name of the user of the app that is displayed
  * @property userAvatar the avatar of the user of the app that is displayed
+ * @property likesCount the number of likes the garden has
+ * @property hasLiked true if the user already liked this garden, false otherwise
+ * @property isLikeUpdating true if the like button is updating
  */
 data class GardenUIState(
     val plants: List<OwnedPlant> = emptyList(),
@@ -42,7 +47,10 @@ data class GardenUIState(
     val currentFilterOption: FilterOption = FilterOption.ALL,
     val errorMsg: Int? = null,
     val userName: String = "",
-    val userAvatar: Avatar = Avatar.A1
+    val userAvatar: Avatar = Avatar.A1,
+    val likesCount: Int = 0,
+    val hasLiked: Boolean = false,
+    val isLikeUpdating: Boolean = false
 )
 
 /**
@@ -52,6 +60,7 @@ data class GardenUIState(
  * @property profileRepo the repository of the profiles used to fetch user information
  * @property userProfileRepo the repository used to fetch public profile info of other users
  * @property activityRepo the repository of the activities to store them
+ * @property likesRepo the repository of the likes to store them
  * @property friendId optional ID of a friend whose garden to display (null for own garden)
  */
 class GardenViewModel(
@@ -59,6 +68,7 @@ class GardenViewModel(
     private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
     private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
     private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository,
+    private val likesRepo: LikesRepository = LikesRepositoryProvider.repository,
     private val friendId: String? = null
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(GardenUIState())
@@ -70,6 +80,26 @@ class GardenViewModel(
    */
   init {
     refreshUIState()
+
+    // Likes: observe count for the displayed garden (own or friend's)
+    viewModelScope.launch {
+      val targetUid = friendId ?: profileRepo.getCurrentUserId()!!
+      likesRepo.observeLikesCount(targetUid).collect { count ->
+        _uiState.value = _uiState.value.copy(likesCount = count)
+      }
+    }
+
+    // Likes: only relevant when viewing a friend's garden
+    if (friendId != null) {
+      viewModelScope.launch {
+        val myUid = profileRepo.getCurrentUserId()
+        if (myUid != null) {
+          likesRepo.observeHasLiked(friendId, myUid).collect { liked ->
+            _uiState.value = _uiState.value.copy(hasLiked = liked)
+          }
+        }
+      }
+    }
     // Only subscribe to plantsFlow if viewing own garden (not a friend's)
     if (friendId == null) {
       viewModelScope.launch {
@@ -97,6 +127,24 @@ class GardenViewModel(
         }
       } catch (e: Exception) {
         setErrorMsg(R.string.error_failed_load_plant_edit)
+      }
+    }
+  }
+
+  fun toggleLike() {
+    if (friendId == null) return
+
+    viewModelScope.launch {
+      if (_uiState.value.isLikeUpdating) return@launch
+      _uiState.value = _uiState.value.copy(isLikeUpdating = true)
+
+      try {
+        val myUid = profileRepo.getCurrentUserId() ?: return@launch
+        likesRepo.toggleLike(friendId, myUid)
+      } catch (_: Exception) {
+        setErrorMsg(R.string.error_failed_get_profile_garden)
+      } finally {
+        _uiState.value = _uiState.value.copy(isLikeUpdating = false)
       }
     }
   }
@@ -285,6 +333,7 @@ class GardenViewModelFactory(
           profileRepo = ProfileRepositoryProvider.repository,
           userProfileRepo = UserProfileRepositoryProvider.repository,
           activityRepo = ActivityRepositoryProvider.repository,
+          likesRepo = LikesRepositoryProvider.repository,
           friendId = friendId)
           as T
     }
