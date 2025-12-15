@@ -47,6 +47,14 @@ interface ProfileRepository {
   suspend fun getFCMToken(): String?
 
   /**
+   * Checks whether the given pseudo belongs to the currently authenticated user.
+   *
+   * @param pseudo The pseudo to check.
+   * @return `true` if the pseudo belongs to the current user, `false` otherwise.
+   */
+  suspend fun isCurrentUserPseudo(pseudo: String): Boolean
+
+  /**
    * Cleans up any active listeners or resources.
    *
    * This should be called before signing out to prevent PERMISSION_DENIED errors from Firestore

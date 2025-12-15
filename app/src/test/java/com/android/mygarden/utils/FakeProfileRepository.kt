@@ -51,5 +51,9 @@ class FakeProfileRepository(val profile: Profile? = null) : ProfileRepository {
     return null
   }
 
+  override suspend fun isCurrentUserPseudo(pseudo: String): Boolean {
+    return profile?.pseudo == pseudo
+  }
+
   override fun cleanup() {}
 }
