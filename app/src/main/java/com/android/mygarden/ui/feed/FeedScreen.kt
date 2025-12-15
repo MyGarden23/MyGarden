@@ -109,12 +109,13 @@ data class CardColorPalette(val backgroundColor: Color, val textColor: Color)
 @Composable
 fun FeedScreen(
     modifier: Modifier = Modifier,
-    feedViewModel: FeedViewModel = viewModel(),
+    navigationActions: NavigationActions,
+    navController: NavHostController,
+    feedViewModel: FeedViewModel =
+        viewModel(factory = FeedViewModelFactory(navigationActions, navController)),
     onAddFriend: () -> Unit = {},
     onNotifClick: () -> Unit = {},
-    onFriendList: () -> Unit = {},
-    navigationActions: NavigationActions,
-    navController: NavHostController
+    onFriendList: () -> Unit = {}
 ) {
 
   val uiState by feedViewModel.uiState.collectAsState()
