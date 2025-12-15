@@ -334,29 +334,11 @@ fun ProfileRow(
           // Like button
           val likeEnabled = isViewMode && isOnline && !uiState.isLikeUpdating
 
-          Row(
-              verticalAlignment = Alignment.CenterVertically,
-              modifier =
-                  Modifier.then(
-                      if (likeEnabled) Modifier.clickable { onLikeClick() } else Modifier)) {
-                Icon(
-                    imageVector =
-                        if (uiState.hasLiked) Icons.Filled.Favorite
-                        else Icons.Outlined.FavoriteBorder,
-                    contentDescription = if (uiState.hasLiked) "Liked" else "Not liked",
-                    tint =
-                        if (uiState.hasLiked) MaterialTheme.colorScheme.error
-                        else if (likeEnabled) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp))
-
-                Spacer(modifier = Modifier.size(6.dp))
-
-                Text(
-                    text = uiState.likesCount.toString(),
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface)
-              }
+          LikeIndicator(
+              uiState.likesCount,
+              hasLiked = uiState.hasLiked,
+              enabled = likeEnabled,
+              onLikeClick = onLikeClick)
 
           Spacer(modifier = modifier.weight(FULL_WEIGHT))
 
@@ -383,5 +365,34 @@ fun ProfileRow(
                     modifier = modifier.fillMaxSize())
               }
         }
+      }
+}
+/** The composable used for the like display */
+@Composable
+fun LikeIndicator(
+    likesCount: Int,
+    hasLiked: Boolean,
+    enabled: Boolean,
+    onLikeClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+  Row(
+      verticalAlignment = Alignment.CenterVertically,
+      modifier = modifier.then(if (enabled) Modifier.clickable { onLikeClick() } else Modifier)) {
+        Icon(
+            imageVector = if (hasLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+            contentDescription = if (hasLiked) "Liked" else "Not liked",
+            tint =
+                if (hasLiked) MaterialTheme.colorScheme.error
+                else if (enabled) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp))
+
+        Spacer(modifier = Modifier.size(6.dp))
+
+        Text(
+            text = likesCount.toString(),
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface)
       }
 }

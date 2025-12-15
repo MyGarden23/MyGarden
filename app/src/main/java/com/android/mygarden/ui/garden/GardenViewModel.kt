@@ -77,6 +77,8 @@ class GardenViewModel(
   /**
    * The value of the list now changes everytime it receives an update from the plants repository in
    * order to display the correct list of owned plants of the user
+   *
+   * It also updates the likeCount and hasLiked according to the like logic
    */
   init {
     refreshUIState()
@@ -131,6 +133,14 @@ class GardenViewModel(
     }
   }
 
+  /**
+   * Likes the currently viewed garden.
+   *
+   * This action is only allowed when viewing another user's garden. The operation is protected
+   * against multiple rapid clicks and is executed atomically through the likes repository.
+   *
+   * If the garden is already liked, clicking on the heart removes the like
+   */
   fun toggleLike() {
     if (friendId == null) return
 
