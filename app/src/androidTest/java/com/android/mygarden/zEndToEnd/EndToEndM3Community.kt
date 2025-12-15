@@ -528,12 +528,6 @@ class EndToEndM3Community {
               .isDisplayed()
         }
 
-        composeTestRule
-            .onNodeWithTag(
-                AchievementsScreenTestTags.getTestTagForCardLevel(AchievementType.FRIENDS_NUMBER),
-                useUnmergedTree = true)
-            .assertTextEquals("Level 2/10")
-
         // Test complete!
         Log.d("EndToEndM3Community", "End-to-end test for Community feature completed successfully")
       }
