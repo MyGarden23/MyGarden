@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.feed
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -93,8 +94,16 @@ fun FriendActivityPopup(
                 modifier = Modifier.fillMaxSize().padding(horizontal = CONTENT_HORIZONTAL_PADDING),
                 verticalArrangement = Arrangement.spacedBy(SPACE_BETWEEN_CARDS),
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                  FriendsPopupCard(uiState.watchedUser1, context)
-                  FriendsPopupCard(uiState.watchedUser2, context)
+                  FriendsPopupCard(
+                      uiState.watchedUser1,
+                      context,
+                      uiState.relationWithWatchedUser1,
+                      feedViewModel)
+                  FriendsPopupCard(
+                      uiState.watchedUser2,
+                      context,
+                      uiState.relationWithWatchedUser2,
+                      feedViewModel)
                 }
           }
     }
@@ -102,7 +111,12 @@ fun FriendActivityPopup(
 }
 
 @Composable
-fun FriendsPopupCard(userProfile: UserProfile?, context: Context) {
+fun FriendsPopupCard(
+    userProfile: UserProfile?,
+    context: Context,
+    relation: RelationWithWatchedUser,
+    feedViewModel: FeedViewModel
+) {
   if (userProfile == null) return
   Card(
       modifier = Modifier.fillMaxWidth().height(FRIEND_CARD_HEIGHT).padding(FRIEND_CARD_PADDING),
@@ -142,13 +156,19 @@ fun FriendsPopupCard(userProfile: UserProfile?, context: Context) {
 
                       Button(
                           modifier = Modifier,
-                          onClick = getOnClickActionForPopup(),
+                          onClick = {
+                            onClickActionForPopup(
+                                relationWithWatchedUser = relation,
+                                feedViewModel = feedViewModel,
+                                context = context,
+                                userProfile = userProfile)
+                          },
                           colors =
                               ButtonDefaults.buttonColors(
                                   MaterialTheme.colorScheme.primaryContainer),
                           content = {
                             Text(
-                                text = getButtonText(),
+                                text = getButtonText(relation),
                                 maxLines = MAX_LINES,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer)
                           })
@@ -158,10 +178,32 @@ fun FriendsPopupCard(userProfile: UserProfile?, context: Context) {
       }
 }
 
-fun getOnClickActionForPopup(): () -> Unit {
-  return {}
+fun onClickActionForPopup(
+    relationWithWatchedUser: RelationWithWatchedUser,
+    feedViewModel: FeedViewModel,
+    context: Context,
+    userProfile: UserProfile
+) {
+  when (relationWithWatchedUser) {
+    RelationWithWatchedUser.FRIEND -> {
+      Toast.makeText(context, "See Garden", Toast.LENGTH_SHORT).show()
+      feedViewModel.handleFriendActivityClick(userProfile.id)
+    }
+    RelationWithWatchedUser.NOT_FRIEND -> {
+      Toast.makeText(context, "Add Friend", Toast.LENGTH_SHORT).show()
+      feedViewModel.handleNotFriendActivityClick()
+    }
+    RelationWithWatchedUser.SELF -> {
+      Toast.makeText(context, "Your Garden", Toast.LENGTH_SHORT).show()
+      feedViewModel.handleSelfActivityClick()
+    }
+  }
 }
 
-fun getButtonText(): String {
-  return "See Garden"
+fun getButtonText(relation: RelationWithWatchedUser): String {
+  return when (relation) {
+    RelationWithWatchedUser.FRIEND -> "See Garden"
+    RelationWithWatchedUser.NOT_FRIEND -> "Add Friend"
+    RelationWithWatchedUser.SELF -> "Your Garden"
+  }
 }
