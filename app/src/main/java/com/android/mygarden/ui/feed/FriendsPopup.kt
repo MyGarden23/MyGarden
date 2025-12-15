@@ -59,7 +59,7 @@ private val SPACER_BETWEEN_TEXT_AND_BUTTON = 4.dp
 private const val COLUMN_WEIGHT = 1f
 
 @Composable
-fun FriendsPopup(
+fun FriendActivityPopup(
     onDismiss: () -> Unit = {},
     feedViewModel: FeedViewModel,
 ) {

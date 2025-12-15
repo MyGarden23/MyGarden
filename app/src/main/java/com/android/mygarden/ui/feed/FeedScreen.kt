@@ -129,7 +129,7 @@ fun FeedScreen(
   LaunchedEffect(Unit) { feedViewModel.refreshUIState() }
 
   if (uiState.isWatchingFriendsActivity) {
-    FriendsPopup(
+    FriendActivityPopup(
         onDismiss = { feedViewModel.setIsWatchingFriendsActivity(false) },
         feedViewModel = feedViewModel)
   }
