@@ -89,6 +89,10 @@ class FriendListViewModelTest {
 
           override fun friendsFlow(userId: String) = FakeFriendsRepository().friendsFlow
 
+          override fun cleanup() {
+            /* doesn't do anything yet*/
+          }
+
           override suspend fun addFriend(friendUserId: String) = Unit
 
           override suspend fun isFriend(friendUserId: String): Boolean {
