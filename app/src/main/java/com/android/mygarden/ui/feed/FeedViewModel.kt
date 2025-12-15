@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.feed
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.android.mygarden.model.friends.FriendRequestsRepository
@@ -14,12 +15,15 @@ import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFrie
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileLoading
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.navigation.NavHostUtils
 import com.android.mygarden.ui.navigation.NavigationActions
+import com.android.mygarden.ui.navigation.Screen
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,8 +44,16 @@ data class FeedUIState(
     val hasRequests: Boolean = false,
     val isWatchingFriendsActivity: Boolean = false,
     val watchedUser1: UserProfile? = null,
+    val relationWithWatchedUser1: RelationWithWatchedUser = RelationWithWatchedUser.SELF,
     val watchedUser2: UserProfile? = null,
+    val relationWithWatchedUser2: RelationWithWatchedUser = RelationWithWatchedUser.SELF,
 )
+
+enum class RelationWithWatchedUser {
+  FRIEND,
+  NOT_FRIEND,
+  SELF
+}
 
 /**
  * The view model of the feed that handles UI interactions and repository updates
@@ -57,7 +69,10 @@ class FeedViewModel(
     private val friendsRepo: FriendsRepository = FriendsRepositoryProvider.repository,
     private val friendsRequestsRepo: FriendRequestsRepository =
         FriendRequestsRepositoryProvider.repository,
-    private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository
+    private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
+    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val navigationActions: NavigationActions? = null,
+    private val navController: NavHostController? = null
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FeedUIState())
@@ -81,7 +96,7 @@ class FeedViewModel(
             // add the current user id to the list
             val allIds = listOf(currentUserId) + friends
             // fetch all activities to display
-            activityRepo.getFeedActivities(allIds)
+            activityRepo.getFeedActivities(allIds, limit = 500)
           }
 
       val hasRequestsFlow = friendsRequestsRepo.incomingRequests().map { it.isNotEmpty() }
@@ -97,7 +112,36 @@ class FeedViewModel(
     _uiState.value = _uiState.value.copy(isWatchingFriendsActivity = isWatchingFriendsActivity)
   }
 
-  fun setWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
+  suspend fun setWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
+    _uiState.value = _uiState.value.copy(watchedUser1 = watchedFriend1)
+    _uiState.value = _uiState.value.copy(watchedUser2 = watchedFriend2)
+
+    if (profileRepo.isCurrentUserPseudo(watchedFriend1?.pseudo ?: "")) {
+      _uiState.value = _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.SELF)
+    } else {
+      if (friendsRepo.isFriend(watchedFriend1?.id ?: "")) {
+        _uiState.value =
+            _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.FRIEND)
+      } else {
+        _uiState.value =
+            _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.NOT_FRIEND)
+      }
+    }
+
+    if (profileRepo.isCurrentUserPseudo(watchedFriend2?.pseudo ?: "")) {
+      _uiState.value = _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.SELF)
+    } else {
+      if (friendsRepo.isFriend(watchedFriend2?.id ?: "")) {
+        _uiState.value =
+            _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.FRIEND)
+      } else {
+        _uiState.value =
+            _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.NOT_FRIEND)
+      }
+    }
+  }
+
+  fun resetWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
     _uiState.value = _uiState.value.copy(watchedUser1 = watchedFriend1)
     _uiState.value = _uiState.value.copy(watchedUser2 = watchedFriend2)
   }
@@ -127,13 +171,32 @@ class FeedViewModel(
       is ActivityAddFriend -> {
         setIsWatchingFriendsActivity(true)
         // So it resets everytime while loading
-        setWatchedFriends(UserProfileLoading.profile, UserProfileLoading.profile)
+        resetWatchedFriends(UserProfileLoading.profile, UserProfileLoading.profile)
         viewModelScope.launch {
-          setWatchedFriends(
-              userProfileRepo.getUserProfile(activity.userId),
-              userProfileRepo.getUserProfile(activity.friendUserId))
+          val watchedUser1 = userProfileRepo.getUserProfile(activity.userId)
+          val watchedUser2 = userProfileRepo.getUserProfile(activity.friendUserId)
+          setWatchedFriends(watchedUser1, watchedUser2)
         }
       }
     }
+  }
+
+  fun handleFriendActivityClick(friendId: String) {
+    navigationActions?.navTo(Screen.FriendGarden(friendId))
+  }
+
+  fun handleNotFriendActivityClick() {}
+
+  fun handleSelfActivityClick() {
+    navigationActions?.navTo(Screen.Garden)
+  }
+}
+
+class FeedViewModelFactory(
+    private val navigationActions: NavigationActions,
+    private val navController: NavHostController
+) : ViewModelProvider.Factory {
+  override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    return FeedViewModel(navigationActions = navigationActions, navController = navController) as T
   }
 }
