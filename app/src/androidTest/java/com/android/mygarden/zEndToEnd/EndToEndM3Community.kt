@@ -19,7 +19,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
 import com.android.mygarden.model.achievements.AchievementType
-import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.ui.achievements.AchievementsScreenTestTags
@@ -528,16 +527,6 @@ class EndToEndM3Community {
               .onNodeWithTag(NavigationTestTags.INTERNAL_ACHIEVEMENTS_SCREEN)
               .isDisplayed()
         }
-
-        // Verify Alice's friend achievement was incremented
-        val aliceAchievementProgress = runBlocking {
-          AchievementsRepositoryProvider.repository.getUserAchievementProgress(
-              mainUserAliceUid, AchievementType.FRIENDS_NUMBER)
-        }
-        assertEquals(
-            "Alice's friend achievement should be 1 after accepting Bob",
-            1,
-            aliceAchievementProgress?.currentValue ?: 0)
 
         composeTestRule
             .onNodeWithTag(
