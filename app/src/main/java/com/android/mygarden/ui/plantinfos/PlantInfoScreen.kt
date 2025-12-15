@@ -92,6 +92,7 @@ private val EDIT_NEXT_BUTTON_FONT_SIZE = 18.sp
 private val HEALTH_TAB_TEXTS_FONT_SIZE = 20.sp
 private val DESCRIPTION_HEADER_LOCATION_FONT_SIZE = 22.sp
 private val DESCRIPTION_LIGHT_EXPOSURE_FONT_SIZE = 18.sp
+private val LINE_HEIGHT = 35.sp
 
 // Sizing values
 private val BOTTOM_BAR_SHAPE_SIZE = 28.dp
@@ -207,6 +208,7 @@ fun PlantInfosScreen(
                       text = uiState.name,
                       modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_NAME),
                       fontSize = PLANT_NAME_FONT_SIZE,
+                      lineHeight = LINE_HEIGHT,
                       fontWeight = FontWeight.Bold,
                       color = MaterialTheme.colorScheme.onBackground)
                   // Scientific name (e.g., "Rosa rubiginosa")
