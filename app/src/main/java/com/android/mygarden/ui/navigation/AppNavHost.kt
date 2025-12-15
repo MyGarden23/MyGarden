@@ -49,6 +49,34 @@ private const val OWNED_PLANT_ID_TO_PLANT_INFO_KEY = "ownedPlantId_to_plantInfo"
 private const val IS_VIEW_MODE_KEY = "isViewMode"
 private const val FRIEND_ID_KEY = "friendId"
 
+/**
+ * Helper function to navigate to PlantInfoFromGarden screen with saved state parameters
+ *
+ * @param navController the navigation controller
+ * @param navigationActions the navigation actions helper
+ * @param ownedPlantId the ID of the owned plant to display
+ * @param isViewMode whether the plant info should be in view-only mode (default: false)
+ * @param friendId the ID of the friend whose plant is being viewed (optional)
+ */
+fun navigateToPlantInfoFromGarden(
+    navController: NavHostController,
+    navigationActions: NavigationActions,
+    ownedPlantId: String,
+    isViewMode: Boolean = false,
+    friendId: String? = null
+) {
+  navController.currentBackStackEntry
+      ?.savedStateHandle
+      ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlantId)
+  if (isViewMode) {
+    navController.currentBackStackEntry?.savedStateHandle?.set(IS_VIEW_MODE_KEY, true)
+  }
+  if (friendId != null) {
+    navController.currentBackStackEntry?.savedStateHandle?.set(FRIEND_ID_KEY, friendId)
+  }
+  navigationActions.navTo(Screen.PlantInfoFromGarden)
+}
+
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -163,10 +191,7 @@ fun AppNavHost(
                   onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
                   onAddPlant = { navigationActions.navTo(Screen.Camera) },
                   onPlantClick = { ownedPlant ->
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
-                    navigationActions.navTo(Screen.PlantInfoFromGarden)
+                    navigateToPlantInfoFromGarden(navController, navigationActions, ownedPlant.id)
                   },
                   onSignOut = {
                     PlantsRepositoryProvider.repository.cleanup()
@@ -204,16 +229,8 @@ fun AppNavHost(
                       onAddPlant = {},
                       onBackPressed = { navigationActions.navBack() },
                       onPlantClick = { ownedPlant ->
-                        navController.currentBackStackEntry
-                            ?.savedStateHandle
-                            ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
-                        navController.currentBackStackEntry
-                            ?.savedStateHandle
-                            ?.set(IS_VIEW_MODE_KEY, true)
-                        navController.currentBackStackEntry
-                            ?.savedStateHandle
-                            ?.set(FRIEND_ID_KEY, friendId)
-                        navigationActions.navTo(Screen.PlantInfoFromGarden)
+                        navigateToPlantInfoFromGarden(
+                            navController, navigationActions, ownedPlant.id, true, friendId)
                       },
                       onSignOut = {}))
         }
@@ -235,14 +252,8 @@ fun AppNavHost(
                       else -> null
                     }
                 if (ownedPlantId != null) {
-                  navController.currentBackStackEntry
-                      ?.savedStateHandle
-                      ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlantId)
-                  navController.currentBackStackEntry?.savedStateHandle?.set(IS_VIEW_MODE_KEY, true)
-                  navController.currentBackStackEntry
-                      ?.savedStateHandle
-                      ?.set(FRIEND_ID_KEY, activity.userId)
-                  navigationActions.navTo(Screen.PlantInfoFromGarden)
+                  navigateToPlantInfoFromGarden(
+                      navController, navigationActions, ownedPlantId, true, activity.userId)
                 }
               }
               else -> {}
