@@ -13,10 +13,13 @@ import com.android.mygarden.R
 import com.android.mygarden.model.authentication.AuthRepository
 import com.android.mygarden.model.authentication.AuthRepositoryFirebase
 import com.android.mygarden.model.notifications.FCMTokenSyncer
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -44,8 +47,10 @@ private const val TAG = "SignIn"
  *
  * @property repository The repository used to perform authentication operations.
  */
-class SignInViewModel(private val repository: AuthRepository = AuthRepositoryFirebase()) :
-    ViewModel() {
+class SignInViewModel(
+    private val repository: AuthRepository = AuthRepositoryFirebase(),
+    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository
+) : ViewModel() {
   private val _uiState = MutableStateFlow(AuthUIState())
   val uiState: StateFlow<AuthUIState> = _uiState
 
@@ -80,7 +85,7 @@ class SignInViewModel(private val repository: AuthRepository = AuthRepositoryFir
 
         repository.signInWithGoogle(credential).fold({ result ->
           val user = result.user
-          val isNewUser = result.isNewUser
+          val hasProfile = profileRepo.getProfile().first() != null
 
           // Try to sync the FCM token
           FCMTokenSyncer.trySync(context)
@@ -91,7 +96,7 @@ class SignInViewModel(private val repository: AuthRepository = AuthRepositoryFir
                 user = user,
                 errorMsg = null,
                 signedOut = false,
-                isNewUser = isNewUser)
+                isNewUser = !hasProfile)
           }
         }) { failure ->
           _uiState.update {
