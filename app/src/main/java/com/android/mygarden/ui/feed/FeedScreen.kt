@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.android.mygarden.R
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
@@ -51,8 +52,10 @@ import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPl
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import com.android.mygarden.model.offline.OfflineStateManager
+import com.android.mygarden.ui.navigation.NavigationActions
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
+import com.android.mygarden.ui.popup.FriendsPopup
 import com.android.mygarden.ui.theme.CustomColors
 import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.utils.OfflineMessages
@@ -111,7 +114,8 @@ fun FeedScreen(
     onAddFriend: () -> Unit = {},
     onNotifClick: () -> Unit = {},
     onFriendList: () -> Unit = {},
-    onActivityClick: (GardenActivity) -> Unit = {},
+    navigationActions: NavigationActions,
+    navController: NavHostController
 ) {
 
   val uiState by feedViewModel.uiState.collectAsState()
@@ -173,7 +177,9 @@ fun FeedScreen(
                       ActivityItem(
                           modifier = modifier,
                           activity = activities[index],
-                          onActivityClick = onActivityClick)
+                          navigationActions = navigationActions,
+                          navController = navController,
+                          feedViewModel = feedViewModel)
                     }
                   }
             }
@@ -274,10 +280,15 @@ fun FriendListButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
 fun ActivityItem(
     modifier: Modifier = Modifier,
     activity: GardenActivity,
-    onActivityClick: (GardenActivity) -> Unit = {}
+    navigationActions: NavigationActions,
+    navController: NavHostController,
+    feedViewModel: FeedViewModel
 ) {
   val colorPalette = activityTypeColor(activity, MaterialTheme.colorScheme, ExtendedTheme.colors)
-  val clickableModifier = modifier.clickable { handleActivityClick(activity, onActivityClick) }
+  val clickableModifier =
+      modifier.clickable {
+        feedViewModel.handleActivityClick(activity, navigationActions, navController)
+      }
   Card(
       modifier =
           clickableModifier
@@ -450,18 +461,5 @@ fun activityTypeColor(
         CardColorPalette(customColors.addPlantActivityGreen, colorScheme.onPrimaryContainer)
     is ActivityWaterPlant ->
         CardColorPalette(customColors.waterActivityBlue, customColors.onWaterActivityBlue)
-  }
-}
-
-/**
- * Function that handles the click on an activity card
- *
- * @param activity the activity that was clicked
- * @param onActivityClick the callback to be triggered when a valid activity is clicked
- */
-fun handleActivityClick(activity: GardenActivity, onActivityClick: (GardenActivity) -> Unit) {
-  val isPlantActivity = activity is ActivityAddedPlant || activity is ActivityWaterPlant
-  if (isPlantActivity) {
-    onActivityClick(activity)
   }
 }

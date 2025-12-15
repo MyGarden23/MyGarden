@@ -2,13 +2,20 @@ package com.android.mygarden.ui.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
+import com.android.mygarden.ui.navigation.NavHostUtils
+import com.android.mygarden.ui.navigation.NavigationActions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +34,7 @@ import kotlinx.coroutines.launch
 data class FeedUIState(
     val activities: List<GardenActivity> = emptyList(),
     val hasRequests: Boolean = false,
+    val isWatchingFriendsActivity: Boolean = false
 )
 
 /**
@@ -75,6 +83,32 @@ class FeedViewModel(
             FeedUIState(activities = activities, hasRequests = hasRequests)
           }
           .collect { newState -> _uiState.value = newState }
+    }
+  }
+
+  /**
+   * Function that handles the click on an activity card
+   *
+   * @param activity the activity that was clicked
+   * @param navigationActions
+   * @param navController
+   */
+  fun handleActivityClick(
+      activity: GardenActivity,
+      navigationActions: NavigationActions,
+      navController: NavHostController
+  ) {
+    when (activity) {
+      is ActivityAddedPlant -> {
+        NavHostUtils.navigateToPlantInfoFromGarden(
+            navController, navigationActions, activity.ownedPlant.id, true, activity.userId)
+      }
+      is ActivityWaterPlant -> {
+        NavHostUtils.navigateToPlantInfoFromGarden(
+            navController, navigationActions, activity.ownedPlant.id, true, activity.userId)
+      }
+      is ActivityAchievement -> {}
+      is ActivityAddFriend -> {}
     }
   }
 }
