@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.feed
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -110,6 +111,7 @@ fun FeedScreen(
     onAddFriend: () -> Unit = {},
     onNotifClick: () -> Unit = {},
     onFriendList: () -> Unit = {},
+    onActivityClick: (GardenActivity) -> Unit = {},
 ) {
 
   val uiState by feedViewModel.uiState.collectAsState()
@@ -168,7 +170,10 @@ fun FeedScreen(
                       Arrangement.spacedBy(VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING),
                   contentPadding = PaddingValues(VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING)) {
                     items(activities.size) { index ->
-                      ActivityItem(modifier = modifier, activity = activities[index])
+                      ActivityItem(
+                          modifier = modifier,
+                          activity = activities[index],
+                          onActivityClick = onActivityClick)
                     }
                   }
             }
@@ -266,11 +271,16 @@ fun FriendListButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
  * @param activity the generic activity
  */
 @Composable
-fun ActivityItem(modifier: Modifier = Modifier, activity: GardenActivity) {
+fun ActivityItem(
+    modifier: Modifier = Modifier,
+    activity: GardenActivity,
+    onActivityClick: (GardenActivity) -> Unit = {}
+) {
   val colorPalette = activityTypeColor(activity, MaterialTheme.colorScheme, ExtendedTheme.colors)
+  val clickableModifier = modifier.clickable { handleActivityClick(activity, onActivityClick) }
   Card(
       modifier =
-          modifier
+          clickableModifier
               .fillMaxWidth()
               .padding(horizontal = CARD_PADDING)
               .testTag(FeedScreenTestTags.getTestTagForActivity(activity)),
@@ -440,5 +450,18 @@ fun activityTypeColor(
         CardColorPalette(customColors.addPlantActivityGreen, colorScheme.onPrimaryContainer)
     is ActivityWaterPlant ->
         CardColorPalette(customColors.waterActivityBlue, customColors.onWaterActivityBlue)
+  }
+}
+
+/**
+ * Function that handles the click on an activity card
+ *
+ * @param activity the activity that was clicked
+ * @param onActivityClick the callback to be triggered when a valid activity is clicked
+ */
+fun handleActivityClick(activity: GardenActivity, onActivityClick: (GardenActivity) -> Unit) {
+  val isPlantActivity = activity is ActivityAddedPlant || activity is ActivityWaterPlant
+  if (isPlantActivity) {
+    onActivityClick(activity)
   }
 }
