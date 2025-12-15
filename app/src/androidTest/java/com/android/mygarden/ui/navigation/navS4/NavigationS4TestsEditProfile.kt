@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.R
 import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
+import com.android.mygarden.model.profile.LikesRepositoryProvider
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.profile.PseudoRepositoryProvider
 import com.android.mygarden.ui.garden.GardenAchievementsParentScreenTestTags
@@ -22,6 +23,7 @@ import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeAchievementsRepository
+import com.android.mygarden.utils.FakeLikesRepository
 import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FakePseudoRepository
 import org.junit.Before
@@ -46,6 +48,7 @@ class NavigationS4TestsEditProfile {
         AppNavHost(navController = controller, startDestination = Screen.Garden.route)
       }
     }
+    LikesRepositoryProvider.repository = FakeLikesRepository()
     ProfileRepositoryProvider.repository = FakeProfileRepository()
     PseudoRepositoryProvider.repository = FakePseudoRepository()
     AchievementsRepositoryProvider.repository = FakeAchievementsRepository()

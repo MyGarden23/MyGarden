@@ -14,8 +14,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.mygarden.model.profile.LikesRepositoryProvider
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.Screen
+import com.android.mygarden.utils.FakeLikesRepository
+import com.android.mygarden.utils.FakeProfileRepository
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -34,6 +38,8 @@ class NavigationS2Tests {
 
   /** Helper to compose AppNavHost once per test with a given start route. */
   private fun setApp(startRoute: String) {
+    LikesRepositoryProvider.repository = FakeLikesRepository()
+    ProfileRepositoryProvider.repository = FakeProfileRepository()
     compose.setContent {
       navController = rememberNavController()
 
