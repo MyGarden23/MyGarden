@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.android.mygarden.R
 import com.android.mygarden.model.users.UserProfile
-import com.android.mygarden.ui.addFriend.AddFriendTestTags
 import com.android.mygarden.ui.popup.PopUpDimensions
 import com.android.mygarden.ui.popup.PopupScreenTestTags
 import com.android.mygarden.ui.popup.QuitPopup
@@ -111,26 +110,18 @@ fun FriendsPopupCard(userProfile: UserProfile?, context: Context) {
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
           Row(
-              modifier =
-                  Modifier.fillMaxWidth(CARD_ROW_WIDTH_FRACTION)
-                      .testTag(AddFriendTestTags.getTestTagForRowOnFriendCard(userProfile.pseudo)),
+              modifier = Modifier.fillMaxWidth(CARD_ROW_WIDTH_FRACTION),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(ROW_SPACING)) {
                 // Avatar
-                Card(
-                    modifier =
-                        Modifier.clip(CircleShape)
-                            .size(AVATAR_SIZE)
-                            .testTag(
-                                AddFriendTestTags.getTestTagForAvatarOnFriendCard(
-                                    userProfile.pseudo))) {
-                      Image(
-                          painter = painterResource(userProfile.avatar.resId),
-                          contentDescription =
-                              context.getString(
-                                  R.string.avatar_description_friend_screen, userProfile.pseudo),
-                          modifier = Modifier.fillMaxSize())
-                    }
+                Card(modifier = Modifier.clip(CircleShape).size(AVATAR_SIZE)) {
+                  Image(
+                      painter = painterResource(userProfile.avatar.resId),
+                      contentDescription =
+                          context.getString(
+                              R.string.avatar_description_friend_screen, userProfile.pseudo),
+                      modifier = Modifier.fillMaxSize())
+                }
 
                 // Column with Pseudo and Button
                 Column(
@@ -142,10 +133,7 @@ fun FriendsPopupCard(userProfile: UserProfile?, context: Context) {
                           fontWeight = FontWeight.Bold,
                           fontSize = PSEUDO_FONT_SIZE,
                           color = MaterialTheme.colorScheme.onSurface,
-                          modifier =
-                              Modifier.testTag(
-                                  AddFriendTestTags.getTestTagForPseudoOnFriendCard(
-                                      userProfile.pseudo)),
+                          modifier = Modifier,
                           maxLines = MAX_LINES,
                           overflow = TextOverflow.Ellipsis,
                       )
@@ -153,17 +141,14 @@ fun FriendsPopupCard(userProfile: UserProfile?, context: Context) {
                       Spacer(modifier = Modifier.height(SPACER_BETWEEN_TEXT_AND_BUTTON))
 
                       Button(
-                          modifier =
-                              Modifier.testTag(
-                                  AddFriendTestTags.getTestTagForButtonOnFriendCard(
-                                      userProfile.pseudo)),
-                          onClick = {},
+                          modifier = Modifier,
+                          onClick = getOnClickActionForPopup(),
                           colors =
                               ButtonDefaults.buttonColors(
                                   MaterialTheme.colorScheme.primaryContainer),
                           content = {
                             Text(
-                                text = "See Garden",
+                                text = getButtonText(),
                                 maxLines = MAX_LINES,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer)
                           })
@@ -171,4 +156,12 @@ fun FriendsPopupCard(userProfile: UserProfile?, context: Context) {
               }
         }
       }
+}
+
+fun getOnClickActionForPopup(): () -> Unit {
+  return {}
+}
+
+fun getButtonText(): String {
+  return "See Garden"
 }
