@@ -33,4 +33,7 @@ interface FriendsRepository {
 
   /** Flow of friends */
   fun friendsFlow(userId: String): Flow<List<String>>
+
+  /** Cleanup method to remove active listeners before logout. */
+  fun cleanup()
 }

@@ -50,4 +50,8 @@ class FakeFriendsRepository : FriendsRepository {
   override suspend fun isFriend(friendUserId: String): Boolean {
     return friendsFlow.value.contains(friendUserId)
   }
+
+  override fun cleanup() {
+    // No-op for fake repository - no real listeners to clean up
+  }
 }
