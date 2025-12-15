@@ -183,4 +183,10 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
     assertTrue(updatedFriends.contains(friend1))
     assertTrue(updatedFriends.contains(friend2))
   }
+
+  @Test
+  fun cleanup_doesNotThrowException() = runTest {
+    // Call cleanup - should not throw
+    friendsRepo.cleanup()
+  }
 }
