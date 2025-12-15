@@ -279,7 +279,12 @@ fun FriendCard(
                           })
                     },
                     colors = ButtonDefaults.buttonColors(relation.color),
-                    content = { Text(relation.label()) })
+                    content = {
+                      Text(
+                          text = relation.label(),
+                          maxLines = MAX_LINE,
+                          overflow = TextOverflow.Ellipsis)
+                    })
               }
         }
       }

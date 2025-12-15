@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -116,6 +117,9 @@ private val INFO_TAB_PADDING = 20.dp
 // Spacer widths
 private val PROGRESS_INDICATOR_TEXT_SPACER_WIDTH = 12.dp
 private val NAMES_TIPS_BUTTON_SPACE_WIDTH = 8.dp
+
+// Values
+private const val MAX_NUMBER_LINE = 1
 
 /**
  * Screen displaying detailed information about a plant.
@@ -307,7 +311,9 @@ fun ModulableTabRow(
                     text = stringResource(id = tab.textRes),
                     fontWeight =
                         if (uiState.selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
-                    fontSize = TAB_HEADERS_FONT_SIZE)
+                    fontSize = TAB_HEADERS_FONT_SIZE,
+                    maxLines = MAX_NUMBER_LINE,
+                    overflow = TextOverflow.Ellipsis)
               })
         }
       }

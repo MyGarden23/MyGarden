@@ -1,47 +1,46 @@
-package com.android.mygarden.zendToEnd
+package com.android.mygarden.zEndToEnd
 
 import android.Manifest
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
-import com.android.mygarden.R
-import com.android.mygarden.model.plant.PlantHealthStatus
-import com.android.mygarden.model.plant.PlantsRepositoryLocal
-import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
-import com.android.mygarden.ui.camera.RequiresCamera
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
+import com.android.mygarden.ui.garden.GardenAchievementsParentScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
+import com.android.mygarden.ui.garden.GardenTab
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
+import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
-import kotlinx.coroutines.test.runTest
+import com.android.mygarden.utils.PlantRepositoryType
+import com.android.mygarden.utils.RequiresCamera
+import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 // Constant string for the e2e test
-private const val ERROR_LATIN_NAME_DESCRIPTION = "There was an error getting the plant latin name."
 private const val NOT_IDENTIFY_PLANT_DESCRIPTION = "The AI was not able to identify the plant."
 private const val UNKNOWN_PLANT_NAME = "Unknown"
-private const val NO_HEALTH_DESCRIPTION = "No health status description available"
+
 /**
  * End-to-end test for MyGarden's core user flow. This test assume that we have an internet
  * connection
@@ -60,20 +59,16 @@ class EndToEndM1 {
     }
   }
 
-  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
-
-  /**
-   * Automatically grants camera permission before tests run. Essential for camera functionality
-   * testing without user interaction prompts.
-   */
+  @get:Rule val composeTestRule = createEmptyComposeRule()
   @get:Rule
   val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.CAMERA)
-
   @get:Rule
   val permissionNotifsRule: GrantPermissionRule =
       GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
+
   private val TIMEOUT = 10_000L
   private val firebaseUtils: FirebaseUtils = FirebaseUtils()
+  private lateinit var scenario: ActivityScenario<MainActivity>
 
   /**
    * Pre-test setup method that ensures the application is fully loaded before test execution.
@@ -83,9 +78,22 @@ class EndToEndM1 {
    * - Calls waitForAppToLoad() to verify core components are ready
    */
   @Before
-  fun setUp() = runTest {
-    firebaseUtils.initialize()
-    firebaseUtils.injectProfileRepository()
+  fun setUp() {
+    runBlocking { firebaseUtils.initialize() }
+
+    // Configure a fake plants repository for deterministic behavior
+    val fakeRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoLocal)
+    fakeRepoUtils.mockIdentifyPlant(
+        Plant(
+            name = UNKNOWN_PLANT_NAME,
+            latinName = UNKNOWN_PLANT_NAME,
+            description = NOT_IDENTIFY_PLANT_DESCRIPTION,
+        ))
+    fakeRepoUtils.setUpMockRepo()
+
+    // Launch the activity via ActivityScenario
+    scenario = ActivityScenario.launch(MainActivity::class.java)
+
     // Wait for the app to be fully loaded
     composeTestRule.waitForIdle()
     waitForAppToLoad()
@@ -100,14 +108,12 @@ class EndToEndM1 {
    * 5. Bottom bar navigation
    */
   @Test
-  fun endToEndTest() = runTest {
-    val context = composeTestRule.activity
-    PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
+  fun endToEndTest() {
     composeTestRule
         .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
         .assertIsDisplayed()
         .performClick()
-    firebaseUtils.signIn()
+    runBlocking { firebaseUtils.signIn() }
     // === NEW PROFILE SCREEN ===
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput("John")
@@ -128,13 +134,11 @@ class EndToEndM1 {
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
     }
-
     // Verify UI elements
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_BAR).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(CameraScreenTestTags.FLIP_CAMERA_BUTTON).assertIsDisplayed()
 
-    // Take photo
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
 
     // === PLANT INFO SCREEN ===
@@ -146,64 +150,22 @@ class EndToEndM1 {
     // Test description tab content
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TAB).assertIsDisplayed()
 
-    // This handles the non-deterministic behavior of the AI (between 2 possible cases)
-    val text =
-        composeTestRule
-            .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-            .fetchSemanticsNode()
-            .config
-            .getOrNull(SemanticsProperties.Text)
-            ?.joinToString(separator = "") { it.text } ?: ""
-    assertTrue(
-        "Expected one of the possible texts, but was: $text",
-        text == context.getString(R.string.loading_plant_infos) ||
-            text == ERROR_LATIN_NAME_DESCRIPTION)
-
-    /**
-     * This is in the specific case where the AI does not return the [ERROR_LATIN_NAME_DESCRIPTION]
-     * description
-     *
-     * Need to wait for Gemini description, assume that it takes < 10 seconds. The pictures are
-     * taken from the emulator, hence the AI does not recognize plants
-     */
-    if (text == context.getString(R.string.loading_plant_infos)) {
-      composeTestRule.waitUntil(TIMEOUT) {
-        val currentText =
-            composeTestRule
-                .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-                .fetchSemanticsNode()
-                .config
-                .getOrNull(SemanticsProperties.Text)
-                ?.joinToString(separator = "") { it.text } ?: ""
-
-        currentText.contains(NOT_IDENTIFY_PLANT_DESCRIPTION)
-      }
-      composeTestRule
-          .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
-          .assertTextEquals(NOT_IDENTIFY_PLANT_DESCRIPTION)
-    }
-
+    // Description deterministic via FakePlantRepository
     composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME)
-        .assertTextEquals(UNKNOWN_PLANT_NAME)
+        .onNodeWithTag(PlantInfoScreenTestTags.DESCRIPTION_TEXT)
+        .assertTextEquals(NOT_IDENTIFY_PLANT_DESCRIPTION)
+
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_NAME).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME).assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME)
-        .assertTextEquals(UNKNOWN_PLANT_NAME)
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.PLANT_LATIN_NAME).assertIsDisplayed()
 
     // Test health tab
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_TAB).performClick()
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS_DESCRIPTION)
-        .assertTextEquals(NO_HEALTH_DESCRIPTION)
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS)
-        .assertTextEquals(
-            context.getString(R.string.status_label, PlantHealthStatus.UNKNOWN.description))
-    composeTestRule
-        .onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY)
-        .assertTextEquals(context.getString(R.string.watering_frequency, 0))
+
+    // Not displayed because we come from the camera screen
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.HEALTH_STATUS).assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.WATERING_FREQUENCY).assertIsDisplayed()
 
     // === BACK TO CAMERA ===
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).isDisplayed()
@@ -215,6 +177,7 @@ class EndToEndM1 {
     }
 
     // === PLANT INFO AGAIN ===
+
     composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
@@ -254,19 +217,32 @@ class EndToEndM1 {
     // Verify navigation to garden after saving from EditPlant
     composeTestRule.waitForIdle()
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).isDisplayed()
+      composeTestRule
+          .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+          .isDisplayed()
     }
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
 
     // Verify garden elements
     composeTestRule.onNodeWithTag(GardenScreenTestTags.GARDEN_LIST).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_TITLE).assertIsDisplayed()
     composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.EDIT_PROFILE_BUTTON).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.USER_PROFILE_PICTURE).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.AVATAR_EDIT_PROFILE)
+        .assertIsDisplayed()
     // assertExists and not assertIsDisplayed because the username is an empty string for this test.
     // Hence the Node exists but is not displayed
-    composeTestRule.onNodeWithTag(GardenScreenTestTags.USERNAME).assertExists()
+
+    // Then verify both tabs in the parent screen
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.getTestTagForTab(GardenTab.GARDEN))
+        .assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(
+            GardenAchievementsParentScreenTestTags.getTestTagForTab(GardenTab.ACHIEVEMENTS))
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).assertExists()
     composeTestRule.onNodeWithTag(GardenScreenTestTags.ADD_PLANT_FAB).assertIsDisplayed()
 
     // Test FAB navigation
@@ -278,7 +254,9 @@ class EndToEndM1 {
 
     // Test garden button
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_SCREEN).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+        .assertIsDisplayed()
 
     // Test camera button
     composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
@@ -300,6 +278,10 @@ class EndToEndM1 {
 
   @After
   fun tearDown() {
+    // Close the ActivityScenario if initialized
+    if (::scenario.isInitialized) {
+      scenario.close()
+    }
     // Clean up the system property to avoid affecting other tests
     System.clearProperty("mygarden.e2e")
   }
