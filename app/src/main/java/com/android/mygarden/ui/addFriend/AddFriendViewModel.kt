@@ -157,8 +157,10 @@ class AddFriendViewModel(
           _uiState.value.let { state ->
             if (state.relations.get(userId) == FriendRelation.ADDBACK) {
               state.copy(relations = state.relations + (userId to FriendRelation.ADDED))
-            } else {
+            } else if (state.relations.get(userId) == FriendRelation.ADD) {
               state.copy(relations = state.relations + (userId to FriendRelation.PENDING))
+            } else {
+              return@launch
             }
           }
       try {
