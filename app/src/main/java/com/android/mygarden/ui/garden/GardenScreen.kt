@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -535,7 +536,8 @@ fun GardenContent(
                 .fillMaxWidth()
                 .padding(horizontal = PLANT_ITEM_HORIZONTAL_PADDING)
                 .testTag(GardenScreenTestTags.GARDEN_LIST),
-        verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING)) {
+        verticalArrangement = Arrangement.spacedBy(PLANT_LIST_ITEM_SPACING),
+        contentPadding = PaddingValues(bottom = PLANT_LIST_ITEM_SPACING)) {
           items(filteredAndSortedPlants.size) { index ->
             PlantCard(
                 filteredAndSortedPlants[index],
