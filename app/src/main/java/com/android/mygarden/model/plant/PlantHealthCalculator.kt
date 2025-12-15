@@ -133,18 +133,20 @@ class PlantHealthCalculator {
       return if (effectiveOverwaterSeverity > OVERWATERING_SEVERITY_LEVEL_THRESHOLD) {
         // If the severity is still higher than 0.5 -> SEVERELY_OVERWATERED
         currentStatusPercentage =
-            MAX_PERCENTAGE - calculateRelativePercentage(
-                x = OVERWATERING_SEVERITY_LEVEL_THRESHOLD,
-                y = MAX_PERCENTAGE,
-                z = effectiveOverwaterSeverity)
+            MAX_PERCENTAGE -
+                calculateRelativePercentage(
+                    x = OVERWATERING_SEVERITY_LEVEL_THRESHOLD,
+                    y = MAX_PERCENTAGE,
+                    z = effectiveOverwaterSeverity)
         PlantHealthStatus.SEVERELY_OVERWATERED
       } else {
         // If the severity has decayed down to smaller than 0.5 -> OVERWATERED
         currentStatusPercentage =
-            MAX_PERCENTAGE - calculateRelativePercentage(
-                x = MIN_PERCENTAGE,
-                y = OVERWATERING_SEVERITY_LEVEL_THRESHOLD,
-                z = effectiveOverwaterSeverity)
+            MAX_PERCENTAGE -
+                calculateRelativePercentage(
+                    x = MIN_PERCENTAGE,
+                    y = OVERWATERING_SEVERITY_LEVEL_THRESHOLD,
+                    z = effectiveOverwaterSeverity)
         PlantHealthStatus.OVERWATERED
       }
     }
