@@ -147,7 +147,6 @@ class EndToEndEpic2 {
             composeTestRule
                 .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
                 .isDisplayed()
-            true
           } catch (e: AssertionError) {
             false
           }
@@ -155,7 +154,7 @@ class EndToEndEpic2 {
 
         // Verify user profile is displayed
         composeTestRule
-            .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
+            .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO, useUnmergedTree = true)
             .assertIsDisplayed()
             .assertTextContains(user_pseudo)
 
