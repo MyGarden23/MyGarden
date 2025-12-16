@@ -297,16 +297,16 @@ class GardenScreenTests {
           PlantCardColorPalette(colorScheme.primaryContainer, customColors.wateringBlue))
       assertEquals(
           colorsFromHealthStatus(PlantHealthStatus.NEEDS_WATER, colorScheme, customColors),
-          PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringOrange))
+          PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringBlue))
       assertEquals(
           colorsFromHealthStatus(PlantHealthStatus.OVERWATERED, colorScheme, customColors),
-          PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringOrange))
+          PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringBlue))
       assertEquals(
           colorsFromHealthStatus(PlantHealthStatus.SEVERELY_OVERWATERED, colorScheme, customColors),
-          PlantCardColorPalette(customColors.redPlantCardBackground, colorScheme.error))
+          PlantCardColorPalette(customColors.redPlantCardBackground, customColors.wateringBlue))
       assertEquals(
           colorsFromHealthStatus(PlantHealthStatus.SEVERELY_DRY, colorScheme, customColors),
-          PlantCardColorPalette(customColors.redPlantCardBackground, colorScheme.error))
+          PlantCardColorPalette(customColors.redPlantCardBackground, customColors.wateringBlue))
     }
   }
 

@@ -91,13 +91,13 @@ enum class PlantHealthStatus(@StringRes val descriptionRes: Int) {
   UNKNOWN(R.string.plant_health_unknown);
 
   companion object {
-    private const val DESC_SEVERELY_OVERWATERED = "Severely overwatered 🌊"
-    private const val DESC_OVERWATERED = "Overwatered 💦"
-    private const val DESC_HEALTHY = "The plant is healthy 🌱"
-    private const val DESC_SLIGHTLY_DRY = "A bit dry 🍂"
-    private const val DESC_NEEDS_WATER = "Needs water 💧"
-    private const val DESC_SEVERELY_DRY = "Critically dry 🥀"
-    private const val DESC_UNKNOWN = "Status unknown ❓"
+    private const val DESC_SEVERELY_OVERWATERED = "Severely overwatered"
+    private const val DESC_OVERWATERED = "Overwatered"
+    private const val DESC_HEALTHY = "The plant is healthy"
+    private const val DESC_SLIGHTLY_DRY = "A bit dry"
+    private const val DESC_NEEDS_WATER = "Needs water"
+    private const val DESC_SEVERELY_DRY = "Critically dry"
+    private const val DESC_UNKNOWN = "Status unknown"
   }
 
   /** Fallback description in English for contexts without Android Resources. Util for tests. */
