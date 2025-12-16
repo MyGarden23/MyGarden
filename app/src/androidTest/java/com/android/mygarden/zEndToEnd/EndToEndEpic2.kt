@@ -145,7 +145,8 @@ class EndToEndEpic2 {
         composeTestRule.waitUntil(TIMEOUT) {
           try {
             composeTestRule
-                .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
+                .onNodeWithTag(
+                    GardenAchievementsParentScreenTestTags.PSEUDO, useUnmergedTree = true)
                 .isDisplayed()
           } catch (e: AssertionError) {
             false
