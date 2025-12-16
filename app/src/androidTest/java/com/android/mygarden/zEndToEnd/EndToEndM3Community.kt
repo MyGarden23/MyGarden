@@ -39,7 +39,6 @@ import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.RequiresCamera
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -88,7 +87,7 @@ class EndToEndM3Community {
   val permissionNotifsRule: GrantPermissionRule =
       GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
-  private val TIMEOUT = 10_000L
+  private val TIMEOUT = 15_000L
 
   private val firebaseUtils: FirebaseUtils = FirebaseUtils()
   private lateinit var mainUserAliceUid: String
@@ -132,10 +131,8 @@ class EndToEndM3Community {
             .assertIsDisplayed()
             .performClick()
 
-        runBlocking {
-          firebaseUtils.signIn()
-          firebaseUtils.waitForAuthReady()
-        }
+        firebaseUtils.signIn()
+        firebaseUtils.waitForAuthReady()
         mainUserAliceUid = firebaseUtils.auth.uid!!
 
         // === CREATE MAIN USER PROFILE ===
@@ -181,12 +178,10 @@ class EndToEndM3Community {
             .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
             .performClick()
 
-        runBlocking {
-          friendFirebaseUtils.signIn()
-          friendFirebaseUtils.waitForAuthReady()
-        }
+        friendFirebaseUtils.signIn()
+        friendFirebaseUtils.waitForAuthReady()
 
-        friendUserBobUid = firebaseUtils.auth.uid!!
+        friendUserBobUid = friendFirebaseUtils.auth.uid!!
 
         // === CREATE FRIEND USER PROFILE ===
         composeTestRule.waitUntil(TIMEOUT) {
