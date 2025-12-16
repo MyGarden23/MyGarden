@@ -43,7 +43,8 @@ object ActivityMapper {
               userId = activity.userId,
               pseudo = activity.pseudo,
               createdAt = activity.createdAt.time,
-              achievementType = activity.achievementType.name)
+              achievementType = activity.achievementType.name,
+              levelReached = activity.levelReached)
       is ActivityAddFriend ->
           SerializedAddFriend(
               userId = activity.userId,
@@ -105,7 +106,7 @@ object ActivityMapper {
             pseudo = serializedActivity.pseudo,
             createdAt = Timestamp(serializedActivity.createdAt),
             achievementType = AchievementType.valueOf(serializedActivity.achievementType),
-        )
+            levelReached = serializedActivity.levelReached)
       }
       is SerializedAddFriend -> {
         ActivityAddFriend(

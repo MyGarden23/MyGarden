@@ -70,7 +70,11 @@ class FeedScreenTests {
 
   val gotAchievementActivity =
       ActivityAchievement(
-          "uid1", "gregory", Timestamp(System.currentTimeMillis()), AchievementType.PLANTS_NUMBER)
+          "uid1",
+          "gregory",
+          Timestamp(System.currentTimeMillis()),
+          AchievementType.PLANTS_NUMBER,
+          2)
 
   /*------------------- FAKE ACTIVITY REPOSITORY -----------------*/
   private class FakeActivityRepository : ActivityRepository {
