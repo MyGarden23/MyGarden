@@ -154,7 +154,8 @@ fun FriendsPopupCard(
                       Spacer(modifier = Modifier.height(SPACER_BETWEEN_TEXT_AND_BUTTON))
 
                       Button(
-                          modifier = Modifier,
+                          modifier =
+                              Modifier.testTag(FriendsPopupTestTags.buttonTestTag(userProfile.id)),
                           onClick = {
                             onClickActionForPopup(
                                 relationWithWatchedUser = relation,
@@ -210,4 +211,8 @@ fun getButtonText(relation: RelationWithWatchedUser, context: Context): String {
     RelationWithWatchedUser.SELF -> context.getString(R.string.friend_popup_your_garden)
     RelationWithWatchedUser.REQUEST_SENT -> context.getString(R.string.friend_popup_request_sent)
   }
+}
+
+object FriendsPopupTestTags {
+  fun buttonTestTag(userId: String): String = "FriendsPopupButton-$userId"
 }
