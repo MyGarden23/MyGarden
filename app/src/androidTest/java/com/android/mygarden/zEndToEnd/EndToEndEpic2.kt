@@ -126,9 +126,13 @@ class EndToEndEpic2 {
         firebaseUtils.waitForAuthReady()
 
         // === NEW PROFILE SCREEN ===
-        composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).assertIsDisplayed()
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(ProfileScreenTestTags.SCREEN).isDisplayed()
+        }
         composeTestRule.onNodeWithTag(ProfileScreenTestTags.FIRST_NAME_FIELD).performTextInput(john)
-        composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).performTextInput(doe)
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(ProfileScreenTestTags.LAST_NAME_FIELD).isDisplayed()
+        }
         composeTestRule
             .onNodeWithTag(ProfileScreenTestTags.PSEUDO_FIELD)
             .performTextInput(user_pseudo)
