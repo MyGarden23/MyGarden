@@ -312,14 +312,10 @@ class GardenViewModel(
             setErrorMsg(R.string.error_failed_get_profile_garden)
           }
         } else {
-          // Load own profile using ProfileRepository
-          profileRepo.getProfile().collect { profile ->
-            if (profile != null) {
-              _uiState.value =
-                  _uiState.value.copy(userName = profile.pseudo, userAvatar = profile.avatar)
-            } else {
-              setErrorMsg(R.string.error_failed_get_profile_garden)
-            }
+          val profile = profileRepo.getProfile().firstOrNull()
+          if (profile != null) {
+            _uiState.value =
+                _uiState.value.copy(userName = profile.pseudo, userAvatar = profile.avatar)
           }
         }
       } catch (_: Exception) {
