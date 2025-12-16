@@ -72,8 +72,7 @@ class FeedViewModel(
         FriendRequestsRepositoryProvider.repository,
     private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
     private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
-    private val navigationActions: NavigationActions? = null,
-    private val navController: NavHostController? = null
+    private val navigationActions: NavigationActions? = null
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FeedUIState())
@@ -218,6 +217,6 @@ class FeedViewModelFactory(
     private val navController: NavHostController
 ) : ViewModelProvider.Factory {
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
-    return FeedViewModel(navigationActions = navigationActions, navController = navController) as T
+    return FeedViewModel(navigationActions = navigationActions) as T
   }
 }
