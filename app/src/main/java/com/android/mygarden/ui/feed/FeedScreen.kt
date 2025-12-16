@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.feed
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,10 +10,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -71,6 +74,10 @@ private val BORDER_CARD_WIDTH = 3.dp
 private val ICON_PADDING = 5.dp
 private val ICON_SIZE = 69.dp
 private val NOTIF_ICON_SIZE = 50.dp
+private val BADGE_ICON_SIZE = 16.dp
+private val BADGE_ICON_X = (-17).dp
+private val BADGE_ICON_Y = 7.dp
+private val BADGE_BORDER_WIDTH = 1.dp
 
 /*---------------- TEST TAGS FOR ALL COMPONENTS OF THE SCREEN --------------*/
 object FeedScreenTestTags {
@@ -184,22 +191,33 @@ fun NotificationButton(
     onClick: () -> Unit = {},
     hasRequests: Boolean
 ) {
-  val icon =
-      if (hasRequests) {
-        R.drawable.notif_with_request
-      } else {
-        R.drawable.notif
-      }
-  IconButton(
-      onClick = onClick,
-      modifier =
-          modifier.size(NOTIF_ICON_SIZE).testTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON)) {
-        Image(
-            painter = painterResource(icon),
-            contentDescription =
-                stringResource(R.string.icon_of_the_notification_button_description),
-        )
-      }
+  BadgedBox(
+      badge = {
+        if (hasRequests) {
+          Badge(
+              containerColor = ExtendedTheme.colors.notificationRed,
+              modifier =
+                  Modifier.offset(x = BADGE_ICON_X, y = BADGE_ICON_Y)
+                      .size(BADGE_ICON_SIZE)
+                      .border(
+                          width = BADGE_BORDER_WIDTH,
+                          color = MaterialTheme.colorScheme.onPrimaryContainer,
+                          shape = CircleShape),
+          )
+        }
+      },
+  ) {
+    IconButton(
+        onClick = onClick,
+        modifier =
+            modifier.size(NOTIF_ICON_SIZE).testTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON)) {
+          Icon(
+              painter = painterResource(R.drawable.notif),
+              contentDescription =
+                  stringResource(R.string.icon_of_the_notification_button_description),
+              tint = MaterialTheme.colorScheme.onPrimaryContainer)
+        }
+  }
 }
 
 /**

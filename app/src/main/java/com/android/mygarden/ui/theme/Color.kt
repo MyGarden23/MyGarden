@@ -87,6 +87,8 @@ val md_theme_dark_scrim = Color(0xFF000000)
  *   [FeedScreen]
  * @param onAchievementGrey the grey color used for the icon of the achievementActivity card in
  *   [FeedScreen]
+ * @param notificationRed the red color used for the red dot on the notification icon in
+ *   [FeedScreen]
  */
 data class CustomColors(
     val wateringBlue: Color,
