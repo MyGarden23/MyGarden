@@ -9,8 +9,9 @@ import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
-import com.android.mygarden.utils.FakeFriendRequestsRepository
-import com.android.mygarden.utils.FakeFriendsRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.model.users.UserProfileRepositoryProvider
+import com.android.mygarden.utils.*
 import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -94,6 +95,8 @@ class FeedViewModelTests {
     activityRepo = FakeActivityRepository()
     friendsRepo = FakeFriendsRepository()
     friendsRequestsRepo = FakeFriendRequestsRepository()
+    UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
+    ProfileRepositoryProvider.repository = FakeProfileRepository()
     vm = FeedViewModel(activityRepo, friendsRepo, friendsRequestsRepo)
   }
 
