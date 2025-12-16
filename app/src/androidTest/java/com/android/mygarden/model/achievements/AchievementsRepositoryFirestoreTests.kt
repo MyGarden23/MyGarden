@@ -113,4 +113,10 @@ class AchievementsRepositoryFirestoreTests : FirestoreProfileTest() {
       assertEquals(newVal1.currentValue, 10)
     }
   }
+
+  @Test
+  fun cleanup_doesNotThrowException() = runTest {
+    // Call cleanup - should not throw
+    repository.cleanup()
+  }
 }

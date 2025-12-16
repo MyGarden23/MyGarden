@@ -64,4 +64,8 @@ class FakeAchievementsRepository : AchievementsRepository {
       }
     }
   }
+
+  override fun cleanup() {
+    // No-op for fake repository - no real listeners to clean up
+  }
 }

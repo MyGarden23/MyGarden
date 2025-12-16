@@ -57,4 +57,7 @@ interface AchievementsRepository {
       achievementType: AchievementType,
       newValue: Int
   )
+
+  /** Cleanup method to remove active listeners before logout. */
+  fun cleanup()
 }

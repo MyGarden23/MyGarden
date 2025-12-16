@@ -12,6 +12,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
+import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
+import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
@@ -157,6 +160,9 @@ fun AppNavHost(
                     PlantsRepositoryProvider.repository.cleanup()
                     ProfileRepositoryProvider.repository.cleanup()
                     ActivityRepositoryProvider.repository.cleanup()
+                    AchievementsRepositoryProvider.repository.cleanup()
+                    FriendsRepositoryProvider.repository.cleanup()
+                    FriendRequestsRepositoryProvider.repository.cleanup()
                     FirebaseAuth.getInstance().signOut()
                     // Clear the entire back stack so saved states can't be
                     // restored after logout while keeping `saveState` enabled for normal

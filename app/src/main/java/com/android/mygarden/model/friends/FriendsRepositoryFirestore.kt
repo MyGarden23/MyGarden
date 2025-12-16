@@ -5,6 +5,7 @@ import com.android.mygarden.model.achievements.AchievementsRepository
 import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -31,6 +32,9 @@ class FriendsRepositoryFirestore(
   // Variable that stores locally the friends count to avoid repeating calls to the database
   private var friendsCount: Int? = null
   private val nonAuthErrorMessage = "User not authenticated"
+
+  // Keep track of active listeners so we can clean them up
+  private val activeFriendsListeners = mutableListOf<ListenerRegistration>()
 
   /**
    * Returns a reference to the authenticated user's "friends" subcollection.
@@ -114,7 +118,18 @@ class FriendsRepositoryFirestore(
           }
         }
 
+    activeFriendsListeners.add(registration)
+
     // Clean up the listener when the flow collector is cancelled
-    awaitClose { registration.remove() }
+    awaitClose {
+      registration.remove()
+      activeFriendsListeners.remove(registration)
+    }
+  }
+
+  /** Cleanup method to remove active listeners before logout. */
+  override fun cleanup() {
+    activeFriendsListeners.forEach { it.remove() }
+    activeFriendsListeners.clear()
   }
 }
