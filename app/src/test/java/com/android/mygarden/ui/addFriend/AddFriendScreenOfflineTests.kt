@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
@@ -17,6 +18,7 @@ import com.android.mygarden.model.profile.PseudoRepositoryProvider
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import com.android.mygarden.utils.FakeProfileRepository
@@ -65,6 +67,7 @@ class AddFriendScreenOfflineTests {
     PseudoRepositoryProvider.repository = pseudoRepo
     UserProfileRepositoryProvider.repository = userProfileRepo
     FriendRequestsRepositoryProvider.repository = friendRequestsRepo
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
 
     // Ensure we start with online state
     OfflineStateManager.setOnlineState(true)
