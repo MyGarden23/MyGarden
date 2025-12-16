@@ -32,7 +32,7 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
     }
   }
 
-  override suspend fun askFriend(targetUserId: String) {
+  override suspend fun askFriend(targetUserId: String): Boolean {
     val currentUserId = getCurrentUserId() ?: "test-user-id"
 
     if (targetUserId == "boom-user-id") {
@@ -42,10 +42,12 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
           incomingRequestsFlow.value +
               FriendRequest(fromUserId = currentUserId, toUserId = targetUserId)
     }
+    return true
   }
 
-  override suspend fun acceptRequest(requestId: String) {
+  override suspend fun acceptRequest(requestId: String): String {
     incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
+    return ""
   }
 
   var markedSeen: MutableList<String> = mutableListOf()

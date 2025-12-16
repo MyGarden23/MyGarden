@@ -2,6 +2,9 @@ package com.android.mygarden.ui.friendsRequests
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.model.achievements.AchievementType
+import com.android.mygarden.model.achievements.AchievementsRepository
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
@@ -41,6 +44,8 @@ data class FriendsRequestsUIState(
  * @property friendsRepo the repository of friends, used to add friends after accepting a request
  * @property activityRepo the repository of activities, used to log friendship activities
  * @property profileRepo the repository of profiles, used to get the current user's profile
+ * @property achievementsRepo the repository of achievements, used to update friend count
+ *   achievements
  */
 class FriendsRequestsViewModel(
     private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
@@ -48,7 +53,8 @@ class FriendsRequestsViewModel(
         FriendRequestsRepositoryProvider.repository,
     private val friendsRepo: FriendsRepository = FriendsRepositoryProvider.repository,
     private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository,
-    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository
+    private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val achievementsRepo: AchievementsRepository = AchievementsRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FriendsRequestsUIState())
@@ -81,12 +87,18 @@ class FriendsRequestsViewModel(
       // Accept the friend request (updates status)
       val fromUserId = requestsRepo.acceptRequest(requestId)
 
-      // Add the friend to both users' friends lists
-      friendsRepo.addFriend(fromUserId)
+      // Add the friend to both users' friends lists and get updated counts
+      val friendCounts = friendsRepo.addFriend(fromUserId)
+
+      // Update achievements for both users with their new friend counts
+      val currentUserId = activityRepo.getCurrentUserId() ?: ""
+      achievementsRepo.updateAchievementValue(
+          currentUserId, AchievementType.FRIENDS_NUMBER, friendCounts.currentUserFriendCount)
+      achievementsRepo.updateAchievementValue(
+          fromUserId, AchievementType.FRIENDS_NUMBER, friendCounts.addedFriendCount)
 
       // Add the new activity that 2 users have become friends
       val currentUserPseudo = profileRepo.getProfile().firstOrNull()?.pseudo ?: ""
-      val currentUserId = activityRepo.getCurrentUserId() ?: ""
       activityRepo.addActivity(
           ActivityAddFriend(
               userId = currentUserId,
