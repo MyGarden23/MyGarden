@@ -499,10 +499,10 @@ fun colorsFromHealthStatus(
         PlantCardColorPalette(colorScheme.primaryContainer, customColors.wateringBlue)
     PlantHealthStatus.NEEDS_WATER,
     PlantHealthStatus.OVERWATERED ->
-        PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringOrange)
+        PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringBlue)
     PlantHealthStatus.SEVERELY_DRY,
     PlantHealthStatus.SEVERELY_OVERWATERED ->
-        PlantCardColorPalette(customColors.redPlantCardBackground, colorScheme.error)
+        PlantCardColorPalette(customColors.redPlantCardBackground, customColors.wateringBlue)
   }
 }
 
