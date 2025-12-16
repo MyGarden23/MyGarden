@@ -52,7 +52,8 @@ data class FeedUIState(
 enum class RelationWithWatchedUser {
   FRIEND,
   NOT_FRIEND,
-  SELF
+  REQUEST_SENT,
+  SELF,
 }
 
 /**
@@ -123,8 +124,13 @@ class FeedViewModel(
         _uiState.value =
             _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.FRIEND)
       } else {
-        _uiState.value =
-            _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.NOT_FRIEND)
+        if (friendsRequestsRepo.isInOutgoingRequests(watchedFriend1?.id ?: "")) {
+          _uiState.value =
+              _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.REQUEST_SENT)
+        } else {
+          _uiState.value =
+              _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.NOT_FRIEND)
+        }
       }
     }
 
@@ -135,8 +141,13 @@ class FeedViewModel(
         _uiState.value =
             _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.FRIEND)
       } else {
-        _uiState.value =
-            _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.NOT_FRIEND)
+        if (friendsRequestsRepo.isInOutgoingRequests(watchedFriend2?.id ?: "")) {
+          _uiState.value =
+              _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.REQUEST_SENT)
+        } else {
+          _uiState.value =
+              _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.NOT_FRIEND)
+        }
       }
     }
   }
@@ -144,8 +155,15 @@ class FeedViewModel(
   fun resetWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
     _uiState.value = _uiState.value.copy(watchedUser1 = watchedFriend1)
     _uiState.value = _uiState.value.copy(watchedUser2 = watchedFriend2)
+    _uiState.value = _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.SELF)
+    _uiState.value = _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.SELF)
+    _uiState.value = _uiState.value.copy(watchedUser1 = null)
+    _uiState.value = _uiState.value.copy(watchedUser2 = null)
   }
 
+  fun updateWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
+    viewModelScope.launch { setWatchedFriends(watchedFriend1, watchedFriend2) }
+  }
   /**
    * Function that handles the click on an activity card
    *
@@ -185,7 +203,10 @@ class FeedViewModel(
     navigationActions?.navTo(Screen.FriendGarden(friendId))
   }
 
-  fun handleNotFriendActivityClick() {}
+  fun handleNotFriendActivityClick(friendId: String) {
+    viewModelScope.launch { friendsRequestsRepo.askFriend(friendId) }
+    updateWatchedFriends(_uiState.value.watchedUser1, _uiState.value.watchedUser2)
+  }
 
   fun handleSelfActivityClick() {
     navigationActions?.navTo(Screen.Garden)
