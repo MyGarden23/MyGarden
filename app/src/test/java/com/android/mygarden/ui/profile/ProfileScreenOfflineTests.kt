@@ -156,6 +156,10 @@ class ProfileScreenOfflineTests {
 
     override suspend fun getFCMToken(): String? = baseRepo.getFCMToken()
 
+    override suspend fun isCurrentUserPseudo(pseudo: String): Boolean {
+      return true
+    }
+
     override fun cleanup() = baseRepo.cleanup()
   }
 }
