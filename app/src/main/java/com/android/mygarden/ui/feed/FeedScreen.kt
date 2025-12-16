@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -157,7 +158,8 @@ fun FeedScreen(
                   modifier =
                       modifier.fillMaxWidth().padding(horizontal = LAZY_COLUMN_HORIZONTAL_PADDING),
                   verticalArrangement =
-                      Arrangement.spacedBy(VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING)) {
+                      Arrangement.spacedBy(VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING),
+                  contentPadding = PaddingValues(VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING)) {
                     items(activities.size) { index ->
                       ActivityItem(modifier = modifier, activity = activities[index])
                     }

@@ -7,13 +7,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -82,6 +85,7 @@ private const val Z_INDEX_DIALOG_REMAINING_UNITS = 1f
 private val PROGRESS_BAR_HEIGHT = 22.dp
 private const val PROGRESS_BAR_ROUNDED_SHAPE = 50
 private val ACHIEVEMENT_IMAGE_SIZE = 130.dp
+private val EMPTY_SPACER_HEIGHT = 0.dp
 
 // Font sizes
 private val ACHIEVEMENT_CARD_NAME_FONT_SIZE = 23.sp
@@ -117,7 +121,10 @@ fun AchievementsScreen(
   var showAchievementInfo by remember { mutableStateOf<AchievementType?>(null) }
 
   Column(
-      modifier = modifier.testTag(NavigationTestTags.INTERNAL_ACHIEVEMENTS_SCREEN),
+      modifier =
+          modifier
+              .verticalScroll(rememberScrollState())
+              .testTag(NavigationTestTags.INTERNAL_ACHIEVEMENTS_SCREEN),
       verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
       horizontalAlignment = Alignment.CenterHorizontally) {
         for (type in AchievementType.entries) {
@@ -137,6 +144,9 @@ fun AchievementsScreen(
             )
           }
         }
+        // Empty spacer that adds an element in the column so it adds a COLUMN_VERTICAL_PADDING at
+        // the end for cleaner UI
+        Spacer(modifier.height(EMPTY_SPACER_HEIGHT))
       }
 }
 

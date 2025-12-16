@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -91,6 +92,7 @@ private val EDIT_NEXT_BUTTON_FONT_SIZE = 18.sp
 private val HEALTH_TAB_TEXTS_FONT_SIZE = 20.sp
 private val DESCRIPTION_HEADER_LOCATION_FONT_SIZE = 22.sp
 private val DESCRIPTION_LIGHT_EXPOSURE_FONT_SIZE = 18.sp
+private val LINE_HEIGHT = 35.sp
 
 // Sizing values
 private val BOTTOM_BAR_SHAPE_SIZE = 28.dp
@@ -116,6 +118,9 @@ private val INFO_TAB_PADDING = 20.dp
 // Spacer widths
 private val PROGRESS_INDICATOR_TEXT_SPACER_WIDTH = 12.dp
 private val NAMES_TIPS_BUTTON_SPACE_WIDTH = 8.dp
+
+// Values
+private const val MAX_NUMBER_LINE = 1
 
 /**
  * Screen displaying detailed information about a plant.
@@ -203,6 +208,7 @@ fun PlantInfosScreen(
                       text = uiState.name,
                       modifier = Modifier.testTag(PlantInfoScreenTestTags.PLANT_NAME),
                       fontSize = PLANT_NAME_FONT_SIZE,
+                      lineHeight = LINE_HEIGHT,
                       fontWeight = FontWeight.Bold,
                       color = MaterialTheme.colorScheme.onBackground)
                   // Scientific name (e.g., "Rosa rubiginosa")
@@ -307,7 +313,9 @@ fun ModulableTabRow(
                     text = stringResource(id = tab.textRes),
                     fontWeight =
                         if (uiState.selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
-                    fontSize = TAB_HEADERS_FONT_SIZE)
+                    fontSize = TAB_HEADERS_FONT_SIZE,
+                    maxLines = MAX_NUMBER_LINE,
+                    overflow = TextOverflow.Ellipsis)
               })
         }
       }
