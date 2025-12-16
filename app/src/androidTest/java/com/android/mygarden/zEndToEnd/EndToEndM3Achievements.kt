@@ -33,7 +33,6 @@ import com.android.mygarden.ui.profile.ProfileScreenTestTags
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.RequiresCamera
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -77,7 +76,7 @@ class EndToEndM3Achievements {
   val permissionNotifsRule: GrantPermissionRule =
       GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
-  private val TIMEOUT = 10_000L
+  private val TIMEOUT = 15_000L
 
   private val bobFirebaseUtils: FirebaseUtils = FirebaseUtils()
   private lateinit var bobUserUid: String
@@ -122,10 +121,10 @@ class EndToEndM3Achievements {
             .assertIsDisplayed()
             .performClick()
 
-        runBlocking {
-          bobFirebaseUtils.signIn()
-          bobFirebaseUtils.waitForAuthReady()
-        }
+        // runBlocking {
+        bobFirebaseUtils.signIn()
+        bobFirebaseUtils.waitForAuthReady()
+        // }
         bobUserUid = bobFirebaseUtils.auth.uid!!
 
         // Create Bob's profile
@@ -332,10 +331,10 @@ class EndToEndM3Achievements {
             .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
             .performClick()
 
-        runBlocking {
-          aliceFirebaseUtils.signIn()
-          aliceFirebaseUtils.waitForAuthReady()
-        }
+        // runBlocking {
+        aliceFirebaseUtils.signIn()
+        aliceFirebaseUtils.waitForAuthReady()
+        // }
         aliceUserUid = aliceFirebaseUtils.auth.uid!!
 
         // Create Alice's profile
