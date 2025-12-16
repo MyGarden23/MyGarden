@@ -163,12 +163,20 @@ fun FriendsPopupCard(
                           },
                           colors =
                               ButtonDefaults.buttonColors(
-                                  MaterialTheme.colorScheme.primaryContainer),
+                                  containerColor =
+                                      when (relation) {
+                                        RelationWithWatchedUser.REQUEST_SENT ->
+                                            MaterialTheme.colorScheme.surfaceVariant
+                                        else -> MaterialTheme.colorScheme.primaryContainer
+                                      },
+                                  contentColor =
+                                      when (relation) {
+                                        RelationWithWatchedUser.REQUEST_SENT ->
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        else -> MaterialTheme.colorScheme.onPrimaryContainer
+                                      }),
                           content = {
-                            Text(
-                                text = getButtonText(relation, context),
-                                maxLines = MAX_LINES,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer)
+                            Text(text = getButtonText(relation, context), maxLines = MAX_LINES)
                           })
                     }
               }
