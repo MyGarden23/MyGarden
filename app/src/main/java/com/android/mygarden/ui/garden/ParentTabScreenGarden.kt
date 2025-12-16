@@ -305,13 +305,13 @@ fun ProfileRow(
                   vertical = PROFILE_ROW_VERTICAL_PADDING),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
           // Sign out button (hidden in view mode)
           if (!isViewMode) {
             NavigationButton(onClick = onSignOut, isSignOut = true)
+          } else {
+            Spacer(modifier = modifier.weight(FULL_WEIGHT))
           }
-          Spacer(modifier = modifier.weight(FULL_WEIGHT))
-
           // Username (user can click on it to edit profile)
           Text(
               modifier =
