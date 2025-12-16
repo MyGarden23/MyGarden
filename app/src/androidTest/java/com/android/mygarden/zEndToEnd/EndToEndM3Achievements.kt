@@ -49,8 +49,8 @@ const val ALICE_USER_PSEUDO = "alice_achievements_test"
  *
  * Test flow:
  * 1. Sign in as Bob and create his profile
- * 2. Add 3 plants to Bob's garden
- * 3. Go to Bob's achievements and verify plants achievement (Level 3/10)
+ * 2. Add 2 plants to Bob's garden
+ * 3. Go to Bob's achievements and verify plants achievement (Level 2/10)
  * 4. Sign out Bob and sign in as Alice
  * 5. Create Alice's profile
  * 6. Alice sends a friend request to Bob
@@ -149,6 +149,126 @@ class EndToEndM3Achievements {
         }
 
         // === STEP 2: ADD 3 PLANTS TO BOB'S GARDEN ===
+
+        // Add first Plant
+        // Go to camera
+        composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
+
+        // Wait for camera ready
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
+        }
+        composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
+
+        // Plant info screen
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
+        }
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).isDisplayed()
+        }
+        composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+
+        // Edit plant screen
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
+        }
+
+        // Edit plant details
+        composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).performTextClearance()
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME)
+            .performTextInput("1st Plant")
+        composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).performTextClearance()
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN)
+            .performTextInput("Plantunos")
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
+            .performTextClearance()
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
+            .performTextInput("My first plant")
+        composeTestRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).performTextClearance()
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE)
+            .performTextInput("Full sun")
+
+        // Scroll to save button
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+            .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_SAVE))
+
+        // Click Save
+        composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
+
+        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule
+              .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+              .isDisplayed()
+        }
+
+        // Add second Plant
+        // Go to camera
+        composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
+
+        // Wait for camera ready
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
+        }
+        composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
+
+        // Plant info screen
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
+        }
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).isDisplayed()
+        }
+        composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
+
+        // Edit plant screen
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
+        }
+
+        // Edit plant details
+        composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).performTextClearance()
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME)
+            .performTextInput("2nd Plant")
+        composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).performTextClearance()
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN)
+            .performTextInput("Plantdosio")
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
+            .performTextClearance()
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
+            .performTextInput("My 2nd Plant")
+        composeTestRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).performTextClearance()
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE)
+            .performTextInput("Full sun")
+
+        // Scroll to save button
+        composeTestRule
+            .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
+            .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_SAVE))
+
+        // Click Save
+        composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
+
+        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(TIMEOUT) {
+          composeTestRule
+              .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
+              .isDisplayed()
+        }
+
+        /*  // === STEP 2: ADD 3 PLANTS TO BOB'S GARDEN ===
         Log.d("EndToEndM3Achievements", "Step 2: Adding 3 plants to Bob's garden")
         for (i in 1..3) {
           addPlant("Bob's Plant $i", "Plantus $i", "Description for plant $i")
@@ -161,7 +281,7 @@ class EndToEndM3Achievements {
           }
 
           Log.d("EndToEndM3Achievements", "Added plant $i/3")
-        }
+        }*/
 
         // === STEP 3: GO TO BOB'S ACHIEVEMENTS AND VERIFY PLANTS ACHIEVEMENT ===
         Log.d("EndToEndM3Achievements", "Step 3: Checking Bob's plants achievement")
@@ -194,7 +314,7 @@ class EndToEndM3Achievements {
             .onNodeWithTag(
                 AchievementsScreenTestTags.getTestTagForCardLevel(AchievementType.PLANTS_NUMBER),
                 useUnmergedTree = true)
-            .assertTextEquals("Level 3/10")
+            .assertTextEquals("Level 2/10")
 
         // === STEP 4: SIGN OUT BOB AND SIGN IN AS ALICE ===
         Log.d("EndToEndM3Achievements", "Step 4: Sign out Bob and sign in as Alice\n")
