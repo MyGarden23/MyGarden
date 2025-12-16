@@ -437,6 +437,9 @@ class EndToEndM3Achievements {
 
     // Click Save
     composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
+
+    composeTestRule.waitForIdle()
+    Thread.sleep(1000) // Give the app time to fully process the plant addition
   }
 
   /** Waits for the app to fully load by checking for key UI elements */
