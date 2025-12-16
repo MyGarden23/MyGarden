@@ -293,20 +293,22 @@ fun ActivityItem(
   val isOnline by OfflineStateManager.isOnline.collectAsState()
 
   val colorPalette = activityTypeColor(activity, MaterialTheme.colorScheme, ExtendedTheme.colors)
-  val clickableModifier =
-      modifier.clickable {
-        handleOfflineClick(
-            isOnline,
-            context,
-            OfflineMessages.CANNOT_CLICK_ACTIVITY,
-            { feedViewModel.handleActivityClick(activity, navigationActions, navController) })
-      }
+
   Card(
       modifier =
-          clickableModifier
+          modifier
+              .testTag(FeedScreenTestTags.getTestTagForActivity(activity))
               .fillMaxWidth()
               .padding(horizontal = CARD_PADDING)
-              .testTag(FeedScreenTestTags.getTestTagForActivity(activity)),
+              .clickable {
+                handleOfflineClick(
+                    isOnline,
+                    context,
+                    OfflineMessages.CANNOT_CLICK_ACTIVITY,
+                    {
+                      feedViewModel.handleActivityClick(activity, navigationActions, navController)
+                    })
+              },
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),
       shape = RoundedCornerShape(ROUND_CORNER),
@@ -341,7 +343,7 @@ fun GenericCard(
   Row(
       modifier =
           modifier
-              .fillMaxSize()
+              .fillMaxWidth()
               .border(
                   width = BORDER_CARD_WIDTH,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
