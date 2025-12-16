@@ -236,4 +236,43 @@ class ProfileRepositoryEmulatorTest : FirestoreProfileTest() {
     assertEquals("Persistent", after!!.firstName)
     assertTrue(after.hasSignedIn)
   }
+
+  @Test
+  fun isCurrentUserPseudo_returnsTrue_whenPseudoMatches() = runTest {
+    // Save a profile with a specific pseudo
+    saveProfileSuspend(pseudo = "testUser123")
+
+    // Check that the pseudo matches
+    val result = repo.isCurrentUserPseudo("testUser123")
+    assertTrue(result)
+  }
+
+  @Test
+  fun isCurrentUserPseudo_returnsFalse_whenPseudoDoesNotMatch() = runTest {
+    // Save a profile with a specific pseudo
+    saveProfileSuspend(pseudo = "testUser123")
+
+    // Check with a different pseudo
+    val result = repo.isCurrentUserPseudo("differentUser")
+    assertFalse(result)
+  }
+
+  @Test
+  fun isCurrentUserPseudo_returnsFalse_whenNoProfileExists() = runTest {
+    // Don't save any profile
+
+    // Check with any pseudo
+    val result = repo.isCurrentUserPseudo("anyUser")
+    assertFalse(result)
+  }
+
+  @Test
+  fun isCurrentUserPseudo_returnsFalse_whenPseudoIsEmpty() = runTest {
+    // Save a profile with a non-empty pseudo
+    saveProfileSuspend(pseudo = "testUser123")
+
+    // Check with empty string
+    val result = repo.isCurrentUserPseudo("")
+    assertFalse(result)
+  }
 }
