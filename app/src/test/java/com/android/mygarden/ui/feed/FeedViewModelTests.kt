@@ -1,14 +1,10 @@
 package com.android.mygarden.ui.feed
 
-import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepository
-import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
-import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
-import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
@@ -64,17 +60,6 @@ class FeedViewModelTests {
 
   val addedPlantActivity =
       ActivityAddedPlant("uid", "gregory", Timestamp(System.currentTimeMillis()), ownedPlant1)
-
-  val waterPlantActivity =
-      ActivityWaterPlant("uid", "gregory", Timestamp(System.currentTimeMillis()), ownedPlant1)
-
-  val achievementActivity =
-      ActivityAchievement(
-          "uid", "gregory", Timestamp(System.currentTimeMillis()), AchievementType.PLANTS_NUMBER)
-
-  val addFriendActivity =
-      ActivityAddFriend(
-          "uid", "gregory", Timestamp(System.currentTimeMillis()), "friend-123", "friendPseudo")
 
   val userProfile1 =
       UserProfile(
@@ -264,7 +249,7 @@ class FeedViewModelTests {
   @Test
   fun feedUsesCurrentUserOnlyWhenNoFriends() = runTest {
     val fakeRepo = activityRepo as FakeActivityRepository
-    val vm = FeedViewModel(fakeRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo)
+    FeedViewModel(fakeRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo)
     runCurrent()
     assertEquals(listOf("fake-uid"), fakeRepo.lastFriendsList)
   }
