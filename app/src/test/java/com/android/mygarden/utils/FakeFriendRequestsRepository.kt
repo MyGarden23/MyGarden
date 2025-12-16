@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyList()) :
     FriendRequestsRepository {
   val incomingRequestsFlow = MutableStateFlow(initialRequests)
-  var currentUserIdValue: String? = "test-user-id"
+  var currentUserIdValue: String? = "fake-uid"
 
   override fun getCurrentUserId(): String? = currentUserIdValue
 
@@ -32,6 +32,8 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
     }
   }
 
+  override suspend fun askFriend(targetUserId: String) {
+    val currentUserId = getCurrentUserId() ?: "fake-uid"
   override suspend fun askFriend(targetUserId: String): Boolean {
     val currentUserId = getCurrentUserId() ?: "test-user-id"
 
