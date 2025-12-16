@@ -290,10 +290,17 @@ fun ActivityItem(
     navController: NavHostController,
     feedViewModel: FeedViewModel
 ) {
+  val context = LocalContext.current
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
+
   val colorPalette = activityTypeColor(activity, MaterialTheme.colorScheme, ExtendedTheme.colors)
   val clickableModifier =
       modifier.clickable {
-        feedViewModel.handleActivityClick(activity, navigationActions, navController)
+        handleOfflineClick(
+            isOnline,
+            context,
+            OfflineMessages.CANNOT_CLICK_ACTIVITY,
+            { feedViewModel.handleActivityClick(activity, navigationActions, navController) })
       }
   Card(
       modifier =
