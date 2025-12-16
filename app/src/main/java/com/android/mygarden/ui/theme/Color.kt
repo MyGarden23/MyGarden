@@ -89,6 +89,8 @@ val md_theme_dark_scrim = Color(0xFF000000)
  *   [FeedScreen]
  * @param notificationRed the red color used for the red dot on the notification icon in
  *   [FeedScreen]
+ * @param addPlantActivityGreen the green color used for background of the addPlantActivity card in
+ *   [FeedScreen]
  */
 data class CustomColors(
     val wateringBlue: Color,
@@ -104,4 +106,5 @@ data class CustomColors(
     val achievementGrey: Color,
     val onAchievementGrey: Color,
     val notificationRed: Color,
+    val addPlantActivityGreen: Color,
 )

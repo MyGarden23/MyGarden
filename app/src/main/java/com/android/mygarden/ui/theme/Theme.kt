@@ -99,7 +99,8 @@ private val customColorsLight =
         onFriendActivityRed = Color(0xFF5A4838),
         achievementGrey = Color(0xFFD5D3CF),
         onAchievementGrey = Color(0xFF5A5653),
-        notificationRed = Color(0xFFF50202))
+        notificationRed = Color(0xFFF50202),
+        addPlantActivityGreen = Color(0xFF7FA884))
 
 /** The custom colors added to the MaterialTheme ones (dark mode) */
 private val customColorsDark =
@@ -116,11 +117,13 @@ private val customColorsDark =
         onFriendActivityRed = Color(0xFFE0D5C8),
         achievementGrey = Color(0xFF6B6965),
         onAchievementGrey = Color(0xFFD8D6D2),
-        notificationRed = Color(0xFFF50202))
+        notificationRed = Color(0xFFF50202),
+        addPlantActivityGreen = Color(0xFF7FA884))
 
 /** Local slot that holds the custom colors value in the composition tree */
 val LocalCustomColors = staticCompositionLocalOf {
   CustomColors(
+      Color.Unspecified,
       Color.Unspecified,
       Color.Unspecified,
       Color.Unspecified,

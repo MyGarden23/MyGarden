@@ -434,7 +434,7 @@ fun activityTypeColor(
     is ActivityAddFriend ->
         CardColorPalette(customColors.friendActivityRed, customColors.onFriendActivityRed)
     is ActivityAddedPlant ->
-        CardColorPalette(colorScheme.primaryContainer, colorScheme.onPrimaryContainer)
+        CardColorPalette(customColors.addPlantActivityGreen, colorScheme.onPrimaryContainer)
     is ActivityWaterPlant ->
         CardColorPalette(customColors.waterActivityBlue, customColors.onWaterActivityBlue)
   }
