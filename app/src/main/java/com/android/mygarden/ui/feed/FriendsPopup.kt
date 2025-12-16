@@ -191,11 +191,14 @@ fun onClickActionForPopup(
     }
     RelationWithWatchedUser.NOT_FRIEND -> {
       Toast.makeText(context, "Add Friend", Toast.LENGTH_SHORT).show()
-      feedViewModel.handleNotFriendActivityClick()
+      feedViewModel.handleNotFriendActivityClick(userProfile.id)
     }
     RelationWithWatchedUser.SELF -> {
       Toast.makeText(context, "Your Garden", Toast.LENGTH_SHORT).show()
       feedViewModel.handleSelfActivityClick()
+    }
+    RelationWithWatchedUser.REQUEST_SENT -> {
+      Toast.makeText(context, "Request Sent", Toast.LENGTH_SHORT).show()
     }
   }
 }
@@ -205,5 +208,6 @@ fun getButtonText(relation: RelationWithWatchedUser): String {
     RelationWithWatchedUser.FRIEND -> "See Garden"
     RelationWithWatchedUser.NOT_FRIEND -> "Add Friend"
     RelationWithWatchedUser.SELF -> "Your Garden"
+    RelationWithWatchedUser.REQUEST_SENT -> "Request Sent"
   }
 }
