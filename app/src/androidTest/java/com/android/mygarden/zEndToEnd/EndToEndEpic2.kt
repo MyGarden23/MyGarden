@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToLog
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
@@ -140,7 +141,7 @@ class EndToEndEpic2 {
         // === CRITICAL FIX: Visit Garden screen first to ensure UserProfile is properly loaded ===
         // This ensures GardenViewModel initializes with the newly created user profile
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-
+        composeTestRule.onRoot(useUnmergedTree = true).printToLog("COMPOSE_TREE")
         // Wait for Garden screen to fully load with user profile
         composeTestRule.waitUntil(TIMEOUT) {
           try {
