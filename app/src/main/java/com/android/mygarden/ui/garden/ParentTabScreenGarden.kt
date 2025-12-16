@@ -59,6 +59,8 @@ import com.android.mygarden.ui.utils.handleOfflineClick
 object GardenAchievementsParentScreenTestTags {
   const val AVATAR_EDIT_PROFILE = "UserAvatarEditProfile"
   const val PSEUDO = "Pseudo"
+  const val LIKE_BUTTON = "LikeButton"
+  const val LIKE_COUNTER = "LikeCounter"
 
   fun getTestTagForTab(tab: GardenTab) = "${tab.titleRes}_Tab"
 }
@@ -378,7 +380,10 @@ fun LikeIndicator(
 ) {
   Row(
       verticalAlignment = Alignment.CenterVertically,
-      modifier = modifier.then(if (enabled) Modifier.clickable { onLikeClick() } else Modifier)) {
+      modifier =
+          modifier
+              .testTag(GardenAchievementsParentScreenTestTags.LIKE_BUTTON)
+              .then(if (enabled) Modifier.clickable { onLikeClick() } else Modifier)) {
         Icon(
             imageVector = if (hasLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
             contentDescription = if (hasLiked) "Liked" else "Not liked",
@@ -393,6 +398,7 @@ fun LikeIndicator(
         Text(
             text = likesCount.toString(),
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface)
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.testTag(GardenAchievementsParentScreenTestTags.LIKE_COUNTER))
       }
 }
