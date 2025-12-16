@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.caretips.CareTipsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.offline.OfflineStateManager
@@ -18,6 +19,7 @@ import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
+import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeActivityRepository
 import com.android.mygarden.utils.FakeCareTipsRepository
 import com.android.mygarden.utils.FakeProfileRepository
@@ -70,6 +72,7 @@ class EditPlantScreenOfflineTests {
                 avatar = Avatar.A1))
     PlantsRepositoryProvider.repository = plantsRepo
     ActivityRepositoryProvider.repository = FakeActivityRepository()
+    AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     CareTipsRepositoryProvider.repository = FakeCareTipsRepository()
 
     // Save a test plant to the garden

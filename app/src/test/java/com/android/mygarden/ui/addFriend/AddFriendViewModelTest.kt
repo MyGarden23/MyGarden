@@ -4,6 +4,7 @@ import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.profile.GardeningSkill
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeFriendRequestsRepository
 import com.android.mygarden.utils.FakeFriendsRepository
 import com.android.mygarden.utils.FakeProfileRepository
@@ -48,6 +49,7 @@ class AddFriendViewModelTest {
     val fakeRequests = FakeFriendRequestsRepository()
     val fakeUserProfile = FakeUserProfileRepository()
     val fakeProfile = FakeProfileRepository()
+    val fakeAchivements = FakeAchievementsRepository()
     val fakePseudo =
         TestPseudoRepository().apply {
           searchResults = listOf("alice")
@@ -67,7 +69,8 @@ class AddFriendViewModelTest {
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
             pseudoRepository = fakePseudo,
-            profileRepository = fakeProfile)
+            profileRepository = fakeProfile,
+            achievementsRepository = fakeAchivements)
 
     // First: perform a search to populate results
     vm.onQueryChange("al")
@@ -112,6 +115,7 @@ class AddFriendViewModelTest {
     val fakeFriends = FakeFriendsRepository()
     val fakeRequests = FakeFriendRequestsRepository()
     val fakeProfile = FakeProfileRepository()
+    val fakeAchievements = FakeAchievementsRepository()
 
     // Configure a test-specific pseudo repository that returns a single match.
     val fakePseudo =
@@ -135,7 +139,8 @@ class AddFriendViewModelTest {
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
             pseudoRepository = fakePseudo,
-            profileRepository = fakeProfile)
+            profileRepository = fakeProfile,
+            achievementsRepository = fakeAchievements)
 
     vm.onQueryChange("al")
 
@@ -163,7 +168,12 @@ class AddFriendViewModelTest {
     Dispatchers.setMain(dispatcher)
 
     val fakeFriends = FakeFriendsRepository()
-    val vm = createViewModel(friendsRepo = fakeFriends)
+    val fakeAchievements = FakeAchievementsRepository()
+    // Initialize achievements for both users to avoid null issues
+    fakeAchievements.initializeAchievementsForNewUser("fake_uid")
+    fakeAchievements.initializeAchievementsForNewUser("friend-123")
+
+    val vm = createViewModel(friendsRepo = fakeFriends, achievementsRepository = fakeAchievements)
 
     var successCalled = false
     var errorCalled = false
@@ -232,6 +242,8 @@ class AddFriendViewModelTest {
     val fakeFriends = FakeFriendsRepository()
     val fakeRequests = FakeFriendRequestsRepository()
     val fakeUserProfile = FakeUserProfileRepository()
+    val fakeAchievements = FakeAchievementsRepository()
+    val profileRepo = FakeProfileRepository()
     val fakePseudo =
         TestPseudoRepository().apply {
           searchResults = listOf("alice")
@@ -250,7 +262,9 @@ class AddFriendViewModelTest {
             friendsRepository = fakeFriends,
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
-            pseudoRepository = fakePseudo)
+            pseudoRepository = fakePseudo,
+            profileRepository = profileRepo,
+            achievementsRepository = fakeAchievements)
 
     vm.onQueryChange("al")
     vm.onSearch(onError = {})
@@ -271,6 +285,8 @@ class AddFriendViewModelTest {
     val fakeFriends = FakeFriendsRepository().apply { friendsFlow.value = listOf("uid-alice") }
     val fakeRequests = FakeFriendRequestsRepository()
     val fakeUserProfile = FakeUserProfileRepository()
+    val fakeAchievements = FakeAchievementsRepository()
+    val profileRepo = FakeProfileRepository()
     val fakePseudo =
         TestPseudoRepository().apply {
           searchResults = listOf("alice")
@@ -289,7 +305,9 @@ class AddFriendViewModelTest {
             friendsRepository = fakeFriends,
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
-            pseudoRepository = fakePseudo)
+            pseudoRepository = fakePseudo,
+            profileRepository = profileRepo,
+            achievementsRepository = fakeAchievements)
 
     vm.onQueryChange("al")
     vm.onSearch(onError = {})
@@ -313,6 +331,8 @@ class AddFriendViewModelTest {
             initialRequests =
                 listOf(FriendRequest(fromUserId = "test-user-id", toUserId = "uid-alice")))
     val fakeUserProfile = FakeUserProfileRepository()
+    val fakeAchievements = FakeAchievementsRepository()
+    val profileRepo = FakeProfileRepository()
     val fakePseudo =
         TestPseudoRepository().apply {
           searchResults = listOf("alice")
@@ -331,7 +351,9 @@ class AddFriendViewModelTest {
             friendsRepository = fakeFriends,
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
-            pseudoRepository = fakePseudo)
+            pseudoRepository = fakePseudo,
+            profileRepository = profileRepo,
+            achievementsRepository = fakeAchievements)
 
     vm.onQueryChange("al")
     vm.onSearch(onError = {})
@@ -361,6 +383,8 @@ class AddFriendViewModelTest {
                     )))
 
     val fakeUserProfile = FakeUserProfileRepository()
+    val fakeAchievements = FakeAchievementsRepository()
+    val profileRepo = FakeProfileRepository()
     val fakePseudo =
         TestPseudoRepository().apply {
           searchResults = listOf("alice")
@@ -380,7 +404,9 @@ class AddFriendViewModelTest {
             friendsRepository = fakeFriends,
             requestsRepository = fakeRequests,
             userProfileRepository = fakeUserProfile,
-            pseudoRepository = fakePseudo)
+            pseudoRepository = fakePseudo,
+            profileRepository = profileRepo,
+            achievementsRepository = fakeAchievements)
 
     vm.onQueryChange("al")
     vm.onSearch(onError = {})

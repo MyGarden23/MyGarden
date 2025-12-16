@@ -1,5 +1,6 @@
 package com.android.mygarden.utils
 
+import com.android.mygarden.model.achievements.AchievementsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.profile.ProfileRepository
@@ -18,13 +19,15 @@ fun createViewModel(
     userProfileRepo: UserProfileRepository = FakeUserProfileRepository(),
     pseudoRepo: PseudoRepository = FakePseudoRepository(),
     profilRepo: ProfileRepository = FakeProfileRepository(),
+    achievementsRepository: AchievementsRepository = FakeAchievementsRepository()
 ): AddFriendViewModel =
     AddFriendViewModel(
         friendsRepository = friendsRepo,
         requestsRepository = requestsRepo,
         userProfileRepository = userProfileRepo,
         pseudoRepository = pseudoRepo,
-        profileRepository = profilRepo)
+        profileRepository = profilRepo,
+        achievementsRepository = achievementsRepository)
 
 /**
  * Test-only fake implementation of [PseudoRepository] used in this test class.

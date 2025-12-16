@@ -21,7 +21,7 @@ class FakeAchievementsRepository : AchievementsRepository {
       userId: String,
       achievementType: AchievementType
   ): UserAchievementProgress? {
-    return addedAchievements.first { it.achievementType == achievementType }
+    return addedAchievements.firstOrNull { it.achievementType == achievementType }
   }
 
   override fun getAllUserAchievementProgress(userId: String): Flow<List<UserAchievementProgress>> {
@@ -58,10 +58,14 @@ class FakeAchievementsRepository : AchievementsRepository {
       newValue: Int
   ) {
     val get = getUserAchievementProgress(userId, achievementType)
-    get?.let { value ->
-      if (value.currentValue < newValue) {
+    if (get != null) {
+      // Achievement exists, update if new value is higher
+      if (get.currentValue < newValue) {
         setAchievementValue(userId, achievementType, newValue)
       }
+    } else {
+      // Achievement doesn't exist yet, create it with the new value
+      setAchievementValue(userId, achievementType, newValue)
     }
   }
 

@@ -39,7 +39,7 @@ class FakeFriendsRepository : FriendsRepository {
     throwOnAdd?.let { throw it }
     addedFriends += friendUserId
     friendsFlow.value = friendsFlow.value + friendUserId
-    return AddFriendResult(0, 0)
+    return AddFriendResult(currentUserFriendCount = friendsFlow.value.size, addedFriendCount = 1)
   }
 
   override suspend fun deleteFriend(friendUserId: String) {
