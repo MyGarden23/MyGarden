@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.friendList
 
 import com.android.mygarden.model.achievements.AchievementType
+import com.android.mygarden.model.friends.AddFriendResult
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeAchievementsRepository
@@ -93,7 +94,7 @@ class FriendListViewModelTest {
             /* doesn't do anything yet*/
           }
 
-          override suspend fun addFriend(friendUserId: String) = Unit
+          override suspend fun addFriend(friendUserId: String) = AddFriendResult(0, 0)
 
           override suspend fun isFriend(friendUserId: String): Boolean {
             return FakeFriendsRepository().friendsFlow.value.contains(friendUserId)

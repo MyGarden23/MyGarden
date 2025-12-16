@@ -50,7 +50,7 @@ class PlantsRepositoryFirestoreTest : FirestoreProfileTest() {
 
     // Inject repositories
     repositoryAchievements = AchievementsRepositoryFirestore(db, auth)
-    repository = PlantsRepositoryFirestore(db, auth, achievementsRepo = repositoryAchievements)
+    repository = PlantsRepositoryFirestore(db, auth)
   }
 
   /** Ensures to clear the repo at the end of each test for consistency */
