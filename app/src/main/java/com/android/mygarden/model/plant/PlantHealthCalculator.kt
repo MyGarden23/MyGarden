@@ -86,13 +86,13 @@ class PlantHealthCalculator {
     }
 
     // Dryness computation (always meaningful)
-    val daysSinceWatered = calculateDaysDifference(lastWatered, currentTime)
+    val daysSinceWatered = maxOf(calculateDaysDifference(lastWatered, currentTime), 0.0)
     val drynessPct = (daysSinceWatered / wateringFrequency) * PERCENTAGE_CALCULATION_UTILITY
 
     // Overwatering computation (based on the interval between last two waterings)
     val intervalPct =
         if (previousLastWatered != null) {
-          val daysBetween = calculateDaysDifference(previousLastWatered, lastWatered)
+          val daysBetween = maxOf(calculateDaysDifference(previousLastWatered, lastWatered), 0.0)
           (daysBetween / wateringFrequency) * PERCENTAGE_CALCULATION_UTILITY
         } else {
           // Plant has no previous watering -> cannot be overwatered

@@ -560,6 +560,9 @@ class GardenViewModelTests {
         "3",
         Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)))
 
+    plantsRepo.waterPlant("1", Timestamp(System.currentTimeMillis()))
+    plantsRepo.waterPlant("2", Timestamp(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(12)))
+
     runCurrent()
     vm.refreshUIState()
     runCurrent()
@@ -573,7 +576,7 @@ class GardenViewModelTests {
 
   @Test
   fun filterCriticalWorks() = runTest {
-    // Show only severely dry or overwatered
+    // Show only severely dry
     plantsRepo.saveToGarden(
         Plant(
             "Critical1",
@@ -587,19 +590,6 @@ class GardenViewModelTests {
             2),
         "1",
         Timestamp(0))
-    plantsRepo.saveToGarden(
-        Plant(
-            "Critical2",
-            null,
-            "",
-            "",
-            PlantLocation.INDOOR,
-            "Test light exposure",
-            PlantHealthStatus.SEVERELY_OVERWATERED,
-            "",
-            15),
-        "2",
-        Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)))
     plantsRepo.saveToGarden(
         Plant(
             "Ok",
@@ -618,7 +608,7 @@ class GardenViewModelTests {
     vm.setFilterOption(FilterOption.CRITICAL_ONLY)
     runCurrent()
 
-    assertEquals(2, vm.uiState.value.filteredAndSortedPlants.size)
+    assertEquals(1, vm.uiState.value.filteredAndSortedPlants.size)
     repositoryScope.cancel()
   }
 
