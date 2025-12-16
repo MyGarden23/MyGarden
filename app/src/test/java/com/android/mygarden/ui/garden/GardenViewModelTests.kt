@@ -9,11 +9,14 @@ import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.LikesRepository
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.FakeActivityRepository
+import com.android.mygarden.utils.FakeLikesRepository
 import com.android.mygarden.utils.FakeProfileRepository
+import com.android.mygarden.utils.FakeUserProfileRepository
 import com.google.firebase.FirebaseApp
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
@@ -21,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -43,6 +47,8 @@ class GardenViewModelTests {
   private lateinit var plantsRepo: PlantsRepository
   private lateinit var profileRepo: ProfileRepository
   private lateinit var activityRepo: FakeActivityRepository
+  private lateinit var likesRepo: LikesRepository
+  private val friendUid = "friend-uid"
   private lateinit var vm: GardenViewModel
   val plant1 =
       Plant(
@@ -58,6 +64,7 @@ class GardenViewModelTests {
   private val testDispatcher = StandardTestDispatcher()
 
   private lateinit var repositoryScope: TestScope
+
   /** Sets up the repository and the view model and the test dispatcher to simulate the app */
   @Before
   fun setUp() {
@@ -68,6 +75,7 @@ class GardenViewModelTests {
     Dispatchers.setMain(testDispatcher)
     repositoryScope = TestScope(SupervisorJob() + testDispatcher)
     plantsRepo = PlantsRepositoryLocal(repositoryScope)
+    likesRepo = FakeLikesRepository()
     profileRepo =
         FakeProfileRepository(
             Profile(
@@ -82,7 +90,11 @@ class GardenViewModelTests {
     activityRepo = FakeActivityRepository()
     vm =
         GardenViewModel(
-            plantsRepo = plantsRepo, profileRepo = profileRepo, activityRepo = activityRepo)
+            plantsRepo = plantsRepo,
+            profileRepo = profileRepo,
+            activityRepo = activityRepo,
+            likesRepo = likesRepo,
+            friendId = friendUid)
   }
 
   /** Ensures the reset of the dispatcher at each end of test */
@@ -110,6 +122,14 @@ class GardenViewModelTests {
   /** Tests that fetchProfileInfos works correctly with a fake profile repository */
   @Test
   fun fetchProfileInfoWorksCorrectly() = runTest {
+    vm =
+        GardenViewModel(
+            plantsRepo = plantsRepo,
+            profileRepo = profileRepo,
+            userProfileRepo = FakeUserProfileRepository(),
+            activityRepo = activityRepo,
+            likesRepo = FakeLikesRepository(),
+            friendId = null)
     val expected =
         Profile(
             firstName = "Test",
@@ -666,5 +686,61 @@ class GardenViewModelTests {
     assertEquals("A-Dry", result[0].plant.name)
     assertEquals("Z-Dry", result[1].plant.name)
     repositoryScope.cancel()
+  }
+
+  @Test
+  fun init_observesLikesCount_updatesUiState() = runTest {
+    // Trigger initial collectors
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Fake repository emits a new count
+    // (cast ok because we control FakeLikesRepository type here)
+    val fake = likesRepo as FakeLikesRepository
+    val flow = (fake.observeLikesCount(friendUid) as MutableStateFlow<Int>)
+    flow.value = 5
+
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    assertEquals(5, vm.uiState.value.likesCount)
+  }
+
+  @Test
+  fun init_observesHasLiked_updatesUiState() = runTest {
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    val myUid = profileRepo.getCurrentUserId() ?: "current-user"
+    val fake = likesRepo as FakeLikesRepository
+    val hasLikedFlow = (fake.observeHasLiked(friendUid, myUid) as MutableStateFlow<Boolean>)
+
+    hasLikedFlow.value = true
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    assertEquals(true, vm.uiState.value.hasLiked)
+  }
+
+  @Test
+  fun toggleLike_likesThenUnlikes_updatesUiState() = runTest {
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Initial state
+    assertEquals(0, vm.uiState.value.likesCount)
+    assertEquals(false, vm.uiState.value.hasLiked)
+    assertEquals(false, vm.uiState.value.isLikeUpdating)
+
+    // 1) Like
+    vm.toggleLike()
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    assertEquals(false, vm.uiState.value.isLikeUpdating)
+    assertEquals(true, vm.uiState.value.hasLiked)
+    assertEquals(1, vm.uiState.value.likesCount)
+
+    // 2) Unlike
+    vm.toggleLike()
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    assertEquals(false, vm.uiState.value.isLikeUpdating)
+    assertEquals(false, vm.uiState.value.hasLiked)
+    assertEquals(0, vm.uiState.value.likesCount)
   }
 }
