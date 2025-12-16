@@ -1,7 +1,6 @@
 package com.android.mygarden.ui.feed
 
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -160,7 +159,6 @@ fun FriendsPopupCard(
                             onClickActionForPopup(
                                 relationWithWatchedUser = relation,
                                 feedViewModel = feedViewModel,
-                                context = context,
                                 userProfile = userProfile)
                           },
                           colors =
@@ -168,7 +166,7 @@ fun FriendsPopupCard(
                                   MaterialTheme.colorScheme.primaryContainer),
                           content = {
                             Text(
-                                text = getButtonText(relation),
+                                text = getButtonText(relation, context),
                                 maxLines = MAX_LINES,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer)
                           })
@@ -181,33 +179,27 @@ fun FriendsPopupCard(
 fun onClickActionForPopup(
     relationWithWatchedUser: RelationWithWatchedUser,
     feedViewModel: FeedViewModel,
-    context: Context,
     userProfile: UserProfile
 ) {
   when (relationWithWatchedUser) {
     RelationWithWatchedUser.FRIEND -> {
-      Toast.makeText(context, "See Garden", Toast.LENGTH_SHORT).show()
       feedViewModel.handleFriendActivityClick(userProfile.id)
     }
     RelationWithWatchedUser.NOT_FRIEND -> {
-      Toast.makeText(context, "Add Friend", Toast.LENGTH_SHORT).show()
       feedViewModel.handleNotFriendActivityClick(userProfile.id)
     }
     RelationWithWatchedUser.SELF -> {
-      Toast.makeText(context, "Your Garden", Toast.LENGTH_SHORT).show()
       feedViewModel.handleSelfActivityClick()
     }
-    RelationWithWatchedUser.REQUEST_SENT -> {
-      Toast.makeText(context, "Request Sent", Toast.LENGTH_SHORT).show()
-    }
+    RelationWithWatchedUser.REQUEST_SENT -> {}
   }
 }
 
-fun getButtonText(relation: RelationWithWatchedUser): String {
+fun getButtonText(relation: RelationWithWatchedUser, context: Context): String {
   return when (relation) {
-    RelationWithWatchedUser.FRIEND -> "See Garden"
-    RelationWithWatchedUser.NOT_FRIEND -> "Add Friend"
-    RelationWithWatchedUser.SELF -> "Your Garden"
-    RelationWithWatchedUser.REQUEST_SENT -> "Request Sent"
+    RelationWithWatchedUser.FRIEND -> context.getString(R.string.friend_popup_see_garden)
+    RelationWithWatchedUser.NOT_FRIEND -> context.getString(R.string.friend_popup_add_friend)
+    RelationWithWatchedUser.SELF -> context.getString(R.string.friend_popup_your_garden)
+    RelationWithWatchedUser.REQUEST_SENT -> context.getString(R.string.friend_popup_request_sent)
   }
 }

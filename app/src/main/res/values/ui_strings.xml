@@ -238,4 +238,10 @@
     <string name="healthy_streak_next_level">+ %1$d days to reach Level %2$d</string>
     <string name="left_for_threshold">%1$d/%2$d</string>
 
+    <!-- Friends Popup -->
+    <string name="friend_popup_see_garden">See Garden</string>
+    <string name="friend_popup_add_friend">Add Friend</string>
+    <string name="friend_popup_your_garden">Your Garden</string>
+    <string name="friend_popup_request_sent">Request Sent</string>
+
 </resources>
