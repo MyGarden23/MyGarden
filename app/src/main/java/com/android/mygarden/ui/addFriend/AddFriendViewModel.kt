@@ -132,9 +132,9 @@ class AddFriendViewModel(
   /**
    * Sends a friend request to [userId] and updates the local relation state immediately.
    *
-   * If the current relation is ADDBACK, the user is marked as ADDED; otherwise the state becomes
-   * PENDING. On success, [onSuccess] is called; on failure, the relation reverts to ADD and
-   * [onError] is invoked.
+   * If the target user had already sent a request, this auto-accepts it and adds both users as
+   * friends. Otherwise, a new PENDING request is created. The UI state is updated to reflect the
+   * new relationship status.
    *
    * @param userId The Firestore ID of the user to send a friend request to.
    * @param onError Invoked if the operation fails for any reason.
@@ -154,22 +154,46 @@ class AddFriendViewModel(
             }
           }
       try {
-        requestsRepository.askFriend(userId)
-        val currentUserId = profileRepository.getCurrentUserId()
-        if (currentUserId == null) {
-          onError()
-          return@launch
+        val wasAutoAccepted = requestsRepository.askFriend(userId)
+
+        // If an existing incoming request was auto-accepted, add to friends list
+        when (wasAutoAccepted) {
+          true -> {
+            // Add the friend to both users' friends lists
+            friendsRepository.addFriend(userId)
+            // Update UI state to show they're now friends
+            _uiState.value =
+                _uiState.value.copy(
+                    relations = _uiState.value.relations + (userId to FriendRelation.ADDED))
+          }
+          false -> {
+            // Normal case: request was sent, send notification
+            val currentUserId = profileRepository.getCurrentUserId()
+            if (currentUserId == null) {
+              _uiState.value =
+                  _uiState.value.let { state ->
+                    state.copy(relations = state.relations + (userId to FriendRelation.ADD))
+                  }
+              onError()
+              return@launch
+            }
+
+            val currentUserProfile = userProfileRepository.getUserProfile(currentUserId)
+            val fromPseudo = currentUserProfile?.pseudo
+
+            if (fromPseudo == null) {
+              _uiState.value =
+                  _uiState.value.let { state ->
+                    state.copy(relations = state.relations + (userId to FriendRelation.ADD))
+                  }
+              onError()
+              return@launch
+            }
+
+            friendRequestNotifier.notifyRequestSent(userId, fromPseudo)
+          }
         }
 
-        val currentUserProfile = userProfileRepository.getUserProfile(currentUserId)
-        val fromPseudo = currentUserProfile?.pseudo
-
-        if (fromPseudo == null) {
-          onError()
-          return@launch
-        }
-
-        friendRequestNotifier.notifyRequestSent(userId, fromPseudo)
         onSuccess()
       } catch (_: Exception) {
         _uiState.value =

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
+import com.android.mygarden.model.friends.FriendsRepository
+import com.android.mygarden.model.friends.FriendsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
@@ -30,17 +32,21 @@ data class FriendsRequestsUIState(
 )
 
 /**
- * View Model that handles interactions between the model (both repositories below) and the UI (here
- * the FriendsRequestsScreen)
+ * View Model that handles interactions between the model (repositories) and the UI (here the
+ * FriendsRequestsScreen)
  *
  * @property userProfileRepo the repository of userProfile, used to retrieve more infos about the
  *   users requesting a friendship
  * @property requestsRepo the repository of requests
+ * @property friendsRepo the repository of friends, used to add friends after accepting a request
+ * @property activityRepo the repository of activities, used to log friendship activities
+ * @property profileRepo the repository of profiles, used to get the current user's profile
  */
 class FriendsRequestsViewModel(
     private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
     private val requestsRepo: FriendRequestsRepository =
         FriendRequestsRepositoryProvider.repository,
+    private val friendsRepo: FriendsRepository = FriendsRepositoryProvider.repository,
     private val activityRepo: ActivityRepository = ActivityRepositoryProvider.repository,
     private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
@@ -72,9 +78,13 @@ class FriendsRequestsViewModel(
    */
   fun acceptRequest(requestId: String, newFriendId: String, newFriendPseudo: String) {
     viewModelScope.launch {
-      // accept the friend request
-      requestsRepo.acceptRequest(requestId)
-      // add the new activity that 2 users have become friends
+      // Accept the friend request (updates status)
+      val fromUserId = requestsRepo.acceptRequest(requestId)
+
+      // Add the friend to both users' friends lists
+      friendsRepo.addFriend(fromUserId)
+
+      // Add the new activity that 2 users have become friends
       val currentUserPseudo = profileRepo.getProfile().firstOrNull()?.pseudo ?: ""
       val currentUserId = activityRepo.getCurrentUserId() ?: ""
       activityRepo.addActivity(
