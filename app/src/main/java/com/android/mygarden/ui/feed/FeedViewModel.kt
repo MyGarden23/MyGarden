@@ -96,7 +96,7 @@ class FeedViewModel(
             // add the current user id to the list
             val allIds = listOf(currentUserId) + friends
             // fetch all activities to display
-            activityRepo.getFeedActivities(allIds, limit = 500)
+            activityRepo.getFeedActivities(allIds, limit = 100)
           }
 
       val hasRequestsFlow = friendsRequestsRepo.incomingRequests().map { it.isNotEmpty() }
