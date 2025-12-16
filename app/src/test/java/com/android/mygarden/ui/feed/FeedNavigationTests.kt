@@ -2,6 +2,7 @@ package com.android.mygarden.ui.feed
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -26,8 +27,10 @@ import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
 import com.android.mygarden.ui.feed.FeedScreenTests.FakeActivityRepository
 import com.android.mygarden.ui.navigation.AppNavHost
+import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
+import com.android.mygarden.ui.popup.PopupScreenTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.*
 import java.sql.Timestamp
@@ -74,14 +77,14 @@ class FeedNavigationTests {
       ActivityAddedPlant(
           userId = "fake-uid",
           pseudo = "TestUser",
-          createdAt = Timestamp(System.currentTimeMillis()),
+          createdAt = Timestamp(System.currentTimeMillis() - 2000),
           ownedPlant = testOwnedPlant)
 
   val waterPlantActivity: ActivityWaterPlant =
       ActivityWaterPlant(
           userId = "fake-uid",
           pseudo = "TestUser",
-          createdAt = Timestamp(System.currentTimeMillis()),
+          createdAt = Timestamp(System.currentTimeMillis() - 1000),
           ownedPlant = testOwnedPlant)
 
   val addFriendActivity: ActivityAddFriend =
@@ -138,5 +141,34 @@ class FeedNavigationTests {
     composeTestRule.onNodeWithTag(activityTag).assertIsDisplayed().performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag(NavigationTestTags.FEED_SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun clickingOnWaterPlantActivity_NavigatesToPlantInfoScreen() = runTest {
+    // Wait for the activity to appear in the UI
+    composeTestRule.waitForIdle()
+
+    // When: Click on the activity card
+    val activityTag = FeedScreenTestTags.getTestTagForActivity(waterPlantActivity)
+    composeTestRule.onNodeWithTag(activityTag).assertIsDisplayed().performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.BACK_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag(NavigationTestTags.FEED_SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun clickingOnFriendActivity_OpensPopupScreen() = runTest {
+    // Wait for the activity to appear in the UI
+    composeTestRule.waitForIdle()
+
+    // When: Click on the activity card
+    val activityTag = FeedScreenTestTags.getTestTagForActivity(addFriendActivity)
+    composeTestRule.onNodeWithTag(activityTag).assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithTag(PopupScreenTestTags.CARD).isDisplayed()
   }
 }
