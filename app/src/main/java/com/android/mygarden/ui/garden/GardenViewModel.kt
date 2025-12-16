@@ -85,9 +85,11 @@ class GardenViewModel(
 
     // Likes: observe count for the displayed garden (own or friend's)
     viewModelScope.launch {
-      val targetUid = friendId ?: profileRepo.getCurrentUserId()!!
-      likesRepo.observeLikesCount(targetUid).collect { count ->
-        _uiState.value = _uiState.value.copy(likesCount = count)
+      val targetUid = friendId ?: profileRepo.getCurrentUserId()
+      if (targetUid != null) {
+        likesRepo.observeLikesCount(targetUid).collect { count ->
+          _uiState.value = _uiState.value.copy(likesCount = count)
+        }
       }
     }
 
