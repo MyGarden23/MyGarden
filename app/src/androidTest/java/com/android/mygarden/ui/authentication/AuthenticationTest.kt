@@ -171,6 +171,48 @@ class AuthenticationTest {
   }
 
   @Test
+  fun back_from_newProfile_signs_out_and_navigates_to_auth() {
+    val ctx = ApplicationProvider.getApplicationContext<Context>()
+    val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken(email = "newuser-back@test.com")
+    val fakeCredMgr = FakeCredentialManager.create(fakeToken, ctx)
+
+    lateinit var currentRoute: MutableState<String?>
+
+    compose.setContent {
+      MyGardenTheme {
+        val nav = rememberNavController()
+        val backEntry by nav.currentBackStackEntryAsState()
+        currentRoute = remember { mutableStateOf(null) }
+        LaunchedEffect(backEntry) { currentRoute.value = backEntry?.destination?.route }
+
+        AppNavHost(
+            navController = nav,
+            startDestination = Screen.Auth.route,
+            credentialManagerProvider = { fakeCredMgr })
+      }
+    }
+
+    // Sign in
+    compose
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+
+    compose.waitUntil(effectiveTimeout) { currentRoute.value == Screen.NewProfile.route }
+    compose.waitForIdle()
+    // Verify user is found
+    assertNotNull(FirebaseEmulator.auth.currentUser)
+
+    // Click on system back button
+    compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
+
+    compose.waitUntil(effectiveTimeout) { currentRoute.value == Screen.Auth.route }
+
+    assertEquals(Screen.Auth.route, currentRoute.value)
+    assertNull(FirebaseEmulator.auth.currentUser)
+  }
+
+  @Test
   fun can_sign_in_with_existing_account() =
       kotlinx.coroutines.runBlocking {
         // 1) Seed an existing user directly in the emulator
