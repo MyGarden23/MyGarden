@@ -50,12 +50,13 @@ const val ALICE_USER_PSEUDO = "alice_achievements_test"
  * Test flow:
  * 1. Sign in as Bob and create his profile
  * 2. Add 3 plants to Bob's garden
- * 3. Go to Bob's achievements and verify plants achievement (Level 3: 3/10 plants)
- * 4. Bob sends a friend request to Alice
- * 5. Sign out Bob and sign in as Alice
- * 6. Create Alice's profile
- * 7. Alice accepts Bob's friend request
- * 8. Verify Alice's friends achievement (Level 2: 1 friend)
+ * 3. Go to Bob's achievements and verify plants achievement (Level 3/10)
+ * 4. Sign out Bob and sign in as Alice
+ * 5. Create Alice's profile
+ * 6. Alice sends a friend request to Bob
+ * 7. Sign out Alice and sign in as Bob
+ * 8. Bob accepts Alice’s friend request
+ * 9. Verify Bob’s friends achievement (Level 2/10)
  */
 @RequiresCamera
 @RunWith(AndroidJUnit4::class)
@@ -195,8 +196,8 @@ class EndToEndM3Achievements {
                 useUnmergedTree = true)
             .assertTextEquals("Level 3/10")
 
-        // === STEP 4: BOB SENDS FRIEND REQUEST TO ALICE ===
-        Log.d("EndToEndM3Achievements", "Step 4: Alice sends friend request to Bob")
+        // === STEP 4: SIGN OUT BOB AND SIGN IN AS ALICE ===
+        Log.d("EndToEndM3Achievements", "Step 4: Sign out Bob and sign in as Alice\n")
 
         composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_SIGN_OUT_BUTTON).performClick()
         composeTestRule.waitUntil(TIMEOUT) {
@@ -205,7 +206,7 @@ class EndToEndM3Achievements {
               .isDisplayed()
         }
 
-        // === STEP 5: SIGN IN AS ALICE, CREATE PROFILE AND ADD BOB ===
+        // === STEP 5-6: SIGN IN AS ALICE, CREATE PROFILE AND ADD BOB ===
         Log.d("EndToEndM3Achievements", "Step 5: Sign in as Alice")
         composeTestRule
             .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
@@ -266,8 +267,8 @@ class EndToEndM3Achievements {
             .onNodeWithTag(AddFriendTestTags.getTestTagForButtonOnFriendCard(BOB_USER_PSEUDO))
             .performClick()
 
-        // === NOW SIGN OUT ALICE AND SIGN BACK IN AS BOB TO ACCEPT REQUEST ===
-        Log.d("EndToEndM3Achievements", "Signing out Alice to let Bob send friend request")
+        // === STEP 7: SIGN OUT ALICE AND SIGN BACK IN AS BOB TO ACCEPT REQUEST ===
+        Log.d("EndToEndM3Achievements", "Signing out Alice to let Bob accept friend request")
         composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
 
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
@@ -287,8 +288,7 @@ class EndToEndM3Achievements {
               .isDisplayed()
         }
 
-        // === STEP 7: SIGN BACK IN AS BOB AND ACCEPT FRIEND REQUEST ===
-        Log.d("EndToEndM3Achievements", "Step 7: Alice accepts Bob's friend request")
+        // Reconnect with Bob's account
         bobFirebaseUtils.signIn()
         bobFirebaseUtils.waitForAuthReady()
 
@@ -300,7 +300,7 @@ class EndToEndM3Achievements {
           composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).isDisplayed()
         }
 
-        // Verify we're signed in as Alice
+        // Verify we're signed in as Bob
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
         composeTestRule.waitUntil(TIMEOUT) {
           composeTestRule
@@ -319,7 +319,7 @@ class EndToEndM3Achievements {
           composeTestRule.onNodeWithTag(NavigationTestTags.FEED_SCREEN).isDisplayed()
         }
 
-        // Accept Bob's friend request
+        // Accept Alice's friend request
         composeTestRule.onNodeWithTag(FeedScreenTestTags.FRIENDS_REQUESTS_BUTTON).performClick()
         composeTestRule.waitUntil(TIMEOUT) {
           composeTestRule.onNodeWithTag(NavigationTestTags.FRIENDS_REQUESTS_SCREEN).isDisplayed()
@@ -343,7 +343,7 @@ class EndToEndM3Achievements {
         Thread.sleep(
             2000) // Give Firebase time to process the friend addition and achievement update
 
-        Log.d("EndToEndM3Achievements", "Alice accepted Bob's friend request")
+        Log.d("EndToEndM3Achievements", "Bob accepted Alice's friend request")
 
         // Go back to feed
         composeTestRule.onNodeWithTag(NavigationTestTags.TOP_BAR_NAV_BACK_BUTTON).performClick()
@@ -351,10 +351,10 @@ class EndToEndM3Achievements {
           composeTestRule.onNodeWithTag(NavigationTestTags.FEED_SCREEN).isDisplayed()
         }
 
-        // === STEP 8: VERIFY ALICE'S FRIENDS ACHIEVEMENT (LEVEL 2: 1 FRIEND) ===
+        // === STEP 8: VERIFY Bob'S FRIENDS ACHIEVEMENT (LEVEL 2: 1 FRIEND) ===
         Log.d("EndToEndM3Achievements", "Step 8: Verifying Bob's friends achievement")
 
-        // Navigate to Alice's achievements
+        // Navigate to Bob's achievements
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
         composeTestRule.waitUntil(TIMEOUT) {
           composeTestRule
