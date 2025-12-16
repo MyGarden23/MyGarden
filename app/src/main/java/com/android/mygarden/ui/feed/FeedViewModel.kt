@@ -172,8 +172,8 @@ class FeedViewModel(
    */
   fun handleActivityClick(
       activity: GardenActivity,
-      navigationActions: NavigationActions,
-      navController: NavHostController
+      navigationActions: NavigationActions?,
+      navController: NavHostController?
   ) {
     when (activity) {
       is ActivityAddedPlant -> {
@@ -212,10 +212,8 @@ class FeedViewModel(
   }
 }
 
-class FeedViewModelFactory(
-    private val navigationActions: NavigationActions,
-    private val navController: NavHostController
-) : ViewModelProvider.Factory {
+class FeedViewModelFactory(private val navigationActions: NavigationActions?) :
+    ViewModelProvider.Factory {
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     return FeedViewModel(navigationActions = navigationActions) as T
   }

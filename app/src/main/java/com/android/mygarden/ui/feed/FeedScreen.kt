@@ -109,10 +109,9 @@ data class CardColorPalette(val backgroundColor: Color, val textColor: Color)
 @Composable
 fun FeedScreen(
     modifier: Modifier = Modifier,
-    navigationActions: NavigationActions,
-    navController: NavHostController,
-    feedViewModel: FeedViewModel =
-        viewModel(factory = FeedViewModelFactory(navigationActions, navController)),
+    navigationActions: NavigationActions? = null,
+    navController: NavHostController? = null,
+    feedViewModel: FeedViewModel = viewModel(factory = FeedViewModelFactory(navigationActions)),
     onAddFriend: () -> Unit = {},
     onNotifClick: () -> Unit = {},
     onFriendList: () -> Unit = {}
@@ -286,8 +285,8 @@ fun FriendListButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
 fun ActivityItem(
     modifier: Modifier = Modifier,
     activity: GardenActivity,
-    navigationActions: NavigationActions,
-    navController: NavHostController,
+    navigationActions: NavigationActions?,
+    navController: NavHostController?,
     feedViewModel: FeedViewModel
 ) {
   val context = LocalContext.current

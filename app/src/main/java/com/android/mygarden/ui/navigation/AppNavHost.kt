@@ -362,21 +362,22 @@ object NavHostUtils {
    * @param friendId the ID of the friend whose plant is being viewed (optional)
    */
   fun navigateToPlantInfoFromGarden(
-      navController: NavHostController,
-      navigationActions: NavigationActions,
+      navController: NavHostController?,
+      navigationActions: NavigationActions?,
       ownedPlantId: String,
       isViewMode: Boolean = false,
       friendId: String? = null
   ) {
-    navController.currentBackStackEntry
+    navController
+        ?.currentBackStackEntry
         ?.savedStateHandle
         ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlantId)
     if (isViewMode) {
-      navController.currentBackStackEntry?.savedStateHandle?.set(IS_VIEW_MODE_KEY, true)
+      navController?.currentBackStackEntry?.savedStateHandle?.set(IS_VIEW_MODE_KEY, true)
     }
     if (friendId != null) {
-      navController.currentBackStackEntry?.savedStateHandle?.set(FRIEND_ID_KEY, friendId)
+      navController?.currentBackStackEntry?.savedStateHandle?.set(FRIEND_ID_KEY, friendId)
     }
-    navigationActions.navTo(Screen.PlantInfoFromGarden)
+    navigationActions?.navTo(Screen.PlantInfoFromGarden)
   }
 }
