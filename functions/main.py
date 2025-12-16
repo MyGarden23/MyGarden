@@ -54,12 +54,15 @@ class PlantHealthStatus(str, Enum):
 
 
 # Same threshold values to compute health status as in the app's logic
-SEV_OVER = 10.0
-OVER = 30.0
-HEALTHY_MAX = 70.0
-SLIGHT_DRY_MAX = 100.0
-NEEDS_WATER_MAX = 130.0
-GRACE_DAYS = 0.5
+SEVERELY_OVERWATERED_MAX_THRESHOLD = 30.0
+OVERWATERED_MAX_THRESHOLD = 70.0
+HEALTHY_MAX_THRESHOLD = 70.0
+SLIGHTLY_DRY_MAX_THRESHOLD = 100.0
+NEEDS_WATER_MAX_THRESHOLD = 130.0
+
+OVERWATER_STATE_RECOVERY_END_THRESHOLD = 30.0
+OVERWATERING_SEVERITY_LEVEL_THRESHOLD = 0.5
+
 
 # Notification error sending handling
 MAX_RETRY_ATTEMPTS = 3
@@ -366,7 +369,6 @@ def _update_all_plants_status():
             except Exception as e:
                 logging.exception(f"[update_all_plants_status] uid={uid} | plant={plant_snap.id} | error={e}")
 
-
 # Date/Time Helpers
 def _dt(x: int | float):
     """
@@ -398,6 +400,13 @@ def _days(a: datetime, b: datetime) -> float:
     seconds_in_day = float(60 * 60 * 24)
     return (b - a).total_seconds() / seconds_in_day
 
+# Helper function for the status computation
+def _relative_percentage(x: float, y: float, z: float) -> float:
+    """Same as the in-app function calculateRelativePercentage(): normalize z in the interval [x,y] to [0,1]."""
+    if y == x:
+        return 0.0
+    z_clamped = max(x, min(y, z))
+    return (z_clamped - x) / (y - x)
 
 # Health Status Computation
 def compute_status(
@@ -406,46 +415,67 @@ def compute_status(
     previous_last_watered: int = None
 ) -> PlantHealthStatus:
     """
-    Compute the plant health status using the same thresholds/logic
-    as MyGarden's `calculateHealthStatus()` (see documentation).
-
-    Args:
-        last_watered (int): Last time the plant was watered
-        watering_frequency_days (int): Expected watering cadence in days
-        previous_last_watered (int, optional): Last time the plant was 
-            watered before the last time (None by default)
-
-    Returns:
-        PlantHealthStatus: The newly computed health state
+    Compute plant health status following the modified app model:
+    - drynessPct = days since last watering / wateringFrequency * 100
+    - Overwatering is computed from the intervalPct between previousLastWatered and 
+      lastWatered (if previous exists) then mapped to [0,1]
+    - Overwatering decays linearly as drynessPct increases and disappears by
+      the given threshold OVERWATER_STATE_RECOVERY_END_THRESHOLD
+    - While the effective overwatering is > 0, status is OVERWATERED or SEVERELY_OVERWATERED.
+      Once it reaches 0, we fall back to the dryness ladder.
     """
     last = _dt(last_watered)
-    prev = _dt(previous_last_watered) if previous_last_watered is not None else previous_last_watered
+    prev = _dt(previous_last_watered) if previous_last_watered is not None else None
     now = datetime.now(timezone.utc)
 
     if watering_frequency_days <= 0 or last is None:
         return PlantHealthStatus.UNKNOWN
 
-    pct = _days(last, now) / watering_frequency_days * 100.0
+    # Dryness computation
+    days_since = _days(last, now)
+    dryness_pct = (days_since / watering_frequency_days) * 100.0
 
-    # Initial-watering grace: first watering very recent -> HEALTHY
-    if _days(last, now) <= GRACE_DAYS and prev is None:
-        return PlantHealthStatus.HEALTHY
+    # Overwatering computation
+    interval_pct = None
+    if prev is not None:
+        days_between = _days(prev, last)
+        interval_pct = (days_between / watering_frequency_days) * 100.0
 
-    # Grace after appropriate watering: if previous cycle had reached ≥70%
-    if _days(last, now) <= GRACE_DAYS and prev is not None:
-        prev_pct = _days(prev, last) / watering_frequency_days * 100.0
-        if prev_pct >= HEALTHY_MAX:
-            return PlantHealthStatus.HEALTHY
+    # Severity mapped in [0,1]
+    if interval_pct is None:
+        starting_overwater_severity = 0.0
+    else:
+        if interval_pct < SEVERELY_OVERWATERED_MAX_THRESHOLD:
+            starting_overwater_severity = 1.0
+        elif interval_pct < OVERWATERED_MAX_THRESHOLD:
+            starting_overwater_severity = 1.0 - _relative_percentage(
+                SEVERELY_OVERWATERED_MAX_THRESHOLD,
+                OVERWATERED_MAX_THRESHOLD,
+                interval_pct
+            )
+        else:
+            starting_overwater_severity = 0.0
 
-    if pct < SEV_OVER:
-        return PlantHealthStatus.SEVERELY_OVERWATERED
-    if pct < OVER:
+    # Decay factor in [0,1] (becomes 0 at the recoveryEnd threshold)
+    overwater_decay = max(
+        0.0,
+        min(1.0, 1.0 - (dryness_pct / OVERWATER_STATE_RECOVERY_END_THRESHOLD))
+    )
+
+    effective_overwater_severity = starting_overwater_severity * overwater_decay
+
+    # If still overwatered gets an overwatered status
+    if effective_overwater_severity > 0.0:
+        if effective_overwater_severity > OVERWATERING_SEVERITY_LEVEL_THRESHOLD:
+            return PlantHealthStatus.SEVERELY_OVERWATERED
         return PlantHealthStatus.OVERWATERED
-    if pct <= HEALTHY_MAX:
+
+    # Otherwise, follow the dryness ladder (as before)
+    if dryness_pct <= HEALTHY_MAX_THRESHOLD:
         return PlantHealthStatus.HEALTHY
-    if pct <= SLIGHT_DRY_MAX:
+    if dryness_pct <= SLIGHTLY_DRY_MAX_THRESHOLD:
         return PlantHealthStatus.SLIGHTLY_DRY
-    if pct <= NEEDS_WATER_MAX:
+    if dryness_pct <= NEEDS_WATER_MAX_THRESHOLD:
         return PlantHealthStatus.NEEDS_WATER
     return PlantHealthStatus.SEVERELY_DRY
 

@@ -12,18 +12,27 @@ import java.util.concurrent.TimeUnit
 class PlantHealthCalculator {
 
   companion object {
-    /** Threshold percentages for watering cycle status determination */
-    private const val SEVERELY_OVERWATERED_THRESHOLD = 10.0
-    private const val OVERWATERED_THRESHOLD = 30.0
+    /* Overwatering thresholds */
+    private const val SEVERELY_OVERWATERED_MAX_THRESHOLD = 30.0
+    // Watering before 70% is "too soon"
+    private const val OVERWATERED_MAX_THRESHOLD = 70.0
+
+    /* Dryness thresholds */
     private const val HEALTHY_MAX_THRESHOLD = 70.0
     private const val SLIGHTLY_DRY_MAX_THRESHOLD = 100.0
     private const val NEEDS_WATER_MAX_THRESHOLD = 130.0
-    private const val JUST_WATERED_GRACE_PERIOD_DAYS = 0.5 // 12 hours
+
+    /* This threshold corresponds to the percentage of the watering frequency where the plant
+    stops being overwatered when there was a overwatering that happened beforehand */
+    private const val OVERWATER_STATE_RECOVERY_END_THRESHOLD = 30.0
+
+    /* This threshold corresponds to the severity level above which the remaining overwatering is considered as severe rather than normal */
+    private const val OVERWATERING_SEVERITY_LEVEL_THRESHOLD = 0.5
 
     private const val PERCENTAGE_CALCULATION_UTILITY = 100.0
 
-    /** Initial/default percentage values */
-    private const val INITIAL_PERCENTAGE = 0.0
+    /** Min/max percentage values */
+    private const val MIN_PERCENTAGE = 0.0
     private const val MAX_PERCENTAGE = 1.0
 
     /** Float conversion value */
@@ -31,24 +40,37 @@ class PlantHealthCalculator {
   }
 
   /** Double variable used to track each owned plant's "percentage" inside of its status */
-  private var currentStatusPercentage = INITIAL_PERCENTAGE
+  private var currentStatusPercentage = MIN_PERCENTAGE
 
   /**
-   * Calculates the current health status of a plant based on watering cycle.
+   * Computes the current health status of a plant based on its watering frequency and the previous
+   * waterings. The algorithm has two possible effects:
+   * - Dryness, which corresponds to how long it has been since the last watering. This always
+   *   progresses forward in time and determines the normal states of a plant's lifecycle (HEALTHY →
+   *   SLIGHTLY_DRY → NEEDS_WATER → SEVERELY_DRY).
+   * - Overwatering, which is driven by whether the last watering happened too soon compared to the
+   *   previous one. If present, this "stress" dominates the dryness logic and gradually decays over
+   *   time to eventually disappear.
    *
-   * Status is determined by the percentage of watering cycle completed:
-   * - 0-10%: Severely overwatered | 10-30%: Overwatered | 30-70%: Healthy
-   * - 70-100%: Slightly dry | 100-130%: Needs water | 130%+: Severely dry
+   * Overwatering severity is computed from the interval between the last two waterings (relative to
+   * the watering frequency), then decays smoothly as the plant dries more and more. This guarantees
+   * realistic transitions between the states: SEVERELY_OVERWATERED → OVERWATERED → HEALTHY →
+   * SLIGHTLY_DRY → NEEDS_WATER → SEVERELY_DRY
    *
-   * Grace Period: If watered within 12h and plant was at ≥70% of cycle (needed water), status is
-   * HEALTHY instead of SEVERELY_OVERWATERED. This requires previousLastWatered to determine if
-   * watering was appropriate or premature.
+   * A plant with no previous watering is never considered overwatered, because it means that is has
+   * just been added to the garden and without further information it is not possible to determine
+   * this.
    *
-   * @param lastWatered Timestamp of when the plant was last watered
-   * @param wateringFrequency Expected number of days between waterings
-   * @param previousLastWatered Optional: Previous watering timestamp (for grace period calculation)
-   * @param currentTime Current time (defaults to now, can be overridden for testing)
-   * @return The calculated PlantHealthStatus
+   * In addition to the discrete [PlantHealthStatus], this function also updates an internal
+   * percentage representing the plant's progress within the current status range, used by the UI to
+   * render a smooth water level bar.
+   *
+   * @param lastWatered The Timestamp of the most recent watering
+   * @param wateringFrequency The expected number of days between each waterings (must be > 0)
+   * @param previousLastWatered The timestamp of the watering before the last one, or null if the
+   *   plant has never been watered in the system
+   * @param currentTime The time at which the status is evaluated (defaults to now)
+   * @return The current [PlantHealthStatus] of the plant after the update
    */
   fun calculateHealthStatus(
       lastWatered: Timestamp,
@@ -59,92 +81,99 @@ class PlantHealthCalculator {
 
     // Validation: Invalid watering frequency
     if (wateringFrequency <= 0) {
-      currentStatusPercentage = INITIAL_PERCENTAGE
+      currentStatusPercentage = MIN_PERCENTAGE
       return PlantHealthStatus.UNKNOWN
     }
 
-    // Calculate days since last watered
-    val daysSinceWatered = calculateDaysDifference(lastWatered, currentTime)
-    // Calculate percentage of watering cycle completed
-    val percentageOfCycle = (daysSinceWatered / wateringFrequency) * PERCENTAGE_CALCULATION_UTILITY
+    // Dryness computation (always meaningful)
+    val daysSinceWatered = maxOf(calculateDaysDifference(lastWatered, currentTime), 0.0)
+    val drynessPct = (daysSinceWatered / wateringFrequency) * PERCENTAGE_CALCULATION_UTILITY
 
-    // Special handling: Initial watering grace period
-    // If this is the first watering (no previous watering) and it's very recent, consider it
-    // healthy
-    if (daysSinceWatered <= JUST_WATERED_GRACE_PERIOD_DAYS && previousLastWatered == null) {
-      currentStatusPercentage =
-          INITIAL_PERCENTAGE // Full water bar (1.0f in calculateInStatusFloat)
-      return PlantHealthStatus.HEALTHY
-    }
+    // Overwatering computation (based on the interval between last two waterings)
+    val intervalPct =
+        if (previousLastWatered != null) {
+          val daysBetween = maxOf(calculateDaysDifference(previousLastWatered, lastWatered), 0.0)
+          (daysBetween / wateringFrequency) * PERCENTAGE_CALCULATION_UTILITY
+        } else {
+          // Plant has no previous watering -> cannot be overwatered
+          null
+        }
 
-    // Special handling: Grace period after appropriate watering
-    if (daysSinceWatered <= JUST_WATERED_GRACE_PERIOD_DAYS && previousLastWatered != null) {
-      val daysSincePreviousWatering = calculateDaysDifference(previousLastWatered, lastWatered)
-      val previousPercentage =
-          (daysSincePreviousWatering / wateringFrequency) * PERCENTAGE_CALCULATION_UTILITY
+    /* Starting overwater severity (smoothen between 0 and 1).
+     *  The closer to 1, the more critically overwatered is the plant. */
+    val startingOverwaterSeverity =
+        if (intervalPct != null) {
+          when {
+            intervalPct < SEVERELY_OVERWATERED_MAX_THRESHOLD -> MAX_PERCENTAGE
+            intervalPct < OVERWATERED_MAX_THRESHOLD -> {
+              // Smoothen between 0 and 1
+              MAX_PERCENTAGE -
+                  calculateRelativePercentage(
+                      x = SEVERELY_OVERWATERED_MAX_THRESHOLD,
+                      y = OVERWATERED_MAX_THRESHOLD,
+                      z = intervalPct)
+            }
+            else -> MIN_PERCENTAGE
+          }
+        } else {
+          MIN_PERCENTAGE
+        }
 
-      if (previousPercentage >= HEALTHY_MAX_THRESHOLD) {
+    // How much the overwatering is still present
+    val overwaterDecay =
+        (MAX_PERCENTAGE - (drynessPct / OVERWATER_STATE_RECOVERY_END_THRESHOLD)).coerceIn(
+            MIN_PERCENTAGE, MAX_PERCENTAGE)
+
+    /* Effective severity of the overwatering at the current time
+     * This is 0 if there is not overwatering left and 1 if it is at maximum */
+    val effectiveOverwaterSeverity = startingOverwaterSeverity * overwaterDecay
+
+    // If there is still some overwatering, return OVERWATERED/SEVERELY_OVERWATERED
+    if (effectiveOverwaterSeverity > MIN_PERCENTAGE) {
+      return if (effectiveOverwaterSeverity > OVERWATERING_SEVERITY_LEVEL_THRESHOLD) {
+        // If the severity is still higher than 0.5 -> SEVERELY_OVERWATERED
         currentStatusPercentage =
-            calculateRelativePercentage(
-                x = OVERWATERED_THRESHOLD, y = HEALTHY_MAX_THRESHOLD, z = percentageOfCycle)
-        return PlantHealthStatus.HEALTHY
-      }
-    }
-
-    // Standard status determination based on percentage of watering cycle
-    return when {
-      // Watered very recently (less than 10% of cycle) - severely overwatered
-      percentageOfCycle < SEVERELY_OVERWATERED_THRESHOLD -> {
-        currentStatusPercentage =
-            calculateRelativePercentage(
-                x = INITIAL_PERCENTAGE, y = SEVERELY_OVERWATERED_THRESHOLD, z = percentageOfCycle)
+            MAX_PERCENTAGE -
+                calculateRelativePercentage(
+                    x = OVERWATERING_SEVERITY_LEVEL_THRESHOLD,
+                    y = MAX_PERCENTAGE,
+                    z = effectiveOverwaterSeverity)
         PlantHealthStatus.SEVERELY_OVERWATERED
-      }
-
-      // Watered too recently (10-30% of cycle) - overwatered
-      percentageOfCycle < OVERWATERED_THRESHOLD -> {
+      } else {
+        // If the severity has decayed down to smaller than 0.5 -> OVERWATERED
         currentStatusPercentage =
-            calculateRelativePercentage(
-                x = SEVERELY_OVERWATERED_THRESHOLD,
-                y = OVERWATERED_THRESHOLD,
-                z = percentageOfCycle)
+            MAX_PERCENTAGE -
+                calculateRelativePercentage(
+                    x = MIN_PERCENTAGE,
+                    y = OVERWATERING_SEVERITY_LEVEL_THRESHOLD,
+                    z = effectiveOverwaterSeverity)
         PlantHealthStatus.OVERWATERED
       }
+    }
 
-      // Healthy range (30-70% of cycle)
-      percentageOfCycle <= HEALTHY_MAX_THRESHOLD -> {
+    // When not overwatered anymore -> use the dryness computation
+    return when {
+      drynessPct <= HEALTHY_MAX_THRESHOLD -> {
         currentStatusPercentage =
             calculateRelativePercentage(
-                x = OVERWATERED_THRESHOLD, y = HEALTHY_MAX_THRESHOLD, z = percentageOfCycle)
+                x = MIN_PERCENTAGE, y = HEALTHY_MAX_THRESHOLD, z = drynessPct)
         PlantHealthStatus.HEALTHY
       }
-
-      // Starting to dry out (70-100% of cycle)
-      percentageOfCycle <= SLIGHTLY_DRY_MAX_THRESHOLD -> {
+      drynessPct <= SLIGHTLY_DRY_MAX_THRESHOLD -> {
         currentStatusPercentage =
             calculateRelativePercentage(
-                x = HEALTHY_MAX_THRESHOLD, y = SLIGHTLY_DRY_MAX_THRESHOLD, z = percentageOfCycle)
+                x = HEALTHY_MAX_THRESHOLD, y = SLIGHTLY_DRY_MAX_THRESHOLD, z = drynessPct)
         PlantHealthStatus.SLIGHTLY_DRY
       }
-
-      // Needs water (100-130% of cycle)
-      percentageOfCycle <= NEEDS_WATER_MAX_THRESHOLD -> {
+      drynessPct <= NEEDS_WATER_MAX_THRESHOLD -> {
         currentStatusPercentage =
             calculateRelativePercentage(
-                x = SLIGHTLY_DRY_MAX_THRESHOLD,
-                y = NEEDS_WATER_MAX_THRESHOLD,
-                z = percentageOfCycle)
+                x = SLIGHTLY_DRY_MAX_THRESHOLD, y = NEEDS_WATER_MAX_THRESHOLD, z = drynessPct)
         PlantHealthStatus.NEEDS_WATER
       }
-
-      // Critical - severely dry (>130% of cycle)
-      percentageOfCycle > NEEDS_WATER_MAX_THRESHOLD -> {
+      else -> {
         currentStatusPercentage = MAX_PERCENTAGE
         PlantHealthStatus.SEVERELY_DRY
-      }
-      else -> {
-        currentStatusPercentage = INITIAL_PERCENTAGE
-        PlantHealthStatus.UNKNOWN
       }
     }
   }
