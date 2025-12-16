@@ -163,12 +163,32 @@ class AddFriendViewModel(
           }
       try {
         val wasAutoAccepted = requestsRepository.askFriend(userId)
+        val currentUserId = profileRepository.getCurrentUserId()
+        if (currentUserId == null) {
+          _uiState.value =
+              _uiState.value.let { state ->
+                state.copy(relations = state.relations + (userId to FriendRelation.ADD))
+              }
+          onError()
+          return@launch
+        }
+
+        val currentUserProfile = userProfileRepository.getUserProfile(currentUserId)
+        val fromPseudo = currentUserProfile?.pseudo
+
+        if (fromPseudo == null) {
+          _uiState.value =
+              _uiState.value.let { state ->
+                state.copy(relations = state.relations + (userId to FriendRelation.ADD))
+              }
+          onError()
+          return@launch
+        }
 
         // If an existing incoming request was auto-accepted, add to friends list
         when (wasAutoAccepted) {
           true -> {
             handleAddingFriend(userId)
-
             // Update UI state to show they're now friends
             _uiState.value =
                 _uiState.value.copy(
@@ -176,28 +196,6 @@ class AddFriendViewModel(
           }
           false -> {
             // Normal case: request was sent, send notification
-            val currentUserId = profileRepository.getCurrentUserId()
-            if (currentUserId == null) {
-              _uiState.value =
-                  _uiState.value.let { state ->
-                    state.copy(relations = state.relations + (userId to FriendRelation.ADD))
-                  }
-              onError()
-              return@launch
-            }
-
-            val currentUserProfile = userProfileRepository.getUserProfile(currentUserId)
-            val fromPseudo = currentUserProfile?.pseudo
-
-            if (fromPseudo == null) {
-              _uiState.value =
-                  _uiState.value.let { state ->
-                    state.copy(relations = state.relations + (userId to FriendRelation.ADD))
-                  }
-              onError()
-              return@launch
-            }
-
             friendRequestNotifier.notifyRequestSent(userId, fromPseudo)
           }
         }
