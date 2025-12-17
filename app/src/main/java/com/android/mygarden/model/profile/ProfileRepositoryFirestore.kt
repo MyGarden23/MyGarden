@@ -138,6 +138,16 @@ class ProfileRepositoryFirestore(
     }
   }
 
+  override suspend fun isCurrentUserPseudo(pseudo: String): Boolean {
+    return try {
+      val snap = userProfile.get().await()
+      val currentPseudo = snap.getString(FIELD_PSEUDO)
+      currentPseudo == pseudo
+    } catch (_: Exception) {
+      false
+    }
+  }
+
   // Converts a Firestore document to a Profile object
   private fun DocumentSnapshot.toProfileOrNull(): Profile? {
     val data = this.data ?: return null

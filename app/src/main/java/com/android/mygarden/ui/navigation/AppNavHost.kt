@@ -26,6 +26,7 @@ import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.editPlant.EditPlantScreen
 import com.android.mygarden.ui.editPlant.EditPlantViewModel
 import com.android.mygarden.ui.feed.FeedScreen
+import com.android.mygarden.ui.feed.FeedViewModelCallbacks
 import com.android.mygarden.ui.friendList.FriendListScreen
 import com.android.mygarden.ui.friendsRequests.FriendsRequestsScreen
 import com.android.mygarden.ui.garden.GardenScreenCallbacks
@@ -161,10 +162,7 @@ fun AppNavHost(
                   onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
                   onAddPlant = { navigationActions.navTo(Screen.Camera) },
                   onPlantClick = { ownedPlant ->
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
-                    navigationActions.navTo(Screen.PlantInfoFromGarden)
+                    navigationActions.navigateToPlantInfoFromGarden(ownedPlant.id)
                   },
                   onSignOut = {
                     PlantsRepositoryProvider.repository.cleanup()
@@ -202,26 +200,34 @@ fun AppNavHost(
                       onAddPlant = {},
                       onBackPressed = { navigationActions.navBack() },
                       onPlantClick = { ownedPlant ->
-                        navController.currentBackStackEntry
-                            ?.savedStateHandle
-                            ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlant.id)
-                        navController.currentBackStackEntry
-                            ?.savedStateHandle
-                            ?.set(IS_VIEW_MODE_KEY, true)
-                        navController.currentBackStackEntry
-                            ?.savedStateHandle
-                            ?.set(FRIEND_ID_KEY, friendId)
-                        navigationActions.navTo(Screen.PlantInfoFromGarden)
+                        navigationActions.navigateToPlantInfoFromGarden(
+                            ownedPlant.id, true, friendId)
                       },
                       onSignOut = {}))
         }
 
     // Feed
     composable(Screen.Feed.route) {
+      val feedViewModelCallbacks: FeedViewModelCallbacks =
+          FeedViewModelCallbacks(
+              onAddPlantActivityClicked = { activity ->
+                navigationActions.navigateToPlantInfoFromGarden(
+                    activity.ownedPlant.id, true, activity.userId)
+              },
+              onWaterPlantActivityClicked = { activity ->
+                navigationActions.navigateToPlantInfoFromGarden(
+                    activity.ownedPlant.id, true, activity.userId)
+              },
+              goToFriendGardenPopupClick = { friendId ->
+                navigationActions.navTo(Screen.FriendGarden(friendId))
+              },
+              onSelfActivityClick = { navigationActions.navTo(Screen.Garden) })
+
       FeedScreen(
           onAddFriend = { navigationActions.navTo(Screen.AddFriend) },
           onFriendList = { navigationActions.navTo(Screen.FriendList) },
-          onNotifClick = { navigationActions.navTo(Screen.FriendsRequests) })
+          onNotifClick = { navigationActions.navTo(Screen.FriendsRequests) },
+          feedViewModelCallbacks = feedViewModelCallbacks)
     }
 
     // Friends Requests

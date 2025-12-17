@@ -329,7 +329,7 @@ class AddFriendViewModelTest {
     val fakeRequests =
         FakeFriendRequestsRepository(
             initialRequests =
-                listOf(FriendRequest(fromUserId = "test-user-id", toUserId = "uid-alice")))
+                listOf(FriendRequest(fromUserId = "fake-uid", toUserId = "uid-alice")))
     val fakeUserProfile = FakeUserProfileRepository()
     val fakeAchievements = FakeAchievementsRepository()
     val profileRepo = FakeProfileRepository()
@@ -379,7 +379,7 @@ class AddFriendViewModelTest {
                 listOf(
                     FriendRequest(
                         fromUserId = "uid-alice",
-                        toUserId = "test-user-id",
+                        toUserId = "fake-uid",
                     )))
 
     val fakeUserProfile = FakeUserProfileRepository()

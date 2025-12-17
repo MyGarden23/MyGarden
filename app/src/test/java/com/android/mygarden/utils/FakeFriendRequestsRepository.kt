@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyList()) :
     FriendRequestsRepository {
   val incomingRequestsFlow = MutableStateFlow(initialRequests)
-  var currentUserIdValue: String? = "test-user-id"
+  var currentUserIdValue: String? = "fake-uid"
 
   override fun getCurrentUserId(): String? = currentUserIdValue
 

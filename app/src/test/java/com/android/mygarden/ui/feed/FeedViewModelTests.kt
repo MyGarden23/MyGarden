@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.feed
 
+import com.android.mygarden.model.friends.FriendRequest
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendsRepository
 import com.android.mygarden.model.gardenactivity.ActivityRepository
@@ -9,8 +10,14 @@ import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantLocation
-import com.android.mygarden.utils.FakeFriendRequestsRepository
-import com.android.mygarden.utils.FakeFriendsRepository
+import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
+import com.android.mygarden.model.users.UserProfile
+import com.android.mygarden.model.users.UserProfileRepository
+import com.android.mygarden.model.users.UserProfileRepositoryProvider
+import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.utils.*
 import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,6 +56,22 @@ class FeedViewModelTests {
   val addedPlantActivity =
       ActivityAddedPlant("uid", "gregory", Timestamp(System.currentTimeMillis()), ownedPlant1)
 
+  val userProfile1 =
+      UserProfile(
+          id = "uid",
+          pseudo = "gregory",
+          avatar = Avatar.A1,
+          gardeningSkill = "Beginner",
+          favoritePlant = "Rose")
+
+  val userProfile2 =
+      UserProfile(
+          id = "friend-123",
+          pseudo = "friendPseudo",
+          avatar = Avatar.A2,
+          gardeningSkill = "Expert",
+          favoritePlant = "Cactus")
+
   /*---------------- FAKE ACTIVITY REPOSITORY TO USE FOR TESTING ----------------*/
   private class FakeActivityRepository : ActivityRepository {
 
@@ -78,12 +101,98 @@ class FeedViewModelTests {
     }
   }
 
+  /*---------------- ENHANCED FAKE PROFILE REPOSITORY ----------------*/
+  private class EnhancedFakeProfileRepository(private val currentUserPseudo: String = "gregory") :
+      ProfileRepository {
+    override fun getCurrentUserId(): String? = "fake-uid"
+
+    override fun getProfile() = emptyFlow<Profile?>()
+
+    override suspend fun saveProfile(profile: Profile) {}
+
+    override suspend fun attachFCMToken(token: String): Boolean = false
+
+    override suspend fun getFCMToken(): String? = null
+
+    override suspend fun isCurrentUserPseudo(pseudo: String): Boolean {
+      return pseudo == currentUserPseudo
+    }
+
+    override fun cleanup() {}
+  }
+
+  /*---------------- ENHANCED FAKE USER PROFILE REPOSITORY ----------------*/
+  private class EnhancedFakeUserProfileRepository : UserProfileRepository {
+    val profiles: MutableMap<String, UserProfile> = mutableMapOf()
+
+    override suspend fun getUserProfile(userId: String): UserProfile? = profiles[userId]
+  }
+
+  /*---------------- ENHANCED FAKE FRIEND REQUESTS REPOSITORY ----------------*/
+  private class EnhancedFakeFriendRequestsRepository : FriendRequestsRepository {
+    val incomingRequestsFlow = MutableStateFlow<List<FriendRequest>>(emptyList())
+    val outgoingRequestsSet = mutableSetOf<String>()
+    var lastAskedFriendId: String? = null
+    var currentUserIdValue: String? = "fake-uid"
+
+    override fun getCurrentUserId(): String? = currentUserIdValue
+
+    override fun myRequests(): Flow<List<FriendRequest>> = MutableStateFlow(emptyList())
+
+    override fun incomingRequests(): Flow<List<FriendRequest>> = incomingRequestsFlow
+
+    override fun outgoingRequests(): Flow<List<FriendRequest>> = MutableStateFlow(emptyList())
+
+    override suspend fun isInIncomingRequests(targetUserId: String): Boolean {
+      val requests = incomingRequestsFlow.value
+      return requests.any { it.fromUserId == targetUserId }
+    }
+
+    override suspend fun isInOutgoingRequests(targetUserId: String): Boolean {
+      return outgoingRequestsSet.contains(targetUserId)
+    }
+
+    override suspend fun askFriend(targetUserId: String): Boolean {
+      lastAskedFriendId = targetUserId
+      outgoingRequestsSet.add(targetUserId)
+      val currentUserId = getCurrentUserId() ?: "fake-uid"
+      incomingRequestsFlow.value =
+          incomingRequestsFlow.value +
+              FriendRequest(fromUserId = currentUserId, toUserId = targetUserId)
+
+      return true
+    }
+
+    override suspend fun acceptRequest(requestId: String): String {
+      incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
+      return ""
+    }
+
+    var markedSeen: MutableList<String> = mutableListOf()
+
+    override suspend fun markRequestAsSeen(requestId: String) {
+      markedSeen += requestId
+    }
+
+    override suspend fun refuseRequest(requestId: String) {
+      incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
+    }
+
+    override suspend fun deleteRequest(requestId: String) {
+      incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.fromUserId != requestId }
+    }
+
+    override fun cleanup() {}
+  }
+
   private val testDispatcher = StandardTestDispatcher()
 
   private lateinit var repositoryScope: TestScope
   private lateinit var activityRepo: ActivityRepository
   private lateinit var friendsRepo: FriendsRepository
-  private lateinit var friendsRequestsRepo: FriendRequestsRepository
+  private lateinit var friendsRequestsRepo: EnhancedFakeFriendRequestsRepository
+  private lateinit var userProfileRepo: EnhancedFakeUserProfileRepository
+  private lateinit var profileRepo: EnhancedFakeProfileRepository
   private lateinit var vm: FeedViewModel
 
   /** Sets up the correct scopes, the repository and the view model */
@@ -93,8 +202,12 @@ class FeedViewModelTests {
     repositoryScope = TestScope(SupervisorJob() + testDispatcher)
     activityRepo = FakeActivityRepository()
     friendsRepo = FakeFriendsRepository()
-    friendsRequestsRepo = FakeFriendRequestsRepository()
-    vm = FeedViewModel(activityRepo, friendsRepo, friendsRequestsRepo)
+    friendsRequestsRepo = EnhancedFakeFriendRequestsRepository()
+    userProfileRepo = EnhancedFakeUserProfileRepository()
+    profileRepo = EnhancedFakeProfileRepository()
+    UserProfileRepositoryProvider.repository = userProfileRepo
+    ProfileRepositoryProvider.repository = profileRepo
+    vm = FeedViewModel(activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo)
   }
 
   /** Resets the scopes and ensures the clear of the list of activities */
@@ -115,7 +228,8 @@ class FeedViewModelTests {
   fun initialNonEmptyCorrectlyCollected() = runTest {
     activityRepo.addActivity(addedPlantActivity)
     // new instance created after the activity is added to the repository
-    val newVM = FeedViewModel(activityRepo, friendsRepo, friendsRequestsRepo)
+    val newVM =
+        FeedViewModel(activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo)
     runCurrent()
     assertEquals(listOf(addedPlantActivity), newVM.uiState.value.activities)
   }
@@ -133,7 +247,7 @@ class FeedViewModelTests {
   @Test
   fun feedUsesCurrentUserOnlyWhenNoFriends() = runTest {
     val fakeRepo = activityRepo as FakeActivityRepository
-    val vm = FeedViewModel(fakeRepo, friendsRepo, friendsRequestsRepo)
+    FeedViewModel(fakeRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo)
     runCurrent()
     assertEquals(listOf("fake-uid"), fakeRepo.lastFriendsList)
   }
@@ -143,7 +257,9 @@ class FeedViewModelTests {
     val fakeActivityRepo = activityRepo as FakeActivityRepository
     val fakeFriendsRepo = friendsRepo as FakeFriendsRepository
 
-    val vm = FeedViewModel(fakeActivityRepo, fakeFriendsRepo, friendsRequestsRepo)
+    val vm =
+        FeedViewModel(
+            fakeActivityRepo, fakeFriendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo)
     runCurrent()
 
     assertTrue(vm.uiState.value.activities.isEmpty())
@@ -156,5 +272,142 @@ class FeedViewModelTests {
     runCurrent()
 
     assertEquals(listOf(addedPlantActivity), vm.uiState.value.activities)
+  }
+
+  /*---------------- NEW TESTS FOR WATCHING FRIENDS ACTIVITY ----------------*/
+
+  @Test
+  fun setWatchedFriends_updatesWatchedUsers() = runTest {
+    userProfileRepo.profiles["uid"] = userProfile1
+    userProfileRepo.profiles["friend-123"] = userProfile2
+
+    vm.setWatchedFriends(userProfile1, userProfile2)
+
+    assertEquals(userProfile1, vm.uiState.value.watchedUser1)
+    assertEquals(userProfile2, vm.uiState.value.watchedUser2)
+  }
+
+  @Test
+  fun setWatchedFriends_setsRelationToSelfForCurrentUser() = runTest {
+    userProfileRepo.profiles["uid"] = userProfile1
+    profileRepo = EnhancedFakeProfileRepository(currentUserPseudo = "gregory")
+    ProfileRepositoryProvider.repository = profileRepo
+    val testVm =
+        FeedViewModel(activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo)
+
+    testVm.setWatchedFriends(userProfile1, null)
+
+    assertEquals(RelationWithWatchedUser.SELF, testVm.uiState.value.relationWithWatchedUser1)
+  }
+
+  @Test
+  fun setWatchedFriends_setsRelationToFriendWhenIsFriend() = runTest {
+    val fakeFriendsRepo = friendsRepo as FakeFriendsRepository
+    fakeFriendsRepo.addFriend("friend-123")
+    runCurrent()
+
+    vm.setWatchedFriends(userProfile2, null)
+
+    assertEquals(RelationWithWatchedUser.FRIEND, vm.uiState.value.relationWithWatchedUser1)
+  }
+
+  @Test
+  fun setWatchedFriends_setsRelationToRequestSentWhenInOutgoingRequests() = runTest {
+    friendsRequestsRepo.outgoingRequestsSet.add("friend-123")
+
+    vm.setWatchedFriends(userProfile2, null)
+
+    assertEquals(RelationWithWatchedUser.REQUEST_SENT, vm.uiState.value.relationWithWatchedUser1)
+  }
+
+  @Test
+  fun setWatchedFriends_setsRelationToNotFriendWhenNoRelation() = runTest {
+    vm.setWatchedFriends(userProfile2, null)
+
+    assertEquals(RelationWithWatchedUser.NOT_FRIEND, vm.uiState.value.relationWithWatchedUser1)
+  }
+
+  @Test
+  fun resetWatchedFriends_clearsAllWatchedData() {
+    vm.setIsWatchingFriendsActivity(true)
+    vm.resetWatchedFriends(userProfile1, userProfile2)
+
+    assertNull(vm.uiState.value.watchedUser1)
+    assertNull(vm.uiState.value.watchedUser2)
+    assertEquals(RelationWithWatchedUser.SELF, vm.uiState.value.relationWithWatchedUser1)
+    assertEquals(RelationWithWatchedUser.SELF, vm.uiState.value.relationWithWatchedUser2)
+  }
+
+  /*---------------- TESTS FOR ACTIVITY CLICK HANDLERS ----------------*/
+
+  @Test
+  fun handleActivityClick_withAddedPlantActivity_callsCorrectCallback() {
+    var capturedActivity: ActivityAddedPlant? = null
+    val callbacks = FeedViewModelCallbacks(onAddPlantActivityClicked = { capturedActivity = it })
+    val testVm =
+        FeedViewModel(
+            activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo, callbacks)
+
+    testVm.handleActivityClick(addedPlantActivity)
+
+    assertEquals(addedPlantActivity, capturedActivity)
+  }
+
+  @Test
+  fun handleActivityClick_withWaterPlantActivity_callsCorrectCallback() = runTest {
+    var capturedActivity:
+        com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant? =
+        null
+    val waterActivity =
+        com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant(
+            "uid2", "john", Timestamp(System.currentTimeMillis()), ownedPlant1)
+    val callbacks = FeedViewModelCallbacks(onWaterPlantActivityClicked = { capturedActivity = it })
+    val testVm =
+        FeedViewModel(
+            activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo, callbacks)
+
+    testVm.handleActivityClick(waterActivity)
+
+    assertEquals(waterActivity, capturedActivity)
+  }
+
+  @Test
+  fun handleFriendActivityClick_callsCorrectCallback() {
+    var capturedFriendId: String? = null
+    val callbacks = FeedViewModelCallbacks(goToFriendGardenPopupClick = { capturedFriendId = it })
+    val testVm =
+        FeedViewModel(
+            activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo, callbacks)
+
+    testVm.handleFriendActivityClick("friend-123")
+
+    assertEquals("friend-123", capturedFriendId)
+  }
+
+  @Test
+  fun handleNotFriendActivityClick_sendsRequestAndUpdatesWatchedFriends() = runTest {
+    userProfileRepo.profiles["friend-123"] = userProfile2
+    vm.updateWatchedFriends(userProfile2, null)
+    runCurrent()
+
+    vm.handleNotFriendActivityClick("friend-123")
+    runCurrent()
+
+    assertEquals("friend-123", friendsRequestsRepo.lastAskedFriendId)
+    // Relation should be updated after sending request
+    assertTrue(friendsRequestsRepo.outgoingRequestsSet.contains("friend-123"))
+  }
+
+  @Test
+  fun handleSelfActivityClick_callsCorrectCallback() {
+    var callbackCalled = false
+    val callbacks = FeedViewModelCallbacks(onSelfActivityClick = { callbackCalled = true })
+    val testVm =
+        FeedViewModel(
+            activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo, callbacks)
+
+    testVm.handleSelfActivityClick()
+
+    assertTrue(callbackCalled)
   }
 }

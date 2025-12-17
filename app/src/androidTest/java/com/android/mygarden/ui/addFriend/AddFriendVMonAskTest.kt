@@ -110,6 +110,8 @@ class AddFriendOnAskTest : FirestoreProfileTest() {
 
           override suspend fun getFCMToken(): String? = null
 
+          override suspend fun isCurrentUserPseudo(pseudo: String): Boolean = true
+
           override fun cleanup() {}
         }
 

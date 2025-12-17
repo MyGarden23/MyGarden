@@ -20,7 +20,7 @@ class FakeProfileRepository(val profile: Profile? = null) : ProfileRepository {
    *
    * @return Always returns "fake_uid" for testing purposes.
    */
-  override fun getCurrentUserId(): String? = "fake_uid"
+  override fun getCurrentUserId(): String? = "fake-uid"
 
   /**
    * Returns a Flow emitting the profile provided in the constructor.
@@ -49,6 +49,10 @@ class FakeProfileRepository(val profile: Profile? = null) : ProfileRepository {
   /** No token is available. */
   override suspend fun getFCMToken(): String? {
     return null
+  }
+
+  override suspend fun isCurrentUserPseudo(pseudo: String): Boolean {
+    return profile?.pseudo == pseudo
   }
 
   override fun cleanup() {}

@@ -33,7 +33,7 @@ class AddFriendScreenTests {
 
   private val pseudoAlice = "alice"
   private val uidAlice = "uid-alice"
-  private val currentUserId = "test-user-id" // même valeur que dans FakeFriendRequestsRepository
+  private val currentUserId = "fake-uid" // same value as in FakeFriendRequestsRepository
 
   /** Sets the AddFriendScreen with a default ViewModel. */
   private fun setupWithEmptyRepos() {

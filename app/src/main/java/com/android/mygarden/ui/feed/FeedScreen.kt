@@ -1,6 +1,7 @@
 package com.android.mygarden.ui.feed
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -106,7 +107,9 @@ data class CardColorPalette(val backgroundColor: Color, val textColor: Color)
 @Composable
 fun FeedScreen(
     modifier: Modifier = Modifier,
-    feedViewModel: FeedViewModel = viewModel(),
+    feedViewModelCallbacks: FeedViewModelCallbacks? = null,
+    feedViewModel: FeedViewModel =
+        viewModel(factory = FeedViewModelFactory(feedViewModelCallbacks)),
     onAddFriend: () -> Unit = {},
     onNotifClick: () -> Unit = {},
     onFriendList: () -> Unit = {},
@@ -122,6 +125,12 @@ fun FeedScreen(
 
   // Ensures that we start collecting from the repository's list of activities
   LaunchedEffect(Unit) { feedViewModel.refreshUIState() }
+
+  if (uiState.isWatchingFriendsActivity) {
+    FriendActivityPopup(
+        onDismiss = { feedViewModel.setIsWatchingFriendsActivity(false) },
+        feedViewModel = feedViewModel)
+  }
 
   Scaffold(
       modifier = modifier.testTag(NavigationTestTags.FEED_SCREEN),
@@ -168,7 +177,10 @@ fun FeedScreen(
                       Arrangement.spacedBy(VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING),
                   contentPadding = PaddingValues(VERTICAL_SPACE_BETWEEN_ACTIVITIES_PADDING)) {
                     items(activities.size) { index ->
-                      ActivityItem(modifier = modifier, activity = activities[index])
+                      ActivityItem(
+                          modifier = modifier,
+                          activity = activities[index],
+                          feedViewModel = feedViewModel)
                     }
                   }
             }
@@ -264,16 +276,32 @@ fun FriendListButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
  *
  * @param modifier the used modifier for the composable and its potential users
  * @param activity the generic activity
+ * @param feedViewModel the view model for handling activity clicks
  */
 @Composable
-fun ActivityItem(modifier: Modifier = Modifier, activity: GardenActivity) {
+fun ActivityItem(
+    modifier: Modifier = Modifier,
+    activity: GardenActivity,
+    feedViewModel: FeedViewModel
+) {
+  val context = LocalContext.current
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
+
   val colorPalette = activityTypeColor(activity, MaterialTheme.colorScheme, ExtendedTheme.colors)
+
   Card(
       modifier =
           modifier
+              .testTag(FeedScreenTestTags.getTestTagForActivity(activity))
               .fillMaxWidth()
               .padding(horizontal = CARD_PADDING)
-              .testTag(FeedScreenTestTags.getTestTagForActivity(activity)),
+              .clickable {
+                handleOfflineClick(
+                    isOnline,
+                    context,
+                    OfflineMessages.CANNOT_CLICK_ACTIVITY,
+                    { feedViewModel.handleActivityClick(activity) })
+              },
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),
       shape = RoundedCornerShape(ROUND_CORNER),
@@ -308,7 +336,7 @@ fun GenericCard(
   Row(
       modifier =
           modifier
-              .fillMaxSize()
+              .fillMaxWidth()
               .border(
                   width = BORDER_CARD_WIDTH,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,

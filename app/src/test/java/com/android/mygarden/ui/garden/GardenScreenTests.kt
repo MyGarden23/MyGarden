@@ -93,6 +93,10 @@ class GardenScreenTests {
       return null
     }
 
+    override suspend fun isCurrentUserPseudo(pseudo: String): Boolean {
+      return true
+    }
+
     override fun cleanup() {}
   }
 

@@ -18,3 +18,20 @@ data class UserProfile(
     val gardeningSkill: String,
     val favoritePlant: String
 )
+
+/**
+ * A singleton object providing a default [UserProfile] instance for loading states.
+ *
+ * This object is used as a placeholder while user profile data is being fetched from Firestore or
+ * during initialization. All fields are set to "Loading" text to indicate that the actual data is
+ * not yet available.
+ */
+object UserProfileLoading {
+  val profile: UserProfile =
+      UserProfile(
+          id = "Loading",
+          pseudo = "Loading",
+          avatar = Avatar.A1,
+          gardeningSkill = "Loading",
+          favoritePlant = "Loading")
+}

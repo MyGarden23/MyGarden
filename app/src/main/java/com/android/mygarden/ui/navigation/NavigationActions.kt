@@ -61,4 +61,28 @@ class NavigationActions(private val controller: NavHostController) {
 
   /** Helper to fetch the current route safely. */
   private fun currentRoute(): String? = controller.currentDestination?.route
+
+  /**
+   * Navigate to the PlantInfoFromGarden screen with saved state parameters.
+   *
+   * @param ownedPlantId the ID of the owned plant to display
+   * @param isViewMode whether the plant info should be in view-only mode (default: false)
+   * @param friendId the ID of the friend whose plant is being viewed (optional)
+   */
+  fun navigateToPlantInfoFromGarden(
+      ownedPlantId: String,
+      isViewMode: Boolean = false,
+      friendId: String? = null
+  ) {
+    controller.currentBackStackEntry
+        ?.savedStateHandle
+        ?.set("ownedPlantId_to_plantInfo", ownedPlantId)
+    if (isViewMode) {
+      controller.currentBackStackEntry?.savedStateHandle?.set("isViewMode", true)
+    }
+    if (friendId != null) {
+      controller.currentBackStackEntry?.savedStateHandle?.set("friendId", friendId)
+    }
+    navTo(Screen.PlantInfoFromGarden)
+  }
 }
