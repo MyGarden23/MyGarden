@@ -1,6 +1,5 @@
 package com.android.mygarden.ui.feed
 
-import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,9 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -52,18 +51,26 @@ private const val MAX_LINES = 1
 private val PSEUDO_FONT_SIZE = 18.sp
 private val CONTENT_HORIZONTAL_PADDING = 16.dp
 private val ROW_SPACING = 12.dp
-private val CARD_CORNER_RADIUS = 10.dp
+private val CARD_CORNER_RADIUS = PopUpDimensions.CARD_ROUND_ANGLE
 private val CARD_ELEVATION = 4.dp
 private val SPACER_BETWEEN_TEXT_AND_BUTTON = 4.dp
 private const val COLUMN_WEIGHT = 1f
 
+/**
+ * Displays a popup dialog showing two friends involved in an "Add Friend" activity.
+ *
+ * The popup displays two cards, one for each user involved in the friendship activity. Each card
+ * shows the user's avatar, pseudo, and an action button based on the relationship with the current
+ * user (e.g., "See Garden", "Add Friend", etc.).
+ *
+ * @param onDismiss callback invoked when the popup is dismissed
+ * @param feedViewModel the view model containing the UI state and handling user actions
+ */
 @Composable
 fun FriendActivityPopup(
     onDismiss: () -> Unit = {},
     feedViewModel: FeedViewModel,
 ) {
-  val context = LocalContext.current
-
   val uiState by feedViewModel.uiState.collectAsState()
 
   Dialog(
@@ -94,29 +101,41 @@ fun FriendActivityPopup(
                 verticalArrangement = Arrangement.spacedBy(SPACE_BETWEEN_CARDS),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                   FriendsPopupCard(
-                      uiState.watchedUser1,
-                      context,
-                      uiState.relationWithWatchedUser1,
-                      feedViewModel)
+                      uiState.watchedUser1, uiState.relationWithWatchedUser1, feedViewModel)
                   FriendsPopupCard(
-                      uiState.watchedUser2,
-                      context,
-                      uiState.relationWithWatchedUser2,
-                      feedViewModel)
+                      uiState.watchedUser2, uiState.relationWithWatchedUser2, feedViewModel)
                 }
           }
     }
   }
 }
 
+/**
+ * Displays a card showing a user profile with their avatar, pseudo, and an action button.
+ *
+ * The button and its action depend on the relationship between the current user and the displayed
+ * user:
+ * - FRIEND: Shows "See Garden" button to navigate to friend's garden
+ * - NOT_FRIEND: Shows "Add Friend" button to send a friend request
+ * - SELF: Shows "Your Garden" button to navigate to own garden
+ * - REQUEST_SENT: Shows "Request Sent" button (disabled)
+ * - REQUEST_RECEIVED: Shows "Add Back" button to accept the friend request
+ *
+ * @param userProfile the user profile to display, or null to hide the card
+ * @param relation the relationship between the current user and the displayed user
+ * @param feedViewModel the view model for handling user actions
+ */
 @Composable
 fun FriendsPopupCard(
     userProfile: UserProfile?,
-    context: Context,
     relation: RelationWithWatchedUser,
     feedViewModel: FeedViewModel
 ) {
   if (userProfile == null) return
+  val buttonText = getButtonText(relation)
+  val avatarDescription =
+      stringResource(R.string.avatar_description_friend_screen, userProfile.pseudo)
+
   Card(
       modifier = Modifier.fillMaxWidth().height(FRIEND_CARD_HEIGHT).padding(FRIEND_CARD_PADDING),
       shape = RoundedCornerShape(CARD_CORNER_RADIUS),
@@ -130,9 +149,7 @@ fun FriendsPopupCard(
                 Card(modifier = Modifier.clip(CircleShape).size(AVATAR_SIZE)) {
                   Image(
                       painter = painterResource(userProfile.avatar.resId),
-                      contentDescription =
-                          context.getString(
-                              R.string.avatar_description_friend_screen, userProfile.pseudo),
+                      contentDescription = avatarDescription,
                       modifier = Modifier.fillMaxSize())
                 }
 
@@ -176,15 +193,27 @@ fun FriendsPopupCard(
                                             MaterialTheme.colorScheme.onSurfaceVariant
                                         else -> MaterialTheme.colorScheme.onPrimaryContainer
                                       }),
-                          content = {
-                            Text(text = getButtonText(relation, context), maxLines = MAX_LINES)
-                          })
+                          content = { Text(text = buttonText, maxLines = MAX_LINES) })
                     }
               }
         }
       }
 }
 
+/**
+ * Handles the click action on a friend popup card button based on the relationship type.
+ *
+ * Delegates to the appropriate FeedViewModel handler method depending on the relationship:
+ * - FRIEND: Navigates to the friend's garden
+ * - NOT_FRIEND: Sends a friend request
+ * - SELF: Navigates to the user's own garden
+ * - REQUEST_RECEIVED: Accepts the incoming friend request
+ * - REQUEST_SENT: Does nothing (button is disabled)
+ *
+ * @param relationWithWatchedUser the relationship between the current user and the watched user
+ * @param feedViewModel the view model for handling the action
+ * @param userProfile the profile of the user whose card was clicked
+ */
 fun onClickActionForPopup(
     relationWithWatchedUser: RelationWithWatchedUser,
     feedViewModel: FeedViewModel,
@@ -207,16 +236,30 @@ fun onClickActionForPopup(
   }
 }
 
-fun getButtonText(relation: RelationWithWatchedUser, context: Context): String {
+/**
+ * Returns the appropriate button text based on the relationship with the watched user.
+ *
+ * @param relation the relationship between the current user and the watched user
+ * @return the localized button text for the given relationship
+ */
+@Composable
+fun getButtonText(relation: RelationWithWatchedUser): String {
   return when (relation) {
-    RelationWithWatchedUser.FRIEND -> context.getString(R.string.friend_popup_see_garden)
-    RelationWithWatchedUser.NOT_FRIEND -> context.getString(R.string.friend_popup_add_friend)
-    RelationWithWatchedUser.SELF -> context.getString(R.string.friend_popup_your_garden)
-    RelationWithWatchedUser.REQUEST_SENT -> context.getString(R.string.friend_popup_request_sent)
-    RelationWithWatchedUser.REQUEST_RECEIVED -> context.getString(R.string.add_back_enum)
+    RelationWithWatchedUser.FRIEND -> stringResource(R.string.friend_popup_see_garden)
+    RelationWithWatchedUser.NOT_FRIEND -> stringResource(R.string.friend_popup_add_friend)
+    RelationWithWatchedUser.SELF -> stringResource(R.string.friend_popup_your_garden)
+    RelationWithWatchedUser.REQUEST_SENT -> stringResource(R.string.friend_popup_request_sent)
+    RelationWithWatchedUser.REQUEST_RECEIVED -> stringResource(R.string.add_back_enum)
   }
 }
 
+/** Object containing test tags for the Friends Popup UI components. */
 object FriendsPopupTestTags {
+  /**
+   * Generates a test tag for a friend popup button based on the user ID.
+   *
+   * @param userId the ID of the user whose button is being tagged
+   * @return a unique test tag string for the button
+   */
   fun buttonTestTag(userId: String): String = "FriendsPopupButton-$userId"
 }
