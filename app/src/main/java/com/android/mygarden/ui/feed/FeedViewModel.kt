@@ -3,7 +3,6 @@ package com.android.mygarden.ui.feed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
@@ -21,7 +20,6 @@ import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileLoading
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
-import com.android.mygarden.ui.navigation.NavHostUtils
 import com.android.mygarden.ui.navigation.NavigationActions
 import com.android.mygarden.ui.navigation.Screen
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -212,22 +210,16 @@ class FeedViewModel(
    * - For [ActivityAddFriend], sets watched users and relationship state.
    *
    * @param activity the activity that was clicked
-   * @param navigationActions the navigation actions for handling navigation
-   * @param navController the navigation controller for navigating between screens
    */
-  fun handleActivityClick(
-      activity: GardenActivity,
-      navigationActions: NavigationActions?,
-      navController: NavHostController?
-  ) {
+  fun handleActivityClick(activity: GardenActivity) {
     when (activity) {
       is ActivityAddedPlant -> {
-        NavHostUtils.navigateToPlantInfoFromGarden(
-            navController, navigationActions, activity.ownedPlant.id, true, activity.userId)
+        navigationActions?.navigateToPlantInfoFromGarden(
+            activity.ownedPlant.id, true, activity.userId)
       }
       is ActivityWaterPlant -> {
-        NavHostUtils.navigateToPlantInfoFromGarden(
-            navController, navigationActions, activity.ownedPlant.id, true, activity.userId)
+        navigationActions?.navigateToPlantInfoFromGarden(
+            activity.ownedPlant.id, true, activity.userId)
       }
       is ActivityAchievement -> {}
       is ActivityAddFriend -> {

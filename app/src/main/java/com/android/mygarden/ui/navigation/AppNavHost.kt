@@ -212,8 +212,7 @@ fun AppNavHost(
           onAddFriend = { navigationActions.navTo(Screen.AddFriend) },
           onFriendList = { navigationActions.navTo(Screen.FriendList) },
           onNotifClick = { navigationActions.navTo(Screen.FriendsRequests) },
-          navigationActions = navigationActions,
-          navController = navController)
+          navigationActions = navigationActions)
     }
 
     // Friends Requests

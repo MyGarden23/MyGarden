@@ -44,7 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.android.mygarden.R
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAchievement
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddFriend
@@ -110,7 +109,6 @@ data class CardColorPalette(val backgroundColor: Color, val textColor: Color)
 fun FeedScreen(
     modifier: Modifier = Modifier,
     navigationActions: NavigationActions? = null,
-    navController: NavHostController? = null,
     feedViewModel: FeedViewModel = viewModel(factory = FeedViewModelFactory(navigationActions)),
     onAddFriend: () -> Unit = {},
     onNotifClick: () -> Unit = {},
@@ -182,8 +180,6 @@ fun FeedScreen(
                       ActivityItem(
                           modifier = modifier,
                           activity = activities[index],
-                          navigationActions = navigationActions,
-                          navController = navController,
                           feedViewModel = feedViewModel)
                     }
                   }
@@ -280,13 +276,12 @@ fun FriendListButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
  *
  * @param modifier the used modifier for the composable and its potential users
  * @param activity the generic activity
+ * @param feedViewModel the view model for handling activity clicks
  */
 @Composable
 fun ActivityItem(
     modifier: Modifier = Modifier,
     activity: GardenActivity,
-    navigationActions: NavigationActions?,
-    navController: NavHostController?,
     feedViewModel: FeedViewModel
 ) {
   val context = LocalContext.current
@@ -305,9 +300,7 @@ fun ActivityItem(
                     isOnline,
                     context,
                     OfflineMessages.CANNOT_CLICK_ACTIVITY,
-                    {
-                      feedViewModel.handleActivityClick(activity, navigationActions, navController)
-                    })
+                    { feedViewModel.handleActivityClick(activity) })
               },
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),
