@@ -48,8 +48,7 @@ class NavigationS4TestsEditProfile {
         AppNavHost(navController = controller, startDestination = Screen.Garden.route)
       }
     }
-    LikesRepositoryProvider.repository = FakeLikesRepository()
-    ProfileRepositoryProvider.repository = FakeProfileRepository()
+    //ProfileRepositoryProvider.repository = FakeProfileRepository()
     PseudoRepositoryProvider.repository = FakePseudoRepository()
     AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
     composeTestRule.waitForIdle()

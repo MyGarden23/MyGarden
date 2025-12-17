@@ -56,8 +56,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
 
   @Before
   fun setUp() {
-    LikesRepositoryProvider.repository = FakeLikesRepository()
-    ProfileRepositoryProvider.repository = FakeProfileRepository()
+    //ProfileRepositoryProvider.repository = FakeProfileRepository()
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
 
     composeTestRule.setContent {
