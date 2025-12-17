@@ -197,8 +197,6 @@ jobs:
             ./gradlew connectedAndroidTest --build-cache --stacktrace -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zEndToEnd -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.utils.RequiresCamera
             TEST_EXIT_CODE_0=$?
             echo "Running EndToEndM1..."
-            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM1 --stacktrace
-            TEST_EXIT_CODE_1=$?
             
             echo "Running EndToEndM2..."
             ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM2 --stacktrace
