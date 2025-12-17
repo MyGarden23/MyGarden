@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -53,6 +54,7 @@ enum class RelationWithWatchedUser {
   FRIEND,
   NOT_FRIEND,
   REQUEST_SENT,
+  REQUEST_RECEIVED,
   SELF,
 }
 
@@ -112,43 +114,33 @@ class FeedViewModel(
     _uiState.value = _uiState.value.copy(isWatchingFriendsActivity = isWatchingFriendsActivity)
   }
 
+  private suspend fun determineRelationWithUser(
+      userProfile: UserProfile?
+  ): RelationWithWatchedUser {
+    if (profileRepo.isCurrentUserPseudo(userProfile?.pseudo ?: "")) {
+      return RelationWithWatchedUser.SELF
+    }
+
+    val userId = userProfile?.id ?: ""
+
+    return when {
+      friendsRepo.isFriend(userId) -> RelationWithWatchedUser.FRIEND
+      friendsRequestsRepo.isInOutgoingRequests(userId) -> RelationWithWatchedUser.REQUEST_SENT
+      friendsRequestsRepo.isInIncomingRequests(userId) -> RelationWithWatchedUser.REQUEST_RECEIVED
+      else -> RelationWithWatchedUser.NOT_FRIEND
+    }
+  }
+
   suspend fun setWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
-    _uiState.value = _uiState.value.copy(watchedUser1 = watchedFriend1)
-    _uiState.value = _uiState.value.copy(watchedUser2 = watchedFriend2)
+    val relation1 = determineRelationWithUser(watchedFriend1)
+    val relation2 = determineRelationWithUser(watchedFriend2)
 
-    if (profileRepo.isCurrentUserPseudo(watchedFriend1?.pseudo ?: "")) {
-      _uiState.value = _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.SELF)
-    } else {
-      if (friendsRepo.isFriend(watchedFriend1?.id ?: "")) {
-        _uiState.value =
-            _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.FRIEND)
-      } else {
-        if (friendsRequestsRepo.isInOutgoingRequests(watchedFriend1?.id ?: "")) {
-          _uiState.value =
-              _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.REQUEST_SENT)
-        } else {
-          _uiState.value =
-              _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.NOT_FRIEND)
-        }
-      }
-    }
-
-    if (profileRepo.isCurrentUserPseudo(watchedFriend2?.pseudo ?: "")) {
-      _uiState.value = _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.SELF)
-    } else {
-      if (friendsRepo.isFriend(watchedFriend2?.id ?: "")) {
-        _uiState.value =
-            _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.FRIEND)
-      } else {
-        if (friendsRequestsRepo.isInOutgoingRequests(watchedFriend2?.id ?: "")) {
-          _uiState.value =
-              _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.REQUEST_SENT)
-        } else {
-          _uiState.value =
-              _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.NOT_FRIEND)
-        }
-      }
-    }
+    _uiState.value =
+        _uiState.value.copy(
+            watchedUser1 = watchedFriend1,
+            watchedUser2 = watchedFriend2,
+            relationWithWatchedUser1 = relation1,
+            relationWithWatchedUser2 = relation2)
   }
 
   fun resetWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
@@ -163,6 +155,7 @@ class FeedViewModel(
   fun updateWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
     viewModelScope.launch { setWatchedFriends(watchedFriend1, watchedFriend2) }
   }
+
   /**
    * Function that handles the click on an activity card
    *
@@ -205,6 +198,14 @@ class FeedViewModel(
   fun handleNotFriendActivityClick(friendId: String) {
     viewModelScope.launch { friendsRequestsRepo.askFriend(friendId) }
     updateWatchedFriends(_uiState.value.watchedUser1, _uiState.value.watchedUser2)
+  }
+
+  fun handleRequestReceivedActivityClick(friendId: String) {
+    viewModelScope.launch {
+      val request =
+          friendsRequestsRepo.incomingRequests().first().first { it.fromUserId == friendId }
+      friendsRequestsRepo.acceptRequest(request.id)
+    }
   }
 
   fun handleSelfActivityClick() {

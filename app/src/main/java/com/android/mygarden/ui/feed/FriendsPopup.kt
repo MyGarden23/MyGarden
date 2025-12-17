@@ -200,6 +200,9 @@ fun onClickActionForPopup(
     RelationWithWatchedUser.SELF -> {
       feedViewModel.handleSelfActivityClick()
     }
+    RelationWithWatchedUser.REQUEST_RECEIVED -> {
+      feedViewModel.handleRequestReceivedActivityClick(userProfile.id)
+    }
     RelationWithWatchedUser.REQUEST_SENT -> {}
   }
 }
@@ -210,6 +213,7 @@ fun getButtonText(relation: RelationWithWatchedUser, context: Context): String {
     RelationWithWatchedUser.NOT_FRIEND -> context.getString(R.string.friend_popup_add_friend)
     RelationWithWatchedUser.SELF -> context.getString(R.string.friend_popup_your_garden)
     RelationWithWatchedUser.REQUEST_SENT -> context.getString(R.string.friend_popup_request_sent)
+    RelationWithWatchedUser.REQUEST_RECEIVED -> context.getString(R.string.add_back_enum)
   }
 }
 
