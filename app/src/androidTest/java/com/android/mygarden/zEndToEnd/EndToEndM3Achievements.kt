@@ -500,59 +500,6 @@ class EndToEndM3Achievements {
         Log.d("EndToEndM3Achievements", "End-to-end test for Achievements completed successfully")
       }
 
-  /** Helper function to add a plant to the current user's garden */
-  private fun addPlant(name: String, latinName: String, description: String) {
-    // Go to camera
-    composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
-
-    // Wait for camera ready
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).isDisplayed()
-    }
-    composeTestRule.onNodeWithTag(CameraScreenTestTags.TAKE_PICTURE_BUTTON).performClick()
-
-    // Plant info screen
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.SCREEN).isDisplayed()
-    }
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).isDisplayed()
-    }
-    composeTestRule.onNodeWithTag(PlantInfoScreenTestTags.NEXT_BUTTON).performClick()
-
-    // Edit plant screen
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(NavigationTestTags.EDIT_PLANT_SCREEN).isDisplayed()
-    }
-
-    // Edit plant details
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).performTextClearance()
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_NAME).performTextInput(name)
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).performTextClearance()
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_LATIN).performTextInput(latinName)
-    composeTestRule
-        .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
-        .performTextClearance()
-    composeTestRule
-        .onNodeWithTag(EditPlantScreenTestTags.INPUT_PLANT_DESCRIPTION)
-        .performTextInput(description)
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE).performTextClearance()
-    composeTestRule
-        .onNodeWithTag(EditPlantScreenTestTags.LIGHT_EXPOSURE)
-        .performTextInput("Full sun")
-
-    // Scroll to save button
-    composeTestRule
-        .onNodeWithTag(EditPlantScreenTestTags.SCROLLABLE_COLUMN)
-        .performScrollToNode(hasTestTag(EditPlantScreenTestTags.PLANT_SAVE))
-
-    // Click Save
-    composeTestRule.onNodeWithTag(EditPlantScreenTestTags.PLANT_SAVE).performClick()
-
-    composeTestRule.waitForIdle()
-    Thread.sleep(1000) // Give the app time to fully process the plant addition
-  }
-
   /** Waits for the app to fully load by checking for key UI elements */
   private fun waitForAppToLoad() {
     composeTestRule.waitUntil(TIMEOUT) {
