@@ -20,8 +20,6 @@ import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileLoading
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
-import com.android.mygarden.ui.navigation.NavigationActions
-import com.android.mygarden.ui.navigation.Screen
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,6 +69,13 @@ enum class RelationWithWatchedUser {
   SELF,
 }
 
+data class FeedViewModelCallbacks(
+    val onAddPlantActivityClicked: (ActivityAddedPlant) -> Unit = {},
+    val onWaterPlantActivityClicked: (ActivityWaterPlant) -> Unit = {},
+    val goToFriendGardenPopupClick: (friendID: String) -> Unit = {},
+    val onSelfActivityClick: () -> Unit = {},
+)
+
 /**
  * The view model of the feed that handles UI interactions and repository updates
  *
@@ -90,7 +95,7 @@ class FeedViewModel(
         FriendRequestsRepositoryProvider.repository,
     private val userProfileRepo: UserProfileRepository = UserProfileRepositoryProvider.repository,
     private val profileRepo: ProfileRepository = ProfileRepositoryProvider.repository,
-    private val navigationActions: NavigationActions? = null
+    private val feedViewModelCallbacks: FeedViewModelCallbacks? = null
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(FeedUIState())
@@ -213,14 +218,8 @@ class FeedViewModel(
    */
   fun handleActivityClick(activity: GardenActivity) {
     when (activity) {
-      is ActivityAddedPlant -> {
-        navigationActions?.navigateToPlantInfoFromGarden(
-            activity.ownedPlant.id, true, activity.userId)
-      }
-      is ActivityWaterPlant -> {
-        navigationActions?.navigateToPlantInfoFromGarden(
-            activity.ownedPlant.id, true, activity.userId)
-      }
+      is ActivityAddedPlant -> feedViewModelCallbacks?.onAddPlantActivityClicked(activity)
+      is ActivityWaterPlant -> feedViewModelCallbacks?.onWaterPlantActivityClicked(activity)
       is ActivityAchievement -> {}
       is ActivityAddFriend -> {
         setIsWatchingFriendsActivity(true)
@@ -241,7 +240,7 @@ class FeedViewModel(
    * @param friendId the ID of the friend whose activity was clicked
    */
   fun handleFriendActivityClick(friendId: String) {
-    navigationActions?.navTo(Screen.FriendGarden(friendId))
+    feedViewModelCallbacks?.goToFriendGardenPopupClick(friendId)
   }
 
   /**
@@ -274,7 +273,7 @@ class FeedViewModel(
    * garden screen.
    */
   fun handleSelfActivityClick() {
-    navigationActions?.navTo(Screen.Garden)
+    feedViewModelCallbacks?.onSelfActivityClick()
   }
 }
 
@@ -283,7 +282,7 @@ class FeedViewModel(
  *
  * @property navigationActions the navigation actions to be used by the ViewModel, or null
  */
-class FeedViewModelFactory(private val navigationActions: NavigationActions?) :
+class FeedViewModelFactory(private val feedViewModelCallbacks: FeedViewModelCallbacks?) :
     ViewModelProvider.Factory {
   /**
    * Creates a new instance of the specified ViewModel class.
@@ -294,7 +293,8 @@ class FeedViewModelFactory(private val navigationActions: NavigationActions?) :
    */
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     if (modelClass.isAssignableFrom(FeedViewModel::class.java)) {
-      @Suppress("UNCHECKED_CAST") return FeedViewModel(navigationActions = navigationActions) as T
+      @Suppress("UNCHECKED_CAST")
+      return FeedViewModel(feedViewModelCallbacks = feedViewModelCallbacks) as T
     }
     throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
   }

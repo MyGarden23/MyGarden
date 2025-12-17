@@ -51,7 +51,6 @@ import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPl
 import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import com.android.mygarden.model.offline.OfflineStateManager
-import com.android.mygarden.ui.navigation.NavigationActions
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.theme.CustomColors
@@ -108,11 +107,12 @@ data class CardColorPalette(val backgroundColor: Color, val textColor: Color)
 @Composable
 fun FeedScreen(
     modifier: Modifier = Modifier,
-    navigationActions: NavigationActions? = null,
-    feedViewModel: FeedViewModel = viewModel(factory = FeedViewModelFactory(navigationActions)),
+    feedViewModelCallbacks: FeedViewModelCallbacks? = null,
+    feedViewModel: FeedViewModel =
+        viewModel(factory = FeedViewModelFactory(feedViewModelCallbacks)),
     onAddFriend: () -> Unit = {},
     onNotifClick: () -> Unit = {},
-    onFriendList: () -> Unit = {}
+    onFriendList: () -> Unit = {},
 ) {
 
   val uiState by feedViewModel.uiState.collectAsState()

@@ -26,11 +26,11 @@ import com.android.mygarden.ui.camera.CameraScreen
 import com.android.mygarden.ui.editPlant.EditPlantScreen
 import com.android.mygarden.ui.editPlant.EditPlantViewModel
 import com.android.mygarden.ui.feed.FeedScreen
+import com.android.mygarden.ui.feed.FeedViewModelCallbacks
 import com.android.mygarden.ui.friendList.FriendListScreen
 import com.android.mygarden.ui.friendsRequests.FriendsRequestsScreen
 import com.android.mygarden.ui.garden.GardenScreenCallbacks
 import com.android.mygarden.ui.garden.ParentTabScreenGarden
-import com.android.mygarden.ui.navigation.NavHostUtils.navigateToPlantInfoFromGarden
 import com.android.mygarden.ui.plantinfos.PlantInfoViewModel
 import com.android.mygarden.ui.plantinfos.PlantInfosScreen
 import com.android.mygarden.ui.profile.Avatar
@@ -162,7 +162,7 @@ fun AppNavHost(
                   onEditProfile = { navigationActions.navTo(Screen.EditProfile) },
                   onAddPlant = { navigationActions.navTo(Screen.Camera) },
                   onPlantClick = { ownedPlant ->
-                    navigateToPlantInfoFromGarden(navController, navigationActions, ownedPlant.id)
+                    navigationActions.navigateToPlantInfoFromGarden(ownedPlant.id)
                   },
                   onSignOut = {
                     PlantsRepositoryProvider.repository.cleanup()
@@ -200,19 +200,34 @@ fun AppNavHost(
                       onAddPlant = {},
                       onBackPressed = { navigationActions.navBack() },
                       onPlantClick = { ownedPlant ->
-                        navigateToPlantInfoFromGarden(
-                            navController, navigationActions, ownedPlant.id, true, friendId)
+                        navigationActions.navigateToPlantInfoFromGarden(
+                            ownedPlant.id, true, friendId)
                       },
                       onSignOut = {}))
         }
 
     // Feed
     composable(Screen.Feed.route) {
+      val feedViewModelCallbacks: FeedViewModelCallbacks =
+          FeedViewModelCallbacks(
+              onAddPlantActivityClicked = { activity ->
+                navigationActions.navigateToPlantInfoFromGarden(
+                    activity.ownedPlant.id, true, activity.userId)
+              },
+              onWaterPlantActivityClicked = { activity ->
+                navigationActions.navigateToPlantInfoFromGarden(
+                    activity.ownedPlant.id, true, activity.userId)
+              },
+              goToFriendGardenPopupClick = { friendId ->
+                navigationActions.navTo(Screen.FriendGarden(friendId))
+              },
+              onSelfActivityClick = { navigationActions.navTo(Screen.Garden) })
+
       FeedScreen(
           onAddFriend = { navigationActions.navTo(Screen.AddFriend) },
           onFriendList = { navigationActions.navTo(Screen.FriendList) },
           onNotifClick = { navigationActions.navTo(Screen.FriendsRequests) },
-          navigationActions = navigationActions)
+          feedViewModelCallbacks = feedViewModelCallbacks)
     }
 
     // Friends Requests
@@ -347,36 +362,5 @@ fun HandleAvatarSelection(backStackEntry: NavBackStackEntry, vm: ProfileViewMode
       vm.setAvatar(chosenAvatar)
       backStackEntry.savedStateHandle[CHOSEN_AVATAR_KEY] = ""
     }
-  }
-}
-
-object NavHostUtils {
-  /**
-   * Helper function to navigate to PlantInfoFromGarden screen with saved state parameters
-   *
-   * @param navController the navigation controller
-   * @param navigationActions the navigation actions helper
-   * @param ownedPlantId the ID of the owned plant to display
-   * @param isViewMode whether the plant info should be in view-only mode (default: false)
-   * @param friendId the ID of the friend whose plant is being viewed (optional)
-   */
-  fun navigateToPlantInfoFromGarden(
-      navController: NavHostController?,
-      navigationActions: NavigationActions?,
-      ownedPlantId: String,
-      isViewMode: Boolean = false,
-      friendId: String? = null
-  ) {
-    navController
-        ?.currentBackStackEntry
-        ?.savedStateHandle
-        ?.set(OWNED_PLANT_ID_TO_PLANT_INFO_KEY, ownedPlantId)
-    if (isViewMode) {
-      navController?.currentBackStackEntry?.savedStateHandle?.set(IS_VIEW_MODE_KEY, true)
-    }
-    if (friendId != null) {
-      navController?.currentBackStackEntry?.savedStateHandle?.set(FRIEND_ID_KEY, friendId)
-    }
-    navigationActions?.navTo(Screen.PlantInfoFromGarden)
   }
 }
