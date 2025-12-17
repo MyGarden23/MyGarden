@@ -190,8 +190,27 @@ jobs:
             
             # Run tests and capture exit code
             set +e
-            ./gradlew connectedCheck --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.utils.RequiresCamera --max-workers=1 --stacktrace
-            TEST_EXIT_CODE=$?
+            
+            # Run each E2E test class separately to ensure complete isolation
+            # This prevents Firebase emulator conflicts between tests
+            echo "Running EndToEndM1..."
+            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM1 --stacktrace
+            TEST_EXIT_CODE_1=$?
+            
+            echo "Running EndToEndM2..."
+            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM2 --stacktrace
+            TEST_EXIT_CODE_2=$?
+            
+            echo "Running EndToEndEpic2..."
+            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndEpic2 --stacktrace
+            TEST_EXIT_CODE_3=$?
+            
+            echo "Running EndToEndM3Achievements..."
+            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM3Achievements --stacktrace
+            TEST_EXIT_CODE_4=$?
+            
+            # Combine exit codes - fail if any test failed
+            TEST_EXIT_CODE=$((TEST_EXIT_CODE_1 + TEST_EXIT_CODE_2 + TEST_EXIT_CODE_3 + TEST_EXIT_CODE_4))
             set -e
             
             # Stop logcat capture
