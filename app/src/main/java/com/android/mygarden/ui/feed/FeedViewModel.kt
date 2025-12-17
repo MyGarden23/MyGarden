@@ -290,8 +290,13 @@ class FeedViewModelFactory(private val navigationActions: NavigationActions?) :
    *
    * @param modelClass the class of the ViewModel to create
    * @return a new instance of [FeedViewModel]
+   * @throws IllegalArgumentException if the modelClass is not [FeedViewModel]
    */
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
-    return FeedViewModel(navigationActions = navigationActions) as T
+      if (modelClass.isAssignableFrom(FeedViewModel::class.java)) {
+          @Suppress("UNCHECKED_CAST")
+          return FeedViewModel(navigationActions = navigationActions) as T
+      }
+      throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
   }
 }
