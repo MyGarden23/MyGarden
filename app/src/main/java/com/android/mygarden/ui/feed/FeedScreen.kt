@@ -373,7 +373,10 @@ fun GotAnAchievementCard(
   val icon = R.drawable.achievement
   val cardText =
       stringResource(
-          R.string.got_achievement_activity, activity.pseudo, activity.achievementType.toString())
+          R.string.got_achievement_activity,
+          activity.pseudo,
+          activity.levelReached,
+          activity.achievementType.toString())
 
   GenericCard(colorPalette, modifier, icon, cardText)
 }

@@ -163,7 +163,7 @@
     <!-- Feed activities strings -->
     <string name="added_plant_activity">%1$s just added a new %2$s to their garden!</string>
     <string name="added_friend_activity">%1$s and %2$s are now friends!</string>
-    <string name="got_achievement_activity">%1$s improved in the achievement : %2$s!</string>
+    <string name="got_achievement_activity">%1$s has reached level %2$d in %3$s!</string>
     <string name="watered_plant_activity">%1$s just watered %2$s!</string>
     <string name="in_card_added_activity_title">ADDED</string>
     <string name="in_card_friends_activity_title">FRIENDS</string>
