@@ -44,9 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mygarden.R
+import com.android.mygarden.model.offline.OfflineStateManager
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.ui.navigation.TopBar
 import com.android.mygarden.ui.profile.Avatar
+import com.android.mygarden.ui.utils.OfflineMessages
+import com.android.mygarden.ui.utils.handleOfflineClick
 
 /** Test tags used for accessing FriendListScreen UI elements in automated tests. */
 object FriendListScreenTestTags {
@@ -91,6 +94,7 @@ fun FriendListScreen(
 ) {
   val context = LocalContext.current
   val uiState by friendListViewModel.uiState.collectAsState()
+  val isOnline by OfflineStateManager.isOnline.collectAsState()
 
   // Load the friend list when the screen first appears
   LaunchedEffect(Unit) {
@@ -142,8 +146,20 @@ fun FriendListScreen(
                       uiState.friends.forEach { friend ->
                         FriendCard(
                             friend = friend,
-                            onClick = { onFriendClick(friend) },
-                            onConfirmDelete = { friendListViewModel.deleteFriend(it) })
+                            onClick = {
+                              handleOfflineClick(
+                                  isOnline = isOnline,
+                                  context = context,
+                                  offlineMessageResId = OfflineMessages.CANNOT_SEE_FRIEND_GARDEN,
+                                  onlineAction = { onFriendClick(friend) })
+                            },
+                            onConfirmDelete = {
+                              handleOfflineClick(
+                                  isOnline = isOnline,
+                                  context = context,
+                                  offlineMessageResId = OfflineMessages.CANNOT_DELETE_FRIENDS,
+                                  onlineAction = { friendListViewModel.deleteFriend(it) })
+                            })
                       }
                     }
               }

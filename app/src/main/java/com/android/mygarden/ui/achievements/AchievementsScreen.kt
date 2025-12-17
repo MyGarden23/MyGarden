@@ -105,18 +105,14 @@ private val DIALOG_REMAINING_FONT_SIZE = 14.sp
  * @param friendId Either the id of the friend we want to see the achievements or null for the
  *   current user.
  * @param viewModel The ViewModel providing the UI state and useful functions.
- * @param isOnline Whether the device is online (given by parent screen with default value false).
  */
 @Composable
 fun AchievementsScreen(
     modifier: Modifier = Modifier,
     friendId: String? = null,
     viewModel: AchievementsViewModel =
-        viewModel(factory = AchievementsViewModelFactory(friendId = friendId)),
-    isOnline: Boolean = true
+        viewModel(factory = AchievementsViewModelFactory(friendId = friendId))
 ) {
-  /* Unused variable to avoid SonarIssue -> isOnline will be used next week
-  for offline mode implementation for achievements */
   val uiState by viewModel.uiState.collectAsState()
   var showAchievementInfo by remember { mutableStateOf<AchievementType?>(null) }
 

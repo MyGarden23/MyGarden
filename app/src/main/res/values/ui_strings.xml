@@ -205,6 +205,8 @@
     <string name="offline_cannot_load_tips">Cannot load tips while offline</string>
     <string name="offline_cannot_search_friends">Cannot search friends while offline</string>
     <string name="offline_cannot_accept_or_reject_friends">Cannot accept or reject friend requests while offline</string>
+    <string name="offline_cannot_see_friend_garden">Cannot see a friend\'s garden while offline</string>
+    <string name="offline_cannot_delete_friends">Cannot delete friends while offline</string>
 
 
     <!-- Friends Requests Screen -->

@@ -166,8 +166,7 @@ fun ParentTabScreenGarden(
                   isOnline = isOnline)
             }
             GardenTab.ACHIEVEMENTS -> {
-              AchievementsScreen(
-                  modifier = modifier, viewModel = achievementsViewModel, isOnline = isOnline)
+              AchievementsScreen(modifier = modifier, viewModel = achievementsViewModel)
             }
           }
         }
