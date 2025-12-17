@@ -13,16 +13,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
-import com.android.mygarden.model.profile.LikesRepositoryProvider
-import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.theme.MyGardenTheme
-import com.android.mygarden.utils.FakeLikesRepository
-import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.RequiresCamera
 import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
@@ -56,7 +52,7 @@ class NavigationS4TestsEditPlantFromPlantInfo {
 
   @Before
   fun setUp() {
-    //ProfileRepositoryProvider.repository = FakeProfileRepository()
+    // ProfileRepositoryProvider.repository = FakeProfileRepository()
     PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
 
     composeTestRule.setContent {

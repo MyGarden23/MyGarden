@@ -144,18 +144,18 @@ class EndToEndEpic2 {
         // This ensures GardenViewModel initializes with the newly created user profile
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
 
-          composeTestRule.waitForIdle()
+        composeTestRule.waitForIdle()
         // Wait for Garden screen to fully load with user profile
-          composeTestRule.waitUntil(TIMEOUT) {
-              try {
-                  composeTestRule
-                      .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
-                      .assertTextContains(user_pseudo)
-                  true
-              } catch (_: AssertionError) {
-                  false
-              }
+        composeTestRule.waitUntil(TIMEOUT) {
+          try {
+            composeTestRule
+                .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
+                .assertTextContains(user_pseudo)
+            true
+          } catch (_: AssertionError) {
+            false
           }
+        }
 
         // Verify user profile is displayed
         composeTestRule
