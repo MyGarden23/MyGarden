@@ -148,11 +148,12 @@ class EndToEndEpic2 {
             composeTestRule
                 .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
                 .isDisplayed()
+            true
           } catch (_: AssertionError) {
             false
           }
         }
-        composeTestRule.onRoot(useUnmergedTree = true).printToLog("COMPOSE_TREE2")
+        composeTestRule.onRoot(useUnmergedTree = true).printToLog("COMPOSE_TREE")
 
         // Verify user profile is displayed
         composeTestRule
