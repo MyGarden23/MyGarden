@@ -32,8 +32,6 @@ class FakeFriendRequestsRepository(initialRequests: List<FriendRequest> = emptyL
     }
   }
 
-  override suspend fun askFriend(targetUserId: String) {
-    val currentUserId = getCurrentUserId() ?: "fake-uid"
   override suspend fun askFriend(targetUserId: String): Boolean {
     val currentUserId = getCurrentUserId() ?: "test-user-id"
 

@@ -157,17 +157,20 @@ class FeedViewModelTests {
       return outgoingRequestsSet.contains(targetUserId)
     }
 
-    override suspend fun askFriend(targetUserId: String) {
+    override suspend fun askFriend(targetUserId: String): Boolean {
       lastAskedFriendId = targetUserId
       outgoingRequestsSet.add(targetUserId)
       val currentUserId = getCurrentUserId() ?: "fake-uid"
       incomingRequestsFlow.value =
           incomingRequestsFlow.value +
               FriendRequest(fromUserId = currentUserId, toUserId = targetUserId)
+
+      return true
     }
 
-    override suspend fun acceptRequest(requestId: String) {
+    override suspend fun acceptRequest(requestId: String): String {
       incomingRequestsFlow.value = incomingRequestsFlow.value.filter { it.id != requestId }
+      return ""
     }
 
     var markedSeen: MutableList<String> = mutableListOf()
