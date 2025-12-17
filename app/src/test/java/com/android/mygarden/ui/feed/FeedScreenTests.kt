@@ -94,6 +94,8 @@ class FeedScreenTests {
       activitiesFlow.value = currentFlowValue + activity
     }
 
+    override suspend fun deletePlantActivityForPlant(plantId: String) {}
+
     override fun cleanup() {
       activitiesFlow.value = emptyList()
     }

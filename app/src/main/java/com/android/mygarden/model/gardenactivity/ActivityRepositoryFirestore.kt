@@ -1,6 +1,8 @@
 package com.android.mygarden.model.gardenactivity
 
 import android.util.Log
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityAddedPlant
+import com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant
 import com.android.mygarden.model.gardenactivity.activityclasses.GardenActivity
 import com.android.mygarden.model.gardenactivity.serializedactivities.SerializedActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -11,6 +13,7 @@ import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
 
@@ -22,7 +25,8 @@ class ActivityRepositoryFirestore(
   companion object {
     private const val COLLECTION_USERS = "users"
     private const val COLLECTION_ACTIVITIES = "activities"
-    private const val ACTIVITIES_ORDER_BY = "createdAt"
+    private const val CREATED_AT_FIELD = "createdAt"
+    private const val ACTIVITIES_ORDER_BY = CREATED_AT_FIELD
     private const val FIELD_TYPE = "type"
     private const val LOG_TAG = "ActivityRepositoryFirestore"
   }
@@ -139,6 +143,37 @@ class ActivityRepositoryFirestore(
       userActivities(activity.userId).add(serializedActivity).await()
     } catch (e: Exception) {
       Log.e(LOG_TAG, "Failed to add activity", e)
+    }
+  }
+
+  /**
+   * Deletes a specific activity from the user's activities subcollection. Queries for the activity
+   * by userId, type, and createdAt timestamp to find the matching document.
+   */
+  private suspend fun deleteActivity(activity: GardenActivity) {
+    try {
+      // Query for activities matching this activity's properties
+      val querySnapshot =
+          userActivities(activity.userId)
+              .whereEqualTo(FIELD_TYPE, activity.type.name)
+              .whereEqualTo(CREATED_AT_FIELD, activity.createdAt.time)
+              .get()
+              .await()
+
+      // Delete all matching documents (should typically be just one)
+      querySnapshot.documents.forEach { doc -> doc.reference.delete().await() }
+    } catch (e: Exception) {
+      Log.e(LOG_TAG, "Failed to delete activity", e)
+    }
+  }
+
+  override suspend fun deletePlantActivityForPlant(plantId: String) {
+    getActivities().first().forEach {
+      when (it) {
+        is ActivityAddedPlant -> if (it.ownedPlant.id == plantId) deleteActivity(it)
+        is ActivityWaterPlant -> if (it.ownedPlant.id == plantId) deleteActivity(it)
+        else -> {}
+      }
     }
   }
 

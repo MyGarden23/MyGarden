@@ -48,6 +48,16 @@ interface ActivityRepository {
   suspend fun addActivity(activity: GardenActivity)
 
   /**
+   * Deletes all activities associated with a specific plant.
+   *
+   * This searches through the current user's activities and removes any activities (such as
+   * [ActivityAddedPlant] or [ActivityWaterPlant]) that reference the given plant ID.
+   *
+   * @param plantId The ID of the plant whose associated activities should be deleted.
+   */
+  suspend fun deletePlantActivityForPlant(plantId: String)
+
+  /**
    * Cleans up any active listeners or resources.
    *
    * This should be called before signing out to prevent PERMISSION_DENIED errors from Firestore

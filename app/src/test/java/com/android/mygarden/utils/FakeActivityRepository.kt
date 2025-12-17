@@ -57,6 +57,8 @@ class FakeActivityRepository : ActivityRepository {
     addedActivities.add(activity)
   }
 
+  override suspend fun deletePlantActivityForPlant(plantId: String) {}
+
   /** Clears all activities from the repository. */
   override fun cleanup() {
     addedActivities.clear()
