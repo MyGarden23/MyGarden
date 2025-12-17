@@ -30,8 +30,11 @@ import com.android.mygarden.ui.garden.GardenTab
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
+import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
+import com.android.mygarden.utils.PlantRepositoryType
 import com.android.mygarden.utils.RequiresCamera
+import com.android.mygarden.utils.TestPlants
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -85,6 +88,7 @@ class EndToEndM3Achievements {
   private lateinit var aliceUserUid: String
 
   private lateinit var scenario: ActivityScenario<MainActivity>
+  private val fakePlantRepoUtils = FakePlantRepositoryUtils(PlantRepositoryType.PlantRepoFirestore)
 
   @Before
   fun setUp() = runTest {
@@ -92,6 +96,9 @@ class EndToEndM3Achievements {
     bobFirebaseUtils.initialize()
     aliceFirebaseUtils.initialize()
     Log.d("EndToEndM3Achievements", "Initialized and signed out")
+    fakePlantRepoUtils.mockIdentifyPlant(TestPlants.healthyBamboo)
+    fakePlantRepoUtils.setUpMockRepo()
+    Log.d("EndToEndM3Achievements", "Set up mock repo")
 
     // Launch the activity
     scenario = ActivityScenario.launch(MainActivity::class.java)
@@ -147,7 +154,7 @@ class EndToEndM3Achievements {
           composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
         }
 
-        // === STEP 2: ADD 3 PLANTS TO BOB'S GARDEN ===
+        // === STEP 2: ADD 2 PLANTS TO BOB'S GARDEN ===
 
         // Add first Plant
         // Go to camera
@@ -266,21 +273,6 @@ class EndToEndM3Achievements {
               .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
               .isDisplayed()
         }
-
-        /*  // === STEP 2: ADD 3 PLANTS TO BOB'S GARDEN ===
-        Log.d("EndToEndM3Achievements", "Step 2: Adding 3 plants to Bob's garden")
-        for (i in 1..3) {
-          addPlant("Bob's Plant $i", "Plantus $i", "Description for plant $i")
-
-          // Wait for garden to load after adding plant
-          composeTestRule.waitUntil(TIMEOUT) {
-            composeTestRule
-                .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
-                .isDisplayed()
-          }
-
-          Log.d("EndToEndM3Achievements", "Added plant $i/3")
-        }*/
 
         // === STEP 3: GO TO BOB'S ACHIEVEMENTS AND VERIFY PLANTS ACHIEVEMENT ===
         Log.d("EndToEndM3Achievements", "Step 3: Checking Bob's plants achievement")
