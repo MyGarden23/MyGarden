@@ -7,6 +7,8 @@ import com.android.mygarden.R
 import com.android.mygarden.model.achievements.AchievementType
 import com.android.mygarden.model.achievements.AchievementsRepository
 import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
+import com.android.mygarden.model.gardenactivity.ActivityRepository
+import com.android.mygarden.model.gardenactivity.ActivityRepositoryProvider
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
@@ -77,7 +79,8 @@ class EditPlantViewModel(
     private val repository: PlantsRepository = PlantsRepositoryProvider.repository,
     private val achievementsRepository: AchievementsRepository =
         AchievementsRepositoryProvider.repository,
-    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val activityRepository: ActivityRepository = ActivityRepositoryProvider.repository
 ) : ViewModel(), EditPlantViewModelInterface {
   private val _uiState = MutableStateFlow(EditPlantUIState())
   override val uiState: StateFlow<EditPlantUIState> = _uiState.asStateFlow()
@@ -144,6 +147,7 @@ class EditPlantViewModel(
       try {
         // Delete the plant
         repository.deleteFromGarden(ownedPlantId)
+        activityRepository.deletePlantActivityForPlant(ownedPlantId)
 
         // Get the updated plant count and update the achievement
         val userId = profileRepository.getCurrentUserId()
