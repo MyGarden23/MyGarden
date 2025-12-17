@@ -1,8 +1,5 @@
 package com.android.mygarden.model.friends
 
-import com.android.mygarden.model.achievements.AchievementType
-import com.android.mygarden.model.achievements.AchievementsRepository
-import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -25,8 +22,7 @@ private const val FIELD_FRIEND_UID = "friendUid"
  */
 class FriendsRepositoryFirestore(
     private val db: FirebaseFirestore,
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val achievementsRep: AchievementsRepository = AchievementsRepositoryProvider.repository
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : FriendsRepository {
 
   // Variable that stores locally the friends count to avoid repeating calls to the database
@@ -49,7 +45,7 @@ class FriendsRepositoryFirestore(
     return snapshot.documents.mapNotNull { doc -> doc.getString(FIELD_FRIEND_UID) }
   }
 
-  override suspend fun addFriend(friendUserId: String) {
+  override suspend fun addFriend(friendUserId: String): AddFriendResult {
     val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException(nonAuthErrorMessage)
     require(currentUserId != friendUserId) { "You cannot add yourself as a friend." }
 
@@ -68,10 +64,8 @@ class FriendsRepositoryFirestore(
     val friendUserFriendsCount = friendsCollection(friendUserId).get().await().size()
     val currentUserFriendsCount = friendsCollection(currentUserId).get().await().size()
 
-    achievementsRep.updateAchievementValue(
-        currentUserId, AchievementType.FRIENDS_NUMBER, currentUserFriendsCount)
-    achievementsRep.updateAchievementValue(
-        friendUserId, AchievementType.FRIENDS_NUMBER, friendUserFriendsCount)
+    return AddFriendResult(
+        currentUserFriendCount = currentUserFriendsCount, addedFriendCount = friendUserFriendsCount)
   }
 
   /**

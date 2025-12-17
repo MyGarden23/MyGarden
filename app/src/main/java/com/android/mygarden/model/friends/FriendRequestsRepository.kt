@@ -54,14 +54,16 @@ interface FriendRequestsRepository {
    * Sends a friend request to another user.
    *
    * Creates a new friend request document with status PENDING. If the other user already sent a
-   * request, this will add both users to each other's friends list, and mark the request as
-   * ACCEPTED.
+   * request, this will mark that request as ACCEPTED and return `true`. The caller (typically
+   * ViewModel) is responsible for adding to the friends list in that case.
    *
    * @param targetUserId The Firebase Auth UID of the user to send the request to.
+   * @return `true` if an existing incoming request was auto-accepted, `false` if a new request was
+   *   sent.
    * @throws IllegalStateException if the user is not authenticated.
    * @throws IllegalArgumentException if trying to send a request to oneself.
    */
-  suspend fun askFriend(targetUserId: String)
+  suspend fun askFriend(targetUserId: String): Boolean
 
   /**
    * Marks a friend request as seen.
@@ -73,15 +75,16 @@ interface FriendRequestsRepository {
   suspend fun markRequestAsSeen(requestId: String)
 
   /**
-   * Accepts a friend request.
+   * Accepts a friend request by updating the status to ACCEPTED.
    *
-   * Updates the request status to ACCEPTED and optionally adds the friend to both users' friend
-   * lists.
+   * Note: This only updates the request status. The caller (typically the ViewModel) is responsible
+   * for adding the users to each other's friends list.
    *
    * @param requestId The ID of the friend request to accept.
+   * @return The user ID of the person who sent the friend request.
    * @throws IllegalStateException if the current user is not the recipient of the request.
    */
-  suspend fun acceptRequest(requestId: String)
+  suspend fun acceptRequest(requestId: String): String
 
   /**
    * Refuses a friend request.

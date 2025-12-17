@@ -2,6 +2,9 @@ package com.android.mygarden.ui.addFriend
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.mygarden.model.achievements.AchievementType
+import com.android.mygarden.model.achievements.AchievementsRepository
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.friends.FriendRequestsRepository
 import com.android.mygarden.model.friends.FriendRequestsRepositoryProvider
 import com.android.mygarden.model.friends.FriendsRepository
@@ -44,13 +47,14 @@ data class AddFriendUiState(
 /**
  * ViewModel responsible for managing the logic of the *Add Friend* screen.
  *
- * This ViewModel coordinates three repository layers:
+ * This ViewModel coordinates multiple repository layers:
  * - [PseudoRepository] for searching users by pseudo prefix,
  * - [UserProfileRepository] for retrieving public user profiles (pseudo + avatar),
  * - [FriendsRepository] for adding a user to the current user's friend list.
  * - [FriendRequestsRepository] for sending a friend request to a user.
  * - [ProfileRepository] for retrieving the current user's profile and pseudo.
  * - [FriendRequestNotifier] for sending a friend request notification to a user.
+ * - [AchievementsRepository] for updating friend count achievements.
  *
  * The ViewModel maintains a small UI state ([AddFriendUiState]) containing the search query,
  * loading status, and search results. The logic for showing visual feedback is delegated to the UI
@@ -64,7 +68,9 @@ class AddFriendViewModel(
         UserProfileRepositoryProvider.repository,
     private val pseudoRepository: PseudoRepository = PseudoRepositoryProvider.repository,
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
-    private val friendRequestNotifier: FriendRequestNotifier = FirebaseFriendRequestNotifier()
+    private val friendRequestNotifier: FriendRequestNotifier = FirebaseFriendRequestNotifier(),
+    private val achievementsRepository: AchievementsRepository =
+        AchievementsRepositoryProvider.repository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(AddFriendUiState())
   val uiState: StateFlow<AddFriendUiState> = _uiState.asStateFlow()
@@ -113,6 +119,8 @@ class AddFriendViewModel(
   /**
    * Adds the user with the given [userId] to the current user's friend list.
    *
+   * This also updates the friend count achievements for both users.
+   *
    * @param userId The Firestore ID of the user to add as a friend.
    * @param onError Invoked if the operation fails for any reason.
    * @param onSuccess Invoked if the friend was added successfully.
@@ -121,7 +129,7 @@ class AddFriendViewModel(
 
     viewModelScope.launch {
       try {
-        friendsRepository.addFriend(userId)
+        handleAddingFriend(userId)
         onSuccess()
       } catch (_: Exception) {
         onError()
@@ -132,9 +140,9 @@ class AddFriendViewModel(
   /**
    * Sends a friend request to [userId] and updates the local relation state immediately.
    *
-   * If the current relation is ADDBACK, the user is marked as ADDED; otherwise the state becomes
-   * PENDING. On success, [onSuccess] is called; on failure, the relation reverts to ADD and
-   * [onError] is invoked.
+   * If the target user had already sent a request, this auto-accepts it and adds both users as
+   * friends. Otherwise, a new PENDING request is created. The UI state is updated to reflect the
+   * new relationship status.
    *
    * @param userId The Firestore ID of the user to send a friend request to.
    * @param onError Invoked if the operation fails for any reason.
@@ -154,9 +162,13 @@ class AddFriendViewModel(
             }
           }
       try {
-        requestsRepository.askFriend(userId)
+        val wasAutoAccepted = requestsRepository.askFriend(userId)
         val currentUserId = profileRepository.getCurrentUserId()
         if (currentUserId == null) {
+          _uiState.value =
+              _uiState.value.let { state ->
+                state.copy(relations = state.relations + (userId to FriendRelation.ADD))
+              }
           onError()
           return@launch
         }
@@ -165,11 +177,29 @@ class AddFriendViewModel(
         val fromPseudo = currentUserProfile?.pseudo
 
         if (fromPseudo == null) {
+          _uiState.value =
+              _uiState.value.let { state ->
+                state.copy(relations = state.relations + (userId to FriendRelation.ADD))
+              }
           onError()
           return@launch
         }
 
-        friendRequestNotifier.notifyRequestSent(userId, fromPseudo)
+        // If an existing incoming request was auto-accepted, add to friends list
+        when (wasAutoAccepted) {
+          true -> {
+            handleAddingFriend(userId)
+            // Update UI state to show they're now friends
+            _uiState.value =
+                _uiState.value.copy(
+                    relations = _uiState.value.relations + (userId to FriendRelation.ADDED))
+          }
+          false -> {
+            // Normal case: request was sent, send notification
+            friendRequestNotifier.notifyRequestSent(userId, fromPseudo)
+          }
+        }
+
         onSuccess()
       } catch (_: Exception) {
         _uiState.value =
@@ -201,5 +231,19 @@ class AddFriendViewModel(
         }
 
     _uiState.value = _uiState.value.copy(relations = newRelations)
+  }
+
+  private suspend fun handleAddingFriend(userId: String) {
+    // Add the friend to both users' friends lists and get updated counts
+    val friendCounts = friendsRepository.addFriend(userId)
+
+    // Update achievements for both users
+    val currentUserId = profileRepository.getCurrentUserId()
+    if (currentUserId != null) {
+      achievementsRepository.updateAchievementValue(
+          currentUserId, AchievementType.FRIENDS_NUMBER, friendCounts.currentUserFriendCount)
+      achievementsRepository.updateAchievementValue(
+          userId, AchievementType.FRIENDS_NUMBER, friendCounts.addedFriendCount)
+    }
   }
 }

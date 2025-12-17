@@ -2,6 +2,14 @@ package com.android.mygarden.model.friends
 
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Result of adding a friend, containing the updated friend counts for both users.
+ *
+ * @property currentUserFriendCount The total number of friends the current user has after adding
+ * @property addedFriendCount The total number of friends the added friend has after the operation
+ */
+data class AddFriendResult(val currentUserFriendCount: Int, val addedFriendCount: Int)
+
 interface FriendsRepository {
 
   /** Returns the list of friends for the given user. */
@@ -11,9 +19,14 @@ interface FriendsRepository {
    * Adds a friend relationship between currentUserId and friendUserId. Typically implemented as a
    * symmetric friendship (both users see each other as friends).
    *
+   * Returns the updated friend counts for both users so the caller (typically ViewModel) can update
+   * achievements.
+   *
+   * @param friendUserId The ID of the friend to add
+   * @return [AddFriendResult] containing the friend counts for both users after adding
    * @throws IllegalArgumentException if currentUserId == friendUserId
    */
-  suspend fun addFriend(friendUserId: String)
+  suspend fun addFriend(friendUserId: String): AddFriendResult
 
   /**
    * Checks whether the given user ID is in the current in-memory friends list.

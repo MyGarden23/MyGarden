@@ -53,7 +53,7 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
     friendsRepo = FriendsRepositoryFirestore(db, auth)
     FriendsRepositoryProvider.repository = friendsRepo
 
-    friendRequestsRepo = FriendRequestsRepositoryFirestore(db, auth, friendsRepo)
+    friendRequestsRepo = FriendRequestsRepositoryFirestore(db, auth)
     FriendRequestsRepositoryProvider.repository = friendRequestsRepo
   }
 
@@ -93,7 +93,10 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
   fun askFriend_creates_request_in_both_users_subcollections() = runTest {
     val targetUserId = "friend-123"
 
-    friendRequestsRepo.askFriend(targetUserId)
+    val wasAutoAccepted = friendRequestsRepo.askFriend(targetUserId)
+
+    // Verify the result indicates a new request was sent
+    assertFalse(wasAutoAccepted)
 
     // Verify in sender's subcollection
     val senderSnapshot =
@@ -205,7 +208,7 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun acceptRequest_updates_status_and_adds_friend() = runTest {
+  fun acceptRequest_updates_status_and_returns_fromUserId() = runTest {
     val senderUserId = "sender-user"
 
     // Create a request FROM sender TO currentUser
@@ -232,7 +235,10 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
         .await()
 
     // Accept the request
-    friendRequestsRepo.acceptRequest(docRef.id)
+    val returnedUserId = friendRequestsRepo.acceptRequest(docRef.id)
+
+    // Verify the method returns the correct fromUserId
+    assertEquals(senderUserId, returnedUserId)
 
     // Verify status changed to ACCEPTED
     val updatedDoc =
@@ -245,17 +251,8 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
 
     assertEquals("ACCEPTED", updatedDoc.getString("status"))
 
-    // Verify friend was added
-    val friendDoc =
-        db.collection("users")
-            .document(currentUserId)
-            .collection("friends")
-            .document(senderUserId)
-            .get()
-            .await()
-
-    assertTrue(friendDoc.exists())
-    assertEquals(senderUserId, friendDoc.getString("friendUid"))
+    // Note: acceptRequest no longer adds to friends list - that's the caller's responsibility
+    // The ViewModel should call friendsRepo.addFriend() separately
   }
 
   @Test
@@ -469,15 +466,32 @@ class FriendRequestsRepositoryTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun askFriend_whenIncomingPendingRequest_exists_acceptsAndCreatesFriendship() = runTest {
+  fun askFriend_whenIncomingPendingRequest_exists_returnsAutoAccepted() = runTest {
     val otherUserId = "other-user"
     val requestId = "req-mutual"
 
     createIncomingRequest(fromUserId = otherUserId, toUserId = currentUserId, requestId = requestId)
     assertTrue(friendRequestsRepo.isInIncomingRequests(otherUserId))
 
-    friendRequestsRepo.askFriend(otherUserId)
-    assertTrue(friendsRepo.isFriend(otherUserId))
-    assertFalse(friendRequestsRepo.isInIncomingRequests(otherUserId))
+    // When there's an incoming request, askFriend should auto-accept it
+    val result = friendRequestsRepo.askFriend(otherUserId)
+
+    // Verify the result indicates auto-acceptance
+    assertTrue(result)
+
+    // Verify the request status was updated to ACCEPTED
+    val updatedDoc =
+        db.collection("users")
+            .document(currentUserId)
+            .collection("friend_requests")
+            .document(requestId)
+            .get()
+            .await()
+    assertEquals("ACCEPTED", updatedDoc.getString("status"))
+
+    // Note: askFriend no longer adds to friends list - that's the caller's (ViewModel's)
+    // responsibility
+    // The ViewModel should check the result and call friendsRepo.addFriend() when AutoAccepted
+    assertFalse(friendsRepo.isFriend(otherUserId))
   }
 }

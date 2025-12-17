@@ -28,8 +28,7 @@ import kotlinx.coroutines.tasks.await
  */
 class FriendRequestsRepositoryFirestore(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val friendsRepository: FriendsRepository = FriendsRepositoryFirestore(db, auth)
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : FriendRequestsRepository {
 
   companion object {
@@ -273,7 +272,7 @@ class FriendRequestsRepositoryFirestore(
    * - users/{currentUserId}/friend_requests/{requestId}
    * - users/{targetUserId}/friend_requests/{requestId}
    */
-  override suspend fun askFriend(targetUserId: String) {
+  override suspend fun askFriend(targetUserId: String): Boolean {
     val currentUserId = getCurrentUserId() ?: throw IllegalStateException(NOT_AUTHENTICATED_ERROR)
 
     require(currentUserId != targetUserId) { "Cannot send friend request to yourself" }
@@ -290,16 +289,17 @@ class FriendRequestsRepositoryFirestore(
               .await()
 
       if (!incomingSnapshot.isEmpty) {
-        // the other has already sent a request, we accepte
+        // the other has already sent a request, we accept (update status)
         val requestDoc = incomingSnapshot.documents.first()
         val requestId = requestDoc.id
 
+        // Only update the request status, don't add friend (view model handles that)
         acceptRequest(requestId)
 
         Log.d(
             "FriendRequestsRepo",
-            "Existing incoming friend request accepted and deleted; users are now friends")
-        return
+            "Existing incoming friend request status updated to ACCEPTED (caller should add friend)")
+        return true
       }
 
       // check if there already is an outgoing request from current user -> target user
@@ -313,7 +313,7 @@ class FriendRequestsRepositoryFirestore(
 
       if (!existingRequests.isEmpty) {
         Log.w("FriendRequestsRepo", "Friend request already exists")
-        return
+        return false
       }
 
       // new request if none already exist
@@ -333,6 +333,7 @@ class FriendRequestsRepositoryFirestore(
       batch.commit().await()
 
       Log.d("FriendRequestsRepo", "Friend request sent successfully")
+      return false
     } catch (e: Exception) {
       Log.e("FriendRequestsRepo", "Failed to send friend request", e)
       throw e
@@ -352,15 +353,13 @@ class FriendRequestsRepositoryFirestore(
   /**
    * Accepts a friend request.
    * - Updates the status to ACCEPTED in both users' subcollections atomically
-   * - Adds each user to the other's friends list using FriendsRepository
    */
-  override suspend fun acceptRequest(requestId: String) {
-    try {
-      updateRequestStatus(requestId, FriendRequestStatus.ACCEPTED) { fromUserId ->
-        // Add to friends list (both directions)
-        friendsRepository.addFriend(fromUserId)
-      }
-      Log.d("FriendRequestsRepo", "Friend request accepted successfully")
+  override suspend fun acceptRequest(requestId: String): String {
+    return try {
+      var fromUserId = ""
+      updateRequestStatus(requestId, FriendRequestStatus.ACCEPTED) { userId -> fromUserId = userId }
+      Log.d("FriendRequestsRepo", "Friend request status updated to ACCEPTED")
+      fromUserId
     } catch (e: Exception) {
       Log.e("FriendRequestsRepo", "Failed to accept friend request", e)
       throw e

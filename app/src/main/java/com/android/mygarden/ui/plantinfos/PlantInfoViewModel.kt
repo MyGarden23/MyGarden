@@ -4,6 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
+import com.android.mygarden.model.achievements.AchievementType
+import com.android.mygarden.model.achievements.AchievementsRepository
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.caretips.CareTipsRepository
 import com.android.mygarden.model.caretips.CareTipsRepositoryProvider
 import com.android.mygarden.model.gardenactivity.ActivityRepository
@@ -81,7 +84,9 @@ class PlantInfoViewModel(
     private val plantsRepository: PlantsRepository = PlantsRepositoryProvider.repository,
     private val activityRepository: ActivityRepository = ActivityRepositoryProvider.repository,
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
-    private val tipsRepository: CareTipsRepository = CareTipsRepositoryProvider.repository
+    private val tipsRepository: CareTipsRepository = CareTipsRepositoryProvider.repository,
+    private val achievementsRepository: AchievementsRepository =
+        AchievementsRepositoryProvider.repository
 ) : ViewModel() {
   // Private mutable state flow
   private val _uiState = MutableStateFlow(PlantInfoUIState())
@@ -180,6 +185,8 @@ class PlantInfoViewModel(
   /**
    * Save the plant to the user's garden.
    *
+   * This also updates the plant count achievement.
+   *
    * @param plant The plant to save
    * @param onPlantSaved Callback called with the ID of the saved plant
    */
@@ -192,9 +199,16 @@ class PlantInfoViewModel(
       // Save the plant to the garden
       val ownedPlant = plantsRepository.saveToGarden(plant, newId, createdAt)
 
+      // Get the updated plant count and update the achievement
+      val userId = activityRepository.getCurrentUserId()
+      if (userId != null) {
+        val plantCount = plantsRepository.getAllOwnedPlants().size
+        achievementsRepository.updateAchievementValue(
+            userId, AchievementType.PLANTS_NUMBER, plantCount)
+      }
+
       // Get user information for the activity
       val pseudo = profileRepository.getProfile().firstOrNull()?.pseudo
-      val userId = activityRepository.getCurrentUserId()
 
       // Create the activity if we have the necessary information
       if (pseudo != null && userId != null) {

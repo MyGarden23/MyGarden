@@ -2,9 +2,6 @@ package com.android.mygarden.model.plant
 
 import android.net.Uri
 import android.util.Log
-import com.android.mygarden.model.achievements.AchievementType
-import com.android.mygarden.model.achievements.AchievementsRepository
-import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.plant.FirestoreMapper.fromOwnedPlantToSerializedOwnedPlant
 import com.android.mygarden.model.plant.FirestoreMapper.fromSerializedOwnedPlantToOwnedPlant
 import com.google.firebase.auth.FirebaseAuth
@@ -68,8 +65,7 @@ private fun imageNotFoundMsg(message: String?) = "Image not found or already del
 class PlantsRepositoryFirestore(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance(),
-    private val achievementsRepo: AchievementsRepository = AchievementsRepositoryProvider.repository
+    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 ) : PlantsRepositoryBase() {
   private val healthCalculator = PlantHealthCalculator()
 
@@ -150,10 +146,6 @@ class PlantsRepositoryFirestore(
 
     userPlantsCollection().document(id).set(serializedOwnedPlant).await()
 
-    // Update the achievements
-    achievementsRepo.updateAchievementValue(
-        currentUserId(), AchievementType.PLANTS_NUMBER, plantsFlow.value.size)
-
     // Trigger the plantsFlow to collect the updated list from Firebase and ensure no plant are
     // thirsty
     _plantsUpdate.emit(true)
@@ -208,12 +200,6 @@ class PlantsRepositoryFirestore(
     userPlantsCollection().document(id).delete().await()
     // Delete the image in Cloud Storage
     deleteImageInCloudStorage(id)
-
-    // Update the achievements
-    achievementsRepo.updateAchievementValue(
-        currentUserId(),
-        AchievementType.PLANTS_NUMBER,
-        plantsFlow.value.size - PLANT_ACHIEVEMENT_DECREMENT_STEP)
   }
 
   override suspend fun editOwnedPlant(id: String, newOwnedPlant: OwnedPlant) {

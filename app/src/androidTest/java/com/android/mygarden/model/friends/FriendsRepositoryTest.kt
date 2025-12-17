@@ -75,11 +75,12 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
   }
 
   @Test
-  fun addFriend_adds_friend_to_current_user_subcollection() = runTest {
+  fun addFriend_adds_friend_to_current_user_subcollection_and_returns_counts() = runTest {
     val friendUid = "friend-123"
 
-    friendsRepo.addFriend(friendUid)
+    val result = friendsRepo.addFriend(friendUid)
 
+    // Verify the friend was added in Firestore
     val snapshot =
         db.collection("users")
             .document(currentUserId)
@@ -90,6 +91,10 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
 
     assertTrue(snapshot.exists())
     assertEquals(friendUid, snapshot.getString("friendUid"))
+
+    // Verify the return value contains correct friend counts
+    assertEquals(1, result.currentUserFriendCount)
+    assertEquals(1, result.addedFriendCount)
   }
 
   @Test
@@ -97,8 +102,11 @@ class FriendsRepositoryTest : FirestoreProfileTest() {
     val friend1 = "friend-1"
     val friend2 = "friend-2"
 
-    friendsRepo.addFriend(friend1)
-    friendsRepo.addFriend(friend2)
+    val result1 = friendsRepo.addFriend(friend1)
+    assertEquals(1, result1.currentUserFriendCount)
+
+    val result2 = friendsRepo.addFriend(friend2)
+    assertEquals(2, result2.currentUserFriendCount)
 
     val friends = friendsRepo.getFriends(currentUserId)
 

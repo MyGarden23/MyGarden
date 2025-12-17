@@ -1,5 +1,6 @@
 package com.android.mygarden.utils
 
+import com.android.mygarden.model.friends.AddFriendResult
 import com.android.mygarden.model.friends.FriendsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,10 +35,11 @@ class FakeFriendsRepository : FriendsRepository {
    * Simulates adding a friend. Records the friend ID unless [throwOnAdd] is set, in which case
    * throws the exception to simulate Firebase failures.
    */
-  override suspend fun addFriend(friendUserId: String) {
+  override suspend fun addFriend(friendUserId: String): AddFriendResult {
     throwOnAdd?.let { throw it }
     addedFriends += friendUserId
     friendsFlow.value = friendsFlow.value + friendUserId
+    return AddFriendResult(currentUserFriendCount = friendsFlow.value.size, addedFriendCount = 1)
   }
 
   override suspend fun deleteFriend(friendUserId: String) {

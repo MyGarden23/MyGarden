@@ -2,6 +2,8 @@ package com.android.mygarden.ui.editPlant
 
 import com.android.mygarden.R
 import com.android.mygarden.model.plant.*
+import com.android.mygarden.utils.FakeAchievementsRepository
+import com.android.mygarden.utils.FakeProfileRepository
 import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,7 +32,9 @@ class EditPlantViewModelTest {
   fun setup() = runTest {
     Dispatchers.setMain(testDispatcher)
     repository = PlantsRepositoryLocal()
-    viewModel = EditPlantViewModel(repository)
+    val achievementsRepo = FakeAchievementsRepository()
+    val profileRepo = FakeProfileRepository()
+    viewModel = EditPlantViewModel(repository, achievementsRepo, profileRepo)
 
     val plant =
         Plant(

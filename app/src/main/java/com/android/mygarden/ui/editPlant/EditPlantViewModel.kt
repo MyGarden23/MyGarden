@@ -4,10 +4,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.mygarden.R
+import com.android.mygarden.model.achievements.AchievementType
+import com.android.mygarden.model.achievements.AchievementsRepository
+import com.android.mygarden.model.achievements.AchievementsRepositoryProvider
 import com.android.mygarden.model.plant.OwnedPlant
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.profile.ProfileRepository
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import java.sql.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -65,9 +70,14 @@ data class EditPlantUIState(
  * [EditPlantViewModelInterface].
  *
  * @param repository The [PlantsRepository] used for plant's data access.
+ * @param achievementsRepository The [AchievementsRepository] for updating plant count achievements.
+ * @param profileRepository The [ProfileRepository] for getting the current user ID.
  */
 class EditPlantViewModel(
     private val repository: PlantsRepository = PlantsRepositoryProvider.repository,
+    private val achievementsRepository: AchievementsRepository =
+        AchievementsRepositoryProvider.repository,
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel(), EditPlantViewModelInterface {
   private val _uiState = MutableStateFlow(EditPlantUIState())
   override val uiState: StateFlow<EditPlantUIState> = _uiState.asStateFlow()
@@ -132,7 +142,16 @@ class EditPlantViewModel(
   override fun deletePlant(ownedPlantId: String) {
     viewModelScope.launch {
       try {
+        // Delete the plant
         repository.deleteFromGarden(ownedPlantId)
+
+        // Get the updated plant count and update the achievement
+        val userId = profileRepository.getCurrentUserId()
+        if (userId != null) {
+          val plantCount = repository.getAllOwnedPlants().size
+          achievementsRepository.updateAchievementValue(
+              userId, AchievementType.PLANTS_NUMBER, plantCount)
+        }
       } catch (e: Exception) {
         Log.e(LOG_TAG, ERROR_DELETE_PLANT, e)
         setErrorMsg(R.string.error_failed_delete_plant_edit)
