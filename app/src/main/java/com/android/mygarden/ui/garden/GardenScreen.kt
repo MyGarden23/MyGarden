@@ -107,7 +107,6 @@ private val PLANT_CARD_INNER_ROW_PADDING = 12.dp
 // Other used dimensions
 private val PLANT_LIST_ITEM_SPACING = 10.dp
 private val PLANT_CARD_HEIGHT = 110.dp
-private val PLANT_CARD_ELEVATION = 2.dp
 private val PLANT_CARD_ROUND_SHAPING = 8.dp
 private val WATER_BUTTON_SIZE = 35.dp
 private val WATER_BUTTON_BORDER_WIDTH = 2.dp
@@ -303,7 +302,6 @@ fun PlantCard(
               .testTag(GardenScreenTestTags.getTestTagForOwnedPlant(ownedPlant)),
       // Color changing
       colors = CardDefaults.cardColors(containerColor = colorPalette.backgroundColor),
-      elevation = CardDefaults.cardElevation(defaultElevation = PLANT_CARD_ELEVATION),
       shape = RoundedCornerShape(PLANT_CARD_ROUND_SHAPING),
       content = {
         Row(
@@ -499,10 +497,10 @@ fun colorsFromHealthStatus(
         PlantCardColorPalette(colorScheme.primaryContainer, customColors.wateringBlue)
     PlantHealthStatus.NEEDS_WATER,
     PlantHealthStatus.OVERWATERED ->
-        PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringOrange)
+        PlantCardColorPalette(colorScheme.secondaryContainer, customColors.wateringBlue)
     PlantHealthStatus.SEVERELY_DRY,
     PlantHealthStatus.SEVERELY_OVERWATERED ->
-        PlantCardColorPalette(customColors.redPlantCardBackground, colorScheme.error)
+        PlantCardColorPalette(customColors.redPlantCardBackground, customColors.wateringBlue)
   }
 }
 

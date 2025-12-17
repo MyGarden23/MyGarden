@@ -9,7 +9,7 @@ val md_theme_light_primaryContainer = Color(0xFF66BB6A)
 val md_theme_light_onPrimaryContainer = Color(0xFF0A200A)
 val md_theme_light_secondary = Color(0xFFFFB74D)
 val md_theme_light_onSecondary = Color(0xFF000000)
-val md_theme_light_secondaryContainer = Color(0xFFFFCC80)
+val md_theme_light_secondaryContainer = Color(0x80FFCC80)
 val md_theme_light_onSecondaryContainer = Color(0xFF000000)
 val md_theme_light_tertiary = Color(0xFF8D6E63)
 val md_theme_light_onTertiary = Color(0xFFFFFFFF)
@@ -40,8 +40,8 @@ val md_theme_dark_primaryContainer = Color(0xFF388E3C)
 val md_theme_dark_onPrimaryContainer = Color(0xFFE8F5E9)
 val md_theme_dark_secondary = Color(0xFFFFCC80)
 val md_theme_dark_onSecondary = Color(0xFF402100)
-val md_theme_dark_secondaryContainer = Color(0xFFFFB74D)
-val md_theme_dark_onSecondaryContainer = Color(0xFF402100)
+val md_theme_dark_secondaryContainer = Color(0xFF504338)
+val md_theme_dark_onSecondaryContainer = Color(0xFFE8DDD0)
 val md_theme_dark_tertiary = Color(0xFFBCAAA4)
 val md_theme_dark_onTertiary = Color(0xFF2C1B12)
 val md_theme_dark_tertiaryContainer = Color(0xFF8D6E63)
@@ -87,6 +87,10 @@ val md_theme_dark_scrim = Color(0xFF000000)
  *   [FeedScreen]
  * @param onAchievementGrey the grey color used for the icon of the achievementActivity card in
  *   [FeedScreen]
+ * @param notificationRed the red color used for the red dot on the notification icon in
+ *   [FeedScreen]
+ * @param addPlantActivityGreen the green color used for background of the addPlantActivity card in
+ *   [FeedScreen]
  */
 data class CustomColors(
     val wateringBlue: Color,
@@ -101,4 +105,6 @@ data class CustomColors(
     val onFriendActivityRed: Color,
     val achievementGrey: Color,
     val onAchievementGrey: Color,
+    val notificationRed: Color,
+    val addPlantActivityGreen: Color,
 )

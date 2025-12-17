@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Plant Health Status Descriptions -->
-    <string name="plant_health_severely_overwatered">Severely overwatered 🌊</string>
-    <string name="plant_health_overwatered">Overwatered 💦</string>
-    <string name="plant_health_healthy">The plant is healthy 🌱</string>
-    <string name="plant_health_slightly_dry">A bit dry 🍂</string>
-    <string name="plant_health_needs_water">Needs water 💧</string>
-    <string name="plant_health_severely_dry">Critically dry 🥀</string>
-    <string name="plant_health_unknown">Status unknown ❓</string>
+    <string name="plant_health_severely_overwatered">Severely overwatered</string>
+    <string name="plant_health_overwatered">Overwatered</string>
+    <string name="plant_health_healthy">The plant is healthy</string>
+    <string name="plant_health_slightly_dry">A bit dry</string>
+    <string name="plant_health_needs_water">Needs water</string>
+    <string name="plant_health_severely_dry">Critically dry</string>
+    <string name="plant_health_unknown">Status unknown</string>
 </resources>

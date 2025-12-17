@@ -87,38 +87,44 @@ private val DarkColorScheme =
 /** The custom colors added to the MaterialTheme ones (light mode) */
 private val customColorsLight =
     CustomColors(
-        wateringBlue = Color(0xff9dddee),
-        wateringOrange = Color(0xffff9d0a),
-        redPlantCardBackground = Color(0xffe46962),
+        wateringBlue = Color(0xFF8FB8C8),
+        wateringOrange = Color(0xFFD4B896),
+        redPlantCardBackground = Color(0xFFE8C4BF),
         iconsAndButtonWhiteColor = Color.White,
-        acceptButtonColor = Color(0xFF29C42F),
-        refuseButtonColor = Color(0xFFF44336),
-        waterActivityBlue = Color(0xff69bcff),
-        onWaterActivityBlue = Color(0xff063C68),
-        friendActivityRed = Color(0xffFFB3B3),
-        onFriendActivityRed = Color(0xffEA3F3F),
-        achievementGrey = Color(0xffD9D9D9),
-        onAchievementGrey = Color(0xff534B52))
+        acceptButtonColor = Color(0xFF7FA884),
+        refuseButtonColor = Color(0xFFD49B93),
+        waterActivityBlue = Color(0xFF8FB8C8),
+        onWaterActivityBlue = Color(0xFF2C4F5E),
+        friendActivityRed = Color(0xFFE8D9D0),
+        onFriendActivityRed = Color(0xFF5A4838),
+        achievementGrey = Color(0xFFD5D3CF),
+        onAchievementGrey = Color(0xFF5A5653),
+        notificationRed = Color(0xFFF50202),
+        addPlantActivityGreen = Color(0xFF7FA884))
 
 /** The custom colors added to the MaterialTheme ones (dark mode) */
 private val customColorsDark =
     CustomColors(
-        wateringBlue = Color(0xff9dddee),
-        wateringOrange = Color(0xffff9d0a),
-        redPlantCardBackground = Color(0xffe46962),
+        wateringBlue = Color(0xFF7AB8A8),
+        wateringOrange = Color(0xFFC8A882),
+        redPlantCardBackground = Color(0xFF8B6B68),
         iconsAndButtonWhiteColor = Color.White,
-        acceptButtonColor = Color(0xFF29C42F),
-        refuseButtonColor = Color(0xFFF44336),
-        waterActivityBlue = Color(0xff69bcff),
-        onWaterActivityBlue = Color(0xff063C68),
-        friendActivityRed = Color(0xffFFB3B3),
-        onFriendActivityRed = Color(0xffEA3F3F),
-        achievementGrey = Color(0xffD9D9D9),
-        onAchievementGrey = Color(0xff534B52))
+        acceptButtonColor = Color(0xFF6B9070),
+        refuseButtonColor = Color(0xFFB88078),
+        waterActivityBlue = Color(0xFF8FB8C8),
+        onWaterActivityBlue = Color(0xFF2C4F5E),
+        friendActivityRed = Color(0xFF5A4838),
+        onFriendActivityRed = Color(0xFFE0D5C8),
+        achievementGrey = Color(0xFF6B6965),
+        onAchievementGrey = Color(0xFFD8D6D2),
+        notificationRed = Color(0xFFF50202),
+        addPlantActivityGreen = Color(0xFF7FA884))
 
 /** Local slot that holds the custom colors value in the composition tree */
 val LocalCustomColors = staticCompositionLocalOf {
   CustomColors(
+      Color.Unspecified,
+      Color.Unspecified,
       Color.Unspecified,
       Color.Unspecified,
       Color.Unspecified,
