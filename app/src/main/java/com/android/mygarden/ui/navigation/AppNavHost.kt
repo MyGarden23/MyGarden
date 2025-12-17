@@ -1,5 +1,6 @@
 package com.android.mygarden.ui.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -84,6 +85,15 @@ fun AppNavHost(
     composable(Screen.NewProfile.route) { backStackEntry ->
       val vm: ProfileViewModel = viewModel()
       HandleAvatarSelection(backStackEntry, vm)
+
+      // Handle going back to sign in screen when user uses system back button
+      BackHandler {
+        FirebaseAuth.getInstance().signOut()
+        navController.navigate(Screen.Auth.route) {
+          popUpTo(Screen.NewProfile.route) { inclusive = true }
+          launchSingleTop = true
+        }
+      }
 
       NewProfileScreen(
           profileViewModel = vm,

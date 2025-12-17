@@ -23,11 +23,16 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.mygarden.R
 import com.android.mygarden.model.authentication.AuthRepositoryFirebase
+import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.Profile
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.Screen
+import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeCredentialManager
 import com.android.mygarden.utils.FakeJwtGenerator
+import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FirebaseEmulator
 import com.google.firebase.auth.GoogleAuthProvider
 import io.mockk.coEvery
@@ -73,11 +78,16 @@ class AuthenticationTest {
     FirebaseEmulator.auth.signOut()
     // Optional: clear emulator users between tests if your helper provides it:
     FirebaseEmulator.clearAuthEmulator()
+
+    // Reset ProfileRepositoryProvider to avoid test pollution
+    ProfileRepositoryProvider.repository.cleanup()
   }
 
   @After
   fun tearDown() {
     FirebaseEmulator.auth.signOut()
+    // Clean up ProfileRepositoryProvider between tests
+    ProfileRepositoryProvider.repository.cleanup()
   }
 
   @Test
@@ -123,6 +133,9 @@ class AuthenticationTest {
     val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken(email = "test@example.com")
     val fakeCredMgr = FakeCredentialManager.create(fakeToken, ctx)
 
+    // Set up FakeProfileRepository with no profile (simulating a new user)
+    ProfileRepositoryProvider.repository = FakeProfileRepository(profile = null)
+
     // Track the current route so we can assert navigation to Camera
     lateinit var currentRoute: MutableState<String?>
 
@@ -147,7 +160,7 @@ class AuthenticationTest {
         .assertIsDisplayed()
         .performClick()
 
-    // Wait until we hit Camera OR the user is set on Firebase
+    // Wait until we hit NewProfile (for new users) and the user is set on Firebase
     compose.waitUntil(effectiveTimeout) {
       currentRoute.value == Screen.NewProfile.route && FirebaseEmulator.auth.currentUser != null
     }
@@ -155,6 +168,48 @@ class AuthenticationTest {
     // Final assertions
     assertEquals(Screen.NewProfile.route, currentRoute.value)
     assertNotNull(FirebaseEmulator.auth.currentUser)
+  }
+
+  @Test
+  fun back_from_newProfile_signs_out_and_navigates_to_auth() {
+    val ctx = ApplicationProvider.getApplicationContext<Context>()
+    val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken(email = "newuser-back@test.com")
+    val fakeCredMgr = FakeCredentialManager.create(fakeToken, ctx)
+
+    lateinit var currentRoute: MutableState<String?>
+
+    compose.setContent {
+      MyGardenTheme {
+        val nav = rememberNavController()
+        val backEntry by nav.currentBackStackEntryAsState()
+        currentRoute = remember { mutableStateOf(null) }
+        LaunchedEffect(backEntry) { currentRoute.value = backEntry?.destination?.route }
+
+        AppNavHost(
+            navController = nav,
+            startDestination = Screen.Auth.route,
+            credentialManagerProvider = { fakeCredMgr })
+      }
+    }
+
+    // Sign in
+    compose
+        .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
+        .assertIsDisplayed()
+        .performClick()
+
+    compose.waitUntil(effectiveTimeout) { currentRoute.value == Screen.NewProfile.route }
+    compose.waitForIdle()
+    // Verify user is found
+    assertNotNull(FirebaseEmulator.auth.currentUser)
+
+    // Click on system back button
+    compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
+
+    compose.waitUntil(effectiveTimeout) { currentRoute.value == Screen.Auth.route }
+
+    assertEquals(Screen.Auth.route, currentRoute.value)
+    assertNull(FirebaseEmulator.auth.currentUser)
   }
 
   @Test
@@ -171,7 +226,18 @@ class AuthenticationTest {
         assertNotNull(created)
         FirebaseEmulator.auth.signOut()
 
-        // 2) Launch app with FakeCredentialManager and click the UI button
+        // 2) Set up FakeProfileRepository with an existing profile (simulating an existing user)
+        val existingProfile =
+            Profile(
+                firstName = "Existing",
+                lastName = "User",
+                pseudo = "existing_user",
+                avatar = Avatar.A1,
+                gardeningSkill = GardeningSkill.BEGINNER,
+                hasSignedIn = true)
+        ProfileRepositoryProvider.repository = FakeProfileRepository(profile = existingProfile)
+
+        // 3) Launch app with FakeCredentialManager and click the UI button
         val ctx = ApplicationProvider.getApplicationContext<Context>()
         val fakeCredMgr = FakeCredentialManager.create(idToken, ctx)
 
@@ -195,7 +261,8 @@ class AuthenticationTest {
             .assertIsDisplayed()
             .performClick()
 
-        // Wait for Firebase to have a current user and for the route to switch
+        // Wait for Firebase to have a current user and for the route to switch to Camera (for
+        // existing users)
         compose.waitUntil(effectiveTimeout) {
           val user = FirebaseEmulator.auth.currentUser
           (user?.email == email) && currentRoute.value == Screen.Camera.route
