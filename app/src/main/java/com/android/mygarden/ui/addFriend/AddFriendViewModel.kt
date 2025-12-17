@@ -153,16 +153,17 @@ class AddFriendViewModel(
   fun onAsk(userId: String, onError: () -> Unit, onSuccess: () -> Unit) {
 
     viewModelScope.launch {
+      val currentRelation = _uiState.value.relations[userId] ?: FriendRelation.ADD
       _uiState.value =
-          _uiState.value.let { state ->
-            if (state.relations.get(userId) == FriendRelation.ADDBACK) {
-              state.copy(relations = state.relations + (userId to FriendRelation.ADDED))
-            } else if (state.relations.get(userId) == FriendRelation.ADD) {
-              state.copy(relations = state.relations + (userId to FriendRelation.PENDING))
-            } else {
-              return@launch
-            }
-          }
+          _uiState.value.copy(
+              relations =
+                  _uiState.value.relations +
+                      (userId to
+                          when (currentRelation) {
+                            FriendRelation.ADDBACK -> FriendRelation.ADDED
+                            FriendRelation.ADD -> FriendRelation.PENDING
+                            else -> return@launch
+                          }))
       try {
         val wasAutoAccepted = requestsRepository.askFriend(userId)
         val currentUserId = profileRepository.getCurrentUserId()
