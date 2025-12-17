@@ -1,4 +1,5 @@
-import main
+from plant_health import compute_status
+from models import PlantHealthStatus
 from datetime import datetime, timezone, timedelta
 
 # Helper function to transform datetime into 
@@ -14,8 +15,8 @@ def test_severely_dry_threshold():
     watering_freq = 10
 
     # the plant is at 200% => should be in SEVERELY_DRY
-    status = main.compute_status(ms(last), watering_freq)
-    assert status == main.PlantHealthStatus.SEVERELY_DRY
+    status = compute_status(ms(last), watering_freq)
+    assert status == PlantHealthStatus.SEVERELY_DRY
 
 def test_needs_water_threshold():
     now = datetime.now(timezone.utc)
@@ -23,8 +24,8 @@ def test_needs_water_threshold():
     watering_freq = 10
 
     # the plant is at 110% => should be in NEEDS_WATER
-    status = main.compute_status(ms(last), watering_freq)
-    assert status == main.PlantHealthStatus.NEEDS_WATER
+    status = compute_status(ms(last), watering_freq)
+    assert status == PlantHealthStatus.NEEDS_WATER
 
 def test_slightly_dry_threshold():
     now = datetime.now(timezone.utc)
@@ -32,8 +33,8 @@ def test_slightly_dry_threshold():
     watering_freq = 10
 
     # the plant is at 90% => should be SLIGHTLY_DRY
-    status = main.compute_status(ms(last), watering_freq)
-    assert status == main.PlantHealthStatus.SLIGHTLY_DRY
+    status = compute_status(ms(last), watering_freq)
+    assert status == PlantHealthStatus.SLIGHTLY_DRY
 
 def test_healthy_threshold():
     now = datetime.now(timezone.utc)
@@ -41,8 +42,8 @@ def test_healthy_threshold():
     watering_freq = 10
 
     # the plant is at 50% => should be HEALTHY
-    status = main.compute_status(ms(last), watering_freq)
-    assert status == main.PlantHealthStatus.HEALTHY
+    status = compute_status(ms(last), watering_freq)
+    assert status == PlantHealthStatus.HEALTHY
 
 def test_no_overwatering_when_no_previous_watering():
     now = datetime.now(timezone.utc)
@@ -51,8 +52,8 @@ def test_no_overwatering_when_no_previous_watering():
     watering_freq = 10
 
     # Without previous watering should be just HEALTHY
-    status = main.compute_status(ms(last), watering_freq)
-    assert status == main.PlantHealthStatus.HEALTHY
+    status = compute_status(ms(last), watering_freq)
+    assert status == PlantHealthStatus.HEALTHY
 
 def test_severely_overwatered_full_severity():
     now = datetime.now(timezone.utc)
@@ -63,8 +64,8 @@ def test_severely_overwatered_full_severity():
     prev = last - timedelta(days=1) 
     
     # Difference between last and now is 0.4%  -> Severly overwatered
-    status = main.compute_status(ms(last), watering_freq, ms(prev))
-    assert status == main.PlantHealthStatus.SEVERELY_OVERWATERED
+    status = compute_status(ms(last), watering_freq, ms(prev))
+    assert status == PlantHealthStatus.SEVERELY_OVERWATERED
 
 def test_overwatered_moderate_severity():
     now = datetime.now(timezone.utc)
@@ -75,8 +76,8 @@ def test_overwatered_moderate_severity():
     prev = last - timedelta(days=5) 
     
     # Difference between last and now is 0.4%  -> Just overwatered
-    status = main.compute_status(ms(last), watering_freq, ms(prev))
-    assert status == main.PlantHealthStatus.OVERWATERED
+    status = compute_status(ms(last), watering_freq, ms(prev))
+    assert status == PlantHealthStatus.OVERWATERED
 
 def test_overwatering_decay_to_healthy():
     now = datetime.now(timezone.utc)
@@ -88,27 +89,27 @@ def test_overwatering_decay_to_healthy():
     
     # Now is far enough to have reached the OVERWATER_STATE_RECOVERY_END_THRESHOLD
     # The plant should then be HEALTHY
-    status = main.compute_status(ms(last), watering_freq, ms(prev))
-    assert status == main.PlantHealthStatus.HEALTHY
+    status = compute_status(ms(last), watering_freq, ms(prev))
+    assert status == PlantHealthStatus.HEALTHY
 
 def test_initial_watering():
     now = datetime.now(timezone.utc)
     last = now - timedelta(hours=1)
     watering_freq = 10
 
-    status = main.compute_status(ms(last), watering_freq)
-    assert status == main.PlantHealthStatus.HEALTHY
+    status = compute_status(ms(last), watering_freq)
+    assert status == PlantHealthStatus.HEALTHY
 
 def test_invalid_watering_frequency():
     now = datetime.now(timezone.utc)
     last = now - timedelta(days=1)
     watering_freq = 0 # Invalid
 
-    status = main.compute_status(ms(last), watering_freq)
-    assert status == main.PlantHealthStatus.UNKNOWN
+    status = compute_status(ms(last), watering_freq)
+    assert status == PlantHealthStatus.UNKNOWN
 
 def test_invalid_last_watered_timestamp():
     watering_freq = 10
 
-    status = main.compute_status(None, watering_freq) # Invalid input
-    assert status == main.PlantHealthStatus.UNKNOWN
+    status = compute_status(None, watering_freq) # Invalid input
+    assert status == PlantHealthStatus.UNKNOWN

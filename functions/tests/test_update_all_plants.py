@@ -63,21 +63,19 @@ def test_update_all_plants_status(mock_send, db):
     # Mock the send function to return a success response
     mock_send.return_value = "mock-message-id"
     
-    import main
+    import firestore_client
     
     # Clear the LRU cache to ensure fresh state
-    main.get_firestore_client.cache_clear()
+    firestore_client.get_firestore_client.cache_clear()
     
     # Mock the get_firestore_client to return our mock db
-    with patch('main.get_firestore_client', return_value=db):
-        # Also set main.db directly for the helper functions
-        main.db = db
-        
+    with patch('firestore_client.get_firestore_client', return_value=db):    
         # Seed the database
         uid = seed_user_with_plants(db)
 
+        import jobs
         # Run the function
-        main._update_all_plants_status()
+        jobs.update_all_plants_status_impl()
 
     # Verifications
     # Verify the dry plant status (SEVERELY_DRY)
