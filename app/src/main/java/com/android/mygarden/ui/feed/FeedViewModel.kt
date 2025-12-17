@@ -177,18 +177,16 @@ class FeedViewModel(
    * @param watchedFriend1 the first friend to watch, or null
    * @param watchedFriend2 the second friend to watch, or null
    */
-  fun setWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
-    viewModelScope.launch {
-      val relation1 = determineRelationWithUser(watchedFriend1)
-      val relation2 = determineRelationWithUser(watchedFriend2)
+  suspend fun setWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
+    val relation1 = determineRelationWithUser(watchedFriend1)
+    val relation2 = determineRelationWithUser(watchedFriend2)
 
-      _uiState.value =
-          _uiState.value.copy(
-              watchedUser1 = watchedFriend1,
-              watchedUser2 = watchedFriend2,
-              relationWithWatchedUser1 = relation1,
-              relationWithWatchedUser2 = relation2)
-    }
+    _uiState.value =
+        _uiState.value.copy(
+            watchedUser1 = watchedFriend1,
+            watchedUser2 = watchedFriend2,
+            relationWithWatchedUser1 = relation1,
+            relationWithWatchedUser2 = relation2)
   }
 
   /**
