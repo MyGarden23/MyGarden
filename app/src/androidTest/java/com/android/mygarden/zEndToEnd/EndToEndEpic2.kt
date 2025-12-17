@@ -152,6 +152,7 @@ class EndToEndEpic2 {
             false
           }
         }
+        composeTestRule.onRoot(useUnmergedTree = true).printToLog("COMPOSE_TREE2")
 
         // Verify user profile is displayed
         composeTestRule
