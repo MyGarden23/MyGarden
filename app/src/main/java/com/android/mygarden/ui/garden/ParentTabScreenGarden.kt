@@ -67,6 +67,7 @@ object GardenAchievementsParentScreenTestTags {
 
 // Padding constants
 private val PROFILE_ROW_HORIZONTAL_PADDING = 30.dp
+private val ICON_PADDING = 20.dp
 private val PROFILE_ROW_VERTICAL_PADDING = 6.dp
 private val COLUMN_VERTICAL_PADDING = 12.dp
 private val TAB_EXTERNAL_HORIZONTAL_PADDING = 16.dp
@@ -376,8 +377,9 @@ fun LikeIndicator(
     hasLiked: Boolean,
     enabled: Boolean,
     onLikeClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
+  val context = LocalContext.current
   Row(
       verticalAlignment = Alignment.CenterVertically,
       modifier =
@@ -386,14 +388,16 @@ fun LikeIndicator(
               .then(if (enabled) Modifier.clickable { onLikeClick() } else Modifier)) {
         Icon(
             imageVector = if (hasLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-            contentDescription = if (hasLiked) "Liked" else "Not liked",
+            contentDescription =
+                if (hasLiked) context.getString(R.string.description_liked)
+                else context.getString(R.string.description_not_liked),
             tint =
                 if (hasLiked) MaterialTheme.colorScheme.error
                 else if (enabled) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp))
+            modifier = Modifier.size(ICON_PADDING))
 
-        Spacer(modifier = Modifier.size(6.dp))
+        Spacer(modifier = Modifier.size(PROFILE_ROW_VERTICAL_PADDING))
 
         Text(
             text = likesCount.toString(),

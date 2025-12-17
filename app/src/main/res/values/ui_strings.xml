@@ -65,6 +65,8 @@
     <string name="avatar_description">Avatar %1$s</string>
     <string name="error_fetch_all_plants_garden">getAllPlants failed : Owned plants couldn\'t be retrieved from repository</string>
     <string name="error_failed_get_profile_garden">Failed to get user profile</string>
+    <string name="description_liked">Liked</string>
+    <string name="description_not_liked">Not liked</string>
 
 
     <!-- Plant Info Screen -->
