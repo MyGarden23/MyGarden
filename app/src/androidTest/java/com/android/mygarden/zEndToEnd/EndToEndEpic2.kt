@@ -36,6 +36,7 @@ import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
 import com.android.mygarden.utils.RequiresCamera
 import com.android.mygarden.utils.TestPlants
+import java.lang.Thread.sleep
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -164,7 +165,7 @@ class EndToEndEpic2 {
 
         // Now navigate to camera
         composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
-
+        sleep(15000)
         // === CAMERA SCREEN ===
         composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
 

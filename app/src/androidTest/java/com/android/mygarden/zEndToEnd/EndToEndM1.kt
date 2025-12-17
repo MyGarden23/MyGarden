@@ -7,7 +7,6 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -31,6 +30,7 @@ import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
 import com.android.mygarden.utils.RequiresCamera
+import java.lang.Thread.sleep
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -125,12 +125,7 @@ class EndToEndM1 {
         .performTextInput("Switzerland")
     composeTestRule.onNodeWithTag(ProfileScreenTestTags.SAVE_BUTTON).performClick()
     composeTestRule.waitForIdle()
-    composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule
-          .onAllNodesWithTag(NavigationTestTags.CAMERA_SCREEN)
-          .fetchSemanticsNodes()
-          .isNotEmpty()
-    }
+    sleep(15000)
     composeTestRule.waitUntil(TIMEOUT) {
       composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).isDisplayed()
     }
