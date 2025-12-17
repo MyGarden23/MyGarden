@@ -141,6 +141,7 @@ class EndToEndEpic2 {
         // === CRITICAL FIX: Visit Garden screen first to ensure UserProfile is properly loaded ===
         // This ensures GardenViewModel initializes with the newly created user profile
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
+        composeTestRule.waitForIdle()
         composeTestRule.onRoot(useUnmergedTree = true).printToLog("COMPOSE_TREE")
         // Wait for Garden screen to fully load with user profile
         composeTestRule.waitUntil(TIMEOUT) {
@@ -210,7 +211,19 @@ class EndToEndEpic2 {
               .isDisplayed()
         }
 
+        composeTestRule.waitForIdle()
+
         // Check that the pseudo and the avatar are displayed
+        composeTestRule.waitUntil(TIMEOUT) {
+          try {
+            composeTestRule
+                .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
+                .isDisplayed()
+            true
+          } catch (_: AssertionError) {
+            false
+          }
+        }
         composeTestRule
             .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
             .assertIsDisplayed()

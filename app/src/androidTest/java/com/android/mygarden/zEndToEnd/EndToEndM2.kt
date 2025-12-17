@@ -125,11 +125,18 @@ class EndToEndM2 {
 
     // goto MyGarden
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
+    composeTestRule.waitForIdle()
     composeTestRule
         .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
         .assertIsDisplayed()
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
+      try {
+        composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
+        true
+      } catch (e: AssertionError) {
+        false
+      }
     }
     composeTestRule
         .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
@@ -160,8 +167,14 @@ class EndToEndM2 {
           .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
           .isDisplayed()
     }
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil(TIMEOUT) {
-      composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
+      try {
+        composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
+        true
+      } catch (e: AssertionError) {
+        false
+      }
     }
     composeTestRule
         .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
