@@ -36,7 +36,6 @@ import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
 import com.android.mygarden.utils.RequiresCamera
 import com.android.mygarden.utils.TestPlants
-import java.lang.Thread.sleep
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -145,17 +144,18 @@ class EndToEndEpic2 {
         // This ensures GardenViewModel initializes with the newly created user profile
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
 
+          composeTestRule.waitForIdle()
         // Wait for Garden screen to fully load with user profile
-        composeTestRule.waitUntil(TIMEOUT) {
-          try {
-            composeTestRule
-                .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
-                .isDisplayed()
-            true
-          } catch (e: AssertionError) {
-            false
+          composeTestRule.waitUntil(TIMEOUT) {
+              try {
+                  composeTestRule
+                      .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
+                      .assertTextContains(user_pseudo)
+                  true
+              } catch (_: AssertionError) {
+                  false
+              }
           }
-        }
 
         // Verify user profile is displayed
         composeTestRule
@@ -165,7 +165,7 @@ class EndToEndEpic2 {
 
         // Now navigate to camera
         composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_BUTTON).performClick()
-        sleep(15000)
+
         // === CAMERA SCREEN ===
         composeTestRule.onNodeWithTag(NavigationTestTags.CAMERA_SCREEN).assertIsDisplayed()
 
