@@ -58,7 +58,10 @@ def _activity_doc_id(achievement_type: str, level: int) -> str:
     return f"ACHIEVEMENT_{achievement_type}_LEVEL_{level}"
 
 
-@firestore_fn.on_document_written(document="users/{userId}/achievements/{achievementType}")
+@firestore_fn.on_document_written(
+    document="users/{userId}/achievements/{achievementType}",
+    region="europe-west4",
+)
 def on_achievement_progress_written(
     event: firestore_fn.Event[
         firestore_fn.Change[firestore_fn.DocumentSnapshot]
@@ -134,6 +137,8 @@ def on_achievement_progress_written(
               .document(activity_id)
         )
 
+        created_time = int(datetime.now(timezone.utc).timestamp() * 1000)
+
         # Set the document with the right value
         activity_ref.set(
             {
@@ -142,7 +147,7 @@ def on_achievement_progress_written(
                 "pseudo": pseudo,
                 "achievementType": achievement_type,
                 "levelReached": after_level,
-                "createdAt": datetime.now(timezone.utc),
+                "createdAt": created_time,
             },
             merge=True,
         )
