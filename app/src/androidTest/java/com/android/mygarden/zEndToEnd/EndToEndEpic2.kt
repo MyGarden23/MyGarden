@@ -21,6 +21,7 @@ import com.android.mygarden.MainActivity
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.plant.testTag
+import com.android.mygarden.model.profile.LikesRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
@@ -30,6 +31,7 @@ import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
+import com.android.mygarden.utils.FakeLikesRepository
 import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
@@ -91,6 +93,7 @@ class EndToEndEpic2 {
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     Log.d("EndToEndEpic2", "Set up mock repo")
     fakePlantRepoUtils.setUpMockRepo()
+    LikesRepositoryProvider.repository = FakeLikesRepository()
 
     // Now launch the activity AFTER Firebase is cleaned up
     scenario = ActivityScenario.launch(MainActivity::class.java)

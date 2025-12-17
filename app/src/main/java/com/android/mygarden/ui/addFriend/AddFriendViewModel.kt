@@ -152,7 +152,6 @@ class AddFriendViewModel(
    */
   fun onAsk(userId: String, onError: () -> Unit, onSuccess: () -> Unit) {
 
-
     viewModelScope.launch {
       val currentRelation = _uiState.value.relations[userId] ?: FriendRelation.ADD
       _uiState.value =

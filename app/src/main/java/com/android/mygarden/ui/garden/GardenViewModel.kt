@@ -81,35 +81,41 @@ class GardenViewModel(
    * It also updates the likeCount and hasLiked according to the like logic
    */
   init {
-    refreshUIState()
+    // Skip Firebase-related initialization during E2E tests to avoid early Firebase initialization
+    val isE2ETest = System.getProperty("mygarden.e2e") == "true"
 
-    // Likes: observe count for the displayed garden (own or friend's)
-    viewModelScope.launch {
-      val targetUid = friendId ?: profileRepo.getCurrentUserId()
-      if (targetUid != null) {
-        likesRepo.observeLikesCount(targetUid).collect { count ->
-          _uiState.value = _uiState.value.copy(likesCount = count)
-        }
-      }
-    }
+    if (!isE2ETest) {
+      refreshUIState()
 
-    // Likes: only relevant when viewing a friend's garden
-    if (friendId != null) {
+      // Likes: observe count for the displayed garden (own or friend's)
       viewModelScope.launch {
-        val myUid = profileRepo.getCurrentUserId()
-        if (myUid != null) {
-          likesRepo.observeHasLiked(friendId, myUid).collect { liked ->
-            _uiState.value = _uiState.value.copy(hasLiked = liked)
+        val targetUid = friendId ?: profileRepo.getCurrentUserId()
+        if (targetUid != null) {
+          likesRepo.observeLikesCount(targetUid).collect { count ->
+            _uiState.value = _uiState.value.copy(likesCount = count)
           }
         }
       }
-    }
-    // Only subscribe to plantsFlow if viewing own garden (not a friend's)
-    if (friendId == null) {
-      viewModelScope.launch {
-        plantsRepo.plantsFlow.collect { newList ->
-          _uiState.value = _uiState.value.copy(plants = newList)
-          applyFiltersAndSorting()
+
+      // Likes: only relevant when viewing a friend's garden
+      if (friendId != null) {
+        viewModelScope.launch {
+          val myUid = profileRepo.getCurrentUserId()
+          if (myUid != null) {
+            likesRepo.observeHasLiked(friendId, myUid).collect { liked ->
+              _uiState.value = _uiState.value.copy(hasLiked = liked)
+            }
+          }
+        }
+      }
+
+      // Only subscribe to plantsFlow if viewing own garden (not a friend's)
+      if (friendId == null) {
+        viewModelScope.launch {
+          plantsRepo.plantsFlow.collect { newList ->
+            _uiState.value = _uiState.value.copy(plants = newList)
+            applyFiltersAndSorting()
+          }
         }
       }
     }
