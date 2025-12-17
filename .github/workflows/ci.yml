@@ -115,7 +115,7 @@ jobs:
         id: firebase_project
         run: |
           echo "project_id=$(jq -r '.project_info.project_id' app/google-services.json)" >> $GITHUB_OUTPUT
-          
+
       - name: Create firebase.json
         run: |
           cat > firebase.json <<'JSON'
@@ -190,33 +190,8 @@ jobs:
             
             # Run tests and capture exit code
             set +e
-            
-            # Run each E2E test class separately to ensure complete isolation
-            # This prevents Firebase emulator conflicts between tests
-            echo "Running android Test..."
-            ./gradlew connectedAndroidTest --build-cache --stacktrace -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zEndToEnd -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.utils.RequiresCamera
-            TEST_EXIT_CODE_0=$?
-            echo "Running EndToEndM1..."
-            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM1 --stacktrace
-            
-            echo "Running EndToEndM2..."
-            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM2 --stacktrace
-            TEST_EXIT_CODE_2=$?
-            
-            echo "Running EndToEndEpic2..."
-            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndEpic2 --stacktrace
-            TEST_EXIT_CODE_3=$?
-            
-            echo "Running EndToEndM3Achievements..."
-            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM3Achievements --stacktrace
-            TEST_EXIT_CODE_4=$?
-            
-            echo "Running EndToEndM3Community..."
-            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM3Community --stacktrace
-            TEST_EXIT_CODE_5=$?
-            
-            # Combine exit codes - fail if any test failed
-            TEST_EXIT_CODE=$((TEST_EXIT_CODE_0 + TEST_EXIT_CODE_1 + TEST_EXIT_CODE_2 + TEST_EXIT_CODE_3 + TEST_EXIT_CODE_4 +TEST_EXIT_CODE_5))
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.utils.RequiresCamera --stacktrace
+            TEST_EXIT_CODE=$?
             set -e
             
             # Stop logcat capture
@@ -256,7 +231,7 @@ jobs:
             
             # Run tests and capture exit code
             set +e
-            ./gradlew connectedCheck --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.utils.RequiresCamera,com.android.mygarden.utils.RequiresFirebaseFunctions --max-workers=1 --stacktrace
+            ./gradlew connectedCheck --parallel --build-cache -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.android.mygarden.utils.RequiresCamera,com.android.mygarden.utils.RequiresFirebaseFunctions --stacktrace
             TEST_EXIT_CODE=$?
             set -e
             
