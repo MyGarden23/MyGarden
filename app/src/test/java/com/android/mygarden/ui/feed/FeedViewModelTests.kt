@@ -16,8 +16,6 @@ import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileRepository
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
-import com.android.mygarden.ui.navigation.NavigationActions
-import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.utils.*
 import java.sql.Timestamp
@@ -37,9 +35,6 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FeedViewModelTests {
@@ -346,20 +341,47 @@ class FeedViewModelTests {
   /*---------------- TESTS FOR ACTIVITY CLICK HANDLERS ----------------*/
 
   @Test
-  fun handleFriendActivityClick_navigatesToFriendGarden() {
-    val mockNavigationActions = mock(NavigationActions::class.java)
+  fun handleActivityClick_withAddedPlantActivity_callsCorrectCallback() {
+    var capturedActivity: ActivityAddedPlant? = null
+    val callbacks = FeedViewModelCallbacks(onAddPlantActivityClicked = { capturedActivity = it })
     val testVm =
         FeedViewModel(
-            activityRepo,
-            friendsRepo,
-            friendsRequestsRepo,
-            userProfileRepo,
-            profileRepo,
-            mockNavigationActions)
+            activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo, callbacks)
+
+    testVm.handleActivityClick(addedPlantActivity)
+
+    assertEquals(addedPlantActivity, capturedActivity)
+  }
+
+  @Test
+  fun handleActivityClick_withWaterPlantActivity_callsCorrectCallback() = runTest {
+    var capturedActivity:
+        com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant? =
+        null
+    val waterActivity =
+        com.android.mygarden.model.gardenactivity.activityclasses.ActivityWaterPlant(
+            "uid2", "john", Timestamp(System.currentTimeMillis()), ownedPlant1)
+    val callbacks = FeedViewModelCallbacks(onWaterPlantActivityClicked = { capturedActivity = it })
+    val testVm =
+        FeedViewModel(
+            activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo, callbacks)
+
+    testVm.handleActivityClick(waterActivity)
+
+    assertEquals(waterActivity, capturedActivity)
+  }
+
+  @Test
+  fun handleFriendActivityClick_callsCorrectCallback() {
+    var capturedFriendId: String? = null
+    val callbacks = FeedViewModelCallbacks(goToFriendGardenPopupClick = { capturedFriendId = it })
+    val testVm =
+        FeedViewModel(
+            activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo, callbacks)
 
     testVm.handleFriendActivityClick("friend-123")
 
-    verify(mockNavigationActions).navTo(Screen.FriendGarden("friend-123"))
+    assertEquals("friend-123", capturedFriendId)
   }
 
   @Test
@@ -377,19 +399,15 @@ class FeedViewModelTests {
   }
 
   @Test
-  fun handleSelfActivityClick_navigatesToGarden() {
-    val mockNavigationActions = mock(NavigationActions::class.java)
+  fun handleSelfActivityClick_callsCorrectCallback() {
+    var callbackCalled = false
+    val callbacks = FeedViewModelCallbacks(onSelfActivityClick = { callbackCalled = true })
     val testVm =
         FeedViewModel(
-            activityRepo,
-            friendsRepo,
-            friendsRequestsRepo,
-            userProfileRepo,
-            profileRepo,
-            mockNavigationActions)
+            activityRepo, friendsRepo, friendsRequestsRepo, userProfileRepo, profileRepo, callbacks)
 
     testVm.handleSelfActivityClick()
 
-    verify(mockNavigationActions).navTo(Screen.Garden)
+    assertTrue(callbackCalled)
   }
 }
