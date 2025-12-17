@@ -197,6 +197,7 @@ jobs:
             ./gradlew connectedAndroidTest --build-cache --stacktrace -Pandroid.testInstrumentationRunnerArguments.notPackage=com.android.mygarden.zEndToEnd -Pandroid.testInstrumentationRunnerArguments.annotation=com.android.mygarden.utils.RequiresCamera
             TEST_EXIT_CODE_0=$?
             echo "Running EndToEndM1..."
+            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM1 --stacktrace
             
             echo "Running EndToEndM2..."
             ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM2 --stacktrace
@@ -210,8 +211,12 @@ jobs:
             ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM3Achievements --stacktrace
             TEST_EXIT_CODE_4=$?
             
+            echo "Running EndToEndM3Community..."
+            ./gradlew connectedAndroidTest --build-cache -Pandroid.testInstrumentationRunnerArguments.class=com.android.mygarden.zEndToEnd.EndToEndM3Community --stacktrace
+            TEST_EXIT_CODE_5=$?
+            
             # Combine exit codes - fail if any test failed
-            TEST_EXIT_CODE=$((TEST_EXIT_CODE_0 + TEST_EXIT_CODE_1 + TEST_EXIT_CODE_2 + TEST_EXIT_CODE_3 + TEST_EXIT_CODE_4))
+            TEST_EXIT_CODE=$((TEST_EXIT_CODE_0 + TEST_EXIT_CODE_1 + TEST_EXIT_CODE_2 + TEST_EXIT_CODE_3 + TEST_EXIT_CODE_4 +TEST_EXIT_CODE_5))
             set -e
             
             # Stop logcat capture
