@@ -39,6 +39,12 @@ import kotlinx.coroutines.launch
  *
  * @property activities the list of activities
  * @property hasRequests boolean to tell if the current user has requests
+ * @property isWatchingFriendsActivity whether the user is currently watching friends' activity
+ *   details
+ * @property watchedUser1 the first watched user profile, or null
+ * @property relationWithWatchedUser1 the relationship between the current user and watchedUser1
+ * @property watchedUser2 the second watched user profile, or null
+ * @property relationWithWatchedUser2 the relationship between the current user and watchedUser2
  */
 data class FeedUIState(
     val activities: List<GardenActivity> = emptyList(),
@@ -50,6 +56,15 @@ data class FeedUIState(
     val relationWithWatchedUser2: RelationWithWatchedUser = RelationWithWatchedUser.SELF,
 )
 
+/**
+ * Enum representing the relationship between the current user and a watched user.
+ *
+ * @property FRIEND The watched user is a friend of the current user.
+ * @property NOT_FRIEND The watched user has no relationship with the current user.
+ * @property REQUEST_SENT The current user has sent a friend request to the watched user.
+ * @property REQUEST_RECEIVED The current user has received a friend request from the watched user.
+ * @property SELF The watched user is the current user themselves.
+ */
 enum class RelationWithWatchedUser {
   FRIEND,
   NOT_FRIEND,
@@ -65,6 +80,9 @@ enum class RelationWithWatchedUser {
  * @property friendsRepo the friends repository used to collect the list of friends
  * @property friendsRequestsRepo the friends requests repository used to know if the user have
  *   incoming requests
+ * @property userProfileRepo the user profile repository used to fetch user profiles
+ * @property profileRepo the profile repository used to check if a user is the current user
+ * @property navigationActions the navigation actions for handling navigation, or null
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class FeedViewModel(
@@ -110,10 +128,21 @@ class FeedViewModel(
     }
   }
 
+  /**
+   * Sets whether the user is currently watching friends' activity details.
+   *
+   * @param isWatchingFriendsActivity true if watching friends' activity, false otherwise
+   */
   fun setIsWatchingFriendsActivity(isWatchingFriendsActivity: Boolean) {
     _uiState.value = _uiState.value.copy(isWatchingFriendsActivity = isWatchingFriendsActivity)
   }
 
+  /**
+   * Determines the relationship between the current user and a watched user.
+   *
+   * @param userProfile the profile of the user to check the relationship with
+   * @return the [RelationWithWatchedUser] enum value representing the relationship
+   */
   private suspend fun determineRelationWithUser(
       userProfile: UserProfile?
   ): RelationWithWatchedUser {
@@ -131,6 +160,12 @@ class FeedViewModel(
     }
   }
 
+  /**
+   * Sets the watched friends and updates their relationship status with the current user.
+   *
+   * @param watchedFriend1 the first friend to watch, or null
+   * @param watchedFriend2 the second friend to watch, or null
+   */
   suspend fun setWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
     val relation1 = determineRelationWithUser(watchedFriend1)
     val relation2 = determineRelationWithUser(watchedFriend2)
@@ -143,25 +178,42 @@ class FeedViewModel(
             relationWithWatchedUser2 = relation2)
   }
 
+  /**
+   * Resets the watched friends to null and their relationship status to SELF.
+   *
+   * @param watchedFriend1 ignored parameter (kept for API compatibility)
+   * @param watchedFriend2 ignored parameter (kept for API compatibility)
+   */
   fun resetWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
-    _uiState.value = _uiState.value.copy(watchedUser1 = watchedFriend1)
-    _uiState.value = _uiState.value.copy(watchedUser2 = watchedFriend2)
-    _uiState.value = _uiState.value.copy(relationWithWatchedUser1 = RelationWithWatchedUser.SELF)
-    _uiState.value = _uiState.value.copy(relationWithWatchedUser2 = RelationWithWatchedUser.SELF)
-    _uiState.value = _uiState.value.copy(watchedUser1 = null)
-    _uiState.value = _uiState.value.copy(watchedUser2 = null)
+    _uiState.value =
+        _uiState.value.copy(
+            watchedUser1 = null,
+            watchedUser2 = null,
+            relationWithWatchedUser1 = RelationWithWatchedUser.SELF,
+            relationWithWatchedUser2 = RelationWithWatchedUser.SELF)
   }
 
+  /**
+   * Updates the watched friends asynchronously in a coroutine scope.
+   *
+   * @param watchedFriend1 the first friend to watch, or null
+   * @param watchedFriend2 the second friend to watch, or null
+   */
   fun updateWatchedFriends(watchedFriend1: UserProfile?, watchedFriend2: UserProfile?) {
     viewModelScope.launch { setWatchedFriends(watchedFriend1, watchedFriend2) }
   }
 
   /**
-   * Function that handles the click on an activity card
+   * Handles the click event when a user clicks on an activity card in the feed. Depending on the
+   * activity type, navigates to the relevant screen or updates watched users.
+   * - For [ActivityAddedPlant], navigates to the plant info screen.
+   * - For [ActivityWaterPlant], navigates to the plant info screen.
+   * - For [ActivityAchievement], does nothing.
+   * - For [ActivityAddFriend], sets watched users and relationship state.
    *
    * @param activity the activity that was clicked
-   * @param navigationActions
-   * @param navController
+   * @param navigationActions the navigation actions for handling navigation
+   * @param navController the navigation controller for navigating between screens
    */
   fun handleActivityClick(
       activity: GardenActivity,
@@ -191,15 +243,32 @@ class FeedViewModel(
     }
   }
 
+  /**
+   * Handles the click event on a friend's activity card. Navigates to the friend's garden screen.
+   *
+   * @param friendId the ID of the friend whose activity was clicked
+   */
   fun handleFriendActivityClick(friendId: String) {
     navigationActions?.navTo(Screen.FriendGarden(friendId))
   }
 
+  /**
+   * Handles the click event on a non-friend's activity card. Sends a friend request to the user and
+   * updates watched friends list.
+   *
+   * @param friendId the ID of the user to send a friend request to
+   */
   fun handleNotFriendActivityClick(friendId: String) {
     viewModelScope.launch { friendsRequestsRepo.askFriend(friendId) }
     updateWatchedFriends(_uiState.value.watchedUser1, _uiState.value.watchedUser2)
   }
 
+  /**
+   * Handles the click event on an activity card from someone who sent a friend request. Accepts the
+   * incoming friend request.
+   *
+   * @param friendId the ID of the user who sent the friend request
+   */
   fun handleRequestReceivedActivityClick(friendId: String) {
     viewModelScope.launch {
       val request =
@@ -208,13 +277,28 @@ class FeedViewModel(
     }
   }
 
+  /**
+   * Handles the click event on the current user's own activity card. Navigates to the user's own
+   * garden screen.
+   */
   fun handleSelfActivityClick() {
     navigationActions?.navTo(Screen.Garden)
   }
 }
 
+/**
+ * Factory class for creating [FeedViewModel] instances with custom navigation actions.
+ *
+ * @property navigationActions the navigation actions to be used by the ViewModel, or null
+ */
 class FeedViewModelFactory(private val navigationActions: NavigationActions?) :
     ViewModelProvider.Factory {
+  /**
+   * Creates a new instance of the specified ViewModel class.
+   *
+   * @param modelClass the class of the ViewModel to create
+   * @return a new instance of [FeedViewModel]
+   */
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     return FeedViewModel(navigationActions = navigationActions) as T
   }
