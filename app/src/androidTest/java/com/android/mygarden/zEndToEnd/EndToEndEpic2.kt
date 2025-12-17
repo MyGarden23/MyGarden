@@ -13,7 +13,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToLog
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
@@ -86,6 +85,7 @@ class EndToEndEpic2 {
 
   @Before
   fun setUp() = runTest {
+    LikesRepositoryProvider.repository = FakeLikesRepository()
     // Set up any necessary configurations or states before each test
     Log.d("EndToEndEpic2", "setUpEntry")
     firebaseUtils.initialize()
@@ -93,7 +93,6 @@ class EndToEndEpic2 {
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     Log.d("EndToEndEpic2", "Set up mock repo")
     fakePlantRepoUtils.setUpMockRepo()
-    LikesRepositoryProvider.repository = FakeLikesRepository()
 
     // Now launch the activity AFTER Firebase is cleaned up
     scenario = ActivityScenario.launch(MainActivity::class.java)
@@ -144,8 +143,7 @@ class EndToEndEpic2 {
         // === CRITICAL FIX: Visit Garden screen first to ensure UserProfile is properly loaded ===
         // This ensures GardenViewModel initializes with the newly created user profile
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onRoot(useUnmergedTree = true).printToLog("COMPOSE_TREE")
+
         // Wait for Garden screen to fully load with user profile
         composeTestRule.waitUntil(TIMEOUT) {
           try {
@@ -153,11 +151,10 @@ class EndToEndEpic2 {
                 .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
                 .isDisplayed()
             true
-          } catch (_: AssertionError) {
+          } catch (e: AssertionError) {
             false
           }
         }
-        composeTestRule.onRoot(useUnmergedTree = true).printToLog("COMPOSE_TREE")
 
         // Verify user profile is displayed
         composeTestRule
@@ -214,19 +211,7 @@ class EndToEndEpic2 {
               .isDisplayed()
         }
 
-        composeTestRule.waitForIdle()
-
         // Check that the pseudo and the avatar are displayed
-        composeTestRule.waitUntil(TIMEOUT) {
-          try {
-            composeTestRule
-                .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
-                .isDisplayed()
-            true
-          } catch (_: AssertionError) {
-            false
-          }
-        }
         composeTestRule
             .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
             .assertIsDisplayed()

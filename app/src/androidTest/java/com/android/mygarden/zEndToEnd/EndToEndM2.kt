@@ -76,6 +76,7 @@ class EndToEndM2 {
 
   @Before
   fun setUp() = runTest {
+    LikesRepositoryProvider.repository = FakeLikesRepository()
     // Set up any necessary configurations or states before each test
     Log.d("EndToEndM2", "setUpEntry")
     firebaseUtils.initialize()
@@ -83,7 +84,6 @@ class EndToEndM2 {
     fakePlantRepoUtils.mockIdentifyPlant(mockPlant)
     fakePlantRepoUtils.setUpMockRepo()
     Log.d("EndToEndM2", "Set up mock repo")
-    LikesRepositoryProvider.repository = FakeLikesRepository()
 
     // Now launch the activity AFTER Firebase is cleaned up
     scenario = ActivityScenario.launch(MainActivity::class.java)
@@ -128,18 +128,11 @@ class EndToEndM2 {
 
     // goto MyGarden
     composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
-    composeTestRule.waitForIdle()
     composeTestRule
         .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
         .assertIsDisplayed()
-    composeTestRule.waitForIdle()
     composeTestRule.waitUntil(TIMEOUT) {
-      try {
-        composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
-        true
-      } catch (e: AssertionError) {
-        false
-      }
+      composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
     }
     composeTestRule
         .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
@@ -170,14 +163,8 @@ class EndToEndM2 {
           .onNodeWithTag(NavigationTestTags.GARDEN_ACHIEVEMENTS_PARENT_SCREEN)
           .isDisplayed()
     }
-    composeTestRule.waitForIdle()
     composeTestRule.waitUntil(TIMEOUT) {
-      try {
-        composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
-        true
-      } catch (e: AssertionError) {
-        false
-      }
+      composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO).isDisplayed()
     }
     composeTestRule
         .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
