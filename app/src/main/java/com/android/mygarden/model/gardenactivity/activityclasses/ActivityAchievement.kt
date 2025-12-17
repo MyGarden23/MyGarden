@@ -14,12 +14,14 @@ import java.sql.Timestamp
  * @property pseudo Public‑facing username of the user who earned the achievement.
  * @property createdAt Moment at which the achievement was awarded.
  * @property achievementType Type of the achievement that was earned.
+ * @property levelReached Level in the achievement that has been reached.
  */
 data class ActivityAchievement(
     override val userId: String,
     override val pseudo: String,
     override val createdAt: Timestamp = Timestamp(System.currentTimeMillis()),
-    val achievementType: AchievementType
+    val achievementType: AchievementType,
+    val levelReached: Int
 ) : GardenActivity() {
 
   /** Indicates that this activity represents an [ActivityType.ACHIEVEMENT] event. */

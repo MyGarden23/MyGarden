@@ -89,7 +89,8 @@ class ActivityMapperTest {
             userId = "user456",
             pseudo = "AchievementUser",
             createdAt = timestamp,
-            achievementType = AchievementType.PLANTS_NUMBER)
+            achievementType = AchievementType.PLANTS_NUMBER,
+            2)
 
     // Serialize
     val serialized = ActivityMapper.fromActivityToSerializedActivity(activity)
@@ -133,7 +134,8 @@ class ActivityMapperTest {
             userId = "user2",
             pseudo = "User2",
             createdAt = timestamp,
-            achievementType = AchievementType.PLANTS_NUMBER)
+            achievementType = AchievementType.PLANTS_NUMBER,
+            2)
 
     assertEquals(ActivityType.ADDED_PLANT, activityAddedPlant.type)
     assertEquals(ActivityType.ACHIEVEMENT, activityAchievement.type)

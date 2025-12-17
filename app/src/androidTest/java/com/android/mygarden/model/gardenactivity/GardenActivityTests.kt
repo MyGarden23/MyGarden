@@ -83,7 +83,8 @@ class GardenActivityTests {
             userId = uid,
             pseudo = "Achiever",
             createdAt = Timestamp(System.currentTimeMillis()),
-            achievementType = AchievementType.PLANTS_NUMBER)
+            achievementType = AchievementType.PLANTS_NUMBER,
+            2)
 
     // Add activity
     activityRepo.addActivity(activityAchievement)
@@ -107,7 +108,8 @@ class GardenActivityTests {
             userId = uid,
             pseudo = "UserFeed",
             createdAt = Timestamp(System.currentTimeMillis()),
-            achievementType = AchievementType.PLANTS_NUMBER)
+            achievementType = AchievementType.PLANTS_NUMBER,
+            2)
 
     val activity2 =
         ActivityAddedPlant(
@@ -185,7 +187,8 @@ class GardenActivityTests {
             userId = uid,
             pseudo = "FeedUser",
             createdAt = Timestamp(System.currentTimeMillis()),
-            achievementType = AchievementType.PLANTS_NUMBER)
+            achievementType = AchievementType.PLANTS_NUMBER,
+            2)
 
     val addedPlant =
         ActivityAddedPlant(
@@ -234,7 +237,8 @@ class GardenActivityTests {
             userId = currentUserId,
             pseudo = "CurrentUser",
             createdAt = Timestamp(System.currentTimeMillis()),
-            achievementType = AchievementType.PLANTS_NUMBER)
+            achievementType = AchievementType.PLANTS_NUMBER,
+            2)
 
     val activityOtherUser =
         ActivityAddedPlant(
