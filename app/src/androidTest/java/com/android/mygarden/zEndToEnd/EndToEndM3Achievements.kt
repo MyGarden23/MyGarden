@@ -79,7 +79,9 @@ class EndToEndM3Achievements {
   val permissionNotifsRule: GrantPermissionRule =
       GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
+  private val GENERAL_TIMEOUT = 200_000.milliseconds
   private val TIMEOUT = 15_000L
+  private val THREAD_SLEEP_TIME = 2000L
 
   private val bobFirebaseUtils: FirebaseUtils = FirebaseUtils()
   private lateinit var bobUserUid: String
@@ -120,7 +122,7 @@ class EndToEndM3Achievements {
 
   @Test
   fun test_end_to_end_m3_achievements() =
-      runTest(timeout = 200_000.milliseconds) {
+      runTest(timeout = GENERAL_TIMEOUT) {
         // === STEP 1: SIGN IN AS BOB AND CREATE PROFILE ===
         Log.d("EndToEndM3Achievements", "Step 1: Sign in as Bob")
         composeTestRule
@@ -128,10 +130,8 @@ class EndToEndM3Achievements {
             .assertIsDisplayed()
             .performClick()
 
-        // runBlocking {
         bobFirebaseUtils.signIn()
         bobFirebaseUtils.waitForAuthReady()
-        // }
         bobUserUid = bobFirebaseUtils.auth.uid!!
 
         // Create Bob's profile
@@ -323,10 +323,8 @@ class EndToEndM3Achievements {
             .onNodeWithTag(SignInScreenTestTags.SIGN_IN_SCREEN_GOOGLE_BUTTON)
             .performClick()
 
-        // runBlocking {
         aliceFirebaseUtils.signIn()
         aliceFirebaseUtils.waitForAuthReady()
-        // }
         aliceUserUid = aliceFirebaseUtils.auth.uid!!
 
         // Create Alice's profile
@@ -452,7 +450,8 @@ class EndToEndM3Achievements {
         // Wait for the friend request to be fully processed and achievements to be updated
         composeTestRule.waitForIdle()
         Thread.sleep(
-            2000) // Give Firebase time to process the friend addition and achievement update
+            THREAD_SLEEP_TIME) // Give Firebase time to process the friend addition and achievement
+        // update
 
         Log.d("EndToEndM3Achievements", "Bob accepted Alice's friend request")
 
