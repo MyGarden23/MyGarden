@@ -3,7 +3,6 @@ from typing import Optional, Dict, List
 
 from datetime import datetime, timezone
 from firebase_functions import firestore_fn
-from firebase_admin import firestore
 
 import firestore_client
 
