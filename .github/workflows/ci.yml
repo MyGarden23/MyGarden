@@ -115,7 +115,7 @@ jobs:
         id: firebase_project
         run: |
           echo "project_id=$(jq -r '.project_info.project_id' app/google-services.json)" >> $GITHUB_OUTPUT
-          
+
       - name: Create firebase.json
         run: |
           cat > firebase.json <<'JSON'

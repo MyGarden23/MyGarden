@@ -19,6 +19,7 @@ import androidx.test.rule.GrantPermissionRule
 import com.android.mygarden.MainActivity
 import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantLocation
+import com.android.mygarden.model.profile.LikesRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
@@ -28,6 +29,7 @@ import com.android.mygarden.ui.garden.GardenTab
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
+import com.android.mygarden.utils.FakeLikesRepository
 import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
@@ -74,6 +76,7 @@ class EndToEndM2 {
 
   @Before
   fun setUp() = runTest {
+    LikesRepositoryProvider.repository = FakeLikesRepository()
     // Set up any necessary configurations or states before each test
     Log.d("EndToEndM2", "setUpEntry")
     firebaseUtils.initialize()

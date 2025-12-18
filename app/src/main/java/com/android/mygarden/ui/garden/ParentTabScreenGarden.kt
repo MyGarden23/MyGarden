@@ -17,10 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -55,12 +59,15 @@ import com.android.mygarden.ui.utils.handleOfflineClick
 object GardenAchievementsParentScreenTestTags {
   const val AVATAR_EDIT_PROFILE = "UserAvatarEditProfile"
   const val PSEUDO = "Pseudo"
+  const val LIKE_BUTTON = "LikeButton"
+  const val LIKE_COUNTER = "LikeCounter"
 
   fun getTestTagForTab(tab: GardenTab) = "${tab.titleRes}_Tab"
 }
 
 // Padding constants
 private val PROFILE_ROW_HORIZONTAL_PADDING = 30.dp
+private val ICON_PADDING = 20.dp
 private val PROFILE_ROW_VERTICAL_PADDING = 6.dp
 private val COLUMN_VERTICAL_PADDING = 12.dp
 private val TAB_EXTERNAL_HORIZONTAL_PADDING = 16.dp
@@ -137,6 +144,7 @@ fun ParentTabScreenGarden(
             gardenUiState = gardenUiState,
             isOnline = isOnline,
             isViewMode = isViewMode,
+            onLikeClick = { gardenViewModel.toggleLike() },
             modifier = modifier)
       },
       floatingActionButton = {
@@ -192,6 +200,7 @@ fun TopBarGardenParent(
     gardenUiState: GardenUIState,
     isOnline: Boolean,
     isViewMode: Boolean,
+    onLikeClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
   CenterAlignedTopAppBar(
@@ -202,7 +211,8 @@ fun TopBarGardenParent(
             modifier,
             gardenUiState,
             isOnline,
-            isViewMode)
+            isViewMode,
+            onLikeClick)
       },
       navigationIcon = {
         if (isViewMode) {
@@ -273,6 +283,7 @@ fun TableRowGardenParent(
  * @param uiState the UI state
  * @param isOnline whether the device is online
  * @param isViewMode if true, hide the log out button (for viewing a friend's garden)
+ * @param onLikeClick if clicked toggle the like button
  */
 @Composable
 fun ProfileRow(
@@ -281,7 +292,8 @@ fun ProfileRow(
     modifier: Modifier = Modifier,
     uiState: GardenUIState,
     isOnline: Boolean,
-    isViewMode: Boolean = false
+    isViewMode: Boolean = false,
+    onLikeClick: () -> Unit
 ) {
   val context = LocalContext.current
 
@@ -294,13 +306,13 @@ fun ProfileRow(
                   vertical = PROFILE_ROW_VERTICAL_PADDING),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
           // Sign out button (hidden in view mode)
           if (!isViewMode) {
             NavigationButton(onClick = onSignOut, isSignOut = true)
+          } else {
+            Spacer(modifier = modifier.weight(FULL_WEIGHT))
           }
-          Spacer(modifier = modifier.weight(FULL_WEIGHT))
-
           // Username (user can click on it to edit profile)
           Text(
               modifier =
@@ -319,6 +331,18 @@ fun ProfileRow(
               fontWeight = FontWeight.Bold,
               style = MaterialTheme.typography.titleLarge,
               text = uiState.userName)
+
+          Spacer(modifier = modifier.weight(FULL_WEIGHT))
+
+          // Like button
+          val likeEnabled = isViewMode && isOnline && !uiState.isLikeUpdating
+
+          LikeIndicator(
+              uiState.likesCount,
+              hasLiked = uiState.hasLiked,
+              enabled = likeEnabled,
+              onLikeClick = onLikeClick)
+
           Spacer(modifier = modifier.weight(FULL_WEIGHT))
 
           // User avatar (user can click on it to edit profile)
@@ -344,5 +368,41 @@ fun ProfileRow(
                     modifier = modifier.fillMaxSize())
               }
         }
+      }
+}
+/** The composable used for the like display */
+@Composable
+fun LikeIndicator(
+    likesCount: Int,
+    hasLiked: Boolean,
+    enabled: Boolean,
+    onLikeClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+  val context = LocalContext.current
+  Row(
+      verticalAlignment = Alignment.CenterVertically,
+      modifier =
+          modifier
+              .testTag(GardenAchievementsParentScreenTestTags.LIKE_BUTTON)
+              .then(if (enabled) Modifier.clickable { onLikeClick() } else Modifier)) {
+        Icon(
+            imageVector = if (hasLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+            contentDescription =
+                if (hasLiked) context.getString(R.string.description_liked)
+                else context.getString(R.string.description_not_liked),
+            tint =
+                if (hasLiked) MaterialTheme.colorScheme.error
+                else if (enabled) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(ICON_PADDING))
+
+        Spacer(modifier = Modifier.size(PROFILE_ROW_VERTICAL_PADDING))
+
+        Text(
+            text = likesCount.toString(),
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.testTag(GardenAchievementsParentScreenTestTags.LIKE_COUNTER))
       }
 }

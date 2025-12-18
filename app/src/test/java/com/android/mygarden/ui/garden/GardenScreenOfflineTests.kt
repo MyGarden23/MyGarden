@@ -13,6 +13,7 @@ import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.LikesRepositoryProvider
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
@@ -21,6 +22,7 @@ import com.android.mygarden.ui.profile.Avatar
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeActivityRepository
+import com.android.mygarden.utils.FakeLikesRepository
 import com.android.mygarden.utils.FakeProfileRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPlants
@@ -80,6 +82,7 @@ class GardenScreenOfflineTests {
     ActivityRepositoryProvider.repository = activityRepo
     UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
     AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
+    LikesRepositoryProvider.repository = FakeLikesRepository()
 
     // Ensure we start with online state
     OfflineStateManager.setOnlineState(true)

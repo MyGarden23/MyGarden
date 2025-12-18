@@ -16,6 +16,7 @@ import com.android.mygarden.ui.profile.Avatar
  * @param country The user's country of residence
  * @param hasSignedIn The user is signed in
  * @param avatar the user's avatar
+ * @param likesCount the number of likes the garden has
  */
 data class Profile(
     val firstName: String = "",
@@ -25,7 +26,8 @@ data class Profile(
     val favoritePlant: String = "",
     val country: String = "",
     val hasSignedIn: Boolean = false,
-    val avatar: Avatar = Avatar.A1
+    val avatar: Avatar = Avatar.A1,
+    val likesCount: Int = 0,
 )
 /**
  * Represents the different levels of gardening experience and skill.

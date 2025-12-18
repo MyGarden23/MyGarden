@@ -20,6 +20,7 @@ import com.android.mygarden.MainActivity
 import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.plant.testTag
+import com.android.mygarden.model.profile.LikesRepositoryProvider
 import com.android.mygarden.ui.authentication.SignInScreenTestTags
 import com.android.mygarden.ui.camera.CameraScreenTestTags
 import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
@@ -29,6 +30,7 @@ import com.android.mygarden.ui.garden.GardenScreenTestTags
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
 import com.android.mygarden.ui.profile.ProfileScreenTestTags
+import com.android.mygarden.utils.FakeLikesRepository
 import com.android.mygarden.utils.FakePlantRepositoryUtils
 import com.android.mygarden.utils.FirebaseUtils
 import com.android.mygarden.utils.PlantRepositoryType
@@ -83,6 +85,7 @@ class EndToEndEpic2 {
 
   @Before
   fun setUp() = runTest {
+    LikesRepositoryProvider.repository = FakeLikesRepository()
     // Set up any necessary configurations or states before each test
     Log.d("EndToEndEpic2", "setUpEntry")
     firebaseUtils.initialize()
@@ -141,14 +144,15 @@ class EndToEndEpic2 {
         // This ensures GardenViewModel initializes with the newly created user profile
         composeTestRule.onNodeWithTag(NavigationTestTags.GARDEN_BUTTON).performClick()
 
+        composeTestRule.waitForIdle()
         // Wait for Garden screen to fully load with user profile
         composeTestRule.waitUntil(TIMEOUT) {
           try {
             composeTestRule
                 .onNodeWithTag(GardenAchievementsParentScreenTestTags.PSEUDO)
-                .isDisplayed()
+                .assertTextContains(user_pseudo)
             true
-          } catch (e: AssertionError) {
+          } catch (_: AssertionError) {
             false
           }
         }

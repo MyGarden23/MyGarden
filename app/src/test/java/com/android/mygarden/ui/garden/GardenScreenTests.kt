@@ -3,6 +3,7 @@ package com.android.mygarden.ui.garden
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -20,6 +21,7 @@ import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
 import com.android.mygarden.model.profile.GardeningSkill
+import com.android.mygarden.model.profile.LikesRepositoryProvider
 import com.android.mygarden.model.profile.Profile
 import com.android.mygarden.model.profile.ProfileRepository
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
@@ -31,6 +33,7 @@ import com.android.mygarden.ui.theme.ExtendedTheme
 import com.android.mygarden.ui.theme.MyGardenTheme
 import com.android.mygarden.utils.FakeAchievementsRepository
 import com.android.mygarden.utils.FakeActivityRepository
+import com.android.mygarden.utils.FakeLikesRepository
 import com.android.mygarden.utils.FakeUserProfileRepository
 import com.android.mygarden.utils.TestPlants
 import com.google.firebase.FirebaseApp
@@ -120,6 +123,7 @@ class GardenScreenTests {
     UserProfileRepositoryProvider.repository = FakeUserProfileRepository()
     ActivityRepositoryProvider.repository = FakeActivityRepository()
     AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
+    LikesRepositoryProvider.repository = FakeLikesRepository()
   }
 
   /**
@@ -360,5 +364,70 @@ class GardenScreenTests {
     val plantFromRepoAfterWatering = plantsRepo.getOwnedPlant(id)
     val statusAfterWatering = plantFromRepoAfterWatering.plant.healthStatus
     assertEquals(PlantHealthStatus.HEALTHY, statusAfterWatering)
+  }
+
+  @Test
+  fun likeCounter_isDisplayed_inTopBar() {
+    setContent()
+
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.LIKE_COUNTER)
+        .assertIsDisplayed()
+        .assertTextEquals("0")
+  }
+
+  @Test
+  fun likeButton_hasNoClickAction_onOwnGarden() {
+    setContent()
+
+    // Own garden => isViewMode = false => like disabled
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.LIKE_BUTTON)
+        .assertIsDisplayed()
+        .assertHasNoClickAction()
+  }
+
+  @Test
+  fun likeButton_isClickable_inViewMode_andTogglesHeartAndCount() {
+    // Setup screen in view mode by passing a friendId
+    composeTestRule.setContent {
+      MyGardenTheme {
+        ParentTabScreenGarden(
+            friendId = "friend-uid",
+            isViewMode = true,
+            gardenCallbacks = GardenScreenCallbacks(onEditProfile = {}, onAddPlant = {}))
+      }
+    }
+    composeTestRule.waitForIdle()
+
+    // Initially not liked
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.LIKE_BUTTON)
+        .assertIsDisplayed()
+        .assertHasClickAction()
+
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.LIKE_COUNTER, useUnmergedTree = true)
+        .assertIsDisplayed()
+        .assertTextEquals("0")
+
+    // Click like
+    composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.LIKE_BUTTON).performClick()
+
+    composeTestRule.waitForIdle()
+
+    // Count should update to 1 (and heart should be filled, indirectly validated via state)
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.LIKE_COUNTER, useUnmergedTree = true)
+        .assertTextEquals("1")
+
+    // Click again (toggle back)
+    composeTestRule.onNodeWithTag(GardenAchievementsParentScreenTestTags.LIKE_BUTTON).performClick()
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule
+        .onNodeWithTag(GardenAchievementsParentScreenTestTags.LIKE_COUNTER, useUnmergedTree = true)
+        .assertTextEquals("0")
   }
 }

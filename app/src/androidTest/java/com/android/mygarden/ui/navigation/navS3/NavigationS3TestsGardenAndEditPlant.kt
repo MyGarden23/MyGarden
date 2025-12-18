@@ -14,6 +14,8 @@ import com.android.mygarden.model.plant.Plant
 import com.android.mygarden.model.plant.PlantHealthStatus
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.profile.LikesRepositoryProvider
+import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.ui.editPlant.DeletePlantPopupTestTags
 import com.android.mygarden.ui.editPlant.EditPlantScreenTestTags
 import com.android.mygarden.ui.garden.GardenScreenTestTags
@@ -21,6 +23,8 @@ import com.android.mygarden.ui.navigation.AppNavHost
 import com.android.mygarden.ui.navigation.NavigationTestTags
 import com.android.mygarden.ui.navigation.Screen
 import com.android.mygarden.ui.plantinfos.PlantInfoScreenTestTags
+import com.android.mygarden.utils.FakeLikesRepository
+import com.android.mygarden.utils.FakeProfileRepository
 import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
@@ -58,6 +62,8 @@ class NavigationS3TestsGardenAndEditPlant {
    */
   @Before
   fun setUp() {
+    LikesRepositoryProvider.repository = FakeLikesRepository()
+    ProfileRepositoryProvider.repository = FakeProfileRepository()
     composeTestRule.setContent {
       PlantsRepositoryProvider.repository = PlantsRepositoryLocal()
       val repo = PlantsRepositoryProvider.repository
