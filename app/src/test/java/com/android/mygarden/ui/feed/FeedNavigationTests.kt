@@ -23,6 +23,7 @@ import com.android.mygarden.model.plant.PlantLocation
 import com.android.mygarden.model.plant.PlantsRepository
 import com.android.mygarden.model.plant.PlantsRepositoryLocal
 import com.android.mygarden.model.plant.PlantsRepositoryProvider
+import com.android.mygarden.model.profile.LikesRepositoryProvider
 import com.android.mygarden.model.profile.ProfileRepositoryProvider
 import com.android.mygarden.model.users.UserProfile
 import com.android.mygarden.model.users.UserProfileRepositoryProvider
@@ -137,6 +138,7 @@ class FeedNavigationTests {
       ProfileRepositoryProvider.repository = FakeProfileRepository()
       CareTipsRepositoryProvider.repository = FakeCareTipsRepository()
       AchievementsRepositoryProvider.repository = FakeAchievementsRepository()
+      LikesRepositoryProvider.repository = FakeLikesRepository()
 
       // initialize activities and plant
       runBlocking {
